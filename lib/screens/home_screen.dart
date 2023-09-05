@@ -1,3 +1,5 @@
+import 'package:arptc_connect/screens/account_page.dart';
+import 'package:arptc_connect/screens/home_page.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/custom_nav_bar.dart';
@@ -20,22 +22,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Map<String, Widget>> pages = [
     {'widget': const Center(child: Text("Dahsboard"))},
-    {'widget': const Center(child: Text("Home"))},
-    {'widget': const Center(child: Text("Account"))},
+    {'widget': HomePage()},
+    {'widget': const AccountPage()},
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar :AppBar(
-            // elevation: 0,
-            backgroundColor: Colors.white,
-            title: Image.asset(
-              'assets/icons/app_logo.png',
-              height: 45,
-            ),
-          automaticallyImplyLeading: false,
-        ),
+        // appBar :AppBar(
+        //     // elevation: 0,
+        //     backgroundColor: Colors.white,
+        //     title: Image.asset(
+        //       'assets/icons/app_logo.png',
+        //       height: 45,
+        //     ),
+        //   automaticallyImplyLeading: false,
+        // ),
         body: pages[curTabIndex]['widget']!,
         bottomNavigationBar: CustomNavBar(
           null,

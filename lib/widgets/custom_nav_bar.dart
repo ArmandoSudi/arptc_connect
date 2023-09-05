@@ -22,11 +22,11 @@ class _CustomNavBarState extends State<CustomNavBar> {
       showUnselectedLabels: true,
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
+          icon: Icon(Icons.dashboard_outlined),
           label: 'Dashboard',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.stacked_bar_chart),
+          icon: Icon(Icons.home_outlined),
           label: 'Home',
         ),
         BottomNavigationBarItem(
