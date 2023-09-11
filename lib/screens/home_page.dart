@@ -2,6 +2,8 @@ import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 
+import '../modules/administration/administration_screen.dart';
+
 class HomePage extends StatelessWidget {
   HomePage({Key? key}) : super(key: key);
 
@@ -55,17 +57,24 @@ class HomePage extends StatelessWidget {
             childAspectRatio: 1.5,
           ),
           itemBuilder: (context, index) {
-            return Card(
-                child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _services[index].icon,
-                  Text("${_services[index].name}"),
-                ],
-              ),
-            ));
+            return InkWell(
+                child: Card(
+                    child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _services[index].icon,
+                      Text("${_services[index].name}"),
+                    ],
+                  ),
+                )),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (context) => AdministrationScreen()),
+                  );
+                });
           },
         ),
       ),
