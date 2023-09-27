@@ -35,13 +35,13 @@ class CustomFormField extends StatelessWidget {
               style: TextStyle(fontSize: 14, color: Colors.grey[700])),
         ),
         TextFormField(
-          style: TextStyle(fontSize: 18),
+          style: const TextStyle(fontSize: 18),
           decoration: InputDecoration(
               contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               hintText: hintText,
               border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(
-                      Radius.circular(40)
+                      Radius.circular(5)
                   )
               )
 

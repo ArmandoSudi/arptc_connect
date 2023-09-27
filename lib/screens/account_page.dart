@@ -53,28 +53,32 @@ class _AccountPageState extends State<AccountPage> {
                 ),
                 const SizedBox(height: 10),
 
-                const Card(
-                    child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Direction",
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold)),
-                      Text("Direction des systèmes d'information",
-                          style: TextStyle(fontSize: 14)),
-                      SizedBox(height: 10),
-                      Text("Service",
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold)),
-                      Text(
-                          "Service de devéloppement des applications et gestion de la base des données",
-                          style: TextStyle(fontSize: 14)),
-                      SizedBox(height: 10),
-                    ],
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
                   ),
-                )),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Direction",
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold)),
+                        Text("Direction des systèmes d'information",
+                            style: TextStyle(fontSize: 14)),
+                        SizedBox(height: 10),
+                        Text("Service",
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold)),
+                        Text(
+                            "Service de devéloppement des applications et gestion de la base des données",
+                            style: TextStyle(fontSize: 14)),
+                        SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 20),
 
@@ -88,34 +92,38 @@ class _AccountPageState extends State<AccountPage> {
                 const SizedBox(height: 10),
 
                 Card(
-                    child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Dependants",
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 10),
-                      ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: 2,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              title: Text(
-                                "Dependant ${index + 1}",
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                              subtitle: Text(
-                                "enfant",
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            );
-                          }),
-                    ],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
                   ),
-                )),
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Dependants",
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 10),
+                        ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: 2,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(
+                                  "Dependant ${index + 1}",
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                subtitle: Text(
+                                  "enfant",
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              );
+                            }),
+                      ],
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 20),
 
