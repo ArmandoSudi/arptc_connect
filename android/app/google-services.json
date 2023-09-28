@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "618367534949",
+    "project_id": "arptc-connect",
+    "storage_bucket": "arptc-connect.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618367534949:android:b1e583e95a5bd85118438c",
+        "android_client_info": {
+          "package_name": "com.sugar.arptc_connect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLNvV6_9yYtAp9hu0e-PIHqjsDWyegcuQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
