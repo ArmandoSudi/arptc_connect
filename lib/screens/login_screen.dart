@@ -11,7 +11,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  TextEditingController phoneNumberController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +40,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       const Text("Plateforme integrée de gestion des ressources "),
                       const SizedBox(height: 40),
                       CustomFormField(
-                        label: "Numéro de téléphone",
-                        hintText: "+24381000",
-                        textInputType: TextInputType.number,
-                        controller: phoneNumberController,
+                        label: "Email",
+                        hintText: "...@arptc.gouv.cd",
+                        textInputType: TextInputType.emailAddress,
+                        controller: emailController,
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
