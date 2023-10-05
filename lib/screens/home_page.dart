@@ -1,6 +1,9 @@
+import 'package:arptc_connect/modules/social/user_social_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../modules/administration/screens/administration_screen.dart';
+
+enum Modules {social, inventory, helpDesk, administration}
 
 class HomePage extends StatelessWidget {
   HomePage({Key? key}) : super(key: key);
@@ -13,6 +16,7 @@ class HomePage extends StatelessWidget {
         size: 90,
         color: Colors.purple,
       ),
+      module: Modules.social,
     ),
     Services(
       name: "Inventory",
@@ -21,6 +25,7 @@ class HomePage extends StatelessWidget {
         size: 90,
         color: Colors.purple,
       ),
+      module: Modules.inventory,
     ),
     Services(
       name: "Help Desk",
@@ -29,6 +34,7 @@ class HomePage extends StatelessWidget {
         size: 90,
         color: Colors.purple,
       ),
+      module: Modules.helpDesk,
     ),
     Services(
       name: "Administration",
@@ -37,6 +43,7 @@ class HomePage extends StatelessWidget {
         size: 90,
         color: Colors.purple,
       ),
+      module: Modules.administration,
     ),
   ];
 
@@ -68,10 +75,29 @@ class HomePage extends StatelessWidget {
                   ),
                 )),
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (context) => AdministrationScreen()),
-                  );
+
+                  switch(_services[index].module){
+                    case Modules.social:
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => const UserSocialScreen()),
+                      );
+                      break;
+                    case Modules.inventory:
+                      print("inventory");
+                      break;
+                    case Modules.helpDesk:
+                      print("helpDesk");
+                      break;
+                    case Modules.administration:
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) =>  AdministrationScreen()),
+                      );
+                      break;
+                  }
+
+
                 });
           },
         ),
@@ -83,6 +109,7 @@ class HomePage extends StatelessWidget {
 class Services {
   final String name;
   final Icon icon;
+  final Modules module;
 
-  Services({required this.name, required this.icon});
+  Services({required this.name, required this.icon ,required this.module});
 }
