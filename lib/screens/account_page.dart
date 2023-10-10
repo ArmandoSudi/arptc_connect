@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+import '../models/dependant.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({Key? key}) : super(key: key);
@@ -8,6 +11,12 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
+
+  final db = FirebaseFirestore.instance;
+
+  CollectionReference dependants =
+  FirebaseFirestore.instance.collection('/agents/PyKV8iGiDzcTdQSaRzWD/dependants');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,7 +105,7 @@ class _AccountPageState extends State<AccountPage> {
                     borderRadius: BorderRadius.circular(5),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -104,22 +113,24 @@ class _AccountPageState extends State<AccountPage> {
                             style: TextStyle(
                                 fontSize: 14, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 10),
-                        ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: 2,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              return ListTile(
-                                title: Text(
-                                  "Dependant ${index + 1}",
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                                subtitle: Text(
-                                  "enfant",
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                              );
-                            }),
+                        StreamBuilder<QuerySnapshot>(
+                            stream: dependants.snapshots(),
+                            builder: (context, snapshot) {
+
+                              if (snapshot.hasError) {
+                                return const Text("something wen wrong");
+                              }
+
+                              if (snapshot.data == null || snapshot.connectionState == ConnectionState.waiting) {
+                                return const Center(child: CircularProgressIndicator());
+                              } else if (!snapshot.hasData) {
+                                return const Text("There is no dependant yet");
+                              }
+                              // print("Directions size : ${snapshot.data!.length}");
+                              return _buildDependantList(context, snapshot.data?.docs ?? []);
+                            }
+
+                        )
                       ],
                     ),
                   ),
@@ -133,6 +144,30 @@ class _AccountPageState extends State<AccountPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDependantList( BuildContext context, List<DocumentSnapshot> snapshot) {
+    return ListView(
+      shrinkWrap: true,
+      children: snapshot.map((data) => _buildDepandant(context, data)).toList(),
+    );
+  }
+
+  Widget _buildDepandant(BuildContext context, DocumentSnapshot data) {
+    final dependant = Dependant.fromSnapshot(data);
+    return ListTile(
+      leading: const Icon(Icons.person),
+      title: Text("${dependant.name}"),
+      subtitle: Text("${dependant.relationship}"),
+      onTap: () {
+        debugPrint("Doc ID: ${dependant.reference.id}");
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(
+        //     builder: (context) => DirectionDetailsScreen(),
+        //   ),
+        // );
+      },
     );
   }
 }

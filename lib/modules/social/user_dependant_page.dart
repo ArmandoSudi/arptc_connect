@@ -48,7 +48,7 @@ class UserDependantPage extends StatelessWidget {
     return ListTile(
       leading: const Icon(Icons.person),
       title: Text(entity.name),
-      subtitle: Text(entity.relation),
+      subtitle: Text(entity.relationship),
       trailing: ElevatedButton(child: Text("Demander Bon"), onPressed: () => print("Demander bon"),),
       onTap: () {
         debugPrint("Doc ID: ${entity.reference.id}");
