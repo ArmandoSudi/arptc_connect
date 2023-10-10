@@ -1,4 +1,5 @@
 import 'package:arptc_connect/modules/social/user_dependant_page.dart';
+import 'package:arptc_connect/modules/social/user_refund_page.dart';
 import 'package:arptc_connect/modules/social/user_vouchers_page.dart';
 import 'package:flutter/material.dart';
 
@@ -30,7 +31,7 @@ class _UserSocialScreenState extends State<UserSocialScreen> {
             children: [
               UserDependantPage(),
               UserVoucherPage(),
-              Icon(Icons.directions_bike),
+              UserRefundPage(),
             ],
           ),
         ),
