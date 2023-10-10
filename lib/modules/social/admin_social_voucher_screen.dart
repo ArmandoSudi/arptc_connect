@@ -3,24 +3,27 @@ import 'package:flutter/material.dart';
 
 import '../../models/voucher.dart';
 
-class UserVoucherPage extends StatelessWidget {
-  UserVoucherPage({super.key});
+class AdminSocialVouchersScreen extends StatelessWidget {
+  AdminSocialVouchersScreen({super.key});
 
   final db = FirebaseFirestore.instance;
 
   CollectionReference vouchersRef =
-  FirebaseFirestore.instance.collection('agents/PyKV8iGiDzcTdQSaRzWD/vouchers');
+  FirebaseFirestore.instance.collection('vouchers');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Liste des bons"),
+      ),
       body: SafeArea(
           child: StreamBuilder<QuerySnapshot>(
               stream: vouchersRef.snapshots(),
               builder: (context, snapshot) {
 
                 if (snapshot.hasError) {
-                  return const Text("something wen wrong");
+                  return const Text("something went wrong");
                 }
 
                 if (snapshot.data == null || snapshot.connectionState == ConnectionState.waiting) {
@@ -28,7 +31,7 @@ class UserVoucherPage extends StatelessWidget {
                 } else if (!snapshot.hasData) {
                   return const Text("There is no dependant yet");
                 }
-                // print("Directions size : ${snapshot.data!.length}");
+
                 return _buildVoucherList(context, snapshot.data?.docs ?? []);
               }
 

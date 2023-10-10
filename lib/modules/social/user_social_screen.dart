@@ -13,27 +13,25 @@ class UserSocialScreen extends StatefulWidget {
 class _UserSocialScreenState extends State<UserSocialScreen> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: const TabBar(
-              tabs: [
-                Tab(text: "Dependants"),
-                Tab(text: "Bons"),
-                Tab(text: "Remboursements"),
-              ],
-            ),
-            title: const Text('Social'),
-          ),
-          body: TabBarView(
-            children: [
-              UserDependantPage(),
-              UserVoucherPage(),
-              UserRefundPage(),
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: "Dependants"),
+              Tab(text: "Bons"),
+              Tab(text: "Remboursements"),
             ],
           ),
+          title: const Text('Social'),
+        ),
+        body: TabBarView(
+          children: [
+            UserDependantPage(),
+            UserVoucherPage(),
+            UserRefundPage(),
+          ],
         ),
       ),
     );
