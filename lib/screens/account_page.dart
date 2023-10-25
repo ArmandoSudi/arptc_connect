@@ -1,16 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/dependant.dart';
+import '../modules/authentication/providers/authentication_provider.dart';
 
-class AccountPage extends StatefulWidget {
+class AccountPage extends ConsumerStatefulWidget {
   const AccountPage({Key? key}) : super(key: key);
 
   @override
-  State<AccountPage> createState() => _AccountPageState();
+  ConsumerState createState() => _AccountPageState();
 }
 
-class _AccountPageState extends State<AccountPage> {
+class _AccountPageState extends ConsumerState<AccountPage> {
 
   final db = FirebaseFirestore.instance;
 
@@ -138,7 +140,22 @@ class _AccountPageState extends State<AccountPage> {
 
                 const SizedBox(height: 20),
 
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(50),
+                    shape: const StadiumBorder(),
+                  ),
+                  onPressed: (){
+
+                    ref.read(authServiceProvider).signOut();
+                  },
+                  child: const Text("sign out"),
+                ),
+
+                const SizedBox(height: 20),
+
                 const Text("Version : 0.0.1")
+
               ],
             ),
           ),
