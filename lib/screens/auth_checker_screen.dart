@@ -1,4 +1,5 @@
 import 'package:arptc_connect/modules/authentication/screens/login_screen.dart';
+import 'package:arptc_connect/modules/courrier/screens/list_courriers_screen.dart';
 import 'package:arptc_connect/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -34,7 +35,7 @@ class AuthCheckerScreen extends ConsumerWidget {
         stream: ref.read(authServiceProvider).authStateChange,
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data != null) {
-            return const HomeScreen();
+            return const ListCourriersScreen();
           } else if(snapshot.connectionState == ConnectionState.waiting){
             return const CupertinoActivityIndicator();
           }
