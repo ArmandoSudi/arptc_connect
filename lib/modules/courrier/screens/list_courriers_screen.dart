@@ -20,10 +20,6 @@ class _ListCourriersScreenState extends ConsumerState<ListCourriersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
-      appBar: AppBar(
-        centerTitle: false,
-        title: const Text("Gestion des courriers"),
-      ),
       // Retreiving all the courrier from a streambuilder
       body: Padding(
         padding: const EdgeInsets.all(16.0),

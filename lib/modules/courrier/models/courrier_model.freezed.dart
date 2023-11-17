@@ -29,6 +29,9 @@ mixin _$Courrier {
   String? get url => throw _privateConstructorUsedError;
   @TimestampSerializer()
   DateTime get date => throw _privateConstructorUsedError;
+  @TimestampSerializer()
+  @JsonKey(name: "reception_date")
+  DateTime get receptionDate => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -47,7 +50,10 @@ abstract class $CourrierCopyWith<$Res> {
       String object,
       List<Map<String, String>> annotations,
       String? url,
-      @TimestampSerializer() DateTime date});
+      @TimestampSerializer() DateTime date,
+      @TimestampSerializer()
+      @JsonKey(name: "reception_date")
+      DateTime receptionDate});
 }
 
 /// @nodoc
@@ -69,6 +75,7 @@ class _$CourrierCopyWithImpl<$Res, $Val extends Courrier>
     Object? annotations = null,
     Object? url = freezed,
     Object? date = null,
+    Object? receptionDate = null,
   }) {
     return _then(_value.copyWith(
       id: freezed == id
@@ -95,6 +102,10 @@ class _$CourrierCopyWithImpl<$Res, $Val extends Courrier>
           ? _value.date
           : date // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      receptionDate: null == receptionDate
+          ? _value.receptionDate
+          : receptionDate // ignore: cast_nullable_to_non_nullable
+              as DateTime,
     ) as $Val);
   }
 }
@@ -113,7 +124,10 @@ abstract class _$$CourrierImplCopyWith<$Res>
       String object,
       List<Map<String, String>> annotations,
       String? url,
-      @TimestampSerializer() DateTime date});
+      @TimestampSerializer() DateTime date,
+      @TimestampSerializer()
+      @JsonKey(name: "reception_date")
+      DateTime receptionDate});
 }
 
 /// @nodoc
@@ -133,6 +147,7 @@ class __$$CourrierImplCopyWithImpl<$Res>
     Object? annotations = null,
     Object? url = freezed,
     Object? date = null,
+    Object? receptionDate = null,
   }) {
     return _then(_$CourrierImpl(
       id: freezed == id
@@ -159,6 +174,10 @@ class __$$CourrierImplCopyWithImpl<$Res>
           ? _value.date
           : date // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      receptionDate: null == receptionDate
+          ? _value.receptionDate
+          : receptionDate // ignore: cast_nullable_to_non_nullable
+              as DateTime,
     ));
   }
 }
@@ -172,7 +191,10 @@ class _$CourrierImpl implements _Courrier {
       required this.object,
       required final List<Map<String, String>> annotations,
       this.url,
-      @TimestampSerializer() required this.date})
+      @TimestampSerializer() required this.date,
+      @TimestampSerializer()
+      @JsonKey(name: "reception_date")
+      required this.receptionDate})
       : _annotations = annotations;
 
   factory _$CourrierImpl.fromJson(Map<String, dynamic> json) =>
@@ -198,10 +220,14 @@ class _$CourrierImpl implements _Courrier {
   @override
   @TimestampSerializer()
   final DateTime date;
+  @override
+  @TimestampSerializer()
+  @JsonKey(name: "reception_date")
+  final DateTime receptionDate;
 
   @override
   String toString() {
-    return 'Courrier(id: $id, sender: $sender, object: $object, annotations: $annotations, url: $url, date: $date)';
+    return 'Courrier(id: $id, sender: $sender, object: $object, annotations: $annotations, url: $url, date: $date, receptionDate: $receptionDate)';
   }
 
   @override
@@ -215,13 +241,22 @@ class _$CourrierImpl implements _Courrier {
             const DeepCollectionEquality()
                 .equals(other._annotations, _annotations) &&
             (identical(other.url, url) || other.url == url) &&
-            (identical(other.date, date) || other.date == date));
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.receptionDate, receptionDate) ||
+                other.receptionDate == receptionDate));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, sender, object,
-      const DeepCollectionEquality().hash(_annotations), url, date);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      sender,
+      object,
+      const DeepCollectionEquality().hash(_annotations),
+      url,
+      date,
+      receptionDate);
 
   @JsonKey(ignore: true)
   @override
@@ -244,7 +279,10 @@ abstract class _Courrier implements Courrier {
       required final String object,
       required final List<Map<String, String>> annotations,
       final String? url,
-      @TimestampSerializer() required final DateTime date}) = _$CourrierImpl;
+      @TimestampSerializer() required final DateTime date,
+      @TimestampSerializer()
+      @JsonKey(name: "reception_date")
+      required final DateTime receptionDate}) = _$CourrierImpl;
 
   factory _Courrier.fromJson(Map<String, dynamic> json) =
       _$CourrierImpl.fromJson;
@@ -263,6 +301,10 @@ abstract class _Courrier implements Courrier {
   @override
   @TimestampSerializer()
   DateTime get date;
+  @override
+  @TimestampSerializer()
+  @JsonKey(name: "reception_date")
+  DateTime get receptionDate;
   @override
   @JsonKey(ignore: true)
   _$$CourrierImplCopyWith<_$CourrierImpl> get copyWith =>

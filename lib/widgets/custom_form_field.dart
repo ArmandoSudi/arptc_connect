@@ -12,7 +12,10 @@ class CustomFormField extends StatelessWidget {
     this.inputFormatters,
     this.maxLine,
     this.validator,
-    this.obscureText}) : super(key: key);
+    this.obscureText,
+  this.enable,
+  this.suffixIcon,
+  this.onTap}) : super(key: key);
 
   final String? label;
   final String hintText;
@@ -22,6 +25,9 @@ class CustomFormField extends StatelessWidget {
   final String? Function(String?)? validator;
   final int? maxLine;
   final bool? obscureText;
+  final bool? enable;
+  final Widget? suffixIcon;
+  final GestureTapCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +49,8 @@ class CustomFormField extends StatelessWidget {
                   borderRadius: BorderRadius.all(
                       Radius.circular(5)
                   )
-              )
-
+              ),
+            suffixIcon: suffixIcon
           ),
           controller: controller,
           keyboardType: textInputType,
@@ -52,6 +58,8 @@ class CustomFormField extends StatelessWidget {
           validator: validator,
           maxLines: maxLine,
           obscureText: obscureText ?? false,
+          enabled: enable ?? true,
+          onTap: onTap ,
         ),
       ],
     );

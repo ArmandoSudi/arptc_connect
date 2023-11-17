@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../widgets/custom_form_field.dart';
 import '../models/courrier_model.dart';
 import '../providers/courrier_service_provider.dart';
+import '../../../extensions/date_extension.dart';
 
 class AddCourrierScreen extends ConsumerStatefulWidget {
   const AddCourrierScreen({super.key});
@@ -18,6 +19,8 @@ class _AddCourrierScreenState extends ConsumerState<AddCourrierScreen> {
 
   TextEditingController senderController = TextEditingController();
   TextEditingController objectController = TextEditingController();
+  TextEditingController dateCourrierController = TextEditingController();
+  TextEditingController dateReceptionController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +40,7 @@ class _AddCourrierScreenState extends ConsumerState<AddCourrierScreen> {
             ),
             child: Column(
               children: [
+                // Expediteur
                 CustomFormField(
                   label: "Expéditeur",
                   hintText: "nom de l'expéditeur",
@@ -44,6 +48,8 @@ class _AddCourrierScreenState extends ConsumerState<AddCourrierScreen> {
                   controller: senderController,
                 ),
                 const SizedBox(height: 20),
+
+                // Object
                 CustomFormField(
                   label: "Objet",
                   hintText: "object du courrier",
@@ -51,12 +57,58 @@ class _AddCourrierScreenState extends ConsumerState<AddCourrierScreen> {
                   controller: objectController,
                 ),
                 const SizedBox(height: 20),
+
+                // Courrier entry Date
+                CustomFormField(
+                  label: "Date du courrier",
+                  hintText: "",
+                  textInputType: TextInputType.name,
+                  controller: dateCourrierController,
+                  enable: true,
+                  suffixIcon: Icon(Icons.calendar_month) ,
+                  onTap: () async {
+                    final DateTime? selectedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime.now(),
+                    );
+
+                    setState(() {
+                      dateCourrierController.text = selectedDate!.formatedDate;
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                // Reception Date
+                CustomFormField(
+                  label: "Date du réception",
+                  hintText: "",
+                  textInputType: TextInputType.name,
+                  controller: dateReceptionController,
+                  enable: true,
+                  suffixIcon: Icon(Icons.calendar_month) ,
+                  onTap: () async {
+                    final DateTime? selectedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime.now(),
+                    );
+
+                    setState(() {
+                      dateReceptionController.text = selectedDate!.formatedDate;
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          // minimumSize: const Size.fromHeight(50),
+                          minimumSize: const Size.fromHeight(50),
                           shape: const StadiumBorder(),
                         ),
                         onPressed: () {
@@ -66,6 +118,7 @@ class _AddCourrierScreenState extends ConsumerState<AddCourrierScreen> {
                               sender: senderController.text,
                               object: objectController.text,
                             date: DateTime.now(),
+                            receptionDate: DateTime.now(),
                             url: "",
                             annotations: [],
                           );
@@ -83,6 +136,7 @@ class _AddCourrierScreenState extends ConsumerState<AddCourrierScreen> {
                     Expanded(
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(50),
                             side: const BorderSide(color: Colors.grey),
                             foregroundColor: Colors.grey),
                         onPressed: () {

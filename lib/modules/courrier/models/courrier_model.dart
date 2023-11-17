@@ -15,6 +15,7 @@ class Courrier with _$Courrier {
     required List<Map<String, String>> annotations,
     String? url,
     @TimestampSerializer() required DateTime date,
+    @TimestampSerializer() @JsonKey(name: "reception_date")required DateTime receptionDate,
 }) = _Courrier;
 
   factory Courrier.fromJson(Map<String, dynamic> json) => _$CourrierFromJson(json);

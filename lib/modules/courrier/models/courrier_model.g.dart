@@ -15,6 +15,8 @@ _$CourrierImpl _$$CourrierImplFromJson(Map<String, dynamic> json) =>
           .toList(),
       url: json['url'] as String?,
       date: const TimestampSerializer().fromJson(json['date'] as Timestamp),
+      receptionDate: const TimestampSerializer()
+          .fromJson(json['reception_date'] as Timestamp),
     );
 
 Map<String, dynamic> _$$CourrierImplToJson(_$CourrierImpl instance) =>
@@ -24,4 +26,6 @@ Map<String, dynamic> _$$CourrierImplToJson(_$CourrierImpl instance) =>
       'annotations': instance.annotations,
       'url': instance.url,
       'date': const TimestampSerializer().toJson(instance.date),
+      'reception_date':
+          const TimestampSerializer().toJson(instance.receptionDate),
     };
