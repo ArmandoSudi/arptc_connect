@@ -7,13 +7,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/firebase_providers.dart';
+import '../../../core/shared_preferences_provider.dart';
 import '../../../models/agent.dart';
 
 class AuthService {
-  final FirebaseAuth _auth;
-  final FirebaseFirestore _firestore;
+  late FirebaseAuth _auth;
+  late FirebaseFirestore _firestore;
+  final _providerRef;
 
-  AuthService(this._auth, this._firestore);
+  AuthService(this._providerRef){
+    _auth = _providerRef.read(firebaseAuthProvider);
+    _firestore = _providerRef.read(fireStoreProvider);
+  }
 
   //  This getter will be returning a Stream of User object.
   //  It will be used to check if the user is logged in or not.
@@ -30,12 +35,13 @@ class AuthService {
       log("signiWithEmail:: ${result.user!.email}");
 
       var agent = await getAgentByEmail(result.user!.email!);
-
-      //TODO: Store the agent email in the shared preferences
+      log("EMAIL ==> Setting email : ${result.user!.email}");
+      _providerRef.read(sharedPrefUtilityProvider).setEmail(result.user!.email);
 
       log("signInWithEmail:: the signed in agent is $agent");
 
     } on FirebaseAuthException catch (e) {
+
 
       log("signInWithEmail:: ${e.code}");
 

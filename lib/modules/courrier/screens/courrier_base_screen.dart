@@ -89,7 +89,7 @@ class _CourrierBaseScreenState extends ConsumerState<CourrierBaseScreen> {
 
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => DetailsCourrierScreen(val),
+            builder: (_) => DetailsCourrierScreen(val.id!),
           ),
         );
       });

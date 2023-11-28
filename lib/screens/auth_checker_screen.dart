@@ -1,8 +1,5 @@
 import 'package:arptc_connect/modules/authentication/screens/login_screen.dart';
-import 'package:arptc_connect/modules/courrier/screens/courrier_base_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/courrier_main_screen.dart';
-import 'package:arptc_connect/modules/courrier/screens/list_courriers_screen.dart';
-import 'package:arptc_connect/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

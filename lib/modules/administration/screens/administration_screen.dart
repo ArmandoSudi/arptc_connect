@@ -2,76 +2,70 @@ import 'package:arptc_connect/modules/administration/screens/agents_screen.dart'
 import 'package:arptc_connect/modules/administration/screens/bureaux_screen.dart';
 import 'package:arptc_connect/modules/administration/screens/services_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../widgets/content_view.dart';
+import '../../../widgets/page_header.dart';
 import 'directions_screen.dart';
 
 class AdministrationScreen extends StatelessWidget {
   AdministrationScreen({Key? key}) : super(key: key);
 
   final entities = [
-    "Directions",
-    "Services",
-    "Bureaux",
-    "Agents",
+  {"Directions" : DirectionsScreen()},
+  {"Services" : ServicesScreen()},
+  {"Bureaux" : BureauxScreen()},
+  {"Agents" : AgentsScreen()},
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Administration"),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              ListTile(
-                title: const Text("Directions"),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => DirectionsScreen(),
-                    ),
-                  );
-                },
+      body: ContentView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const PageHeader(
+              title: 'Administration',
+              description: 'La gestion des directions, des services, des bureaux et des agents',
+            ),
+            const Gap(16),
+            Expanded(
+              child: Card(
+                child: ListView.separated(
+                  itemCount: entities.length,
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final entity = entities[index];
+                    return ListTile(
+                      title: Text(
+                        entity.keys.first,
+                        // style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      trailing: const Icon(Icons.navigate_next_outlined),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => entity.values.first,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
-              ListTile(
-                title: const Text("Services"),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => ServicesScreen(),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                title: const Text("Bureaux"),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => BureauxScreen(),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                title: const Text("Agents"),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => AgentsScreen(),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        )
+            ),
+            const Gap(16),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.arrow_back_ios),
+              onPressed: () {
+                context.pop();
+              },
+              label: const Text("Retour"),
+            )
+          ],
+        ),
       ),
     );
   }

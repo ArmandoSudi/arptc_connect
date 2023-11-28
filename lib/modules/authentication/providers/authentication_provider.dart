@@ -6,7 +6,7 @@ import '../service/authentication_service.dart';
 
 /// The provider for the authentication class providing all if its features
 final authServiceProvider = Provider<AuthService>((ref) {
-  return AuthService(ref.read(firebaseAuthProvider), ref.read(fireStoreProvider));
+  return AuthService(ref);
 });
 
 
