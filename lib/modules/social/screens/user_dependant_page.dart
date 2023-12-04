@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/dependant.dart';
+import '../../../models/dependant.dart';
 
 class UserDependantPage extends StatelessWidget {
   UserDependantPage({super.key});

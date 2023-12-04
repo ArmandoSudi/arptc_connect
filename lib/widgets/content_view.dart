@@ -11,7 +11,7 @@ class ContentView extends StatelessWidget {
     return Padding(
       padding: ResponsiveBreakpoints.of(context).isMobile
           ? const EdgeInsets.all(16)
-          : const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+          : const EdgeInsets.symmetric(horizontal: 32, vertical: 20,),
       child: child,
     );
   }

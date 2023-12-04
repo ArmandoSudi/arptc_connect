@@ -1,39 +1,45 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class Agent {
-  final String name;
-  final String email;
-  final String genre;
-  final String matricule;
-  final String dob;
-  String? direction;
-  String? service;
-  String? bureau;
-  String? fonction;
-  final String category;
-  final List<String> roles;
-  final DocumentReference reference;
+part 'agent.freezed.dart';
+part 'agent.g.dart';
 
-  Agent.fromMap(Map<String, dynamic> map, {required this.reference})
-      : assert(map['name'] != null),
-        assert(map['email'] != null),
-        assert(map['genre'] != null),
-        assert(map['matricule'] != null),
-        name = map['name'],
-        email = map['email'],
-        genre = map['genre'],
-        matricule = map['matricule'],
-        dob = map['dob'],
-        category = map['category'],
-        roles = map['roles'].cast<String>(),
-        direction = map['direction'],
-        service = map['service'];
-        // bureau = map['bureau'],
-        // fonction = map['fonction'];
+@Freezed()
+class Agent with _$Agent{
 
-  Agent.fromSnapshot(DocumentSnapshot snapshot)
-      : this.fromMap(snapshot.data() as Map<String, dynamic>, reference: snapshot.reference);
+  const Agent._();
 
-  @override
-  String toString() => "Agent:: <$name>";
+  const factory Agent({
+    @JsonKey(includeFromJson: false, includeToJson: false) String? id,
+    required String name,
+    required String email,
+    required String genre,
+    required String matricule,
+    required String dob,
+    String? direction,
+    String? service,
+    String? bureau,
+    String? fonction,
+    required String category,
+    required List<String> roles,
+  }) = _Agent;
+
+  factory Agent.newEmpty({required String userId}) => Agent(
+      id: null,
+      name: '',
+      email: '',
+      genre: '',
+      matricule: '',
+      dob: '',
+      category: '',
+      roles: [] );
+
+  factory Agent.fromJson(Map<String, dynamic> json) => _$AgentFromJson(json);
+
+  factory Agent.fromDocument(DocumentSnapshot doc) {
+    if (doc.data() == null) throw Exception("Agent document was null");
+
+    return Agent.fromJson(doc.data() as Map<String, Object?>).copyWith(id: doc.id);
+  }
+
 }

@@ -1,21 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/voucher.dart';
+import '../../../models/refund.dart';
 
-class AdminSocialVouchersScreen extends StatelessWidget {
-  AdminSocialVouchersScreen({super.key});
+class AdminSocialRefundsScreen extends StatelessWidget {
+  AdminSocialRefundsScreen({super.key});
 
   final db = FirebaseFirestore.instance;
 
   CollectionReference vouchersRef =
-  FirebaseFirestore.instance.collection('vouchers');
+  FirebaseFirestore.instance.collection('refunds');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Liste des bons"),
+        title: const Text("Liste des remboursements"),
       ),
       body: SafeArea(
           child: StreamBuilder<QuerySnapshot>(
@@ -32,7 +32,7 @@ class AdminSocialVouchersScreen extends StatelessWidget {
                   return const Text("There is no dependant yet");
                 }
 
-                return _buildVoucherList(context, snapshot.data?.docs ?? []);
+                return _buildRefundList(context, snapshot.data?.docs ?? []);
               }
 
           )
@@ -40,21 +40,21 @@ class AdminSocialVouchersScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildVoucherList( BuildContext context, List<DocumentSnapshot> snapshot) {
+  Widget _buildRefundList( BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView(
-      children: snapshot.map((data) => _buildVoucher(context, data)).toList(),
+      children: snapshot.map((data) => _buildRefund(context, data)).toList(),
     );
   }
 
-  Widget _buildVoucher(BuildContext context, DocumentSnapshot data) {
-    final voucher = Voucher.fromSnapshot(data);
+  Widget _buildRefund(BuildContext context, DocumentSnapshot data) {
+    final refund = Refund.fromSnapshot(data);
     return ListTile(
       leading: const Icon(Icons.person),
-      title: Text(voucher.agentName),
-      subtitle: Text(voucher.dependantName),
-      trailing: voucher.isApproved ? Text("Approuvé", style: TextStyle(color: Colors.green)) : Text("En attente", style: TextStyle(color: Colors.red)),
+      title: Text(refund.amount.toString() + " \$"),
+      subtitle: Text(refund.hospital),
+      trailing: refund.isApproved ? Text("Approuvé", style: TextStyle(color: Colors.green)) : Text("En attente", style: TextStyle(color: Colors.red)),
       onTap: () {
-        debugPrint("Doc ID: ${voucher.reference.id}");
+        debugPrint("Doc ID: ${refund.reference.id}");
         // Navigator.of(context).push(
         //   MaterialPageRoute(
         //     builder: (context) => DirectionDetailsScreen(),

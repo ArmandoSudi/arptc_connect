@@ -1,6 +1,6 @@
-import 'package:arptc_connect/modules/social/user_dependant_page.dart';
-import 'package:arptc_connect/modules/social/user_refund_page.dart';
-import 'package:arptc_connect/modules/social/user_vouchers_page.dart';
+import 'package:arptc_connect/modules/social/screens/user_dependant_page.dart';
+import 'package:arptc_connect/modules/social/screens/user_refund_page.dart';
+import 'package:arptc_connect/modules/social/screens/user_vouchers_page.dart';
 import 'package:flutter/material.dart';
 
 class UserSocialScreen extends StatefulWidget {

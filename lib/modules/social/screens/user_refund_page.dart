@@ -1,29 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/refund.dart';
+import '../../../models/refund.dart';
 
-class AdminSocialRefundsScreen extends StatelessWidget {
-  AdminSocialRefundsScreen({super.key});
+class UserRefundPage extends StatelessWidget {
+  UserRefundPage({super.key});
 
   final db = FirebaseFirestore.instance;
 
   CollectionReference vouchersRef =
-  FirebaseFirestore.instance.collection('refunds');
+  FirebaseFirestore.instance.collection('agents/PyKV8iGiDzcTdQSaRzWD/refunds');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Liste des remboursements"),
-      ),
       body: SafeArea(
           child: StreamBuilder<QuerySnapshot>(
               stream: vouchersRef.snapshots(),
               builder: (context, snapshot) {
 
                 if (snapshot.hasError) {
-                  return const Text("something went wrong");
+                  return const Text("something wen wrong");
                 }
 
                 if (snapshot.data == null || snapshot.connectionState == ConnectionState.waiting) {
@@ -31,7 +28,7 @@ class AdminSocialRefundsScreen extends StatelessWidget {
                 } else if (!snapshot.hasData) {
                   return const Text("There is no dependant yet");
                 }
-
+                // print("Directions size : ${snapshot.data!.length}");
                 return _buildRefundList(context, snapshot.data?.docs ?? []);
               }
 
@@ -50,16 +47,11 @@ class AdminSocialRefundsScreen extends StatelessWidget {
     final refund = Refund.fromSnapshot(data);
     return ListTile(
       leading: const Icon(Icons.person),
-      title: Text(refund.amount.toString() + " \$"),
-      subtitle: Text(refund.hospital),
+      title: Text("${refund.amount}"),
+      subtitle: Text("${refund.hospital}"),
       trailing: refund.isApproved ? Text("Approuvé", style: TextStyle(color: Colors.green)) : Text("En attente", style: TextStyle(color: Colors.red)),
       onTap: () {
         debugPrint("Doc ID: ${refund.reference.id}");
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(
-        //     builder: (context) => DirectionDetailsScreen(),
-        //   ),
-        // );
       },
     );
   }

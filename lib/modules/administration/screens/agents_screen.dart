@@ -12,12 +12,6 @@ class AgentsScreen extends StatefulWidget {
 
 class _AgentsScreenState extends State<AgentsScreen> {
 
-  final agents = [
-    "Agent 1",
-    "Agent 2",
-    "Agent 3",
-  ];
-
   final db = FirebaseFirestore.instance;
 
   CollectionReference agentsRef =
@@ -63,12 +57,12 @@ class _AgentsScreenState extends State<AgentsScreen> {
   }
 
   Widget _buildAgent(BuildContext context, DocumentSnapshot data) {
-    final entity = Agent.fromSnapshot(data);
+    final agent = Agent.fromDocument(data);
     return ListTile(
-      title: Text(entity.name),
+      title: Text(agent.name),
       trailing: Icon(Icons.arrow_forward_ios),
       onTap: () {
-        debugPrint("Doc ID: ${entity.reference.id}");
+        debugPrint("Doc ID: ${agent.id}");
         // Navigator.of(context).push(
         //   MaterialPageRoute(
         //     builder: (context) => DirectionDetailsScreen(),

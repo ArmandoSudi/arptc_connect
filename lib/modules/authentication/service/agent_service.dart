@@ -29,7 +29,7 @@ class AgentService{
   Future<Agent> getAgentByEmail(String email) {
     return _agents
         .doc(email)
-        .get().then((snapshot) => Agent.fromSnapshot(snapshot));
+        .get().then((snapshot) => Agent.fromDocument(snapshot));
   }
 
 

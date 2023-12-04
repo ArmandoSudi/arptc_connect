@@ -1,5 +1,5 @@
 import 'package:arptc_connect/modules/dashboard/screens/dashboard_page.dart';
-import 'package:arptc_connect/modules/social/admin_social_dashboard_page.dart';
+import 'package:arptc_connect/modules/social/screens/admin_social_dashboard_page.dart';
 import 'package:arptc_connect/screens/account_page.dart';
 import 'package:arptc_connect/screens/home_page.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int curTabIndex = 0;
 
   List<Map<String, Widget>> pages = [
-    {'widget': AdminSocialDashboardPage()},
+    {'widget': AdminSocialStatistics()},
     {'widget': HomePage()},
     {'widget': const AccountPage()},
   ];

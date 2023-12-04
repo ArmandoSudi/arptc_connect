@@ -59,7 +59,9 @@ class ScaffoldWithNavigationBar extends StatelessWidget {
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
         destinations: const [
-          NavigationDestination(label: 'Dashboard', icon: Icon(Icons.home)),
+          NavigationDestination(label: 'Dashboard', icon: Icon(Icons.dashboard)),
+          NavigationDestination(label: 'Service', icon: Icon(Icons.apps)),
+          NavigationDestination(label: 'Courrier', icon: Icon(Icons.mail_outline)),
           NavigationDestination(label: 'Administration', icon: Icon(Icons.admin_panel_settings)),
         ],
         onDestinationSelected: onDestinationSelected,
@@ -90,6 +92,14 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
             onDestinationSelected: onDestinationSelected,
             labelType: NavigationRailLabelType.all,
             destinations: const <NavigationRailDestination>[
+              NavigationRailDestination(
+                label: Text('Dashboard'),
+                icon: Icon(Icons.dashboard),
+              ),
+              NavigationRailDestination(
+                label: Text('Service'),
+                icon: Icon(Icons.apps),
+              ),
               NavigationRailDestination(
                 label: Text('Courriers'),
                 icon: Icon(Icons.mail_outline),

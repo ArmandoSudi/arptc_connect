@@ -30,15 +30,24 @@ class AuthService {
   ///  SignIn the user using Email and Password
   Future<void> signInWithEmailAndPassword(
       String email, String password, BuildContext? context) async {
+
+    log("SIGNIN....");
+
     try {
       var result = await _auth.signInWithEmailAndPassword(email: email, password: password);
-      log("signiWithEmail:: ${result.user!.email}");
 
+      log("RESULT --> $result");
+
+
+      //TODO Create an agent in the DB with email as ID
       var agent = await getAgentByEmail(result.user!.email!);
-      log("EMAIL ==> Setting email : ${result.user!.email}");
-      _providerRef.read(sharedPrefUtilityProvider).setEmail(result.user!.email);
+      // var agent = await getAgentByEmail("yves.palanga@arptc.gouv.cd");
+      // log("AGENT ==> $agent");
 
-      log("signInWithEmail:: the signed in agent is $agent");
+
+      _providerRef.read(sharedPrefUtilityProvider).setEmail(result.user!.email);
+      log("EMAIL ==> Setting email : ${result.user!.email}");
+      // log("signInWithEmail:: the signed in agent is $agent");
 
     } on FirebaseAuthException catch (e) {
 
@@ -125,11 +134,10 @@ class AuthService {
     }
   }
 
-
   Future<Agent> getAgentByEmail(String email) {
     return _agents
         .doc(email)
-        .get().then((snapshot) => Agent.fromSnapshot(snapshot));
+        .get().then((snapshot) => Agent.fromDocument(snapshot));
   }
 
 

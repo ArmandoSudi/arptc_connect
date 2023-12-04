@@ -5,6 +5,10 @@ import 'package:arptc_connect/modules/courrier/screens/add_courrier_screen.dart'
 import 'package:arptc_connect/modules/courrier/screens/courrier_base_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/details_courrier.dart';
 import 'package:arptc_connect/modules/courrier/screens/list_courriers_screen.dart';
+import 'package:arptc_connect/modules/dashboard/screens/main_dashboard_screen.dart';
+import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
+import 'package:arptc_connect/modules/social/screens/main_social_screen.dart';
+import 'package:arptc_connect/modules/social/screens/user_social_screen.dart';
 import 'package:arptc_connect/screens/navigators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,14 +17,17 @@ import 'package:go_router/go_router.dart';
 
 import 'modules/authentication/providers/authentication_provider.dart';
 import 'modules/dashboard/screens/dashboard_page.dart';
+import 'modules/social/screens/admin_social_voucher_screen.dart';
 
-const routerInitialLocation = '/courriers';
+const routerInitialLocation = '/dashboard';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
 
   final rootNavigatorKey = GlobalKey<NavigatorState>();
   final shellNavigatorLoginKey = GlobalKey<NavigatorState>(debugLabel: 'shellLogin');
   final shellNavigatorErrorKey = GlobalKey<NavigatorState>(debugLabel: 'shellError');
+  final shellNavigatorDashboardKey = GlobalKey<NavigatorState>(debugLabel: 'shellDashboard');
+  final shellNavigatorServiceKey = GlobalKey<NavigatorState>(debugLabel: 'shellService');
   final shellNavigatorCourrierKey = GlobalKey<NavigatorState>(debugLabel: 'shellCourrier');
   final _shellNavigatorBKey = GlobalKey<NavigatorState>(debugLabel: 'shellB');
 
@@ -51,6 +58,40 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               navigationShell: navigationShell);
         },
         branches: [
+          // Dashboard branch
+          StatefulShellBranch(
+            navigatorKey: shellNavigatorDashboardKey,
+              routes: [
+                GoRoute(
+                  path: '/dashboard',
+                  pageBuilder: (context, state) => const NoTransitionPage(
+                    // child: RootScreen(label: 'A', detailsPath: '/courriers/details'),
+                    child: MainDashboardScreen(),
+                  ),
+                ),
+              ]
+          ),
+
+          // Service branch
+          StatefulShellBranch(
+            navigatorKey: shellNavigatorServiceKey,
+              routes: [
+                GoRoute(
+                  path: '/service',
+                  pageBuilder: (context, state) => NoTransitionPage(
+                    child: MainServiceScreen(),
+                  ),
+                  routes: [
+                    GoRoute(
+                      path: 'social',
+                      builder: (context, state) => MainSocialScreen(),
+                    ),
+                  ],
+                ),
+              ]
+          ),
+
+          // Courriers branch
           StatefulShellBranch(
             navigatorKey: shellNavigatorCourrierKey,
             routes: [
@@ -76,6 +117,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+
+          // Administration branch
           StatefulShellBranch(
             navigatorKey: _shellNavigatorBKey,
             routes: [
