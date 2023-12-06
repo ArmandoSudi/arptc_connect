@@ -45,6 +45,7 @@ class MyApp extends ConsumerWidget {
         const Breakpoint(start: 961, end: double.infinity, name: DESKTOP),
       ],
       child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
         routerConfig: goRouter,
         title: 'ARPTC',
         theme: ThemeData(

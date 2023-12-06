@@ -94,10 +94,13 @@ class AuthService {
   Future<void> signUpWithEmailAndPassword(
       String email, String password, BuildContext context) async {
     try {
-      _auth.createUserWithEmailAndPassword(
+      var user = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      print("Created User:: $user");
+
     } on FirebaseAuthException catch (e) {
       await showDialog(
           context: context,
@@ -113,6 +116,18 @@ class AuthService {
               ]));
     } catch (e) {
       if (e == 'email-already-in-use') {
+        await showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+                title: const Text('Erreur'),
+                content: Text(e.toString()),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                      },
+                      child: const Text("OK"))
+                ]));
         print('Email already in use.');
       } else {
         print('Error: $e');

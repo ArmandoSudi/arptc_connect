@@ -31,29 +31,28 @@ class AdministrationScreen extends StatelessWidget {
               description: 'La gestion des directions, des services, des bureaux et des agents',
             ),
             const Gap(16),
-            Expanded(
-              child: Card(
-                child: ListView.separated(
-                  itemCount: entities.length,
-                  separatorBuilder: (context, index) => const Divider(),
-                  itemBuilder: (context, index) {
-                    final entity = entities[index];
-                    return ListTile(
-                      title: Text(
-                        entity.keys.first,
-                        // style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      trailing: const Icon(Icons.navigate_next_outlined),
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => entity.values.first,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
+            Card(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: entities.length,
+                separatorBuilder: (context, index) => const Divider(),
+                itemBuilder: (context, index) {
+                  final entity = entities[index];
+                  return ListTile(
+                    title: Text(
+                      entity.keys.first,
+                      // style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    trailing: const Icon(Icons.navigate_next_outlined),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => entity.values.first,
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
             const Gap(16),

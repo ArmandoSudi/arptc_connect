@@ -1,7 +1,9 @@
+import 'package:arptc_connect/modules/administration/providers/administration_service_provider.dart';
 import 'package:arptc_connect/modules/administration/screens/add_direction_screen.dart';
 import 'package:arptc_connect/modules/administration/screens/direction_details_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,19 +12,22 @@ import '../../../widgets/content_view.dart';
 import '../../../widgets/page_header.dart';
 import '../../courrier/screens/add_courrier_screen.dart';
 
-class DirectionsScreen extends StatelessWidget {
+class DirectionsScreen extends ConsumerWidget {
   DirectionsScreen({Key? key}) : super(key: key);
 
   CollectionReference directionsRef =
       FirebaseFirestore.instance.collection('directions');
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+
+
     return Scaffold(
       body: SafeArea(
         child: ContentView(
           child: StreamBuilder<QuerySnapshot>(
-              stream: directionsRef.snapshots(),
+              // stream: directionsRef.snapshots(),
+              stream: ref.watch(administrationServiceProvider).directions.snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return const Text("something went wrong");
@@ -92,7 +97,6 @@ class DirectionsScreen extends StatelessWidget {
       separatorBuilder: (BuildContext context, int index) {
         return const Divider();
       },
-      // children: snapshot.map((data) => _buildEntity(context, data)).toList(),
     );
   }
 
