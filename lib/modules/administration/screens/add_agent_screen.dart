@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:arptc_connect/extensions/date_extension.dart';
+import 'package:arptc_connect/modules/administration/providers/service_provider.dart';
 import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,13 +41,16 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
   List<String> genres = ["Masculin", "Feminin"];
   List<Direction> dir = [];
   List<Service> services = [];
-  late String directionDropdownValue ;
+  String directionDropdownValue = '' ;
+  late String serviceDropdownValue ;
   late String selectedGenre;
   late DateTime dobDate;
   late DateTime dateEngagement;
 
   @override
   Widget build(BuildContext context) {
+
+    final serviceState = ref.watch(asyncServiceProvider(directionDropdownValue));
 
     return Scaffold(
       body: ContentView(
@@ -257,15 +261,7 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                       dir = snapshot.data ?? [];
 
                       return DropdownMenu(
-                        // width: MediaQuery.of(context).size.width - 16,
-
-                        // inputDecorationTheme: InputDecorationTheme(
-                        //   border: OutlineInputBorder(
-                        //     borderRadius: BorderRadius.circular(5),
-                        //   ),
-                        //   contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        // ),
-                        label: Text("Direction"),
+                        label: const Text("Direction"),
                         initialSelection: dir.first.name,
                         onSelected: (String? value) {
                           directionDropdownValue = value!;
@@ -277,41 +273,52 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                     }
                   ),
                   const Gap(16),
-                  StreamBuilder<List<Service>>(
-                      stream: ref.watch(administrationServiceProvider).allServices(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return const Text("something went wrong");
-                        }
-
-                        if (snapshot.data == null ||
-                            snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        } else if (!snapshot.hasData) {
-                          return const Text("There is no direction yet");
-                        }
-
-                        services = snapshot.data ?? [];
-
+                  serviceState.when(
+                      data: (data) {
                         return DropdownMenu(
-                          // width: MediaQuery.of(context).size.width - 16,
-                          // inputDecorationTheme: InputDecorationTheme(
-                          //   border: OutlineInputBorder(
-                          //     borderRadius: BorderRadius.circular(5),
-                          //   ),
-                          //   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          // ),
-                          label: Text("Service"),
-                          initialSelection: services.first.name,
+                          label: const Text("Service"),
+                          initialSelection: data.first.name,
                           onSelected: (String? value) {
-                            directionDropdownValue = value!;
+                            serviceDropdownValue = value!;
                           },
-                          dropdownMenuEntries: services.map<DropdownMenuEntry<String>>((Service value) {
+                          dropdownMenuEntries: data.map<DropdownMenuEntry<String>>((Service value) {
                             return DropdownMenuEntry<String>(value: value.name, label: value.name);
                           }).toList(),
                         );
-                      }
-                  ),
+                      },
+                      error: (error, stackTrace) {
+                        return const Text("something went wrong");
+                      },
+                      loading: () => const CircularProgressIndicator()),
+                  // FutureBuilder<List<Service>>(
+                  //     // stream: ref.watch(administrationServiceProvider).allServices(),
+                  //     future: ref.watch(),
+                  //     builder: (context, snapshot) {
+                  //       if (snapshot.hasError) {
+                  //         return const Text("something went wrong");
+                  //       }
+                  //
+                  //       if (snapshot.data == null ||
+                  //           snapshot.connectionState == ConnectionState.waiting) {
+                  //         return const Center(child: CircularProgressIndicator());
+                  //       } else if (!snapshot.hasData) {
+                  //         return const Text("There is no direction yet");
+                  //       }
+                  //
+                  //       services = snapshot.data ?? [];
+                  //
+                  //       return DropdownMenu(
+                  //         label: const Text("Service"),
+                  //         initialSelection: services.first.name,
+                  //         onSelected: (String? value) {
+                  //           directionDropdownValue = value!;
+                  //         },
+                  //         dropdownMenuEntries: services.map<DropdownMenuEntry<String>>((Service value) {
+                  //           return DropdownMenuEntry<String>(value: value.name, label: value.name);
+                  //         }).toList(),
+                  //       );
+                  //     }
+                  // ),
                   const Gap(16),
                   StreamBuilder<List<Direction>>(
                       stream: ref.watch(administrationServiceProvider).allDirections(),

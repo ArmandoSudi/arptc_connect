@@ -6,3 +6,4 @@ import '../service/administration_service.dart';
 final administrationServiceProvider = Provider<AdministrationService>((ref) {
   return AdministrationService(ref.read(fireStoreProvider));
 });
+

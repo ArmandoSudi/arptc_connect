@@ -12,39 +12,49 @@ class AdministrationService {
   AdministrationService(this._firestore);
 
   CollectionReference get agents => _firestore.collection('agents');
+
   CollectionReference get services => _firestore.collection('services');
+
   CollectionReference get directions => _firestore.collection('directions');
 
-  Stream<List<Agent>> allAgents(){
-    return agents.snapshots().map((event) => event.docs.map((e) => Agent.fromDocument(e)).toList());
+  Stream<List<Agent>> allAgents() {
+    return agents
+        .snapshots()
+        .map((event) => event.docs.map((e) => Agent.fromDocument(e)).toList());
   }
 
-  Stream<List<Direction>> allDirections(){
-    return directions.snapshots().map((event) => event.docs.map((e) => Direction.fromDocument(e)).toList());
+  Stream<List<Direction>> allDirections() {
+    return directions.snapshots().map(
+        (event) => event.docs.map((e) => Direction.fromDocument(e)).toList());
   }
 
-  Stream<List<Service>> allServices(){
-    return services.snapshots().map((event) => event.docs.map((e) => Service.fromDocument(e)).toList());
+  Future<List<Service>> allServices() {
+    // return services.snapshots().map((event) => event.docs.map((e) => Service.fromDocument(e)).toList());
+    return services.get().then((querySnapshot) {
+      return querySnapshot.docs
+          .map((doc) => Service.fromDocument(doc))
+          .toList();
+    }, onError: (e) {
+      return [];
+    });
   }
-  
-  // Future<List<Direction>> allDirections(){
-  //
-  //   try {
-  //     directions.get().then((querySnapshot) {
-  //       return querySnapshot.docs.map((doc) {
-  //         Direction.fromDocument(doc);
-  //       }).toList();
-  //     },
-  //         onError: (e) {
-  //           return [];
-  //         });
-  //   } catch (e) {
-  //     // print("allDirections::: ${e.toString()}");
-  //     return Future.value([]);
-  //   } finally {
-  //     return Future.value([]);
-  //   }
-  // }
 
-
+// Future<List<Direction>> allDirections(){
+//
+//   try {
+//     directions.get().then((querySnapshot) {
+//       return querySnapshot.docs.map((doc) {
+//         Direction.fromDocument(doc);
+//       }).toList();
+//     },
+//         onError: (e) {
+//           return [];
+//         });
+//   } catch (e) {
+//     // print("allDirections::: ${e.toString()}");
+//     return Future.value([]);
+//   } finally {
+//     return Future.value([]);
+//   }
+// }
 }
