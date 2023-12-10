@@ -6,6 +6,7 @@ import 'package:arptc_connect/modules/courrier/screens/courrier_base_screen.dart
 import 'package:arptc_connect/modules/courrier/screens/details_courrier.dart';
 import 'package:arptc_connect/modules/courrier/screens/list_courriers_screen.dart';
 import 'package:arptc_connect/modules/dashboard/screens/main_dashboard_screen.dart';
+import 'package:arptc_connect/modules/inventory/screens/inventory_main_screen.dart';
 import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
 import 'package:arptc_connect/modules/social/screens/main_social_screen.dart';
 import 'package:arptc_connect/modules/social/screens/user_social_screen.dart';
@@ -84,7 +85,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   routes: [
                     GoRoute(
                       path: 'social',
-                      builder: (context, state) => MainSocialScreen(),
+                      builder: (context, state) => const MainSocialScreen(),
+                    ),
+                    GoRoute(
+                      path: 'inventory',
+                      builder: (context, state) => InventoryMainScreen(),
                     ),
                   ],
                 ),
