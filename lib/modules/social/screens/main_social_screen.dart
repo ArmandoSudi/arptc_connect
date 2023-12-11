@@ -22,7 +22,7 @@ class MainSocialScreen extends StatelessWidget {
           ),
           title: const Text("Bureau Social")
         ),
-        body: TabBarView(
+        body: const TabBarView(
           children: [
             SocialAgentsPage(),
             SocialVouchersPage(),

@@ -28,6 +28,16 @@ class AdministrationService {
         (event) => event.docs.map((e) => Direction.fromDocument(e)).toList());
   }
 
+  Future<List<Direction>> fetchDirections() {
+    return directions.get().then((querySnapshot) {
+      return querySnapshot.docs
+          .map((doc) => Direction.fromDocument(doc))
+          .toList();
+    }, onError: (e) {
+      return [];
+    });
+  }
+
   Future<List<Service>> allServices() {
     // return services.snapshots().map((event) => event.docs.map((e) => Service.fromDocument(e)).toList());
     return services.get().then((querySnapshot) {
