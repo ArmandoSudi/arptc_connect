@@ -49,7 +49,7 @@ class InventoryMainScreen extends StatelessWidget {
                   ),
                 ),
                 onTap: () {
-                  // context.go('/service/$path');
+                  context.go('/service/inventory/manage/');
                 },
               ),
               const Gap(16),

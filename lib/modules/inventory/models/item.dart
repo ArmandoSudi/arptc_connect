@@ -18,7 +18,7 @@ class Item with _$Item{
     required int quantity,
   }) = _Item;
 
-  factory Item.newEmpty({required String userId}) => Item(
+  factory Item.newEmpty({required String userId}) => const Item(
       id: null,
       name: '',
       model: '',
