@@ -32,20 +32,4 @@ class AsyncService extends _$AsyncService {
   Future<List<Service>> fetchServices() {
     return ref.read(administrationServiceProvider).allServices();
   }
-
-  // Future<List<Service>> servicesByDirectionRef(String directionRef) async {
-  //   print("Loading services...");
-  //
-  //   services = await fetchServices();
-  //
-  //   if (directionRef == "") {
-  //     print("returning all services");
-  //     return services;
-  //   } else {
-  //     print("returning filtered services");
-  //     return services
-  //         .where((element) => element.directionRef == directionRef)
-  //         .toList();
-  //   }
-  // }
 }

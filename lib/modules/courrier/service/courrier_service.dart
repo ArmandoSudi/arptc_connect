@@ -21,6 +21,16 @@ class CourrierService {
 
   }
 
+  Future<List<Courrier>> allCourriers(){
+    return courriers.get().then((querySnapshot) {
+      return querySnapshot.docs
+          .map((doc) => Courrier.fromDocument(doc))
+          .toList();
+    }, onError: (e) {
+      return [];
+    });
+  }
+
   Stream<Courrier> getCourrier(String id) {
      return courriers
          .doc(id)
