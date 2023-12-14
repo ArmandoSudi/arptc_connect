@@ -10,6 +10,16 @@ class InventoryService {
   CollectionReference get items =>
       _firestore.collection('items');
 
+  Future<List<Item>> allItems() {
+    return items.get().then((querySnapshot) {
+      return querySnapshot.docs
+          .map((doc) => Item.fromDocument(doc))
+          .toList();
+    }, onError: (e) {
+      return [];
+    });
+  }
+
   Stream<Item> getItem(String id) {
     return items
         .doc(id)
@@ -29,15 +39,6 @@ class InventoryService {
     return items.doc(item.id).delete();
   }
 
-  Future<List<Item>> allItems() {
-    return items.get().then((querySnapshot) {
-      return querySnapshot.docs
-          .map((doc) => Item.fromDocument(doc))
-          .toList();
-    }, onError: (e) {
-      return [];
-    });
-  }
 
 // listen to change to a single item document in firestore
 // Stream<Item> get(String id){

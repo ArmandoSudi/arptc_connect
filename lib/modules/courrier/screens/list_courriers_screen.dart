@@ -63,7 +63,9 @@ class _ListCourriersScreenState extends ConsumerState<ListCourriersScreen> {
                 ),
                 const Gap(16),
                 ElevatedButton.icon(
-                  icon: isFiltering ?  const Icon(Icons.cancel_outlined) : const Icon(Icons.filter_alt_rounded),
+                  icon: isFiltering
+                      ? const Icon(Icons.cancel_outlined)
+                      : const Icon(Icons.filter_alt_rounded),
                   onPressed: () async {
 
                     ref.read(dateFilterProvider.notifier).state = await showDatePicker(
@@ -78,8 +80,8 @@ class _ListCourriersScreenState extends ConsumerState<ListCourriersScreen> {
                       isFiltering = !isFiltering;
                     });
 
-                  }, label: isFiltering ?
-                    Text("${ref.read(dateFilterProvider)?.toString()}}",
+                  }, label: isFiltering
+                    ? Text("${ref.read(dateFilterProvider)?.toString()}}",
                     style: const TextStyle(fontWeight: FontWeight.bold))
                     : const Text("Filtrer par date",
                     style: TextStyle(fontWeight: FontWeight.bold)),

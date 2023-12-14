@@ -10,3 +10,4 @@ part 'inventory_service_provider.g.dart';
 InventoryService inventoryService(InventoryServiceRef ref) {
   return InventoryService(ref.read(fireStoreProvider));
 }
+
