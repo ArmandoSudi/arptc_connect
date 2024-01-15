@@ -1,4 +1,4 @@
-import 'package:arptc_connect/modules/administration/providers/administration_service_provider.dart';
+import 'package:arptc_connect/modules/administration/providers/administration_api_provider.dart';
 import 'package:arptc_connect/modules/administration/providers/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../models/service.dart';
@@ -30,6 +30,6 @@ class AsyncService extends _$AsyncService {
   }
 
   Future<List<Service>> fetchServices() {
-    return ref.read(administrationServiceProvider).allServices();
+    return ref.read(administrationAPIProvider).allServices();
   }
 }

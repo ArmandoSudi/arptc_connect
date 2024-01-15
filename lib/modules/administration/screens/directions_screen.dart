@@ -1,4 +1,4 @@
-import 'package:arptc_connect/modules/administration/providers/administration_service_provider.dart';
+import 'package:arptc_connect/modules/administration/providers/administration_api_provider.dart';
 import 'package:arptc_connect/modules/administration/screens/add_direction_screen.dart';
 import 'package:arptc_connect/modules/administration/screens/direction_details_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -27,7 +27,7 @@ class DirectionsScreen extends ConsumerWidget {
         child: ContentView(
           child: StreamBuilder<QuerySnapshot>(
               // stream: directionsRef.snapshots(),
-              stream: ref.watch(administrationServiceProvider).directions.snapshots(),
+              stream: ref.watch(administrationAPIProvider).directions.snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return const Text("something went wrong");

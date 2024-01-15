@@ -14,10 +14,10 @@ import '../../../models/service.dart';
 import '../../../widgets/content_view.dart';
 import '../../../widgets/custom_form_field.dart';
 import '../../../widgets/page_header.dart';
-import '../providers/administration_service_provider.dart';
+import '../providers/administration_api_provider.dart';
+import '../providers/bureau_provider.dart';
 import '../providers/directions_provider.dart';
 import '../providers/providers.dart';
-
 
 class AddAgentScreen extends ConsumerStatefulWidget {
   const AddAgentScreen({super.key});
@@ -27,7 +27,6 @@ class AddAgentScreen extends ConsumerStatefulWidget {
 }
 
 class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
-
   TextEditingController serviceNameController = TextEditingController();
   TextEditingController dateEngagementController = TextEditingController();
   TextEditingController matriculeController = TextEditingController();
@@ -52,11 +51,11 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     print("BUILDING THE ENTIRE WIDGET");
 
-    final serviceState = ref.watch(
-        asyncServiceProvider(directionDropdownValue));
+    final serviceState =
+        ref.watch(asyncServiceProvider(directionDropdownValue));
+    final bureauState = ref.watch(bureauControllerProvider);
     final directionsAsync = ref.watch(directionsControllerProvider);
 
     return Scaffold(
@@ -80,6 +79,8 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Gap(16),
+
+                  // AGENT IDENTITY FIELDS
                   Row(
                     children: [
                       Expanded(
@@ -111,6 +112,8 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                     ],
                   ),
                   const Gap(16),
+
+                  // AGENT CONTACT FIELDS
                   Row(
                     children: [
                       Expanded(
@@ -155,6 +158,8 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                     ],
                   ),
                   const Gap(16),
+
+                  // AGENT
                   Row(
                     children: [
                       Expanded(
@@ -194,8 +199,8 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                           initialSelection: genres.first,
                           controller: genreController,
                           label: const Text('Genre'),
-                          dropdownMenuEntries: genres.map<
-                              DropdownMenuEntry<String>>((String value) {
+                          dropdownMenuEntries: genres
+                              .map<DropdownMenuEntry<String>>((String value) {
                             return DropdownMenuEntry<String>(
                                 value: value, label: value);
                           }).toList(),
@@ -208,6 +213,7 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                       ),
                     ],
                   ),
+
                   // Text(
                   //     "Direction",
                   //     style: TextStyle(fontSize: 14, color: Colors.grey[700])),
@@ -253,9 +259,13 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                   //     return DropdownMenuEntry<String>(value: value, label: value);
                   //   }).toList(),
                   // ),
+
                   const SizedBox(height: 20),
+
+                  // DIRECTION DROPDOWN MENU
                   StreamBuilder<List<Direction>>(
-                      stream: ref.watch(administrationServiceProvider)
+                      stream: ref
+                          .watch(administrationAPIProvider)
                           .allDirections(),
                       builder: (context, snapshot) {
                         if (snapshot.hasError) {
@@ -281,21 +291,20 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                               directionDropdownValue = value!;
                             });
 
-                            ref
-                                .read(selectedDirectionProvider.notifier)
-                                .state = value!;
+                            ref.read(selectedDirectionProvider.notifier).state =
+                                value!;
                           },
-                          dropdownMenuEntries: dir.map<
-                              DropdownMenuEntry<String>>((Direction value) {
+                          dropdownMenuEntries: dir
+                              .map<DropdownMenuEntry<String>>(
+                                  (Direction value) {
                             return DropdownMenuEntry<String>(
                                 value: value.id!, label: value.name);
                           }).toList(),
                         );
-                      }
-                  ),
+                      }),
                   const Gap(16),
 
-                  // SERVICE DROP DOWN MENU
+                  // SERVICE DROPDOWN MENU
                   serviceState.when(
                       data: (data) {
                         print("Services length : ${data.length}");
@@ -309,21 +318,27 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                               },
                               dropdownMenuEntries: const [
                                 DropdownMenuEntry<String>(
-                                  value: "No service", label: "No service",)
-                              ]
-                          );
+                                  value: "No service",
+                                  label: "No service",
+                                )
+                              ]);
                         }
 
                         return DropdownMenu(
                           label: const Text("Service"),
-                          initialSelection: data.first.name,
+                          initialSelection: ref.read(selectedServiceProvider),
                           onSelected: (String? value) {
                             serviceDropdownValue = value!;
+
+                            ref.read(selectedServiceProvider.notifier).state =
+                                value!;
                           },
-                          dropdownMenuEntries: data.map<
-                              DropdownMenuEntry<String>>((Service value) {
+                          dropdownMenuEntries: data
+                              .map<DropdownMenuEntry<String>>((Service value) {
                             return DropdownMenuEntry<String>(
-                              value: value.name, label: value.name,);
+                              value: value.id!,
+                              label: value.name,
+                            );
                           }).toList(),
                         );
                       },
@@ -361,97 +376,111 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                   //       );
                   //     }
                   // ),
-
                   const Gap(16),
 
                   // DIRECTION DROP DOWN MENU
-                  directionsAsync.when(
+                  // directionsAsync.when(
+                  //   data: (data) {
+                  //     print("Directions length : ${data.length}");
+                  //
+                  //     if (data.isEmpty) {
+                  //       return DropdownMenu(
+                  //           label: const Text("Direction"),
+                  //           initialSelection: "No Direction",
+                  //           onSelected: (String? value) {
+                  //             // serviceDropdownValue = value!;
+                  //           },
+                  //           dropdownMenuEntries: const [
+                  //             DropdownMenuEntry<String>(
+                  //               value: "No Direction",
+                  //               label: "No Direction",
+                  //             )
+                  //           ]);
+                  //     }
+                  //
+                  //     return DropdownMenu(
+                  //       label: const Text("Direction"),
+                  //       initialSelection: ref.read(selectedDirectionProvider),
+                  //       onSelected: (String? value) {
+                  //         setState(() {
+                  //           directionDropdownValue = value!;
+                  //         });
+                  //
+                  //         ref.read(selectedDirectionProvider.notifier).state =
+                  //             value!;
+                  //       },
+                  //       dropdownMenuEntries: data
+                  //           .map<DropdownMenuEntry<String>>((Direction value) {
+                  //         return DropdownMenuEntry<String>(
+                  //           value: value.id!,
+                  //           label: value.name,
+                  //         );
+                  //       }).toList(),
+                  //     );
+                  //   },
+                  //   error: (error, stackTrace) {
+                  //     return const Text("something went wrong");
+                  //   },
+                  //   loading: () => const CircularProgressIndicator(),
+                  // ),
+                  // const Gap(16),
+
+                  // BUREAU DROP DOWN MENU
+
+                  bureauState.when(
                     data: (data) {
-                      print("Directions length : ${data.length}");
+                      print("Bureau length : ${data.length}");
 
                       if (data.isEmpty) {
                         return DropdownMenu(
-                            label: const Text("Direction"),
-                            initialSelection: "No Direction",
+                            label: const Text("Bureau"),
+                            initialSelection: "No Bureau",
                             onSelected: (String? value) {
                               // serviceDropdownValue = value!;
                             },
                             dropdownMenuEntries: const [
                               DropdownMenuEntry<String>(
-                                value: "No Direction", label: "No Direction",)
-                            ]
-                        );
+                                value: "No Bureau",
+                                label: "No Bureau",
+                              )
+                            ]);
                       }
 
                       return DropdownMenu(
-                        label: const Text("Direction"),
-                        initialSelection: ref.read(selectedDirectionProvider),
+                        label: const Text("Bureau"),
+                        initialSelection: ref.read(selectedBureauProvider),
                         onSelected: (String? value) {
                           setState(() {
                             directionDropdownValue = value!;
                           });
 
-                          ref
-                              .read(selectedDirectionProvider.notifier)
-                              .state = value!;
+                          ref.read(selectedBureauProvider.notifier).state =
+                          value!;
                         },
-                        dropdownMenuEntries: data.map<
-                            DropdownMenuEntry<String>>((Direction value) {
+                        dropdownMenuEntries: data
+                            .map<DropdownMenuEntry<String>>((Service value) {
                           return DropdownMenuEntry<String>(
-                            value: value.id!, label: value.name,);
+                            value: value.id!,
+                            label: value.name,
+                          );
                         }).toList(),
                       );
                     },
                     error: (error, stackTrace) {
-                    return const Text("something went wrong");
-                  },
-                    loading: () => const CircularProgressIndicator(),),
-                  StreamBuilder<List<Direction>>(
-                      stream: ref.watch(administrationServiceProvider)
-                          .allDirections(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return const Text("something went wrong");
-                        }
+                      debugPrint("Error: $error");
+                      debugPrint("StackTrace: $stackTrace");
+                      return const Text("something went wrong");
+                    },
+                    loading: () => const CircularProgressIndicator(),
+                  )
 
-                        if (snapshot.data == null ||
-                            snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        } else if (!snapshot.hasData) {
-                          return const Text("There is no direction yet");
-                        }
-
-
-                        dir = snapshot.data ?? [];
-
-                        return DropdownMenu(
-                          // width: 200,
-                          // inputDecorationTheme: InputDecorationTheme(
-                          //   border: OutlineInputBorder(
-                          //     borderRadius: BorderRadius.circular(5),
-                          //   ),
-                          //   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          // ),
-                          label: Text("Bureau"),
-                          initialSelection: dir.first.name,
-                          onSelected: (String? value) {
-                            directionDropdownValue = value!;
-                          },
-                          dropdownMenuEntries: dir.map<
-                              DropdownMenuEntry<String>>((Direction value) {
-                            return DropdownMenuEntry<String>(
-                                value: value.name, label: value.name);
-                          }).toList(),
-                        );
-                      }
-                  ),
                 ],
               ),
             ),
           ),
           const Gap(16),
+
+          // CTA FIELDS (SAVE AND CANCEL)
           Row(
             children: [
               Expanded(
@@ -505,9 +534,8 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
   }
 
   void signupWithEmailAndPassword(String email, String password) async {
-    ref.read(authServiceProvider).signUpWithEmailAndPassword(
-        email, password, context);
+    ref
+        .read(authServiceProvider)
+        .signUpWithEmailAndPassword(email, password, context);
   }
 }
-
-

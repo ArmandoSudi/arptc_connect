@@ -1,5 +1,5 @@
 import 'package:arptc_connect/models/direction.dart';
-import 'package:arptc_connect/modules/administration/providers/administration_service_provider.dart';
+import 'package:arptc_connect/modules/administration/providers/administration_api_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'directions_provider.g.dart';
@@ -12,6 +12,6 @@ class DirectionsController extends _$DirectionsController {
   }
 
   Future<List<Direction>> fetchDirections(){
-    return ref.read(administrationServiceProvider).fetchDirections();
+    return ref.read(administrationAPIProvider).fetchDirections();
   }
 }

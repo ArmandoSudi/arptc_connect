@@ -1,27 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'directions_provider.dart';
+part of 'bureau_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$directionsControllerHash() =>
-    r'376b7df704641297b7dd5ac0c8904225cd0554f2';
+String _$bureauControllerHash() => r'f73f870db8d251db84bebcf217ebc6614f9474f8';
 
-/// See also [DirectionsController].
-@ProviderFor(DirectionsController)
-final directionsControllerProvider = AutoDisposeAsyncNotifierProvider<
-    DirectionsController, List<Direction>>.internal(
-  DirectionsController.new,
-  name: r'directionsControllerProvider',
+/// See also [BureauController].
+@ProviderFor(BureauController)
+final bureauControllerProvider =
+    AutoDisposeAsyncNotifierProvider<BureauController, List<Service>>.internal(
+  BureauController.new,
+  name: r'bureauControllerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$directionsControllerHash,
+      : _$bureauControllerHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$DirectionsController = AutoDisposeAsyncNotifier<List<Direction>>;
+typedef _$BureauController = AutoDisposeAsyncNotifier<List<Service>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
