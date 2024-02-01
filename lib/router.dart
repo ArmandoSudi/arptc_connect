@@ -1,4 +1,10 @@
+import 'package:arptc_connect/modules/administration/screens/add_agent_screen.dart';
+import 'package:arptc_connect/modules/administration/screens/add_direction_screen.dart';
 import 'package:arptc_connect/modules/administration/screens/administration_screen.dart';
+import 'package:arptc_connect/modules/administration/screens/agents_screen.dart';
+import 'package:arptc_connect/modules/administration/screens/bureaux_screen.dart';
+import 'package:arptc_connect/modules/administration/screens/directions_screen.dart';
+import 'package:arptc_connect/modules/administration/screens/services_screen.dart';
 import 'package:arptc_connect/modules/authentication/screens/login_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/add_annotation_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/add_courrier_screen.dart';
@@ -17,6 +23,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'modules/administration/screens/add_bureau_screen.dart';
+import 'modules/administration/screens/add_service_screen.dart';
 import 'modules/authentication/providers/authentication_provider.dart';
 import 'modules/dashboard/screens/dashboard_page.dart';
 import 'modules/social/screens/admin_social_voucher_screen.dart';
@@ -142,8 +150,56 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 ),
                 routes: [
                   GoRoute(
-                    path: 'details',
-                    builder: (context, state) => const DetailsScreen(label: 'B'),
+                    path: 'directions',
+                    builder: (context, state) => DirectionsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'add',
+                        pageBuilder: (context, state) => const MaterialPage(
+                          fullscreenDialog: true,
+                          child: AddDirectionScreen(),
+                        )
+                      )
+                    ]
+                  ),
+                  GoRoute(
+                    path: 'services',
+                    builder: (context, state) => ServicesScreen(),
+                    routes: [
+                      GoRoute(
+                          path: 'add',
+                          pageBuilder: (context, state) => const MaterialPage(
+                            fullscreenDialog: true,
+                            child: AddServiceScreen(),
+                          )
+                      )
+                    ]
+                  ),
+                  GoRoute(
+                    path: 'bureaux',
+                    builder: (context, state) => BureauxScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'add',
+                        pageBuilder: (context, state) => const MaterialPage(
+                          fullscreenDialog: true,
+                          child: AddBureauScreen(),
+                        ),
+                      ),
+                    ]
+                  ),
+                  GoRoute(
+                    path: 'agents',
+                    builder: (context, state) => AgentsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'add',
+                        pageBuilder: (context, state) => const MaterialPage(
+                          fullscreenDialog: true,
+                          child: AddAgentScreen(),
+                        ),
+                      ),
+                    ]
                   ),
                 ],
               ),

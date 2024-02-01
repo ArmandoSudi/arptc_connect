@@ -32,17 +32,18 @@ class _AgentsScreenState extends State<AgentsScreen> {
             child: Column(
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    IconButton(icon:const Icon(Icons.arrow_back_ios), onPressed: () {
+                      context.pop();
+                    },),
+                    const Gap(16),
                     const PageHeader(title: "Liste des agents", description: ''),
+                    Expanded(child: Container()),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.add),
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => AddAgentScreen(),
-                          ),
-                        );
+                        context.go("/administration/agents/add");
                       },
                       label: const Text("Enregistrer agent", style: TextStyle(fontWeight: FontWeight.bold)),
                     )

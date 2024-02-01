@@ -10,23 +10,17 @@ import 'package:go_router/go_router.dart';
 import '../../../utils/entity_model.dart';
 import '../../../widgets/content_view.dart';
 import '../../../widgets/page_header.dart';
-import '../../courrier/screens/add_courrier_screen.dart';
 
 class DirectionsScreen extends ConsumerWidget {
   DirectionsScreen({Key? key}) : super(key: key);
 
-  CollectionReference directionsRef =
-      FirebaseFirestore.instance.collection('directions');
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
 
     return Scaffold(
       body: SafeArea(
         child: ContentView(
           child: StreamBuilder<QuerySnapshot>(
-              // stream: directionsRef.snapshots(),
               stream: ref.watch(administrationAPIProvider).directions.snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
@@ -42,21 +36,27 @@ class DirectionsScreen extends ConsumerWidget {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // HEADER
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        IconButton(icon:Icon(Icons.arrow_back_ios), onPressed: () {
+                          context.pop();
+                        },),
+                        const Gap(16),
                         const PageHeader(
                           title: 'Directions',
                           description: 'La liste de toutes les Directions',
                         ),
+                        Expanded(child: Container()),
                         ElevatedButton.icon(
                           icon: const Icon(Icons.add),
                           onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => AddDirectionScreen(),
-                              ),
-                            );
+                            // Navigator.of(context).push(
+                            //   MaterialPageRoute(
+                            //     builder: (context) => AddDirectionScreen(),
+                            //   ),
+                            // );
+                            context.go("/administration/directions/add");
                           },
                           label: const Text("Enregistrer direction",
                               style: TextStyle(fontWeight: FontWeight.bold)),
