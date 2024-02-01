@@ -10,7 +10,7 @@ class Bureau with _$Bureau {
   const factory Bureau({
     @JsonKey(includeFromJson: false, includeToJson: false) String? id,
     required String name,
-    @JsonKey(name: "service_ref") required String directionRef,
+    @JsonKey(name: "direction_ref") required String directionRef,
   }) = _Bureau;
 
   factory Bureau.newEmpty({required String userId}) => Bureau(

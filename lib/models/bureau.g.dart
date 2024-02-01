@@ -8,11 +8,11 @@ part of 'bureau.dart';
 
 _$BureauImpl _$$BureauImplFromJson(Map<String, dynamic> json) => _$BureauImpl(
       name: json['name'] as String,
-      directionRef: json['service_ref'] as String,
+      directionRef: json['direction_ref'] as String,
     );
 
 Map<String, dynamic> _$$BureauImplToJson(_$BureauImpl instance) =>
     <String, dynamic>{
       'name': instance.name,
-      'service_ref': instance.directionRef,
+      'direction_ref': instance.directionRef,
     };

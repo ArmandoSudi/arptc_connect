@@ -61,10 +61,13 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
     return Scaffold(
       body: ContentView(
         child: Column(children: [
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Row(
             children: [
-              PageHeader(
+              IconButton(icon:Icon(Icons.arrow_back_ios), onPressed: () {
+                context.pop();
+              },),
+              const Gap(16),
+              const PageHeader(
                 title: 'Enregistrer un agent',
                 description: 'formulaire d\'enregistrement d\'agent',
               ),
@@ -214,51 +217,6 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                     ],
                   ),
 
-                  // Text(
-                  //     "Direction",
-                  //     style: TextStyle(fontSize: 14, color: Colors.grey[700])),
-                  // DropdownMenu(
-                  //   width: MediaQuery.of(context).size.width - 16,
-                  //   inputDecorationTheme: InputDecorationTheme(
-                  //     border: OutlineInputBorder(
-                  //       borderRadius: BorderRadius.circular(5),
-                  //     ),
-                  //     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  //   ),
-                  //   initialSelection: directions.first,
-                  //   onSelected: (String? value) {
-                  //     // This is called when the user selects an item.
-                  //     setState(() {
-                  //       directionDropDownValue = value!;
-                  //     });
-                  //   },
-                  //   dropdownMenuEntries: directions.map<DropdownMenuEntry<String>>((String value) {
-                  //     return DropdownMenuEntry<String>(value: value, label: value);
-                  //   }).toList(),
-                  // ),
-                  const SizedBox(height: 20),
-                  // Text(
-                  //     "Service",
-                  //     style: TextStyle(fontSize: 14, color: Colors.grey[700])),
-                  // DropdownMenu(
-                  //   width: MediaQuery.of(context).size.width - 16,
-                  //   inputDecorationTheme: InputDecorationTheme(
-                  //     border: OutlineInputBorder(
-                  //       borderRadius: BorderRadius.circular(5),
-                  //     ),
-                  //     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  //   ),
-                  //   initialSelection: services.first,
-                  //   onSelected: (String? value) {
-                  //     // This is called when the user selects an item.
-                  //     setState(() {
-                  //       serviceDropdownValue = value!;
-                  //     });
-                  //   },
-                  //   dropdownMenuEntries: services.map<DropdownMenuEntry<String>>((String value) {
-                  //     return DropdownMenuEntry<String>(value: value, label: value);
-                  //   }).toList(),
-                  // ),
 
                   const SizedBox(height: 20),
 
@@ -347,83 +305,8 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                       },
                       loading: () => const CircularProgressIndicator()),
 
-                  // FutureBuilder<List<Service>>(
-                  //     // stream: ref.watch(administrationServiceProvider).allServices(),
-                  //     future: ref.watch(),
-                  //     builder: (context, snapshot) {
-                  //       if (snapshot.hasError) {
-                  //         return const Text("something went wrong");
-                  //       }
-                  //
-                  //       if (snapshot.data == null ||
-                  //           snapshot.connectionState == ConnectionState.waiting) {
-                  //         return const Center(child: CircularProgressIndicator());
-                  //       } else if (!snapshot.hasData) {
-                  //         return const Text("There is no direction yet");
-                  //       }
-                  //
-                  //       services = snapshot.data ?? [];
-                  //
-                  //       return DropdownMenu(
-                  //         label: const Text("Service"),
-                  //         initialSelection: services.first.name,
-                  //         onSelected: (String? value) {
-                  //           directionDropdownValue = value!;
-                  //         },
-                  //         dropdownMenuEntries: services.map<DropdownMenuEntry<String>>((Service value) {
-                  //           return DropdownMenuEntry<String>(value: value.name, label: value.name);
-                  //         }).toList(),
-                  //       );
-                  //     }
-                  // ),
-                  const Gap(16),
 
-                  // DIRECTION DROP DOWN MENU
-                  // directionsAsync.when(
-                  //   data: (data) {
-                  //     print("Directions length : ${data.length}");
-                  //
-                  //     if (data.isEmpty) {
-                  //       return DropdownMenu(
-                  //           label: const Text("Direction"),
-                  //           initialSelection: "No Direction",
-                  //           onSelected: (String? value) {
-                  //             // serviceDropdownValue = value!;
-                  //           },
-                  //           dropdownMenuEntries: const [
-                  //             DropdownMenuEntry<String>(
-                  //               value: "No Direction",
-                  //               label: "No Direction",
-                  //             )
-                  //           ]);
-                  //     }
-                  //
-                  //     return DropdownMenu(
-                  //       label: const Text("Direction"),
-                  //       initialSelection: ref.read(selectedDirectionProvider),
-                  //       onSelected: (String? value) {
-                  //         setState(() {
-                  //           directionDropdownValue = value!;
-                  //         });
-                  //
-                  //         ref.read(selectedDirectionProvider.notifier).state =
-                  //             value!;
-                  //       },
-                  //       dropdownMenuEntries: data
-                  //           .map<DropdownMenuEntry<String>>((Direction value) {
-                  //         return DropdownMenuEntry<String>(
-                  //           value: value.id!,
-                  //           label: value.name,
-                  //         );
-                  //       }).toList(),
-                  //     );
-                  //   },
-                  //   error: (error, stackTrace) {
-                  //     return const Text("something went wrong");
-                  //   },
-                  //   loading: () => const CircularProgressIndicator(),
-                  // ),
-                  // const Gap(16),
+                  const Gap(16),
 
                   // BUREAU DROP DOWN MENU
 
@@ -493,7 +376,7 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                     signupWithEmailAndPassword(
                         emailController.text, "Arptc@2021");
                   },
-                  child: const Text("Save"),
+                  child: const Text("Save", style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(width: 10),
@@ -508,7 +391,7 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
 
                     context.pop();
                   },
-                  child: const Text("Cancel"),
+                  child: const Text("Cancel", style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],

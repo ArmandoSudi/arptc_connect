@@ -13,10 +13,10 @@ class AdministrationScreen extends StatelessWidget {
   AdministrationScreen({Key? key}) : super(key: key);
 
   final entities = [
-  {"Directions" : DirectionsScreen()},
-  {"Services" : ServicesScreen()},
-  {"Bureaux" : BureauxScreen()},
-  {"Agents" : AgentsScreen()},
+  {"Directions" : "directions"},
+  {"Services" : "services"},
+  {"Bureaux" : "bureaux"},
+  {"Agents" : "agents"},
   ];
 
   @override
@@ -45,11 +45,12 @@ class AdministrationScreen extends StatelessWidget {
                     ),
                     trailing: const Icon(Icons.navigate_next_outlined),
                     onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => entity.values.first,
-                        ),
-                      );
+                      // Navigator.of(context).push(
+                      //   MaterialPageRoute(
+                      //     builder: (context) => entity.values.first,
+                      //   ),
+                      // );
+                      context.go("/administration/${entity.values.first}");
                     },
                   );
                 },
