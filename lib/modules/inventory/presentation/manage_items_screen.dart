@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../widgets/page_header.dart';
 import '../models/item.dart';
@@ -32,11 +33,20 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
         child: Column(
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const PageHeader(
                     title: "Articles",
                     description: 'Gestion des articles en stock'),
+                Expanded(child: Container()),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.shopping_cart_outlined),
+                  onPressed: () {
+                    context.go('/service/inventory/cart');
+                  },
+                  label: const Text("0 article",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+                Gap(16),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.add),
                   onPressed: () async {
@@ -44,12 +54,8 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                   },
                   label: const Text("Enregistrer article",
                       style: TextStyle(fontWeight: FontWeight.bold)),
-                )
+                ),
               ],
-            ),
-            const Gap(16),
-            const CupertinoSearchTextField(
-              placeholder: "Rechercher un article",
             ),
             const Gap(16),
             asyncItem.when(
@@ -70,6 +76,17 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                           subtitle: Text(
                             data[index].quantity.toString(),
                             style: theme.textTheme.labelMedium,
+                          ),
+                          trailing: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                                // minimumSize: const Size.fromHeight(50),
+                                side: const BorderSide(color: Colors.grey),
+                                foregroundColor: Colors.black),
+                            onPressed: () async {
+                              await showSelectedItemDialog(context, data[index].name );
+                              // context.pop();
+                            },
+                            child: const Text("ajouter au panier", style: TextStyle(fontWeight: FontWeight.bold)),
                           ),
                         );
                       },
@@ -202,6 +219,78 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
               ),
             ),
             title: const Text('Créer un nouvel article'),
+          );
+        });
+  }
+
+  Future<void> showSelectedItemDialog(BuildContext context, String itemName) async {
+
+    final TextEditingController quantityController = TextEditingController();
+    int itemCount = 0;
+
+    return await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: SizedBox(
+              width: 500,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(itemName, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,),),
+                    const Gap(16),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(50),
+                              shape: const StadiumBorder(),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                itemCount++;
+                                quantityController.text = itemCount.toString();
+                              });
+                            },
+                            child: const Icon(Icons.add),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: CustomFormField(
+                            hintText: "0",
+                            textInputType: TextInputType.text,
+                            controller: quantityController,
+                            borderRadius: 30,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(50),
+                                side: const BorderSide(color: Colors.grey),
+                                foregroundColor: Colors.grey),
+                            onPressed: () {
+                              setState(() {
+                                if (itemCount > 0) itemCount--;
+                                quantityController.text = itemCount.toString();
+                              });
+                            },
+                            child: const Icon(Icons.remove),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            title: const Text('Article à ajouter au panier'),
           );
         });
   }

@@ -49,7 +49,7 @@ class MyApp extends ConsumerWidget {
         routerConfig: goRouter,
         title: 'ARPTC',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
         ),
         // routerDelegate: ref.watch(goRouterProvider).routerDelegate,

@@ -9,6 +9,7 @@ class CustomFormField extends StatelessWidget {
     required this.hintText,
     required this.textInputType,
     required this.controller,
+    this.borderRadius=5,
     this.inputFormatters,
     this.maxLine,
     this.validator,
@@ -22,6 +23,7 @@ class CustomFormField extends StatelessWidget {
   final TextInputType textInputType;
   final TextEditingController controller;
   final List<TextInputFormatter>? inputFormatters;
+  final double? borderRadius;
   final String? Function(String?)? validator;
   final int? maxLine;
   final bool? obscureText;
@@ -45,9 +47,9 @@ class CustomFormField extends StatelessWidget {
           decoration: InputDecoration(
               contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               hintText: hintText,
-              border: const OutlineInputBorder(
+              border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(
-                      Radius.circular(5)
+                      Radius.circular(borderRadius ?? 5)
                   )
               ),
             suffixIcon: suffixIcon

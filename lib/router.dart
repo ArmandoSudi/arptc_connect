@@ -8,15 +8,12 @@ import 'package:arptc_connect/modules/administration/screens/services_screen.dar
 import 'package:arptc_connect/modules/authentication/screens/login_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/add_annotation_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/add_courrier_screen.dart';
-import 'package:arptc_connect/modules/courrier/screens/courrier_base_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/details_courrier.dart';
 import 'package:arptc_connect/modules/courrier/screens/list_courriers_screen.dart';
 import 'package:arptc_connect/modules/dashboard/screens/main_dashboard_screen.dart';
-import 'package:arptc_connect/modules/inventory/screens/inventory_main_screen.dart';
-import 'package:arptc_connect/modules/inventory/screens/manage_items_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/manage_items_screen.dart';
 import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
 import 'package:arptc_connect/modules/social/screens/main_social_screen.dart';
-import 'package:arptc_connect/modules/social/screens/user_social_screen.dart';
 import 'package:arptc_connect/screens/navigators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +24,7 @@ import 'modules/administration/screens/add_bureau_screen.dart';
 import 'modules/administration/screens/add_service_screen.dart';
 import 'modules/authentication/providers/authentication_provider.dart';
 import 'modules/dashboard/screens/dashboard_page.dart';
-import 'modules/social/screens/admin_social_voucher_screen.dart';
+import 'modules/inventory/presentation/cart_screen.dart';
 
 const routerInitialLocation = '/dashboard';
 
@@ -98,11 +95,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     ),
                     GoRoute(
                       path: 'inventory',
-                      builder: (context, state) => InventoryMainScreen(),
+                      pageBuilder: (context, state) => const NoTransitionPage(
+                        child: ManageItemScreen(),
+                      ),
                       routes: [
                         GoRoute(
-                          path: 'manage',
-                          builder: (context, state) => ManageItemScreen(),
+                          path: 'cart',
+                          builder: (context, state) => CartScreen(),
                         ),
                       ],
                     ),
@@ -118,7 +117,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/courriers',
                 pageBuilder: (context, state) => const NoTransitionPage(
-                  // child: RootScreen(label: 'A', detailsPath: '/courriers/details'),
                   child: ListCourriersScreen(),
                 ),
                 routes: [
