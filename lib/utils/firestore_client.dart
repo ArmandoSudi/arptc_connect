@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:arptc_connect/utils/firestore_document.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +21,22 @@ class FirestoreClient {
       return docRef.id;
     } catch (err) {
       throw Exception('Error adding a document: $err');
+    }
+  }
+
+  Future<void> update({
+    required String collection,
+    required Map<String,dynamic> data,
+  }) async {
+    try {
+      final docRef = _firestore
+          .collection(collection)
+          .doc(data["id"] as String);
+      await docRef.update(data);
+    } catch (exception){
+      log("FireStoreClient::update err => $exception");
+      log("FireStoreClient::update data[id] => ${data["id"]}");
+      throw Exception('Error updating document: $exception');
     }
   }
 

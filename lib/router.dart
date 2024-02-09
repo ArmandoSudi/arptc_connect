@@ -11,7 +11,7 @@ import 'package:arptc_connect/modules/courrier/screens/add_courrier_screen.dart'
 import 'package:arptc_connect/modules/courrier/screens/details_courrier.dart';
 import 'package:arptc_connect/modules/courrier/screens/list_courriers_screen.dart';
 import 'package:arptc_connect/modules/dashboard/screens/main_dashboard_screen.dart';
-import 'package:arptc_connect/modules/inventory/presentation/manage_items_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
 import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
 import 'package:arptc_connect/modules/social/screens/main_social_screen.dart';
 import 'package:arptc_connect/screens/navigators.dart';
@@ -24,7 +24,7 @@ import 'modules/administration/screens/add_bureau_screen.dart';
 import 'modules/administration/screens/add_service_screen.dart';
 import 'modules/authentication/providers/authentication_provider.dart';
 import 'modules/dashboard/screens/dashboard_page.dart';
-import 'modules/inventory/presentation/cart_screen.dart';
+import 'modules/inventory/presentation/cart/cart_screen.dart';
 
 const routerInitialLocation = '/dashboard';
 

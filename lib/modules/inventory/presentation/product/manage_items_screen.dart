@@ -1,6 +1,9 @@
 import 'dart:developer';
 
+import 'package:arptc_connect/modules/inventory/models/product.dart';
+import 'package:arptc_connect/modules/inventory/presentation/product/async_product.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
+import 'package:arptc_connect/widgets/custom_dropdown_field.dart';
 import 'package:arptc_connect/widgets/custom_form_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,10 +11,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../widgets/page_header.dart';
-import '../models/item.dart';
-import '../providers/async_item.dart';
-import '../../../core/constants.dart';
+import '../../../../widgets/page_header.dart';
+import '../../../../core/constants.dart';
+import '../cart/cart_controller_provider.dart';
 
 class ManageItemScreen extends ConsumerStatefulWidget {
   const ManageItemScreen({super.key});
@@ -25,8 +27,9 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final asyncItem = ref.watch(asyncItemsProvider);
+    final asyncProducts = ref.watch(asyncProductProvider);
     final theme = Theme.of(context);
+    final cartController = ref.watch(cartControllerProvider);
 
     return Scaffold(
       body: ContentView(
@@ -38,27 +41,28 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                     title: "Articles",
                     description: 'Gestion des articles en stock'),
                 Expanded(child: Container()),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.shopping_cart_outlined),
-                  onPressed: () {
-                    context.go('/service/inventory/cart');
-                  },
-                  label: const Text("0 article",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                IconButton(
+                  onPressed: () => context.go('/service/inventory/cart'),
+                  icon: Badge(
+                    // TODO Display the label only if the size of the cart is > 0
+                    label: Text("${ref.watch(cartControllerProvider.notifier).count}"),
+                    isLabelVisible: ref.watch(cartControllerProvider.notifier).count > 0 ? true : false,
+                    child: const Icon(Icons.shopping_cart_outlined)
+                  ),
                 ),
-                Gap(16),
+                const Gap(16),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.add),
                   onPressed: () async {
-                    await showInformationDialog(context);
+                    await showCreateProductDialog(context);
                   },
-                  label: const Text("Enregistrer article",
+                  label: const Text("Créer article",
                       style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
             const Gap(16),
-            asyncItem.when(
+            asyncProducts.when(
               data: (data) {
                 return Expanded(
                   child: Card(
@@ -83,10 +87,12 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                                 side: const BorderSide(color: Colors.grey),
                                 foregroundColor: Colors.black),
                             onPressed: () async {
-                              await showSelectedItemDialog(context, data[index].name );
+                              await showSelectedItemDialog(
+                                  context, data[index]);
                               // context.pop();
                             },
-                            child: const Text("ajouter au panier", style: TextStyle(fontWeight: FontWeight.bold)),
+                            child: const Text("ajouter au panier",
+                                style: TextStyle(fontWeight: FontWeight.bold)),
                           ),
                         );
                       },
@@ -98,7 +104,6 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                 );
               },
               error: (error, stackTrace) {
-
                 //TODO log the error that going to occur here
                 return const Text("An error occurer when loading the items");
               },
@@ -112,11 +117,10 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
     );
   }
 
-  Future<void> showInformationDialog(BuildContext context) async {
+  Future<void> showCreateProductDialog(BuildContext context) async {
     final TextEditingController _nameController = TextEditingController();
-    final TextEditingController _modelController = TextEditingController();
-    final TextEditingController _categoryController = TextEditingController();
     final TextEditingController _quantityController = TextEditingController();
+    String? selectedUnitValue;
 
     return await showDialog(
         context: context,
@@ -129,43 +133,67 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // NAME
                     CustomFormField(
                       label: "Nom",
-                      hintText: "nom ou modéle de l'article",
+                      hintText: "nom de l'article",
                       textInputType: TextInputType.text,
                       controller: _nameController,
                     ),
                     const Gap(12),
-                    CustomFormField(
-                      label: "Marque",
-                      hintText: "marque de l'article",
-                      textInputType: TextInputType.text,
-                      controller: _modelController,
-                    ),
-                    const Gap(12),
+
+                    // QUANTITY
                     CustomFormField(
                       label: "Quantité",
                       hintText: "quantité de l'article en stock",
-                      textInputType: TextInputType.text,
+                      textInputType: TextInputType.number,
                       controller: _quantityController,
                     ),
                     const Gap(12),
-                    DropdownMenu(
-                      label: const Text("Catégorie"),
-                      dropdownMenuEntries: Constants.itemCategories
-                          .map((e) => DropdownMenuEntry(
-                                value: e,
-                                label: e,
-                              ))
-                          .toList(),
-                    ),
-                    CustomFormField(
-                      label: "Catégorie",
-                      hintText: "catégorie de l'article",
-                      textInputType: TextInputType.text,
-                      controller: _categoryController,
-                    ),
+
+                    // UNIT
+                    // DropdownButtonFormField<String>(
+                    //   // Customize the button's appearance (optional)
+                    //
+                    //   hint: const Text('Selectionner l\'unité de l\'article'),
+                    //   decoration: InputDecoration(
+                    //       contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    //       hintText: 'Selectionner l\'unité de l\'article',
+                    //       border: OutlineInputBorder(
+                    //           borderRadius: BorderRadius.all(
+                    //               Radius.circular( 5)
+                    //           )
+                    //       ),
+                    //       // suffixIcon: Icon(Icons.arrow_drop_down)
+                    //   ),
+                    //   icon: const Icon(Icons.keyboard_arrow_down_outlined),
+                    //   isExpanded: true,
+                    //   value: selectedValue,
+                    //   items: Constants.productUnits
+                    //       .map<DropdownMenuItem<String>>((String value) {
+                    //     return DropdownMenuItem<String>(
+                    //       value: value,
+                    //       child: Text(value),
+                    //     );
+                    //   }).toList(),
+                    //   onChanged: (String? newValue) {
+                    //     setState(() {
+                    //       selectedValue = newValue!;
+                    //     });
+                    //   },
+                    // ),
+                    CustomDropDown(
+                        label: "Unité",
+                        hintText: "Selectionner l\'unité de l\'article",
+                        items: Constants.productUnits,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedUnitValue = value!;
+                          });
+                        }),
                     const Gap(32),
+
+                    // BUTTON TO SAVE OR CANCEL
                     Row(
                       children: [
                         Expanded(
@@ -175,16 +203,14 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                               shape: const StadiumBorder(),
                             ),
                             onPressed: () {
-                              final item = Item(
-                                  name: _nameController.text,
-                                  quantity: int.parse(_quantityController.text),
-                                  category: _categoryController.text,
-                                  model: _modelController.text,
-                                  unit: "pièce");
+                              final product = Product(
+                                name: _nameController.text,
+                                unit: selectedUnitValue ??
+                                    Constants.productUnits.first,
+                                quantity: int.parse(_quantityController.text),
+                              );
 
-                              ref
-                                  .watch(asyncItemsProvider.notifier)
-                                  .addItem(item);
+                              ref.read(asyncProductProvider.notifier).addProduct(product);
 
                               Navigator.of(context).pop();
                             },
@@ -202,8 +228,6 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                                 side: const BorderSide(color: Colors.grey),
                                 foregroundColor: Colors.grey),
                             onPressed: () {
-                              log("add_courrier_screen:: cancel");
-
                               Navigator.of(context).pop();
                             },
                             child: const Text(
@@ -223,10 +247,9 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
         });
   }
 
-  Future<void> showSelectedItemDialog(BuildContext context, String itemName) async {
-
-    final TextEditingController quantityController = TextEditingController();
-    int itemCount = 0;
+  Future<void> showSelectedItemDialog(
+      BuildContext context, Product product) async {
+    final TextEditingController quantityController = TextEditingController(text: "1");
 
     return await showDialog(
         context: context,
@@ -239,10 +262,24 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(itemName, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,),),
+                    Text(
+                      product.name,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Gap(16),
+                    CustomFormField(
+                      label: "Quantité",
+                      hintText: "0",
+                      textInputType: TextInputType.number,
+                      controller: quantityController,
+                      borderRadius: 30,
+                    ),
+
                     const Gap(16),
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
                           child: ElevatedButton(
@@ -251,21 +288,15 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                               shape: const StadiumBorder(),
                             ),
                             onPressed: () {
-                              setState(() {
-                                itemCount++;
-                                quantityController.text = itemCount.toString();
-                              });
+                              //TODO ADD PRODUCT TO CART
+                              int quantity = int.parse(quantityController.text);
+                              ref.read(cartControllerProvider.notifier).addProduct(product, quantity);
+                              Navigator.of(context).pop();
                             },
-                            child: const Icon(Icons.add),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: CustomFormField(
-                            hintText: "0",
-                            textInputType: TextInputType.text,
-                            controller: quantityController,
-                            borderRadius: 30,
+                            child: const Text(
+                              "Ajouter",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -276,12 +307,12 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                                 side: const BorderSide(color: Colors.grey),
                                 foregroundColor: Colors.grey),
                             onPressed: () {
-                              setState(() {
-                                if (itemCount > 0) itemCount--;
-                                quantityController.text = itemCount.toString();
-                              });
+                              Navigator.of(context).pop();
                             },
-                            child: const Icon(Icons.remove),
+                            child: const Text(
+                              "Annuler",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
                       ],

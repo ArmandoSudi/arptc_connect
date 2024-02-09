@@ -4,4 +4,8 @@ class Constants {
     'Nettoyage',
     'Automobile',
   ];
+
+  static List<String> productUnits =[
+    'Pièce', 'Boite',
+  ];
 }
