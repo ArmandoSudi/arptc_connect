@@ -46,8 +46,10 @@ class AsyncProduct extends _$AsyncProduct {
   }
 
   void deliverTo(List<CartItem> cartItems, String direction) async {
+
     state = const AsyncValue.loading();
     cartItems.forEach((cartItem) {
+      //TODO Make sure that there is enough product in stock before delivery
       int newQuantity = cartItem.product.quantity - cartItem.quantity;
       updateProductQuantity(cartItem.product, newQuantity);
     });

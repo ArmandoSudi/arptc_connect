@@ -1,3 +1,4 @@
+import 'package:arptc_connect/core/theme.dart';
 import 'package:arptc_connect/router.dart';
 import 'package:arptc_connect/screens/auth_checker_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -37,6 +38,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final goRouter = ref.watch(goRouterProvider);
+    final theme = MaterialTheme(Theme.of(context).textTheme);
 
     return ResponsiveBreakpoints.builder(
       breakpoints: [
@@ -48,10 +50,11 @@ class MyApp extends ConsumerWidget {
         debugShowCheckedModeBanner: false,
         routerConfig: goRouter,
         title: 'ARPTC',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
-        ),
+        theme: theme.light(),
+        // theme: ThemeData(
+        //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        //   useMaterial3: true,
+        // ),
         // routerDelegate: ref.watch(goRouterProvider).routerDelegate,
         // routeInformationParser: ref.watch(goRouterProvider).routeInformationParser,
         // home: const AuthCheckerScreen(),

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:arptc_connect/modules/inventory/models/product.dart';
 import 'package:arptc_connect/modules/inventory/presentation/product/async_product.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
@@ -37,6 +35,12 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
           children: [
             Row(
               children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios),
+                  onPressed: () {
+                    context.pop();
+                  },
+                ),
                 const PageHeader(
                     title: "Articles",
                     description: 'Gestion des articles en stock'),
@@ -44,10 +48,9 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                 IconButton(
                   onPressed: () => context.go('/service/inventory/cart'),
                   icon: Badge(
-                    // TODO Display the label only if the size of the cart is > 0
                     label: Text("${ref.watch(cartControllerProvider.notifier).count}"),
                     isLabelVisible: ref.watch(cartControllerProvider.notifier).count > 0 ? true : false,
-                    child: const Icon(Icons.shopping_cart_outlined)
+                    child: Icon(Icons.shopping_cart_outlined),
                   ),
                 ),
                 const Gap(16),
@@ -288,7 +291,7 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                               shape: const StadiumBorder(),
                             ),
                             onPressed: () {
-                              //TODO ADD PRODUCT TO CART
+                              //TODO Check that the required quantity is not more than quantity in stock
                               int quantity = int.parse(quantityController.text);
                               ref.read(cartControllerProvider.notifier).addProduct(product, quantity);
                               Navigator.of(context).pop();

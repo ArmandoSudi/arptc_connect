@@ -25,6 +25,8 @@ class CartController extends StateNotifier<CartState> {
     } else {
       state = state.copyWith(items: [...state.items, CartItem(product: product, quantity: quantity)]);
     }
+
+    log("CartSize : ${state.items.length}");
   }
 
   void removeProduct(Product product){
@@ -44,9 +46,14 @@ class CartController extends StateNotifier<CartState> {
             (item) => item.product.name == product.name)
         .firstOrNull;
     if (existingItem != null) {
+
+      // As we need to resinsert the product at the same index
+      final indexOfExistingProduct = state.items.indexOf(existingItem);
+
       state = state.copyWith(items: List.from(state.items)
         ..remove(existingItem)
-        ..add(existingItem.copyWith(quantity: existingItem.quantity + 1)));
+        ..insert(indexOfExistingProduct, existingItem.copyWith(quantity: existingItem.quantity + 1)));
+
     }
   }
 
@@ -56,10 +63,14 @@ class CartController extends StateNotifier<CartState> {
             (item) => item.product.name == product.name)
         .firstOrNull;
     if (existingItem != null) {
+
+      // As we need to resinsert the product at the same index
+      final indexOfExistingProduct = state.items.indexOf(existingItem);
+
       if (existingItem.quantity > 1) {
         state = state.copyWith(items: List.from(state.items)
           ..remove(existingItem)
-          ..add(existingItem.copyWith(quantity: existingItem.quantity - 1)));
+          ..insert(indexOfExistingProduct,existingItem.copyWith(quantity: existingItem.quantity - 1)));
       }
     }
   }
@@ -78,20 +89,7 @@ class CartController extends StateNotifier<CartState> {
     state = state.copyWith(items: []);
   }
 
-  void deliverTo(String direction){
-    state.items.forEach((cartItem) {
-      int newQuantity = cartItem.product.quantity - cartItem.quantity;
-      updateProductQuantity(cartItem.product, newQuantity);
-    });
-  }
 
-  void restock(){
-    log("restocking: Restocking the products");
-    state.items.forEach((cartItem) {
-      int newQuantity = cartItem.product.quantity + cartItem.quantity;
-      updateProductQuantity(cartItem.product, newQuantity);
-    });
-  }
 
   void updateProductQuantity(Product product, int quantity){
     final newProduct = product.copyWith(quantity: quantity);
