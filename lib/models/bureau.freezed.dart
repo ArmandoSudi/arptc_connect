@@ -23,7 +23,7 @@ mixin _$Bureau {
   @JsonKey(includeFromJson: false, includeToJson: false)
   String? get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
-  @JsonKey(name: "service_ref")
+  @JsonKey(name: "direction_ref")
   String get directionRef => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -39,7 +39,7 @@ abstract class $BureauCopyWith<$Res> {
   $Res call(
       {@JsonKey(includeFromJson: false, includeToJson: false) String? id,
       String name,
-      @JsonKey(name: "service_ref") String directionRef});
+      @JsonKey(name: "direction_ref") String directionRef});
 }
 
 /// @nodoc
@@ -86,7 +86,7 @@ abstract class _$$BureauImplCopyWith<$Res> implements $BureauCopyWith<$Res> {
   $Res call(
       {@JsonKey(includeFromJson: false, includeToJson: false) String? id,
       String name,
-      @JsonKey(name: "service_ref") String directionRef});
+      @JsonKey(name: "direction_ref") String directionRef});
 }
 
 /// @nodoc
@@ -127,7 +127,7 @@ class _$BureauImpl extends _Bureau {
   const _$BureauImpl(
       {@JsonKey(includeFromJson: false, includeToJson: false) this.id,
       required this.name,
-      @JsonKey(name: "service_ref") required this.directionRef})
+      @JsonKey(name: "direction_ref") required this.directionRef})
       : super._();
 
   factory _$BureauImpl.fromJson(Map<String, dynamic> json) =>
@@ -139,7 +139,7 @@ class _$BureauImpl extends _Bureau {
   @override
   final String name;
   @override
-  @JsonKey(name: "service_ref")
+  @JsonKey(name: "direction_ref")
   final String directionRef;
 
   @override
@@ -180,7 +180,7 @@ abstract class _Bureau extends Bureau {
   const factory _Bureau(
       {@JsonKey(includeFromJson: false, includeToJson: false) final String? id,
       required final String name,
-      @JsonKey(name: "service_ref")
+      @JsonKey(name: "direction_ref")
       required final String directionRef}) = _$BureauImpl;
   const _Bureau._() : super._();
 
@@ -192,7 +192,7 @@ abstract class _Bureau extends Bureau {
   @override
   String get name;
   @override
-  @JsonKey(name: "service_ref")
+  @JsonKey(name: "direction_ref")
   String get directionRef;
   @override
   @JsonKey(ignore: true)
