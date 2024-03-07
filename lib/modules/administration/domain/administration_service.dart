@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:arptc_connect/models/agent.dart';
+import 'package:arptc_connect/modules/administration/domain/models/agent.dart';
+import 'package:arptc_connect/modules/administration/domain/models/direction.dart';
+import 'package:arptc_connect/modules/administration/domain/models/service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../../../models/direction.dart';
-import '../../../models/service.dart';
 
 class AdministrationAPI {
   final FirebaseFirestore _firestore;

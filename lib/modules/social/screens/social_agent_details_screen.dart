@@ -1,10 +1,9 @@
+import 'package:arptc_connect/modules/administration/domain/models/dependant.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-
-import '../../../models/dependant.dart';
 
 class SocialAgentDetailsScreen extends StatelessWidget {
   final String agentId;

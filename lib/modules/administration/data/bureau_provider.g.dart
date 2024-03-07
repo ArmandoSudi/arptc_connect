@@ -6,7 +6,7 @@ part of 'bureau_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$bureauControllerHash() => r'f73f870db8d251db84bebcf217ebc6614f9474f8';
+String _$bureauControllerHash() => r'042dd65c85e06a128086f6ded0f0053e87e7a8be';
 
 /// See also [BureauController].
 @ProviderFor(BureauController)

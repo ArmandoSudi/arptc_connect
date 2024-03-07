@@ -1,10 +1,10 @@
-import 'package:arptc_connect/modules/administration/screens/add_agent_screen.dart';
-import 'package:arptc_connect/modules/administration/screens/add_direction_screen.dart';
-import 'package:arptc_connect/modules/administration/screens/administration_screen.dart';
-import 'package:arptc_connect/modules/administration/screens/agents_screen.dart';
-import 'package:arptc_connect/modules/administration/screens/bureaux_screen.dart';
-import 'package:arptc_connect/modules/administration/screens/directions_screen.dart';
-import 'package:arptc_connect/modules/administration/screens/services_screen.dart';
+import 'package:arptc_connect/modules/administration/presentation/screens/add_agent_screen.dart';
+import 'package:arptc_connect/modules/administration/presentation/screens/add_direction_screen.dart';
+import 'package:arptc_connect/modules/administration/presentation/screens/administration_screen.dart';
+import 'package:arptc_connect/modules/administration/presentation/screens/agents_screen.dart';
+import 'package:arptc_connect/modules/administration/presentation/screens/bureaux_screen.dart';
+import 'package:arptc_connect/modules/administration/presentation/screens/directions_screen.dart';
+import 'package:arptc_connect/modules/administration/presentation/screens/services_screen.dart';
 import 'package:arptc_connect/modules/authentication/screens/login_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/add_annotation_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/add_courrier_screen.dart';
@@ -20,8 +20,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'modules/administration/screens/add_bureau_screen.dart';
-import 'modules/administration/screens/add_service_screen.dart';
+import 'modules/administration/presentation/screens/add_bureau_screen.dart';
+import 'modules/administration/presentation/screens/add_service_screen.dart';
 import 'modules/authentication/providers/authentication_provider.dart';
 import 'modules/dashboard/screens/dashboard_page.dart';
 import 'modules/inventory/presentation/cart/cart_screen.dart';

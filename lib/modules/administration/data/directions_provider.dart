@@ -1,5 +1,5 @@
-import 'package:arptc_connect/models/direction.dart';
-import 'package:arptc_connect/modules/administration/providers/administration_api_provider.dart';
+import 'package:arptc_connect/modules/administration/data/administration_api_provider.dart';
+import 'package:arptc_connect/modules/administration/domain/models/direction.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'directions_provider.g.dart';

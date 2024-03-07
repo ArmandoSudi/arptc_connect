@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:arptc_connect/modules/administration/domain/models/agent.dart';
 import 'package:arptc_connect/utils/firebase_constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/firebase_providers.dart';
 import '../../../core/shared_preferences_provider.dart';
-import '../../../models/agent.dart';
 
 class AuthService {
   late FirebaseAuth _auth;

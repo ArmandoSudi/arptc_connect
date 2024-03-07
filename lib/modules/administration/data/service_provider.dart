@@ -1,8 +1,7 @@
-import 'package:arptc_connect/modules/administration/providers/administration_api_provider.dart';
-import 'package:arptc_connect/modules/administration/providers/providers.dart';
+import 'package:arptc_connect/modules/administration/data/administration_api_provider.dart';
+import 'package:arptc_connect/modules/administration/data/providers.dart';
+import 'package:arptc_connect/modules/administration/domain/models/service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../models/service.dart';
-
 part 'service_provider.g.dart';
 
 @riverpod
@@ -10,10 +9,9 @@ class AsyncService extends _$AsyncService {
   List<Service> services = [];
 
   @override
-  FutureOr<List<Service>> build(String directionRef) async {
+  FutureOr<List<Service>> build() async {
 
     String selectedDirRef = ref.watch(selectedDirectionProvider);
-    print("selectedDirRed: $selectedDirRef");
 
     services = await fetchServices();
 
@@ -26,7 +24,6 @@ class AsyncService extends _$AsyncService {
           .where((element) => element.directionRef == selectedDirRef)
           .toList();
     }
-    return services;
   }
 
   Future<List<Service>> fetchServices() {

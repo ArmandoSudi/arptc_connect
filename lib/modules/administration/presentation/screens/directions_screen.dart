@@ -1,63 +1,63 @@
-import 'package:arptc_connect/modules/administration/screens/add_service_screen.dart';
-import 'package:arptc_connect/modules/administration/screens/bureaux_screen.dart';
-import 'package:arptc_connect/models/service.dart';
+import 'package:arptc_connect/modules/administration/data/administration_api_provider.dart';
+import 'package:arptc_connect/modules/administration/presentation/screens/direction_details_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../widgets/content_view.dart';
-import '../../../widgets/page_header.dart';
-import '../providers/administration_api_provider.dart';
-import 'direction_details_screen.dart';
+import '../../../../utils/entity_model.dart';
+import '../../../../widgets/content_view.dart';
+import '../../../../widgets/page_header.dart';
 
-class ServicesScreen extends ConsumerWidget {
-  ServicesScreen({Key? key}) : super(key: key);
+class DirectionsScreen extends ConsumerWidget {
+  DirectionsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
     return Scaffold(
       body: SafeArea(
         child: ContentView(
           child: StreamBuilder<QuerySnapshot>(
-              stream: ref.watch(administrationAPIProvider).services.snapshots(),
+              stream: ref.watch(administrationAPIProvider).directions.snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return const Text("Error loading the services");
+                  return const Text("something went wrong");
                 }
 
                 if (snapshot.data == null ||
                     snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (!snapshot.hasData) {
-                  return const Text("There is no service yet");
+                  return const Text("There is no direction yet");
                 }
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // HEADER
                     Row(
-                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(icon:Icon(Icons.arrow_back_ios), onPressed: () {
                           context.pop();
                         },),
                         const Gap(16),
                         const PageHeader(
-                          title: 'Services',
-                          description: 'La liste de tous les services',
+                          title: 'Directions',
+                          description: 'La liste de toutes les Directions',
                         ),
                         Expanded(child: Container()),
                         ElevatedButton.icon(
                           icon: const Icon(Icons.add),
                           onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => AddServiceScreen(),
-                              ),
-                            );
+                            // Navigator.of(context).push(
+                            //   MaterialPageRoute(
+                            //     builder: (context) => AddDirectionScreen(),
+                            //   ),
+                            // );
+                            context.go("/administration/directions/add");
                           },
-                          label: const Text("Enregistrer service",
+                          label: const Text("Enregistrer direction",
                               style: TextStyle(fontWeight: FontWeight.bold)),
                         )
                       ],
@@ -65,7 +65,7 @@ class ServicesScreen extends ConsumerWidget {
                     const Gap(16),
                     Expanded(
                       child: Card(
-                        child: _buildServiceList(
+                        child: _buildDirectionList(
                             context, snapshot.data?.docs ?? []),
                       ),
                     ),
@@ -85,7 +85,7 @@ class ServicesScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildServiceList(
+  Widget _buildDirectionList(
       BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView.separated(
       itemCount: snapshot.length,
@@ -100,7 +100,7 @@ class ServicesScreen extends ConsumerWidget {
   }
 
   Widget _buildEntity(BuildContext context, DocumentSnapshot data) {
-    final entity = Service.fromDocument(data);
+    final entity = Entity.fromSnapshot(data);
     return ListTile(
       title: Text(entity.name),
       trailing: const Icon(Icons.arrow_forward_ios),

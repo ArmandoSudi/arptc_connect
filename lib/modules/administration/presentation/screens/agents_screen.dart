@@ -1,14 +1,12 @@
-import 'package:arptc_connect/modules/administration/screens/add_agent_screen.dart';
-import 'package:arptc_connect/modules/administration/screens/example_drop_down.dart';
+import 'package:arptc_connect/modules/administration/domain/models/agent.dart';
+import 'package:arptc_connect/modules/administration/presentation/screens/example_drop_down.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../../models/agent.dart';
-import '../../../widgets/content_view.dart';
+import '../../../../widgets/content_view.dart';
 
 class AgentsScreen extends StatefulWidget {
   const AgentsScreen({Key? key}) : super(key: key);
@@ -20,7 +18,6 @@ class AgentsScreen extends StatefulWidget {
 class _AgentsScreenState extends State<AgentsScreen> {
 
   final db = FirebaseFirestore.instance;
-  bool _isSearching = false;
 
   CollectionReference agentsRef =
   FirebaseFirestore.instance.collection('agents');
@@ -57,7 +54,7 @@ class _AgentsScreenState extends State<AgentsScreen> {
                     builder: (context, snapshot) {
 
                       if (snapshot.hasError) {
-                        return const Text("something wen wrong");
+                        return const Text("something went wrong");
                       }
 
                       if (snapshot.data == null || snapshot.connectionState == ConnectionState.waiting) {
@@ -74,17 +71,17 @@ class _AgentsScreenState extends State<AgentsScreen> {
                               itemBuilder: (context, index) {
                                 return ListTile(
                                   leading: Container(
-                                      padding: EdgeInsets.all(4),
-                                      child: Icon(Icons.person),
+                                      padding: const EdgeInsets.all(4), 
                                       decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(50),
                                           color: Colors.grey[300]
-                                      )
+                                      ),
+                                      child: const Icon(Icons.person),
                                   ),
                                   title: Text(agents![index].name),
                                   trailing: const Icon(Icons.arrow_forward_ios),
                                   onTap: () {
-                                    debugPrint("Doc ID: ${agents?[index].id}");
+                                    debugPrint("Doc ID: ${agents[index].id}");
                                     // Navigator.of(context).push(
                                     //   MaterialPageRoute(
                                     //     builder: (context) => SocialAgentDetailsScreen(agentId: agents![index].id!),
@@ -93,7 +90,7 @@ class _AgentsScreenState extends State<AgentsScreen> {
                                   },
                                 );
                               },
-                              separatorBuilder: (context, index) => Divider(),
+                              separatorBuilder: (context, index) => const Divider(),
                               itemCount: agents?.length ?? 0)
                       );
                     }

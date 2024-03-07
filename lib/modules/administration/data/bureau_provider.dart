@@ -1,8 +1,8 @@
-import 'package:arptc_connect/modules/administration/providers/providers.dart';
+import 'package:arptc_connect/modules/administration/data/administration_api_provider.dart';
+import 'package:arptc_connect/modules/administration/data/providers.dart';
+import 'package:arptc_connect/modules/administration/domain/models/service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:arptc_connect/modules/administration/providers/administration_api_provider.dart';
-import '../../../models/service.dart';
 
 part 'bureau_provider.g.dart';
 
@@ -13,8 +13,8 @@ class BureauController extends _$BureauController {
 
   @override
   FutureOr<List<Service>> build() async {
+
     String selectedServiceId = ref.watch(selectedServiceProvider);
-    debugPrint("Selected Service ID for bureau: $selectedServiceId");
 
     bureaux = await fetchBureaux();
 

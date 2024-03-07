@@ -1,7 +1,7 @@
 import 'package:arptc_connect/modules/social/screens/user_social_screen.dart';
 import 'package:flutter/material.dart';
 
-import '../modules/administration/screens/administration_screen.dart';
+import '../modules/administration/presentation/screens/administration_screen.dart';
 
 enum Modules {social, inventory, helpDesk, administration}
 

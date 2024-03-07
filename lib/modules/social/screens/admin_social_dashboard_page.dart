@@ -3,7 +3,7 @@ import 'package:arptc_connect/modules/social/screens/admin_social_voucher_screen
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../../administration/screens/agents_screen.dart';
+import '../../administration/presentation/screens/agents_screen.dart';
 
 class AdminSocialStatistics extends StatelessWidget {
   AdminSocialStatistics({super.key});

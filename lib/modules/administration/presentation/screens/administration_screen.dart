@@ -1,13 +1,9 @@
-import 'package:arptc_connect/modules/administration/screens/agents_screen.dart';
-import 'package:arptc_connect/modules/administration/screens/bureaux_screen.dart';
-import 'package:arptc_connect/modules/administration/screens/services_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../widgets/content_view.dart';
-import '../../../widgets/page_header.dart';
-import 'directions_screen.dart';
+import '../../../../widgets/content_view.dart';
+import '../../../../widgets/page_header.dart';
 
 class AdministrationScreen extends StatelessWidget {
   AdministrationScreen({Key? key}) : super(key: key);

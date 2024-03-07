@@ -1,7 +1,6 @@
+import 'package:arptc_connect/modules/administration/domain/models/voucher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
-import '../../../models/voucher.dart';
 
 class AdminSocialVouchersScreen extends StatelessWidget {
   AdminSocialVouchersScreen({super.key});

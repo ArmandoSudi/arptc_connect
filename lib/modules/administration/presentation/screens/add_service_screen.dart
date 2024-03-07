@@ -1,33 +1,39 @@
 import 'dart:developer';
 
-import 'package:arptc_connect/widgets/custom_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../widgets/content_view.dart';
-import '../../../widgets/page_header.dart';
+import '../../../../widgets/content_view.dart';
+import '../../../../widgets/custom_form_field.dart';
+import '../../../../widgets/page_header.dart';
 
-class AddDirectionScreen extends StatefulWidget {
-  const AddDirectionScreen({Key? key}) : super(key: key);
+List<String> directions = <String>['DSI', 'DRMT', 'DRAJ', 'DEP'];
+
+class AddServiceScreen extends StatefulWidget {
+  const AddServiceScreen({Key? key}) : super(key: key);
 
   @override
-  State<AddDirectionScreen> createState() => _AddDirectionScreenState();
+  State<AddServiceScreen> createState() => _AddServiceScreenState();
 }
 
-class _AddDirectionScreenState extends State<AddDirectionScreen> {
+class _AddServiceScreenState extends State<AddServiceScreen> {
+
   TextEditingController directionNameController = TextEditingController();
   TextEditingController abreviationController = TextEditingController();
+
+  String dropdownValue = directions.first;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: SafeArea(
-          child: ContentView(
+        body: ContentView(
+          child: SafeArea(
             child: Stack(children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
@@ -36,26 +42,49 @@ class _AddDirectionScreenState extends State<AddDirectionScreen> {
                         },),
                         const Gap(16),
                         const PageHeader(
-                          title: 'Créer une direction',
-                          description: 'Remplissez le formulaire pour créer une nouvelle direction',
+                          title: 'Créer un service',
+                          description: 'Remplissez le formulaire pour créer un nouveau service dans une direction donnée',
                         ),
                       ],
                     ),
                     const Gap(16),
+                    Text(
+                    "Direction",
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                    DropdownMenu(
+                      width: MediaQuery.of(context).size.width - 16,
+                      inputDecorationTheme: InputDecorationTheme(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      ),
+                      initialSelection: directions.first,
+                      onSelected: (String? value) {
+                        // This is called when the user selects an item.
+                        setState(() {
+                          dropdownValue = value!;
+                        });
+                      },
+                      dropdownMenuEntries: directions.map<DropdownMenuEntry<String>>((String value) {
+                        return DropdownMenuEntry<String>(value: value, label: value);
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
                     CustomFormField(
-                      label: "Direction",
-                      hintText: "nom de la direction",
+                      label: "Service",
+                      hintText: "nom du service",
                       textInputType: TextInputType.name,
                       controller: directionNameController,
                     ),
                     const SizedBox(height: 20),
                     CustomFormField(
                       label: "Abreviation",
-                      hintText: "l'abréviation de la direction",
+                      hintText: "l'abréviation du service",
                       textInputType: TextInputType.name,
                       controller: abreviationController,
                     ),
-                    Gap(16),
+                    const Gap(16),
                     Row(
                       children: [
                         Expanded(

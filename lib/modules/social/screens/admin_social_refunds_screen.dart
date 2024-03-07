@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../../../models/refund.dart';
+import '../../administration/domain/models/refund.dart';
 
 class AdminSocialRefundsScreen extends StatelessWidget {
   AdminSocialRefundsScreen({super.key});

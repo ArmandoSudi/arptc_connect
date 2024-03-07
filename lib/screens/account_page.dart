@@ -1,8 +1,7 @@
+import 'package:arptc_connect/modules/administration/domain/models/dependant.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../models/dependant.dart';
 import '../modules/authentication/providers/authentication_provider.dart';
 
 class AccountPage extends ConsumerStatefulWidget {

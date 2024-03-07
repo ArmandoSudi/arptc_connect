@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:arptc_connect/modules/inventory/presentation/product/async_product.dart';
 import 'package:arptc_connect/modules/inventory/presentation/cart/cart_controller_provider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';

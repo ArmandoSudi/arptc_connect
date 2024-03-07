@@ -1,9 +1,8 @@
+import 'package:arptc_connect/modules/administration/domain/models/refund.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_breakpoints.dart';
-
-import '../../../models/refund.dart';
 
 class SocialRefundsPage extends StatefulWidget {
   const SocialRefundsPage({super.key});

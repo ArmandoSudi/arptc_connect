@@ -1,7 +1,6 @@
+import 'package:arptc_connect/modules/administration/domain/models/refund.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
-import '../../../models/refund.dart';
 
 class UserRefundPage extends StatelessWidget {
   UserRefundPage({super.key});

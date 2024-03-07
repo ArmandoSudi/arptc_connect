@@ -4,25 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../widgets/content_view.dart';
-import '../../../widgets/custom_form_field.dart';
-import '../../../widgets/page_header.dart';
+import '../../../../widgets/content_view.dart';
+import '../../../../widgets/custom_form_field.dart';
+import '../../../../widgets/page_header.dart';
 
 List<String> directions = <String>['DSI', 'DRMT', 'DRAJ', 'DEP'];
+List<String> services = <String>['Service Help Desk', 'Service Infrasctucture', 'Service Téléphonie & Messagerie'];
 
-class AddServiceScreen extends StatefulWidget {
-  const AddServiceScreen({Key? key}) : super(key: key);
+class AddBureauScreen extends StatefulWidget {
+  const AddBureauScreen({Key? key}) : super(key: key);
 
   @override
-  State<AddServiceScreen> createState() => _AddServiceScreenState();
+  State<AddBureauScreen> createState() => _AddBureauScreenState();
 }
 
-class _AddServiceScreenState extends State<AddServiceScreen> {
+class _AddBureauScreenState extends State<AddBureauScreen> {
 
-  TextEditingController directionNameController = TextEditingController();
+  TextEditingController serviceNameController = TextEditingController();
   TextEditingController abreviationController = TextEditingController();
 
-  String dropdownValue = directions.first;
+  var directionDropDownValue = directions.first;
+  var serviceDropdownValue = services.first;
 
   @override
   Widget build(BuildContext context) {
@@ -37,20 +39,20 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                   children: [
                     Row(
                       children: [
-                        IconButton(icon:Icon(Icons.arrow_back_ios), onPressed: () {
+                        IconButton(icon:const Icon(Icons.arrow_back_ios), onPressed: () {
                           context.pop();
                         },),
                         const Gap(16),
                         const PageHeader(
-                          title: 'Créer un service',
-                          description: 'Remplissez le formulaire pour créer un nouveau service dans une direction donnée',
+                          title: 'Enregistrer un bureau',
+                          description: 'formulaire d\'enregistrement de bureau',
                         ),
                       ],
                     ),
                     const Gap(16),
                     Text(
-                    "Direction",
-                    style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                        "Direction",
+                        style: TextStyle(fontSize: 14, color: Colors.grey[700])),
                     DropdownMenu(
                       width: MediaQuery.of(context).size.width - 16,
                       inputDecorationTheme: InputDecorationTheme(
@@ -63,10 +65,33 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                       onSelected: (String? value) {
                         // This is called when the user selects an item.
                         setState(() {
-                          dropdownValue = value!;
+                          directionDropDownValue = value!;
                         });
                       },
                       dropdownMenuEntries: directions.map<DropdownMenuEntry<String>>((String value) {
+                        return DropdownMenuEntry<String>(value: value, label: value);
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                        "Service",
+                        style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                    DropdownMenu(
+                      width: MediaQuery.of(context).size.width - 16,
+                      inputDecorationTheme: InputDecorationTheme(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      ),
+                      initialSelection: services.first,
+                      onSelected: (String? value) {
+                        // This is called when the user selects an item.
+                        setState(() {
+                          serviceDropdownValue = value!;
+                        });
+                      },
+                      dropdownMenuEntries: services.map<DropdownMenuEntry<String>>((String value) {
                         return DropdownMenuEntry<String>(value: value, label: value);
                       }).toList(),
                     ),
@@ -75,7 +100,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                       label: "Service",
                       hintText: "nom du service",
                       textInputType: TextInputType.name,
-                      controller: directionNameController,
+                      controller: serviceNameController,
                     ),
                     const SizedBox(height: 20),
                     CustomFormField(

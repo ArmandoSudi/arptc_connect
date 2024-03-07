@@ -1,3 +1,4 @@
+import 'package:arptc_connect/modules/administration/domain/models/agent.dart';
 import 'package:arptc_connect/modules/social/screens/social_agent_details_screen.dart';
 import 'package:arptc_connect/modules/social/screens/user_dependant_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_breakpoints.dart';
 
-import '../../../models/agent.dart';
 import '../../../widgets/content_view.dart';
 
 class SocialAgentsPage extends StatefulWidget {

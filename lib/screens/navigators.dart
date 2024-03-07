@@ -24,13 +24,21 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      if (constraints.maxWidth < 450) {
+
+
+      if (constraints.maxWidth < 960) {
+
+        print("Constraints width : ${constraints.maxWidth} : NAVIGATION BAR");
+
         return ScaffoldWithNavigationBar(
           body: navigationShell,
           selectedIndex: navigationShell.currentIndex,
           onDestinationSelected: _goBranch,
         );
       } else {
+
+        print("Constraints width : ${constraints.maxWidth} : NAVIGATION RAIL");
+
         return ScaffoldWithNavigationRail(
           body: navigationShell,
           selectedIndex: navigationShell.currentIndex,

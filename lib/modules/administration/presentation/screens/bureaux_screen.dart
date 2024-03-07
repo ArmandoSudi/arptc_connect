@@ -1,14 +1,13 @@
+import 'package:arptc_connect/modules/administration/data/administration_api_provider.dart';
+import 'package:arptc_connect/modules/administration/domain/models/bureau.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../models/bureau.dart';
-import '../../../widgets/content_view.dart';
-import '../../../widgets/page_header.dart';
-import '../providers/administration_api_provider.dart';
-import 'add_bureau_screen.dart';
+import '../../../../widgets/content_view.dart';
+import '../../../../widgets/page_header.dart';
 import 'direction_details_screen.dart';
 
 class BureauxScreen extends ConsumerWidget {

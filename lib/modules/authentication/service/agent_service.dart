@@ -1,8 +1,5 @@
-import 'dart:developer';
-
+import 'package:arptc_connect/modules/administration/domain/models/agent.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../../../models/agent.dart';
 import '../../../utils/firebase_constants.dart';
 
 class AgentService{
