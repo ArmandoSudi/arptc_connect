@@ -14,6 +14,8 @@ import 'package:arptc_connect/modules/dashboard/screens/main_dashboard_screen.da
 import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
 import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
 import 'package:arptc_connect/modules/social/screens/main_social_screen.dart';
+import 'package:arptc_connect/modules/ticketing/presentation/screens/add_ticket_screen.dart';
+import 'package:arptc_connect/modules/ticketing/presentation/screens/tickets_screen.dart';
 import 'package:arptc_connect/screens/navigators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -34,9 +36,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   final shellNavigatorLoginKey = GlobalKey<NavigatorState>(debugLabel: 'shellLogin');
   final shellNavigatorErrorKey = GlobalKey<NavigatorState>(debugLabel: 'shellError');
   final shellNavigatorDashboardKey = GlobalKey<NavigatorState>(debugLabel: 'shellDashboard');
+  final shellNavigatorAdministrationKey = GlobalKey<NavigatorState>(debugLabel: 'shellAdministration');
   final shellNavigatorServiceKey = GlobalKey<NavigatorState>(debugLabel: 'shellService');
   final shellNavigatorCourrierKey = GlobalKey<NavigatorState>(debugLabel: 'shellCourrier');
-  final _shellNavigatorBKey = GlobalKey<NavigatorState>(debugLabel: 'shellB');
+  final shellNavigatorTicketingKey = GlobalKey<NavigatorState>(debugLabel: 'shellTicketing');
 
   return GoRouter(
     initialLocation: routerInitialLocation,
@@ -105,6 +108,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                         ),
                       ],
                     ),
+                    GoRoute(
+                      path: 'ticketing',
+                      builder: (context, state) => const TicketsScreen(),
+                      routes: [
+                        GoRoute(
+                          path: 'add',
+                          builder: (context, state) => AddTicketScreen(),
+                        ),
+                      ]
+                    ),
                   ],
                 ),
               ]
@@ -138,7 +151,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
           // Administration branch
           StatefulShellBranch(
-            navigatorKey: _shellNavigatorBKey,
+            navigatorKey: shellNavigatorAdministrationKey,
             routes: [
               // Administration
               GoRoute(
@@ -203,6 +216,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+
+          // Ticketing branch
+          // StatefulShellBranch(
+          //   navigatorKey: shellNavigatorTicketingKey,
+          //   routes: [
+          //     GoRoute(
+          //       path: '/ticketing',
+          //       pageBuilder: (context, state) => const NoTransitionPage(
+          //         child: ListCourriersScreen(),
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ],
       )
     ],

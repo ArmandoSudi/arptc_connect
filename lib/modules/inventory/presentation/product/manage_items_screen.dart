@@ -3,7 +3,6 @@ import 'package:arptc_connect/modules/inventory/presentation/product/async_produ
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_dropdown_field.dart';
 import 'package:arptc_connect/widgets/custom_form_field.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';

@@ -10,7 +10,8 @@ class MainServiceScreen extends StatelessWidget {
 
   final services = [
     {"Social": const Center(child: Text("Social"))},
-    {"Inventory": const Center(child: Text("Inventory"))},
+    {"Inventory": const Center(child: Text("Inventaire"))},
+    {"Ticketing": const Center(child: Text("Ticketerie"))},
   ];
 
   @override
