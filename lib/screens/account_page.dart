@@ -12,11 +12,10 @@ class AccountPage extends ConsumerStatefulWidget {
 }
 
 class _AccountPageState extends ConsumerState<AccountPage> {
-
   final db = FirebaseFirestore.instance;
 
-  CollectionReference dependants =
-  FirebaseFirestore.instance.collection('/agents/PyKV8iGiDzcTdQSaRzWD/dependants');
+  CollectionReference dependants = FirebaseFirestore.instance
+      .collection('/agents/PyKV8iGiDzcTdQSaRzWD/dependants');
 
   @override
   Widget build(BuildContext context) {
@@ -117,21 +116,22 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                         StreamBuilder<QuerySnapshot>(
                             stream: dependants.snapshots(),
                             builder: (context, snapshot) {
-
                               if (snapshot.hasError) {
                                 return const Text("something wen wrong");
                               }
 
-                              if (snapshot.data == null || snapshot.connectionState == ConnectionState.waiting) {
-                                return const Center(child: CircularProgressIndicator());
+                              if (snapshot.data == null ||
+                                  snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
                               } else if (!snapshot.hasData) {
                                 return const Text("There is no dependant yet");
                               }
                               // print("Directions size : ${snapshot.data!.length}");
-                              return _buildDependantList(context, snapshot.data?.docs ?? []);
-                            }
-
-                        )
+                              return _buildDependantList(
+                                  context, snapshot.data?.docs ?? []);
+                            })
                       ],
                     ),
                   ),
@@ -144,8 +144,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                     minimumSize: const Size.fromHeight(50),
                     shape: const StadiumBorder(),
                   ),
-                  onPressed: (){
-
+                  onPressed: () {
                     ref.read(authServiceProvider).signOut();
                   },
                   child: const Text("sign out"),
@@ -154,7 +153,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 const SizedBox(height: 20),
 
                 const Text("Version : 0.0.1")
-
               ],
             ),
           ),
@@ -163,7 +161,8 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
   }
 
-  Widget _buildDependantList( BuildContext context, List<DocumentSnapshot> snapshot) {
+  Widget _buildDependantList(
+      BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView(
       shrinkWrap: true,
       children: snapshot.map((data) => _buildDepandant(context, data)).toList(),
@@ -171,13 +170,19 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   Widget _buildDepandant(BuildContext context, DocumentSnapshot data) {
-    final dependant = Dependant.fromSnapshot(data);
+    // final dependant = Dependant.fromSnapshot(data);
+    final dependant = Dependant(
+      name: "John Doe, Jr",
+      relationship: "Fils",
+      imageURL: "www.google.com",
+      id: "123456",
+    );
     return ListTile(
       leading: const Icon(Icons.person),
       title: Text("${dependant.name}"),
       subtitle: Text("${dependant.relationship}"),
       onTap: () {
-        debugPrint("Doc ID: ${dependant.reference.id}");
+        debugPrint("Doc ID: ${dependant.id}");
         // Navigator.of(context).push(
         //   MaterialPageRoute(
         //     builder: (context) => DirectionDetailsScreen(),

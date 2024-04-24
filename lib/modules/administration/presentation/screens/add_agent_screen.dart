@@ -9,6 +9,7 @@ import 'package:arptc_connect/modules/administration/domain/models/agent.dart';
 import 'package:arptc_connect/modules/administration/domain/models/direction.dart';
 import 'package:arptc_connect/modules/administration/domain/models/service.dart';
 import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
+import 'package:arptc_connect/widgets/custom_filledbutton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -42,7 +43,7 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
   List<Service> services = [];
   String directionDropdownValue = '';
 
-  late String serviceDropdownValue;
+  late String serviceDropdownValue, bureauDropdownValue;
   late String selectedGenre;
   late DateTime dobDate;
   late DateTime dateEngagement;
@@ -197,23 +198,6 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                         ),
                       ),
                       const Gap(24),
-                      // Expanded(
-                      //   child: DropdownMenu<String>(
-                      //     initialSelection: genres.first,
-                      //     controller: genreController,
-                      //     label: const Text('Genre'),
-                      //     dropdownMenuEntries: genres
-                      //         .map<DropdownMenuEntry<String>>((String value) {
-                      //       return DropdownMenuEntry<String>(
-                      //           value: value, label: value);
-                      //     }).toList(),
-                      //     onSelected: (String? genre) {
-                      //       setState(() {
-                      //         selectedGenre = genre!;
-                      //       });
-                      //     },
-                      //   ),
-                      // ),
 
                       // SEXE DROPDOWN
                       Expanded(
@@ -241,10 +225,9 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                                   Icons.keyboard_arrow_down_outlined),
                               isExpanded: true,
                               value: genres.first,
-                              items: genres
-                                  .map<DropdownMenuItem<String>>((genre) {
-                                print(
-                                    "Dropdown menuitem value ${genre}");
+                              items:
+                                  genres.map<DropdownMenuItem<String>>((genre) {
+                                print("Dropdown menuitem value ${genre}");
                                 return DropdownMenuItem<String>(
                                   value: genre,
                                   child: Text(genre),
@@ -261,73 +244,20 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                   ),
                   const Gap(16),
 
-                  Row(children: [
-                    // DIRECTIONS DROPDOWN
-                    directionsAsync.when(
-                      data: (data) {
-                        if (data.isEmpty) {
-                          return Container();
-                        }
-                        return Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text("Directions"),
-                              DropdownButtonFormField<String>(
-                                decoration: const InputDecoration(
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 10),
-                                  hintText: "hint text",
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(5),
-                                    ),
-                                  ),
-                                  // suffixIcon: Icon(Icons.arrow_drop_down)
-                                ),
-                                icon: const Icon(
-                                    Icons.keyboard_arrow_down_outlined),
-                                isExpanded: true,
-                                value: data.first.id,
-                                items: data
-                                    .map<DropdownMenuItem<String>>((direction) {
-                                  print(
-                                      "Dropdown menuitem value ${direction.id}");
-                                  return DropdownMenuItem<String>(
-                                    value: direction.id,
-                                    child: Text(direction.name),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  print("Selected direction is : $value");
-                                  ref
-                                      .read(selectedDirectionProvider.notifier)
-                                      .state = value!;
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      error: (error, stackTrace) {
-                        debugPrint("Error: $error");
-                        debugPrint("StackTrace: $stackTrace");
-                        return const Text("something went wrong");
-                      },
-                      loading: () => const CircularProgressIndicator(),
-                    ),
-                    const Gap(16),
-
-                    // SERVICES DROPDOWN
-                    serviceAsync.when(
-                      data: (data) {
-                        if (data.isEmpty) {
+                  Row(
+                    children: [
+                      // DIRECTIONS DROPDOWN
+                      directionsAsync.when(
+                        data: (data) {
+                          if (data.isEmpty) {
+                            return Container();
+                          }
                           return Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text("Services"),
-                                DropdownButtonFormField<String>(
+                                const Text("Directions"),
+                                DropdownButtonFormField<Direction>(
                                   decoration: const InputDecoration(
                                     contentPadding: EdgeInsets.symmetric(
                                         horizontal: 20, vertical: 10),
@@ -337,89 +267,184 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                                         Radius.circular(5),
                                       ),
                                     ),
+                                    // suffixIcon: Icon(Icons.arrow_drop_down)
                                   ),
+                                  icon: const Icon(
+                                      Icons.keyboard_arrow_down_outlined),
                                   isExpanded: true,
-                                  value: "aucun",
-                                  items: const [
-                                    DropdownMenuItem<String>(
-                                      value: "aucun",
-                                      child: Text("Aucun service trouve"),
-                                    )
-                                  ],
+                                  value: data.first,
+                                  items: data.map<DropdownMenuItem<Direction>>(
+                                      (direction) {
+                                    return DropdownMenuItem<Direction>(
+                                      value: direction,
+                                      child: Text(direction.name),
+                                    );
+                                  }).toList(),
                                   onChanged: (value) {
+                                    print("Selected direction is : $value");
+                                    ref
+                                        .read(
+                                            selectedDirectionProvider.notifier)
+                                        .state = value!.id!;
+
+                                    directionDropdownValue = value.name;
+
                                     ref
                                         .read(selectedServiceProvider.notifier)
-                                        .state = value!;
+                                        .state = "";
                                   },
                                 ),
                               ],
                             ),
                           );
-                        }
-                        return Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text("Services"),
-                              DropdownButtonFormField<String>(
-                                decoration: const InputDecoration(
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 10),
-                                  hintText: "hint text",
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(5),
+                        },
+                        error: (error, stackTrace) {
+                          debugPrint("Error: $error");
+                          debugPrint("StackTrace: $stackTrace");
+                          return const Text("something went wrong");
+                        },
+                        loading: () => const CircularProgressIndicator(),
+                      ),
+                      const Gap(16),
+
+                      // SERVICES DROPDOWN
+                      serviceAsync.when(
+                        data: (data) {
+                          if (data.isEmpty) {
+                            return Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("Services"),
+                                  DropdownButtonFormField<Service>(
+                                    decoration: const InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 10),
+                                      hintText: "hint text",
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(5),
+                                        ),
+                                      ),
                                     ),
+                                    isExpanded: true,
+                                    // value: data.first,
+                                    items: const [
+                                      DropdownMenuItem<Service>(
+                                        value: null,
+                                        child: Text("Aucun service trouvé"),
+                                      )
+                                    ],
+                                    onChanged: (value) {
+                                      // ref
+                                      //     .read(
+                                      //         selectedServiceProvider.notifier)
+                                      //     .state = value!.id!;
+                                    },
                                   ),
-                                  // suffixIcon: Icon(Icons.arrow_drop_down)
-                                ),
-                                icon: const Icon(
-                                    Icons.keyboard_arrow_down_outlined),
-                                isExpanded: true,
-                                value: data.first.id,
-                                items: data
-                                    .map<DropdownMenuItem<String>>((service) {
-                                  print(
-                                      "Dropdown menuitem value ${service.id}");
-                                  return DropdownMenuItem<String>(
-                                    value: service.id,
-                                    child: Text(service.name),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  ref
-                                      .read(selectedServiceProvider.notifier)
-                                      .state = value!;
-                                },
+                                ],
                               ),
-                            ],
-                          ),
-                        );
-                      },
-                      error: (error, stackTrace) {
-                        debugPrint("Error: $error");
-                        debugPrint("StackTrace: $stackTrace");
-                        return const Text("something went wrong");
-                      },
-                      loading: () => const Expanded(
-                        child: Column(
-                          children: [
-                            Row(
+                            );
+                          }
+                          return Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Services"),
+                                const Text("Services"),
+                                DropdownButtonFormField<Service>(
+                                  decoration: const InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 10),
+                                    hintText: "hint text",
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(5),
+                                      ),
+                                    ),
+                                    // suffixIcon: Icon(Icons.arrow_drop_down)
+                                  ),
+                                  icon: const Icon(
+                                      Icons.keyboard_arrow_down_outlined),
+                                  isExpanded: true,
+                                  value: data.first,
+                                  items: data
+                                      .map<DropdownMenuItem<Service>>((service) {
+                                    return DropdownMenuItem<Service>(
+                                      value: service,
+                                      child: Text(service.name),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    ref
+                                        .read(selectedServiceProvider.notifier)
+                                        .state = value!.id!;
+
+                                    serviceDropdownValue = value.name;
+                                  },
+                                ),
                               ],
                             ),
-                            CircularProgressIndicator()
-                          ],
+                          );
+                        },
+                        error: (error, stackTrace) {
+                          debugPrint("Error: $error");
+                          debugPrint("StackTrace: $stackTrace");
+                          return const Text("something went wrong");
+                        },
+                        loading: () => const Expanded(
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Text("Services"),
+                                ],
+                              ),
+                              CircularProgressIndicator()
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const Gap(16),
+                      const Gap(16),
 
-                    // BUREAUX DROPDOWN
-                    bureauAsync.when(
-                      data: (data) {
-                        if (data.isEmpty) {
+                      // BUREAUX DROPDOWN
+                      bureauAsync.when(
+                        data: (data) {
+                          if (data.isEmpty) {
+                            return Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("Bureaux"),
+                                  DropdownButtonFormField<String>(
+                                    decoration: const InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 10),
+                                      hintText: "hint text",
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(5),
+                                        ),
+                                      ),
+                                    ),
+                                    isExpanded: true,
+                                    value: "aucun",
+                                    items: const [
+                                      DropdownMenuItem<String>(
+                                        value: "aucun",
+                                        child: Text("Aucun bureau trouve"),
+                                      )
+                                    ],
+                                    onChanged: (value) {
+                                      ref
+                                          .read(
+                                              selectedServiceProvider.notifier)
+                                          .state = value!;
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
                           return Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -436,122 +461,81 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                                       ),
                                     ),
                                   ),
+                                  icon: const Icon(
+                                      Icons.keyboard_arrow_down_outlined),
                                   isExpanded: true,
-                                  value: "aucun",
-                                  items: const [
-                                    DropdownMenuItem<String>(
-                                      value: "aucun",
-                                      child: Text("Aucun bureau trouve"),
-                                    )
-                                  ],
+                                  value: data.first.id,
+                                  items: data.map<DropdownMenuItem<String>>(
+                                      (direction) {
+                                    return DropdownMenuItem<String>(
+                                      value: direction.id,
+                                      child: Text(direction.name),
+                                    );
+                                  }).toList(),
                                   onChanged: (value) {
-                                    ref
-                                        .read(selectedServiceProvider.notifier)
-                                        .state = value!;
+                                    bureauDropdownValue = value!;
                                   },
                                 ),
                               ],
                             ),
                           );
-                        }
-                        return Expanded(
+                        },
+                        error: (error, stackTrace) {
+                          debugPrint("Error: $error");
+                          debugPrint("StackTrace: $stackTrace");
+                          return const Text("something went wrong");
+                        },
+                        loading: () => const Expanded(
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text("Bureaux"),
-                              DropdownButtonFormField<String>(
-                                decoration: const InputDecoration(
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 10),
-                                  hintText: "hint text",
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(5),
-                                    ),
-                                  ),
-                                  // suffixIcon: Icon(Icons.arrow_drop_down)
-                                ),
-                                icon: const Icon(
-                                    Icons.keyboard_arrow_down_outlined),
-                                isExpanded: true,
-                                value: data.first.id,
-                                items: data
-                                    .map<DropdownMenuItem<String>>((direction) {
-                                  print(
-                                      "Dropdown menuitem value ${direction.id}");
-                                  return DropdownMenuItem<String>(
-                                    value: direction.id,
-                                    child: Text(direction.name),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {},
+                              Row(
+                                children: [
+                                  Text("Services"),
+                                ],
                               ),
+                              CircularProgressIndicator()
                             ],
                           ),
-                        );
-                      },
-                      error: (error, stackTrace) {
-                        debugPrint("Error: $error");
-                        debugPrint("StackTrace: $stackTrace");
-                        return const Text("something went wrong");
-                      },
-                      loading: () => const Expanded(
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Text("Services"),
-                              ],
-                            ),
-                            CircularProgressIndicator()
-                          ],
                         ),
                       ),
-                    ),
-                  ]),
+                    ],
+                  ),
                   const Gap(16),
                 ],
               ),
             ),
           ),
           const Gap(16),
-
-          // CTA FIELDS (SAVE AND CANCEL)
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(50),
-                    shape: const StadiumBorder(),
-                  ),
-                  onPressed: () {
-                    signupWithEmailAndPassword(
-                        emailController.text, "Arptc@2021");
-                  },
-                  child: const Text("Save",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      side: const BorderSide(color: Colors.grey),
-                      foregroundColor: Colors.grey),
-                  onPressed: () {
-                    log("add_agent_screen:: Cancel");
-
-                    context.pop();
-                  },
-                  child: const Text("Cancel",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ],
-          )
         ]),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          children: [
+            Expanded(
+              child: CustomFilledButton(
+                text: "Enregistrer",
+                onPressed: () {
+                  registerAgent();
+                  context.pop();
+                },
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
+                  minimumSize: const Size.fromHeight(50),
+                ),
+                onPressed: () {
+                  context.pop();
+                },
+                child: const Text("Annuler"),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -567,15 +551,20 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
       service: directionDropdownValue,
       bureau: directionDropdownValue,
       category: '',
-      roles: [],
+      roles: ['DSI'],
     );
   }
 
-  void creatingAgent() {}
+  void registerAgent() {
+    Agent agent = getAgent();
+    ref
+        .read(authServiceProvider)
+        .createAgent(agent);
+  }
 
   void signupWithEmailAndPassword(String email, String password) async {
     ref
         .read(authServiceProvider)
-        .signUpWithEmailAndPassword(email, password, context);
+        .signInWithEmailAndPassword(email, password, context);
   }
 }

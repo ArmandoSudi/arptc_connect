@@ -41,25 +41,12 @@ class AdministrationScreen extends StatelessWidget {
                     ),
                     trailing: const Icon(Icons.navigate_next_outlined),
                     onTap: () {
-                      // Navigator.of(context).push(
-                      //   MaterialPageRoute(
-                      //     builder: (context) => entity.values.first,
-                      //   ),
-                      // );
                       context.go("/administration/${entity.values.first}");
                     },
                   );
                 },
               ),
             ),
-            const Gap(16),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.arrow_back_ios),
-              onPressed: () {
-                context.pop();
-              },
-              label: const Text("Retour"),
-            )
           ],
         ),
       ),

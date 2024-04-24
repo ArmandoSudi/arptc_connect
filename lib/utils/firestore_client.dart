@@ -50,7 +50,7 @@ class FirestoreClient {
           .map((doc) => FirestoreDocument(id: doc.id, data: doc.data()))
           .toList();
     } catch (err) {
-      throw Exception('Error fetching documents: $err');
+      throw Exception('Error fetching all documents: $err');
     }
   }
 
@@ -67,7 +67,20 @@ class FirestoreClient {
           .map((doc) => FirestoreDocument(id: doc.id, data: doc.data()))
           .toList();
     } catch (err) {
-      throw Exception('Error fetching documents: $err');
+      throw Exception('Error fetching all by documents: $err');
+    }
+  }
+
+  Future<FirestoreDocument> fetchById({
+    required String collection,
+    required String id,
+  }) async {
+    try {
+      final docRef = _firestore.collection(collection).doc(id);
+      final doc = await docRef.get();
+      return FirestoreDocument(id: doc.id, data: doc.data()!);
+    } catch (err) {
+      throw Exception('Error fetching by id document: $err');
     }
   }
 

@@ -11,16 +11,16 @@ import '../../../../widgets/content_view.dart';
 import '../../../../widgets/page_header.dart';
 
 class DirectionsScreen extends ConsumerWidget {
-  DirectionsScreen({Key? key}) : super(key: key);
+  const DirectionsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     return Scaffold(
       body: SafeArea(
         child: ContentView(
           child: StreamBuilder<QuerySnapshot>(
-              stream: ref.watch(administrationAPIProvider).directions.snapshots(),
+              stream:
+                  ref.watch(administrationAPIProvider).directions.snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return const Text("something went wrong");
@@ -38,45 +38,34 @@ class DirectionsScreen extends ConsumerWidget {
                     // HEADER
                     Row(
                       children: [
-                        IconButton(icon:Icon(Icons.arrow_back_ios), onPressed: () {
-                          context.pop();
-                        },),
+                        IconButton(
+                          icon: Icon(Icons.arrow_back_ios),
+                          onPressed: () {
+                            context.pop();
+                          },
+                        ),
                         const Gap(16),
                         const PageHeader(
                           title: 'Directions',
                           description: 'La liste de toutes les Directions',
                         ),
                         Expanded(child: Container()),
-                        ElevatedButton.icon(
+                        FilledButton.icon(
                           icon: const Icon(Icons.add),
                           onPressed: () {
-                            // Navigator.of(context).push(
-                            //   MaterialPageRoute(
-                            //     builder: (context) => AddDirectionScreen(),
-                            //   ),
-                            // );
                             context.go("/administration/directions/add");
                           },
-                          label: const Text("Enregistrer direction",
+                          label: const Text("Nouvelle Direction",
                               style: TextStyle(fontWeight: FontWeight.bold)),
                         )
                       ],
                     ),
                     const Gap(16),
                     Expanded(
-                      child: Card(
-                        child: _buildDirectionList(
-                            context, snapshot.data?.docs ?? []),
-                      ),
+                      child: _buildDirectionList(
+                          context, snapshot.data?.docs ?? []),
                     ),
                     const Gap(16),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.arrow_back_ios),
-                      onPressed: () {
-                        context.pop();
-                      },
-                      label: const Text("Retour"),
-                    )
                   ],
                 );
               }),
@@ -102,13 +91,18 @@ class DirectionsScreen extends ConsumerWidget {
   Widget _buildEntity(BuildContext context, DocumentSnapshot data) {
     final entity = Entity.fromSnapshot(data);
     return ListTile(
-      title: Text(entity.name),
-      trailing: const Icon(Icons.arrow_forward_ios),
+      title: Text(
+        entity.name,
+        style: TextStyle(
+          // fontWeight: FontWeight.bold,
+        ),
+      ),
+      // trailing: const Icon(Icons.arrow_forward_ios),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => DirectionDetailsScreen(),
-          ),
+              builder: (context) =>
+                  DirectionDetailsScreen(directionId: entity.reference.id)),
         );
       },
     );

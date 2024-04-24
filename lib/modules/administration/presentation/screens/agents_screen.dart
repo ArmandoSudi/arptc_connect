@@ -37,12 +37,12 @@ class _AgentsScreenState extends State<AgentsScreen> {
                     const Gap(16),
                     const PageHeader(title: "Liste des agents", description: ''),
                     Expanded(child: Container()),
-                    ElevatedButton.icon(
+                    FilledButton.icon(
                       icon: const Icon(Icons.add),
                       onPressed: () {
                         context.go("/administration/agents/add");
                       },
-                      label: const Text("Enregistrer agent", style: TextStyle(fontWeight: FontWeight.bold)),
+                      label: const Text("Nouvel agent", style: TextStyle(fontWeight: FontWeight.bold)),
                     )
                   ],
                 ),
@@ -65,45 +65,30 @@ class _AgentsScreenState extends State<AgentsScreen> {
 
                       List<Agent>? agents = snapshot.data?.docs.map((data) => Agent.fromDocument(data)).toList();
 
-                      return Card(
-                          child: ListView.separated(
-                            shrinkWrap: true,
-                              itemBuilder: (context, index) {
-                                return ListTile(
-                                  leading: Container(
-                                      padding: const EdgeInsets.all(4), 
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(50),
-                                          color: Colors.grey[300]
-                                      ),
-                                      child: const Icon(Icons.person),
+                      return ListView.separated(
+                        shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              leading: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(50),
+                                      color: Colors.grey[300]
                                   ),
-                                  title: Text(agents![index].name),
-                                  trailing: const Icon(Icons.arrow_forward_ios),
-                                  onTap: () {
-                                    debugPrint("Doc ID: ${agents[index].id}");
-                                    // Navigator.of(context).push(
-                                    //   MaterialPageRoute(
-                                    //     builder: (context) => SocialAgentDetailsScreen(agentId: agents![index].id!),
-                                    //   ),
-                                    // );
-                                  },
-                                );
+                                  child: const Icon(Icons.person),
+                              ),
+                              title: Text(agents![index].name),
+                              onTap: () {
+                                debugPrint("Doc ID: ${agents[index].id}");
                               },
-                              separatorBuilder: (context, index) => const Divider(),
-                              itemCount: agents?.length ?? 0)
-                      );
+                            );
+                          },
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemCount: agents?.length ?? 0);
                     }
 
                 ),
                 const Gap(16),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: () {
-                    context.pop();
-                  },
-                  label: const Text("Retour"),
-                )
               ],
             )
         ),

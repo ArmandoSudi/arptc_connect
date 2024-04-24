@@ -4,6 +4,8 @@ import 'package:arptc_connect/modules/administration/domain/models/service.dart'
 import 'package:flutter/cupertino.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../domain/models/bureau.dart';
+
 part 'bureau_provider.g.dart';
 
 @riverpod
@@ -19,7 +21,7 @@ class BureauController extends _$BureauController {
     bureaux = await fetchBureaux();
 
     if (selectedServiceId == "") {
-      print("returning all services");
+      print("returning all Bureaux");
       return bureaux;
     } else {
       print("returning filtered services");
@@ -31,5 +33,17 @@ class BureauController extends _$BureauController {
 
   Future<List<Service>> fetchBureaux(){
     return ref.read(administrationAPIProvider).fetchBureaux();
+  }
+
+  Future<void> add(Bureau bureau) async {
+    state = const AsyncValue.loading();
+    await ref.read(administrationAPIProvider).addBureau(bureau);
+    state = AsyncValue.data(await fetchBureaux());
+  }
+
+  Future<void> delete(String id) async {
+    state = const AsyncValue.loading();
+    await ref.read(administrationAPIProvider).deleteBureau(id);
+    state = AsyncValue.data(await fetchBureaux());
   }
 }

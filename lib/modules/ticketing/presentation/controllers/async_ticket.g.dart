@@ -6,7 +6,7 @@ part of 'async_ticket.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$asyncTicketHash() => r'9cf596b09e332b2b5958b50446c484ebb77d47a5';
+String _$asyncTicketHash() => r'0f5327174a6f4fdf793f5e52c778820c8b712ef2';
 
 /// See also [AsyncTicket].
 @ProviderFor(AsyncTicket)

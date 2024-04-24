@@ -1,11 +1,19 @@
+import 'dart:developer';
+
+import 'package:arptc_connect/modules/administration/data/administration_api_provider.dart';
 import 'package:arptc_connect/modules/administration/domain/models/dependant.dart';
+import 'package:arptc_connect/modules/social/screens/data/voucher_service.dart';
+import 'package:arptc_connect/utils/firestore_document.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
-import 'package:arptc_connect/widgets/page_header.dart';
+import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-class SocialAgentDetailsScreen extends StatelessWidget {
+import '../../administration/domain/models/agent.dart';
+
+class SocialAgentDetailsScreen extends ConsumerStatefulWidget {
   final String agentId;
   late CollectionReference agentsRef;
 
@@ -14,133 +22,178 @@ class SocialAgentDetailsScreen extends StatelessWidget {
         FirebaseFirestore.instance.collection('agents/$agentId/dependants');
   }
 
+  @override
+  ConsumerState createState() => _SocialAgentDetailsScreenState();
+}
 
-
+class _SocialAgentDetailsScreenState
+    extends ConsumerState<SocialAgentDetailsScreen> {
   @override
   Widget build(BuildContext context) {
-
     final theme = Theme.of(context);
 
     return Scaffold(
-        body: StreamBuilder<QuerySnapshot>(
-            stream: agentsRef!.snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Text("something went wrong");
-              }
+      appBar: AppBar(
+        title: const Text("Détails de l'Agent"),
+      ),
+      body: FutureBuilder<Agent>(
+        future:
+            ref.watch(administrationAPIProvider).getAgentById(widget.agentId),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Text("something went wrong");
+          }
 
-              if (snapshot.data == null ||
-                  snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (!snapshot.hasData) {
-                return const Text("There is no dependant yet");
-              }
-              // print("Directions size : ${snapshot.data!.length}");
-              return ContentView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const PageHeader(title: "Détails de l'Agent", description: "description"),
-                    Gap(16),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Card(
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  const CircleAvatar(
-                                    radius: 150,
-                                    backgroundImage:
-                                    NetworkImage('https://picsum.photos/id/237/200/300', scale: 2),
-                                  ),
-                                  const Gap(24),
-                                  Text("John Doe",
-                                    style: theme.textTheme.titleLarge!.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                    )),
-                                  const Gap(16),
-                                  Text("Direction Générale",
-                                      style: theme.textTheme.titleMedium!.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  )),
-                                  const Gap(16),
-                                  Text("Service  Juridique",
-                                      style: theme.textTheme.titleSmall!.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      )
-                                  ),
-                                  const Gap(16),
-                                  ElevatedButton(
-                                      onPressed: (){},
-                                      child: Text("Demander bon", style: TextStyle(fontWeight: FontWeight.bold)),
-                                  )
-                                ],
-                              ),
-                            )
-                          ),
-                        ),
-                        // Gap(16),
-                        Expanded(
-                          child: Card(
-                            child:
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text("Dépendants", style: theme.textTheme.titleMedium!.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          )),
-                                          ElevatedButton.icon(
-                                              icon: Icon(Icons.add),
-                                              onPressed: (){
+          if (snapshot.data == null ||
+              snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (!snapshot.hasData) {
+            return const Text("There is no dependant yet");
+          }
+          Agent agent = snapshot.data!;
 
-                                              }, label: Text("Ajouter", style: TextStyle(fontWeight: FontWeight.bold)),)
-                                        ],
-                                      ),
-                                    ),
-                                    _buildDependantList(context, snapshot.data?.docs ?? []),
-                                  ],
-                                ),
+          log("AGENT DETAILS : ${agent}");
+          return ContentView(
+            child: ResponsiveCenter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Gap(16),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const CircleAvatar(
+                            radius: 150,
+                            backgroundImage: NetworkImage(
+                                'https://i.pravatar.cc/300?img=49',
+                                scale: 2),
                           ),
-                        ),
-                      ],
+                          const Gap(24),
+                          Text(
+                            agent.name,
+                            style: theme.textTheme.titleLarge!.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const Gap(16),
+                          Text(
+                            "Direction Générale",
+                            style: theme.textTheme.titleMedium!.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Gap(16),
+                          Text(
+                            "Service  Juridique",
+                            style: theme.textTheme.titleSmall!.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Gap(16),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              // primary: theme.primaryColor
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 32),
+                              side: BorderSide(color: theme.primaryColor),
+                            ),
+                            onPressed: () async {
+                              log("Generer bon");
+                              VoucherService().generateVoucher(agent);
+                            },
+                            icon: const Icon(Icons.file_copy_outlined),
+                            label: const Text("Générer bon"),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              );
-            }));
-  }
-
-  Widget _buildDependantList(
-      BuildContext context, List<DocumentSnapshot> snapshot) {
-    if (snapshot.isEmpty) {
-      return const Text("Cet agent n'a aucun dépendant");
-    }
-    return ListView(
-      shrinkWrap: true,
-      children: snapshot.map((data) => _buildDependant(context, data)).toList(),
+                  ),
+                  const Gap(16),
+                  Card(
+                    color: Colors.white,
+                    elevation: 5,
+                    child: Container(
+                      // color: Colors.white,
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Dépendants",
+                                  style: theme.textTheme.titleMedium!.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                FilledButton(
+                                  onPressed: () => log("Add dependant"),
+                                  child: Text("Ajouter dépendant"),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // TODO Implement the service to fetch dependants
+                          // FutureBuilder(
+                          //     future: future,
+                          //     builder: builder),
+                          // _buildDependantList(
+                          //     context, snapshot ?? []),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildDependant(BuildContext context, DocumentSnapshot data) {
-    final entity = Dependant.fromSnapshot(data);
+  Widget _buildDependantList(
+      BuildContext context,
+      List<Map<String, dynamic>> dependants) {
+    if (dependants.isEmpty) {
+      return const Text("Cet agent n'a aucun dépendant");
+    }
+    return ListView.separated(
+      shrinkWrap: true,
+      itemBuilder: (BuildContext context, int index) {
+        return _buildDependant(context, {"name": "John Doe"});
+      },
+      separatorBuilder: (BuildContext context, int index) {
+        return const Divider();
+      },
+      itemCount: dependants.length,
+    );
+  }
+
+  Widget _buildDependant(BuildContext context, Map<String, dynamic> data) {
+    // final entity = Dependant(
+    //   name: "John",
+    //   relationship: "Fils",
+    //   id: "ads",
+    //   imageURL: "Sdf",
+    // );
     return ListTile(
       leading: const Icon(Icons.person),
-      title: Text(entity.name),
-      subtitle: Text(entity.relationship),
-      trailing: ElevatedButton(
-        child: Text("Demander Bon"),
-        onPressed: () => print("Demander bon"),
+      title: Text(data["name"]),
+      subtitle: Text(data["relation"]),
+      trailing: IconButton(
+        icon: const Icon(Icons.file_copy_outlined),
+        onPressed: () => log("Generer bon"),
       ),
       onTap: () {
-        debugPrint("Doc ID: ${entity.reference.id}");
+        debugPrint("Doc ID: ${data}");
         // Navigator.of(context).push(
         //   MaterialPageRoute(
         //     builder: (context) => DirectionDetailsScreen(),

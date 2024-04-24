@@ -1,15 +1,24 @@
 import 'dart:developer';
 
+import 'package:arptc_connect/modules/administration/data/administration_api_provider.dart';
+import 'package:arptc_connect/modules/administration/data/directions_provider.dart';
+import 'package:arptc_connect/widgets/custom_filledbutton.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class DirectionDetailsScreen extends StatefulWidget {
-  const DirectionDetailsScreen({Key? key}) : super(key: key);
+import '../../domain/models/direction.dart';
+
+class DirectionDetailsScreen extends ConsumerStatefulWidget {
+
+  final String directionId;
+  const DirectionDetailsScreen({Key? key, required this.directionId}) : super(key: key);
 
   @override
-  State<DirectionDetailsScreen> createState() => _DirectionDetailsScreenState();
+  ConsumerState createState() => _DirectionDetailsScreenState();
 }
 
-class _DirectionDetailsScreenState extends State<DirectionDetailsScreen> {
+class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen> {
   bool isServiceExpanded = false;
   bool isAgentExpanded = false;
 
@@ -19,23 +28,33 @@ class _DirectionDetailsScreenState extends State<DirectionDetailsScreen> {
         appBar: AppBar(
           centerTitle: false,
           title: const Text("Directions"),
-          actions: [
-            const IconButton(onPressed: null, icon: Icon(Icons.edit))
+          actions: const [
+            IconButton(onPressed: null, icon: Icon(Icons.edit))
           ],
         ),
         body: SafeArea(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FutureBuilder<Direction>(
+                future: ref.watch(administrationAPIProvider).getDirectionById(widget.directionId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return const Center(
+                        child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return const Center(
+                        child: Text('Erreur de connection'));
+                  }
+                  final direction = snapshot.data as Direction;
+                  return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Direction des systèmes d'information",
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      Text(
+                        direction.name,
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 20),
                       Card(
@@ -68,14 +87,14 @@ class _DirectionDetailsScreenState extends State<DirectionDetailsScreen> {
                               SizedBox(height: 20),
                               isServiceExpanded
                                   ? ListView.builder(
-                                      shrinkWrap: true,
-                                      physics: NeverScrollableScrollPhysics(),
-                                      itemCount: 3,
-                                      itemBuilder: (context, index) {
-                                        return ListTile(
-                                          title: Text("Service $index"),
-                                        );
-                                      })
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: 3,
+                                  itemBuilder: (context, index) {
+                                    return ListTile(
+                                      title: Text("Service $index"),
+                                    );
+                                  })
                                   : Container(),
                             ],
                           ),
@@ -126,26 +145,48 @@ class _DirectionDetailsScreenState extends State<DirectionDetailsScreen> {
                         ),
                       ),
                     ],
-                  ),
-                ),
+                  );
+                }
               ),
-              Positioned(
-                bottom: 20,
-                right: 10,
-                left: 10,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.red),
-                      minimumSize: const Size.fromHeight(50),
-                      foregroundColor: Colors.red),
-                  onPressed: () {
-                    log("direction_details_screen:: delete");
-                  },
-                  child: const Text("delete"),
-                ),
-              )
-            ],
+            ),
           ),
-        ));
+        ),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          children: [
+            Expanded(
+              child: CustomFilledButton(
+                backgroundColor: Colors.red,
+                text: "Supprimer",
+                onPressed: () {
+                  // TODO Before deleting a direction, check if there are services and bureaux under it
+                  // TODO Display a yesOrNo dialogBox
+                  ref.read(directionsControllerProvider.notifier)
+                      .delete(widget.directionId);
+                  context.pop();
+                },
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  minimumSize: const Size.fromHeight(50),
+                ),
+                onPressed: () {
+                  context.pop();
+                },
+                child: const Text("Annuler"),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void deleteDirection(Direction) {
+    log("deleteDirection");
   }
 }

@@ -1,6 +1,5 @@
 import 'package:arptc_connect/modules/administration/domain/models/agent.dart';
 import 'package:arptc_connect/modules/social/screens/social_agent_details_screen.dart';
-import 'package:arptc_connect/modules/social/screens/user_dependant_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -50,33 +49,31 @@ class _SocialAgentsPageState extends State<SocialAgentsPage> {
 
                   List<Agent>? agents = snapshot.data?.docs.map((data) => Agent.fromDocument(data)).toList();
 
-                  return Card(
-                      child: ListView.separated(
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              leading: Container(
-                                padding: EdgeInsets.all(4),
-                                  child: Icon(Icons.person),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(50),
-                                      color: Colors.grey[300]
-                                  )
+                  return ListView.separated(
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(50),
+                                  color: Colors.grey[300]
                               ),
-                              title: Text(agents![index].name),
-                              trailing: const Icon(Icons.arrow_forward_ios),
-                              onTap: () {
-                                debugPrint("Doc ID: ${agents?[index].id}");
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => SocialAgentDetailsScreen(agentId: agents![index].id!),
-                                  ),
-                                );
-                              },
+                              child: Icon(Icons.person)
+                          ),
+                          title: Text(agents![index].name),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () {
+                            debugPrint("Doc ID : ${agents?[index].id}");
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => SocialAgentDetailsScreen(agentId: agents![index].id!),
+                              ),
                             );
                           },
-                          separatorBuilder: (context, index) => Divider(),
-                          itemCount: agents?.length ?? 0)
-                  );
+                        );
+                      },
+                      separatorBuilder: (context, index) => Divider(),
+                      itemCount: agents?.length ?? 0);
                 }
 
             )

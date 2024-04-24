@@ -7,7 +7,7 @@ part of 'directions_provider.dart';
 // **************************************************************************
 
 String _$directionsControllerHash() =>
-    r'376b7df704641297b7dd5ac0c8904225cd0554f2';
+    r'39ec985127dd4ab51721d1a21e98e5fcd8c4af22';
 
 /// See also [DirectionsController].
 @ProviderFor(DirectionsController)

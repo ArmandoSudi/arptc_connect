@@ -29,4 +29,16 @@ class AsyncService extends _$AsyncService {
   Future<List<Service>> fetchServices() {
     return ref.read(administrationAPIProvider).allServices();
   }
+
+  Future<void> add(Service service) async {
+    state = const AsyncValue.loading();
+    await ref.read(administrationAPIProvider).addService(service);
+    state = AsyncValue.data(await fetchServices());
+  }
+
+  Future<void> delete(String id) async {
+    state = const AsyncValue.loading();
+    await ref.read(administrationAPIProvider).deleteService(id);
+    state = AsyncValue.data(await fetchServices());
+  }
 }

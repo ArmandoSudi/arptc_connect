@@ -14,4 +14,17 @@ class DirectionsController extends _$DirectionsController {
   Future<List<Direction>> fetchDirections(){
     return ref.read(administrationAPIProvider).fetchDirections();
   }
+
+  Future<void> add(Direction direction) async {
+    state = const AsyncValue.loading();
+    await ref.read(administrationAPIProvider).addDirection(direction);
+    state = AsyncValue.data( await fetchDirections());
+  }
+
+  Future<void> delete(String id) async {
+    state = const AsyncValue.loading();
+    await ref.read(administrationAPIProvider).deleteDirection(id);
+    state = AsyncValue.data( await fetchDirections());
+  }
+
 }

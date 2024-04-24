@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,8 +23,9 @@ class SharedPrefUtility {
     return sharedPreferences.getString('email') ?? '';
   }
 
-  void setEmail(String email) {
-    sharedPreferences.setString('email', email);
+  void setEmail(String email) async {
+    await sharedPreferences.setString('email', email);
+    log("EMAIL : $email SAVED");
   }
 
   String getName() {

@@ -2,11 +2,14 @@ import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
 import 'package:arptc_connect/widgets/custom_form_field.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
+import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/shared_preferences_provider.dart';
+import '../../../../widgets/custom_dropdown_field.dart';
 import '../../domain/ticket.dart';
 import '../controllers/async_ticket.dart';
 
@@ -21,6 +24,16 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
   TextEditingController agentNameTEC = TextEditingController();
   TextEditingController subjectTEC = TextEditingController();
   TextEditingController solutionTEC = TextEditingController();
+
+  final categories = [
+    "Internet",
+    "Imprimante ou autre péripherie ",
+    "Cosap",
+    "Mail",
+    "Téléphonie IP",
+    "Autre assistance IT"
+  ];
+  String selectedCategory = "Informatique";
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +57,8 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
                 const Gap(16),
               ],
             ),
-            Card(
-              clipBehavior: Clip.antiAlias,
+            const Gap(16),
+            ResponsiveCenter(
               child: Container(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -63,25 +76,28 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
                     ),
                     const Gap(24),
 
+                    // CATEGORY FIELD
+                    CustomDropDown(
+                      label: "Catégorie",
+                      hintText: "Sélectionner la catégorie",
+                      items: categories,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedCategory = value!;
+                        });
+                      },
+                    ),
+                    const Gap(24),
+
                     // SUBJECT FIELD
                     CustomFormField(
                       label: "Objet",
-                      hintText: "object de l'intervention",
+                      hintText:
+                          "Quel est le problème que l'agent a rencontré ?",
                       textInputType: TextInputType.name,
                       controller: subjectTEC,
                       maxLine: 2,
                     ),
-                    const Gap(24),
-
-                    // SOLUTION FIELD
-                    CustomFormField(
-                      label: "Solution",
-                      hintText: "solution trouvée",
-                      textInputType: TextInputType.name,
-                      controller: solutionTEC,
-                      maxLine: 4,
-                    ),
-                    const Gap(16),
                   ],
                 ),
               ),
@@ -94,12 +110,11 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
           children: [
             Expanded(
               child: CustomFilledButton(
-                onPressed: () {
-                  saveTicket();
-                  context.pop();
-                },
-                text: "Enregistrer"
-              ),
+                  onPressed: () {
+                    saveTicket();
+                    context.pop();
+                  },
+                  text: "Enregistrer"),
             ),
             const Gap(16),
             Expanded(
@@ -126,18 +141,18 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
     String agentName = agentNameTEC.text;
     String subject = subjectTEC.text;
     String solution = solutionTEC.text;
+    String email = ref.watch(sharedPrefUtilityProvider).getEmail();
 
     DateTime creationDate = DateTime.now();
-    DateTime closingDate = DateTime.now();
 
     final ticket = Ticket(
-      author: "Auteur",
+      author: email,
       agent: agentName,
+      category: selectedCategory,
       subject: subject,
       solution: solution,
       creationDate: creationDate,
-      closingDate: closingDate,
-      isSolved: true,
+      isSolved: false,
     );
 
     ref.read(asyncTicketProvider.notifier).addTicket(ticket);

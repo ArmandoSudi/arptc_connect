@@ -1,7 +1,11 @@
+import 'dart:developer';
+
 import 'package:arptc_connect/modules/administration/data/administration_api_provider.dart';
+import 'package:arptc_connect/modules/administration/data/service_provider.dart';
 import 'package:arptc_connect/modules/administration/domain/models/service.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/add_service_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -9,10 +13,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../widgets/content_view.dart';
 import '../../../../widgets/page_header.dart';
-import 'direction_details_screen.dart';
+import '../../../../widgets/yes_or_no_dialog.dart';
 
 class ServicesScreen extends ConsumerWidget {
-  ServicesScreen({Key? key}) : super(key: key);
+  const ServicesScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -47,35 +51,25 @@ class ServicesScreen extends ConsumerWidget {
                           description: 'La liste de tous les services',
                         ),
                         Expanded(child: Container()),
-                        ElevatedButton.icon(
+                        FilledButton.icon(
                           icon: const Icon(Icons.add),
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => AddServiceScreen(),
+                                builder: (context) => const AddServiceScreen(),
                               ),
                             );
                           },
-                          label: const Text("Enregistrer service",
+                          label: const Text("Nouveau service",
                               style: TextStyle(fontWeight: FontWeight.bold)),
                         )
                       ],
                     ),
                     const Gap(16),
                     Expanded(
-                      child: Card(
-                        child: _buildServiceList(
-                            context, snapshot.data?.docs ?? []),
-                      ),
+                      child: _buildServiceList(
+                          context, snapshot.data?.docs ?? [], ref),
                     ),
-                    const Gap(16),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.arrow_back_ios),
-                      onPressed: () {
-                        context.pop();
-                      },
-                      label: const Text("Retour"),
-                    )
                   ],
                 );
               }),
@@ -85,12 +79,12 @@ class ServicesScreen extends ConsumerWidget {
   }
 
   Widget _buildServiceList(
-      BuildContext context, List<DocumentSnapshot> snapshot) {
+      BuildContext context, List<DocumentSnapshot> snapshot, WidgetRef ref) {
     return ListView.separated(
       itemCount: snapshot.length,
       itemBuilder: (context, index) {
         final data = snapshot[index];
-        return _buildEntity(context, data);
+        return _buildEntity(context, data, ref);
       },
       separatorBuilder: (BuildContext context, int index) {
         return const Divider();
@@ -98,18 +92,48 @@ class ServicesScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEntity(BuildContext context, DocumentSnapshot data) {
+  Widget _buildEntity(BuildContext context, DocumentSnapshot data, WidgetRef ref) {
     final entity = Service.fromDocument(data);
     return ListTile(
       title: Text(entity.name),
-      trailing: const Icon(Icons.arrow_forward_ios),
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => DirectionDetailsScreen(),
-          ),
-        );
       },
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, color: Colors.grey),
+            onPressed: () async  {
+              final result = await showCupertinoYesNoDialog(
+                context,
+                'Modification',
+                'Voulez-vous vraiment modifier le ${entity.name} ?',
+              );
+              if (result == true) {
+                // ref.read(asyncServiceProvider.notifier).delete(entity.id!);
+                // log('${entity.name} deleted');
+              }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.grey),
+            onPressed: () async{
+              final result = await showCupertinoYesNoDialog(
+                context,
+                'Suppression',
+                'Voulez-vous vraiment supprimer le ${entity.name} ?',
+              );
+              if (result == true) {
+                ref.read(administrationAPIProvider).deleteService(entity.id!);
+                log('Service deleted');
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
+
+
+
 }

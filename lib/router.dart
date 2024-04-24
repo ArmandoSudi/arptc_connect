@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:arptc_connect/modules/administration/presentation/screens/add_agent_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/add_direction_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/administration_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/agents_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/bureaux_screen.dart';
+import 'package:arptc_connect/modules/administration/presentation/screens/direction_details_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/directions_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/services_screen.dart';
 import 'package:arptc_connect/modules/authentication/screens/login_screen.dart';
@@ -10,11 +13,12 @@ import 'package:arptc_connect/modules/courrier/screens/add_annotation_screen.dar
 import 'package:arptc_connect/modules/courrier/screens/add_courrier_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/details_courrier.dart';
 import 'package:arptc_connect/modules/courrier/screens/list_courriers_screen.dart';
-import 'package:arptc_connect/modules/dashboard/screens/main_dashboard_screen.dart';
+import 'package:arptc_connect/modules/dashboard/presentation/screens/main_dashboard_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
 import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
 import 'package:arptc_connect/modules/social/screens/main_social_screen.dart';
 import 'package:arptc_connect/modules/ticketing/presentation/screens/add_ticket_screen.dart';
+import 'package:arptc_connect/modules/ticketing/presentation/screens/ticket_details_screen.dart';
 import 'package:arptc_connect/modules/ticketing/presentation/screens/tickets_screen.dart';
 import 'package:arptc_connect/screens/navigators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -110,11 +114,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     ),
                     GoRoute(
                       path: 'ticketing',
-                      builder: (context, state) => const TicketsScreen(),
+                      builder: (context, state)
+                        => const TicketsScreen(),
                       routes: [
                         GoRoute(
                           path: 'add',
-                          builder: (context, state) => AddTicketScreen(),
+                          builder: (context, state)
+                            => AddTicketScreen(),
+                        ),
+                        GoRoute(
+                          path: ':ticketId',
+                          builder: (context, state)
+                            => TicketDetailsScreen(
+                                ticketId: state.pathParameters['ticketId'] as String),
                         ),
                       ]
                     ),
@@ -142,7 +154,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     builder: (context, state) => const AddCourrierScreen(),
                   ),GoRoute(
                     path: ':courrierId/annotations/enregistrer',
-                    builder: (context, state) => AddAnnotationScreen(courrierId: state.pathParameters['courrierId'] as String),
+                    builder: (context, state) =>
+                        AddAnnotationScreen(courrierId: state.pathParameters['courrierId'] as String),
                   ),
                 ],
               ),
@@ -156,21 +169,32 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               // Administration
               GoRoute(
                 path: '/administration',
-                pageBuilder: (context, state) => NoTransitionPage(
+                pageBuilder: (context, state) =>
+                    NoTransitionPage(
                   child: AdministrationScreen(),
                 ),
                 routes: [
                   GoRoute(
                     path: 'directions',
-                    builder: (context, state) => DirectionsScreen(),
+                    builder: (context, state) =>
+                        DirectionsScreen(),
                     routes: [
                       GoRoute(
                         path: 'add',
-                        pageBuilder: (context, state) => const MaterialPage(
+                        pageBuilder: (context, state) =>
+                        const MaterialPage(
                           fullscreenDialog: true,
                           child: AddDirectionScreen(),
                         )
-                      )
+                      ),
+                      GoRoute(
+                        path: ':directionId',
+                        pageBuilder: (context, state) =>
+                        MaterialPage(
+                          fullscreenDialog: true,
+                          child: DirectionDetailsScreen(directionId: state.pathParameters['directionId'] as String),
+                        )
+                      ),
                     ]
                   ),
                   GoRoute(
@@ -217,24 +241,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
 
-          // Ticketing branch
-          // StatefulShellBranch(
-          //   navigatorKey: shellNavigatorTicketingKey,
-          //   routes: [
-          //     GoRoute(
-          //       path: '/ticketing',
-          //       pageBuilder: (context, state) => const NoTransitionPage(
-          //         child: ListCourriersScreen(),
-          //       ),
-          //     ),
-          //   ],
-          // ),
         ],
       )
     ],
     redirect: (context, state)  {
 
       final _authState = ref.watch(authStateProvider);
+
+      log("1. REDIRECTING TO DASHBOARD SCREEN");
 
       return _authState.when(
           data: (data) {
@@ -245,6 +259,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               debugPrint(":: GO TO LOGIN SCREEN");
               return '/login';
             }
+
+            log("2. REDIRECTING TO DASHBOARD SCREEN");
             // debugPrint(":: RETURNING LOGIN");
             // return '/login';
           },
@@ -256,91 +272,93 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 }
 );
 
-final goRouterProviderTwo = Provider<GoRouter>((ref){
-  return router(ref);
-});
+// final goRouterProviderTwo = Provider<GoRouter>((ref){
+//   return router(ref);
+// });
 
-GoRouter router(ProviderRef ref) {
-
-final rootNavigatorKey = GlobalKey<NavigatorState>();
-  final shellNavigatorCourrierKey =
-      GlobalKey<NavigatorState>(debugLabel: 'shellCourrier');
-  final shellNavigatorDashboardKey =
-      GlobalKey<NavigatorState>(debugLabel: 'shellDashboard');
-  final shellNavigatorErrorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'shellError');
-  final shellNavigatorLoginKey =
-      GlobalKey<NavigatorState>(debugLabel: 'shellLogin');
-
-  return GoRouter(
-    initialLocation: '/courriers',
-    navigatorKey: rootNavigatorKey,
-    debugLogDiagnostics: true,
-    routes: [
-      GoRoute(
-        path: '/login',
-        pageBuilder: (context, state) => const NoTransitionPage(
-          child: LoginScreen(),
-        ),
-      ),
-      GoRoute(
-        path: '/dashboard',
-        pageBuilder: (context, state) => const NoTransitionPage(
-          child: DashboardPage(),
-        ),
-      ),
-      GoRoute(
-        path: '/courriers',
-        pageBuilder: (context, state) => const NoTransitionPage(
-          child: ListCourriersScreen(),
-        ),
-        // routes: [
-        //   GoRoute(
-        //     path: 'details/:courrierId',
-        //     pageBuilder: (context, state) {
-        //
-        //       return NoTransitionPage(
-        //           child: DetailsCourrierScreen(state.pathParameters['courrierId'] as String));
-        //     },
-        //   ),
-        // ],
-      ),
-      GoRoute(
-        path: '/courriers/:courrierId',
-        pageBuilder: (context, state) {
-
-          return NoTransitionPage(
-              child: DetailsCourrierScreen(state.pathParameters['courrierId'] as String));
-        },
-      ),
-      GoRoute(
-        path: '/error',
-        pageBuilder: (context, state) => const NoTransitionPage(
-          child: Center(
-            child: Text('Error'),
-          ),
-        ),
-      )
-    ],
-    redirect: (context, state) async {
-
-      final _authState = ref.watch(authStateProvider);
-
-      return _authState.when(
-          data: (data) {
-            User? user = data;
-
-            // if (user == null && state.location == '/'){
-            if (user == null ){
-              debugPrint(":: GO TO LOGIN SCREEN");
-              return '/login';
-            }
-            // debugPrint(":: RETURNING LOGIN");
-            // return '/login';
-          },
-          loading: () => '/login',
-          error: (e, trace) => '/error');
-
-    },
-  );
-}
+// GoRouter router(ProviderRef ref) {
+//
+// final rootNavigatorKey = GlobalKey<NavigatorState>();
+//   final shellNavigatorCourrierKey =
+//       GlobalKey<NavigatorState>(debugLabel: 'shellCourrier');
+//   final shellNavigatorDashboardKey =
+//       GlobalKey<NavigatorState>(debugLabel: 'shellDashboard');
+//   final shellNavigatorErrorKey =
+//       GlobalKey<NavigatorState>(debugLabel: 'shellError');
+//   final shellNavigatorLoginKey =
+//       GlobalKey<NavigatorState>(debugLabel: 'shellLogin');
+//
+//   return GoRouter(
+//     initialLocation: '/courriers',
+//     navigatorKey: rootNavigatorKey,
+//     debugLogDiagnostics: true,
+//     routes: [
+//       GoRoute(
+//         path: '/login',
+//         pageBuilder: (context, state) => const NoTransitionPage(
+//           child: LoginScreen(),
+//         ),
+//       ),
+//       GoRoute(
+//         path: '/dashboard',
+//         pageBuilder: (context, state) => const NoTransitionPage(
+//           child: DashboardPage(),
+//         ),
+//       ),
+//       GoRoute(
+//         path: '/courriers',
+//         pageBuilder: (context, state) => const NoTransitionPage(
+//           child: ListCourriersScreen(),
+//         ),
+//         // routes: [
+//         //   GoRoute(
+//         //     path: 'details/:courrierId',
+//         //     pageBuilder: (context, state) {
+//         //
+//         //       return NoTransitionPage(
+//         //           child: DetailsCourrierScreen(state.pathParameters['courrierId'] as String));
+//         //     },
+//         //   ),
+//         // ],
+//       ),
+//       GoRoute(
+//         path: '/courriers/:courrierId',
+//         pageBuilder: (context, state) {
+//
+//           return NoTransitionPage(
+//               child: DetailsCourrierScreen(state.pathParameters['courrierId'] as String));
+//         },
+//       ),
+//       GoRoute(
+//         path: '/error',
+//         pageBuilder: (context, state) => const NoTransitionPage(
+//           child: Center(
+//             child: Text('Error'),
+//           ),
+//         ),
+//       )
+//     ],
+//     redirect: (context, state) async {
+//
+//       log("1. REDIRECTING TO DASHBOARD SCREEN");
+//
+//       final _authState = ref.watch(authStateProvider);
+//
+//       return _authState.when(
+//           data: (data) {
+//             User? user = data;
+//
+//             log("2. REDIRECTING TO DASHBOARD SCREEN");
+//
+//             // if (user == null && state.location == '/'){
+//             if (user == null ){
+//               debugPrint(":: GO TO LOGIN SCREEN");
+//               return '/login';
+//             }
+//           },
+//           loading: () => '/login',
+//           error: (e, trace) => '/error');
+//
+//     },
+//   );
+// }

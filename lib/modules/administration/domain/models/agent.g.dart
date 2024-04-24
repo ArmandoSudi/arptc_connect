@@ -18,6 +18,9 @@ _$AgentImpl _$$AgentImplFromJson(Map<String, dynamic> json) => _$AgentImpl(
       fonction: json['fonction'] as String?,
       category: json['category'] as String,
       roles: (json['roles'] as List<dynamic>).map((e) => e as String).toList(),
+      dependants: (json['dependants'] as List<dynamic>?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList(),
     );
 
 Map<String, dynamic> _$$AgentImplToJson(_$AgentImpl instance) =>
@@ -33,4 +36,5 @@ Map<String, dynamic> _$$AgentImplToJson(_$AgentImpl instance) =>
       'fonction': instance.fonction,
       'category': instance.category,
       'roles': instance.roles,
+      'dependants': instance.dependants,
     };

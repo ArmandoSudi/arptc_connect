@@ -24,33 +24,23 @@ class AuthService {
   //  It will be used to check if the user is logged in or not.
   Stream<User?> get authStateChange => _auth.authStateChanges();
 
-  // This getter will return a stream of all the agents
   CollectionReference get _agents => _firestore.collection(FirebaseConstants.agentsCollection);
 
   ///  SignIn the user using Email and Password
   Future<void> signInWithEmailAndPassword(
-      String email, String password, BuildContext? context) async {
-
-    log("SIGNIN....");
+      String email,
+      String password,
+      BuildContext? context) async {
 
     try {
       var result = await _auth.signInWithEmailAndPassword(email: email, password: password);
 
-      log("RESULT --> $result");
-
-
       //TODO Create an agent in the DB with email as ID
       var agent = await getAgentByEmail(result.user!.email!);
-      // var agent = await getAgentByEmail("yves.palanga@arptc.gouv.cd");
-      // log("AGENT ==> $agent");
 
-
-      _providerRef.read(sharedPrefUtilityProvider).setEmail(result.user!.email);
-      log("EMAIL ==> Setting email : ${result.user!.email}");
-      // log("signInWithEmail:: the signed in agent is $agent");
+      saveAgent(result.user!.email!);
 
     } on FirebaseAuthException catch (e) {
-
 
       log("signInWithEmail:: ${e.code}");
 
@@ -76,7 +66,7 @@ class AuthService {
           context: context!,
           builder: (ctx) => AlertDialog(
             title: Text('Une erreur est survenue'),
-            content: Text("Veuillez contacter l'administrateur"),
+            content: Text(e.toString()),
             actions: [
               TextButton(
                   onPressed: () {
@@ -90,16 +80,20 @@ class AuthService {
     }
   }
 
+  Future<void> saveAgent(String email) async {
+    await _providerRef.read(sharedPrefUtilityProvider).setEmail(email);
+  }
+
   /// SignUp the user using Email and Password
   Future<void> signUpWithEmailAndPassword(
-      String email, String password, BuildContext context) async {
+      String email,
+      String password,
+      BuildContext context) async {
     try {
       var user = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-
-      print("Created User:: $user");
 
     } on FirebaseAuthException catch (e) {
       await showDialog(
@@ -129,6 +123,7 @@ class AuthService {
                       child: const Text("OK"))
                 ]));
         print('Email already in use.');
+
       } else {
         print('Error: $e');
       }
@@ -149,48 +144,27 @@ class AuthService {
     }
   }
 
-  Future<Agent> getAgentByEmail(String email) {
-    return _agents
-        .doc(email)
-        .get().then((snapshot) => Agent.fromDocument(snapshot));
+  Future<Agent?> getAgentByEmail(String email) async {
+    try {
+      final querySnapshot = await _agents.where('email', isEqualTo: email).get();
+      if (querySnapshot.docs.isNotEmpty) {
+        return Agent.fromDocument(querySnapshot.docs.first);
+      } else {
+        return null;
+      }
+    } catch (error) {
+      log("Error getAgetnByEmail: $email ::  $error");
+      return null;
+    }
+
   }
 
-
-  //  SignIn the user Google
-  // Future<void> signInWithGoogle(BuildContext context) async {
-  //   // Trigger the authentication flow
-  //   final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-  //
-  //   // Obtain the auth details from the request
-  //   final GoogleSignInAuthentication googleAuth =
-  //   await googleUser!.authentication;
-  //
-  //   // Create a new credential
-  //   final credential = GoogleAuthProvider.credential(
-  //     accessToken: googleAuth.accessToken,
-  //     idToken: googleAuth.idToken,
-  //   );
-  //
-  //   try {
-  //     await _auth.signInWithCredential(credential);
-  //   } on FirebaseAuthException catch (e) {
-  //     await showDialog(
-  //       context: context,
-  //       builder: (ctx) => AlertDialog(
-  //         title: Text('Error Occured'),
-  //         content: Text(e.toString()),
-  //         actions: [
-  //           TextButton(
-  //               onPressed: () {
-  //                 Navigator.of(ctx).pop();
-  //               },
-  //               child: Text("OK"))
-  //         ],
-  //       ),
-  //     );
-  //   }
-  // }
-
-  //  SignOut the current user
+  Future<void> createAgent(Agent) async {
+    try {
+      await _agents.doc(Agent.email).set(Agent.toJson());
+    } catch (error) {
+      log("Error createAgent: ${Agent.email} ::  $error");
+    }
+  }
 
 }

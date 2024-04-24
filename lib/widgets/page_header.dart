@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class PageHeader extends StatelessWidget {
-  const PageHeader({super.key, required this.title, required this.description});
+  const PageHeader({super.key, required this.title, this.description});
 
   final String title;
-  final String description;
+  final String? description;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class PageHeader extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        Text(description),
+      description == null ? Text(description!) : const SizedBox.shrink(),
       ],
     );
   }

@@ -65,86 +65,83 @@ class _CartScreenState extends ConsumerState<CartScreen> {
             // LIST OF ITEMS IN THE CART
             const Gap(32),
             Expanded(
-              child: Card(
-                elevation: 5,
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: cartController.items.length,
-                  itemBuilder: (context, index) {
-                    return Slidable(
-                      key: ValueKey(index),
-                      endActionPane:  ActionPane(
-                        extentRatio: 0.2 ,
-                        motion: const ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            // An action can be bigger than the others.
-                            flex: 1,
-                            onPressed: (value){
-                              ref
-                                  .read(cartControllerProvider.notifier)
-                                  .removeProduct(cartController.items[index].product);
-                            },
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.grey,
-                            icon: Icons.delete_forever_outlined,
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ],
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: cartController.items.length,
+                itemBuilder: (context, index) {
+                  return Slidable(
+                    key: ValueKey(index),
+                    endActionPane:  ActionPane(
+                      extentRatio: 0.2 ,
+                      motion: const ScrollMotion(),
+                      children: [
+                        SlidableAction(
+                          // An action can be bigger than the others.
+                          flex: 1,
+                          onPressed: (value){
+                            ref
+                                .read(cartControllerProvider.notifier)
+                                .removeProduct(cartController.items[index].product);
+                          },
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.grey,
+                          icon: Icons.delete_forever_outlined,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ],
+                    ),
+                    child: ListTile(
+                      leading: Text("${index + 1} . "),
+                      title: Text(
+                        cartController.items[index].product.name,
+                        style: theme.textTheme.bodyMedium!
+                            .copyWith(fontWeight: FontWeight.w600),
                       ),
-                      child: ListTile(
-                        leading: Text("${index + 1} . "),
-                        title: Text(
-                          cartController.items[index].product.name,
-                          style: theme.textTheme.bodyMedium!
-                              .copyWith(fontWeight: FontWeight.w600),
+                      trailing: Container(
+                        decoration: const ShapeDecoration(
+                          shape: StadiumBorder(side: BorderSide(color: Colors.grey)),
                         ),
-                        trailing: Container(
-                          decoration: const ShapeDecoration(
-                            shape: StadiumBorder(side: BorderSide(color: Colors.grey)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                               IconButton(
-                                icon: const Icon(Icons.remove),
-                                visualDensity: VisualDensity.compact,
-                                onPressed: (){
-                                  log("reduce quantity");
-                                  ref.read(cartControllerProvider.notifier)
-                                      .decreaseQuantity(cartController.items[index].product);
-                                },
-                              ),
-                              SizedBox(
-                                  width:50,
-                                  child: Text(
-                                    "${cartController.items[index].quantity}",
-                                    style: theme.textTheme.bodyLarge,
-                                    textAlign: TextAlign.center,
-                                  ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.add),
-                                visualDensity: VisualDensity.compact,
-                                onPressed: (){
-                                  log("increase quantity");
-                                  ref.read(cartControllerProvider.notifier)
-                                      .increaseQuantity(cartController.items[index].product);
-                                },
-                              ),
-                            ],
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                             IconButton(
+                              icon: const Icon(Icons.remove),
+                              visualDensity: VisualDensity.compact,
+                              onPressed: (){
+                                log("reduce quantity");
+                                ref.read(cartControllerProvider.notifier)
+                                    .decreaseQuantity(cartController.items[index].product);
+                              },
+                            ),
+                            SizedBox(
+                                width:50,
+                                child: Text(
+                                  "${cartController.items[index].quantity}",
+                                  style: theme.textTheme.bodyLarge,
+                                  textAlign: TextAlign.center,
+                                ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add),
+                              visualDensity: VisualDensity.compact,
+                              onPressed: (){
+                                log("increase quantity");
+                                ref.read(cartControllerProvider.notifier)
+                                    .increaseQuantity(cartController.items[index].product);
+                              },
+                            ),
+                          ],
                         ),
+                      ),
 
-                        onTap: null,
-                      ),
-                    );
-                  },
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const Divider();
-                  },
-                )
+                      onTap: null,
+                    ),
+                  );
+                },
+                separatorBuilder: (BuildContext context, int index) {
+                  return const Divider();
+                },
               )
             ),
           ],

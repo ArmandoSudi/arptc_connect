@@ -2,6 +2,7 @@ import 'package:arptc_connect/modules/inventory/models/product.dart';
 import 'package:arptc_connect/modules/inventory/presentation/product/async_product.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_dropdown_field.dart';
+import 'package:arptc_connect/widgets/custom_filledbutton.dart';
 import 'package:arptc_connect/widgets/custom_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,13 +48,17 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                 IconButton(
                   onPressed: () => context.go('/service/inventory/cart'),
                   icon: Badge(
-                    label: Text("${ref.watch(cartControllerProvider.notifier).count}"),
-                    isLabelVisible: ref.watch(cartControllerProvider.notifier).count > 0 ? true : false,
+                    label: Text(
+                        "${ref.watch(cartControllerProvider.notifier).count}"),
+                    isLabelVisible:
+                        ref.watch(cartControllerProvider.notifier).count > 0
+                            ? true
+                            : false,
                     child: Icon(Icons.shopping_cart_outlined),
                   ),
                 ),
                 const Gap(16),
-                ElevatedButton.icon(
+                FilledButton.icon(
                   icon: const Icon(Icons.add),
                   onPressed: () async {
                     await showCreateProductDialog(context);
@@ -67,47 +72,52 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
             asyncProducts.when(
               data: (data) {
                 return Expanded(
-                  child: Card(
-                    elevation: 5,
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: data.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(
-                            data[index].name,
-                            style: theme.textTheme.bodyMedium!
-                                .copyWith(fontWeight: FontWeight.w600),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(
+                          data[index].name,
+                          style: theme.textTheme.bodyMedium!
+                              .copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: Text(
+                          data[index].quantity.toString(),
+                          style: theme.textTheme.labelMedium,
+                        ),
+                        trailing: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.transparent,
+                              width: 1.0, // Adjust border width as needed
+                            ),
                           ),
-                          subtitle: Text(
-                            data[index].quantity.toString(),
-                            style: theme.textTheme.labelMedium,
-                          ),
-                          trailing: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                                // minimumSize: const Size.fromHeight(50),
-                                side: const BorderSide(color: Colors.grey),
-                                foregroundColor: Colors.black),
+                          child: IconButton(
                             onPressed: () async {
                               await showSelectedItemDialog(
                                   context, data[index]);
                               // context.pop();
                             },
-                            child: const Text("ajouter au panier",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            icon: Icon(
+                              Icons.add,
+                              color: Colors.grey[700],
+                            ),
                           ),
-                        );
-                      },
-                      separatorBuilder: (BuildContext context, int index) {
-                        return const Divider();
-                      },
-                    ),
+                        ),
+                      );
+                    },
+                    separatorBuilder: (BuildContext context, int index) {
+                      return const Divider();
+                    },
                   ),
                 );
               },
               error: (error, stackTrace) {
                 //TODO log the error that going to occur here
-                return const Text("An error occurer when loading the items");
+                return const Text("An error occured when loading the items");
               },
               loading: () => const Center(
                 child: CircularProgressIndicator(),
@@ -154,36 +164,6 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                     const Gap(12),
 
                     // UNIT
-                    // DropdownButtonFormField<String>(
-                    //   // Customize the button's appearance (optional)
-                    //
-                    //   hint: const Text('Selectionner l\'unité de l\'article'),
-                    //   decoration: InputDecoration(
-                    //       contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    //       hintText: 'Selectionner l\'unité de l\'article',
-                    //       border: OutlineInputBorder(
-                    //           borderRadius: BorderRadius.all(
-                    //               Radius.circular( 5)
-                    //           )
-                    //       ),
-                    //       // suffixIcon: Icon(Icons.arrow_drop_down)
-                    //   ),
-                    //   icon: const Icon(Icons.keyboard_arrow_down_outlined),
-                    //   isExpanded: true,
-                    //   value: selectedValue,
-                    //   items: Constants.productUnits
-                    //       .map<DropdownMenuItem<String>>((String value) {
-                    //     return DropdownMenuItem<String>(
-                    //       value: value,
-                    //       child: Text(value),
-                    //     );
-                    //   }).toList(),
-                    //   onChanged: (String? newValue) {
-                    //     setState(() {
-                    //       selectedValue = newValue!;
-                    //     });
-                    //   },
-                    // ),
                     CustomDropDown(
                         label: "Unité",
                         hintText: "Selectionner l\'unité de l\'article",
@@ -199,11 +179,7 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(50),
-                              shape: const StadiumBorder(),
-                            ),
+                          child: CustomFilledButton(
                             onPressed: () {
                               final product = Product(
                                 name: _nameController.text,
@@ -212,29 +188,28 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                                 quantity: int.parse(_quantityController.text),
                               );
 
-                              ref.read(asyncProductProvider.notifier).addProduct(product);
+                              ref
+                                  .read(asyncProductProvider.notifier)
+                                  .addProduct(product);
 
                               Navigator.of(context).pop();
                             },
-                            child: const Text(
-                              "Enregistrer",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                            text: "Enregistrer",
                           ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(50),
-                                side: const BorderSide(color: Colors.grey),
-                                foregroundColor: Colors.grey),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text(
-                              "Annuler",
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                          child: Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(50)),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text(
+                                "Annuler",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
                         ),
@@ -251,7 +226,8 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
 
   Future<void> showSelectedItemDialog(
       BuildContext context, Product product) async {
-    final TextEditingController quantityController = TextEditingController(text: "1");
+    final TextEditingController quantityController =
+        TextEditingController(text: "1");
 
     return await showDialog(
         context: context,
@@ -264,6 +240,7 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    const Gap(16),
                     Text(
                       product.name,
                       style: const TextStyle(
@@ -279,35 +256,28 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                       controller: quantityController,
                       borderRadius: 30,
                     ),
-
                     const Gap(16),
                     Row(
                       children: [
                         Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(50),
-                              shape: const StadiumBorder(),
-                            ),
+                          child: CustomFilledButton(
                             onPressed: () {
                               //TODO Check that the required quantity is not more than quantity in stock
                               int quantity = int.parse(quantityController.text);
-                              ref.read(cartControllerProvider.notifier).addProduct(product, quantity);
+                              ref
+                                  .read(cartControllerProvider.notifier)
+                                  .addProduct(product, quantity);
                               Navigator.of(context).pop();
                             },
-                            child: const Text(
-                              "Ajouter",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                            text: "Confirmer",
+                            // backgroundColor: Colors.green,
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        const Gap(10),
                         Expanded(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(50),
-                                side: const BorderSide(color: Colors.grey),
-                                foregroundColor: Colors.grey),
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                                minimumSize: const Size.fromHeight(50)),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },

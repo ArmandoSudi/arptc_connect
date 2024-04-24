@@ -1,4 +1,3 @@
-
 import 'dart:developer';
 
 import 'package:arptc_connect/core/shared_preferences_provider.dart';
@@ -15,9 +14,13 @@ class NavigationAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
+    Future.delayed(Duration(seconds: 2), (){
+      log("NavigationAppBar EMAIL::  ${ref.read(sharedPrefUtilityProvider).getEmail()}");
+    });
+
     String email = ref.watch(sharedPrefUtilityProvider).getEmail();
 
-    log("NavigationAppBar Email::  $email");
+    // log("NavigationAppBar Email::  $email");
 
     return AppBar(
       title: const NavigationTitle(),

@@ -22,6 +22,7 @@ class Agent with _$Agent{
     String? fonction,
     required String category,
     required List<String> roles,
+    List<Map<String, dynamic>>? dependants
   }) = _Agent;
 
   factory Agent.newEmpty({required String userId}) => Agent(

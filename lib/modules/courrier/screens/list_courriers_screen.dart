@@ -1,6 +1,4 @@
 import 'package:arptc_connect/modules/courrier/providers/courrier_provider.dart';
-import 'package:arptc_connect/modules/courrier/providers/courrier_service_provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +7,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../widgets/content_view.dart';
 import '../../../widgets/page_header.dart';
-import '../models/courrier_model.dart';
 import 'add_courrier_screen.dart';
 
 class ListCourriersScreen extends ConsumerStatefulWidget {
@@ -125,7 +122,7 @@ class _ListCourriersScreenState extends ConsumerState<ListCourriersScreen> {
                   error: (error, stackTrace) {
                     return const Text("something went wrong");
                   },
-                  loading: () => const CircularProgressIndicator(),
+                  loading: () => const Center(child: CircularProgressIndicator()),
                 ),
               ),
             ),

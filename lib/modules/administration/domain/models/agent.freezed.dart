@@ -33,6 +33,8 @@ mixin _$Agent {
   String? get fonction => throw _privateConstructorUsedError;
   String get category => throw _privateConstructorUsedError;
   List<String> get roles => throw _privateConstructorUsedError;
+  List<Map<String, dynamic>>? get dependants =>
+      throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -56,7 +58,8 @@ abstract class $AgentCopyWith<$Res> {
       String? bureau,
       String? fonction,
       String category,
-      List<String> roles});
+      List<String> roles,
+      List<Map<String, dynamic>>? dependants});
 }
 
 /// @nodoc
@@ -84,6 +87,7 @@ class _$AgentCopyWithImpl<$Res, $Val extends Agent>
     Object? fonction = freezed,
     Object? category = null,
     Object? roles = null,
+    Object? dependants = freezed,
   }) {
     return _then(_value.copyWith(
       id: freezed == id
@@ -134,6 +138,10 @@ class _$AgentCopyWithImpl<$Res, $Val extends Agent>
           ? _value.roles
           : roles // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      dependants: freezed == dependants
+          ? _value.dependants
+          : dependants // ignore: cast_nullable_to_non_nullable
+              as List<Map<String, dynamic>>?,
     ) as $Val);
   }
 }
@@ -157,7 +165,8 @@ abstract class _$$AgentImplCopyWith<$Res> implements $AgentCopyWith<$Res> {
       String? bureau,
       String? fonction,
       String category,
-      List<String> roles});
+      List<String> roles,
+      List<Map<String, dynamic>>? dependants});
 }
 
 /// @nodoc
@@ -183,6 +192,7 @@ class __$$AgentImplCopyWithImpl<$Res>
     Object? fonction = freezed,
     Object? category = null,
     Object? roles = null,
+    Object? dependants = freezed,
   }) {
     return _then(_$AgentImpl(
       id: freezed == id
@@ -233,6 +243,10 @@ class __$$AgentImplCopyWithImpl<$Res>
           ? _value._roles
           : roles // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      dependants: freezed == dependants
+          ? _value._dependants
+          : dependants // ignore: cast_nullable_to_non_nullable
+              as List<Map<String, dynamic>>?,
     ));
   }
 }
@@ -252,8 +266,10 @@ class _$AgentImpl extends _Agent {
       this.bureau,
       this.fonction,
       required this.category,
-      required final List<String> roles})
+      required final List<String> roles,
+      final List<Map<String, dynamic>>? dependants})
       : _roles = roles,
+        _dependants = dependants,
         super._();
 
   factory _$AgentImpl.fromJson(Map<String, dynamic> json) =>
@@ -290,9 +306,19 @@ class _$AgentImpl extends _Agent {
     return EqualUnmodifiableListView(_roles);
   }
 
+  final List<Map<String, dynamic>>? _dependants;
+  @override
+  List<Map<String, dynamic>>? get dependants {
+    final value = _dependants;
+    if (value == null) return null;
+    if (_dependants is EqualUnmodifiableListView) return _dependants;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
   @override
   String toString() {
-    return 'Agent(id: $id, name: $name, email: $email, genre: $genre, matricule: $matricule, dob: $dob, direction: $direction, service: $service, bureau: $bureau, fonction: $fonction, category: $category, roles: $roles)';
+    return 'Agent(id: $id, name: $name, email: $email, genre: $genre, matricule: $matricule, dob: $dob, direction: $direction, service: $service, bureau: $bureau, fonction: $fonction, category: $category, roles: $roles, dependants: $dependants)';
   }
 
   @override
@@ -315,7 +341,9 @@ class _$AgentImpl extends _Agent {
                 other.fonction == fonction) &&
             (identical(other.category, category) ||
                 other.category == category) &&
-            const DeepCollectionEquality().equals(other._roles, _roles));
+            const DeepCollectionEquality().equals(other._roles, _roles) &&
+            const DeepCollectionEquality()
+                .equals(other._dependants, _dependants));
   }
 
   @JsonKey(ignore: true)
@@ -333,7 +361,8 @@ class _$AgentImpl extends _Agent {
       bureau,
       fonction,
       category,
-      const DeepCollectionEquality().hash(_roles));
+      const DeepCollectionEquality().hash(_roles),
+      const DeepCollectionEquality().hash(_dependants));
 
   @JsonKey(ignore: true)
   @override
@@ -362,7 +391,8 @@ abstract class _Agent extends Agent {
       final String? bureau,
       final String? fonction,
       required final String category,
-      required final List<String> roles}) = _$AgentImpl;
+      required final List<String> roles,
+      final List<Map<String, dynamic>>? dependants}) = _$AgentImpl;
   const _Agent._() : super._();
 
   factory _Agent.fromJson(Map<String, dynamic> json) = _$AgentImpl.fromJson;
@@ -392,6 +422,8 @@ abstract class _Agent extends Agent {
   String get category;
   @override
   List<String> get roles;
+  @override
+  List<Map<String, dynamic>>? get dependants;
   @override
   @JsonKey(ignore: true)
   _$$AgentImplCopyWith<_$AgentImpl> get copyWith =>

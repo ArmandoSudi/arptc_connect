@@ -1,35 +1,42 @@
 import 'dart:developer';
 
+import 'package:arptc_connect/modules/administration/data/service_provider.dart';
+import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../widgets/content_view.dart';
+import '../../../../widgets/custom_filledbutton.dart';
 import '../../../../widgets/custom_form_field.dart';
 import '../../../../widgets/page_header.dart';
+import '../../data/directions_provider.dart';
+import '../../domain/models/service.dart';
 
-List<String> directions = <String>['DSI', 'DRMT', 'DRAJ', 'DEP'];
 
-class AddServiceScreen extends StatefulWidget {
+class AddServiceScreen extends ConsumerStatefulWidget {
   const AddServiceScreen({Key? key}) : super(key: key);
 
   @override
-  State<AddServiceScreen> createState() => _AddServiceScreenState();
+  ConsumerState createState() => _AddServiceScreenState();
 }
 
-class _AddServiceScreenState extends State<AddServiceScreen> {
-
+class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
   TextEditingController directionNameController = TextEditingController();
   TextEditingController abreviationController = TextEditingController();
 
-  String dropdownValue = directions.first;
+  String? directionId;
 
   @override
   Widget build(BuildContext context) {
+    final directionsAsync = ref.watch(directionsControllerProvider);
+
     return Scaffold(
-        body: ContentView(
-          child: SafeArea(
-            child: Stack(children: [
+      body: ContentView(
+        child: SafeArea(
+          child: Stack(
+            children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -37,88 +44,149 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                   children: [
                     Row(
                       children: [
-                        IconButton(icon:Icon(Icons.arrow_back_ios), onPressed: () {
-                          context.pop();
-                        },),
+                        IconButton(
+                          icon: Icon(Icons.arrow_back_ios),
+                          onPressed: () {
+                            context.pop();
+                          },
+                        ),
                         const Gap(16),
                         const PageHeader(
                           title: 'Créer un service',
-                          description: 'Remplissez le formulaire pour créer un nouveau service dans une direction donnée',
+                          description:
+                              'Remplissez le formulaire pour créer un nouveau service dans une direction donnée',
                         ),
                       ],
                     ),
                     const Gap(16),
-                    Text(
-                    "Direction",
-                    style: TextStyle(fontSize: 14, color: Colors.grey[700])),
-                    DropdownMenu(
-                      width: MediaQuery.of(context).size.width - 16,
-                      inputDecorationTheme: InputDecorationTheme(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+
+                    ResponsiveCenter(
+                      child: Column(
+                        children: [
+
+                          // DIRECTIONS DROPDOWN
+                          directionsAsync.when(
+                            data: (data) {
+                              if (data.isEmpty) {
+                                return Container();
+                              }
+
+                              directionId = data.first.id!;
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Directions",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                  DropdownButtonFormField<String>(
+                                    decoration: const InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 10),
+                                      hintText: "hint text",
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(5),
+                                        ),
+                                      ),
+                                      // suffixIcon: Icon(Icons.arrow_drop_down)
+                                    ),
+                                    icon: const Icon(
+                                        Icons.keyboard_arrow_down_outlined),
+                                    isExpanded: true,
+                                    value: data.first.id,
+                                    items: data
+                                        .map<DropdownMenuItem<String>>((direction) {
+                                      return DropdownMenuItem<String>(
+                                        value: direction.id,
+                                        child: Text(direction.name),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      directionId = value!;
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                            error: (error, stackTrace) {
+                              debugPrint("Error: $error");
+                              debugPrint("StackTrace: $stackTrace");
+                              return const Text("something went wrong");
+                            },
+                            loading: () => const CircularProgressIndicator(),
+                          ),
+                          const Gap(16),
+
+                          // SERVICE NAME
+                          CustomFormField(
+                            label: "Service",
+                            hintText: "nom du service",
+                            textInputType: TextInputType.name,
+                            controller: directionNameController,
+                          ),
+                          const SizedBox(height: 20),
+
+                          // SERVICE SHORT NAME
+                          CustomFormField(
+                            label: "Abreviation",
+                            hintText: "l'abréviation du service",
+                            textInputType: TextInputType.name,
+                            controller: abreviationController,
+                          ),
+                        ],
                       ),
-                      initialSelection: directions.first,
-                      onSelected: (String? value) {
-                        // This is called when the user selects an item.
-                        setState(() {
-                          dropdownValue = value!;
-                        });
-                      },
-                      dropdownMenuEntries: directions.map<DropdownMenuEntry<String>>((String value) {
-                        return DropdownMenuEntry<String>(value: value, label: value);
-                      }).toList(),
                     ),
-                    const SizedBox(height: 20),
-                    CustomFormField(
-                      label: "Service",
-                      hintText: "nom du service",
-                      textInputType: TextInputType.name,
-                      controller: directionNameController,
-                    ),
-                    const SizedBox(height: 20),
-                    CustomFormField(
-                      label: "Abreviation",
-                      hintText: "l'abréviation du service",
-                      textInputType: TextInputType.name,
-                      controller: abreviationController,
-                    ),
-                    const Gap(16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(50),
-                              shape: const StadiumBorder(),
-                            ),
-                            onPressed: () {
-                              log("add_direction_screen:: save");
-                            },
-                            child: const Text("Enregistrer", style: TextStyle(fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: Colors.grey),
-                                minimumSize: const Size.fromHeight(50),
-                                foregroundColor: Colors.grey),
-                            onPressed: () {
-                              log("add_direction_screen:: cancel");
-                            },
-                            child: const Text("Annuler", style: TextStyle(fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ],
-                    ),
+                    
                   ],
                 ),
               ),
-            ]),
+            ],
           ),
-        ));
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          children: [
+            Expanded(
+              child: CustomFilledButton(
+                text: "Enregistrer",
+                onPressed: () {
+                  createService();
+                  context.pop();
+                },
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
+                  minimumSize: const Size.fromHeight(50),
+                ),
+                onPressed: () {
+                  context.pop();
+                },
+                child: const Text("Annuler"),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void createService(){
+    final service = Service(
+      name: directionNameController.text,
+      directionRef: directionId!,
+    );
+    ref.read(asyncServiceProvider.notifier).add(service);
   }
 }
