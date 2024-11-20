@@ -90,7 +90,6 @@ class CartController extends StateNotifier<CartState> {
   }
 
 
-
   void updateProductQuantity(Product product, int quantity){
     final newProduct = product.copyWith(quantity: quantity);
     log("1. CartController::updateProductQuantity => PRODUCT ID : ${product.id}");

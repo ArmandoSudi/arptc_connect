@@ -282,7 +282,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                           ),
                           onPressed: () {
                             final cartItems = ref.read(cartControllerProvider.notifier).carItems;
-                            ref.read(asyncProductProvider.notifier).restock(cartItems);
+                            ref.watch(asyncProductProvider.notifier).restock(cartItems);
                             Navigator.of(context).pop();
                             context.pop();
                           },

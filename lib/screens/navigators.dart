@@ -28,7 +28,7 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
 
       if (constraints.maxWidth < 960) {
 
-        print("Constraints width : ${constraints.maxWidth} : NAVIGATION BAR");
+        // print("Constraints width : ${constraints.maxWidth} : NAVIGATION BAR");
 
         return ScaffoldWithNavigationBar(
           body: navigationShell,
@@ -37,7 +37,7 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
         );
       } else {
 
-        print("Constraints width : ${constraints.maxWidth} : NAVIGATION RAIL");
+        // print("Constraints width : ${constraints.maxWidth} : NAVIGATION RAIL");
 
         return ScaffoldWithNavigationRail(
           body: navigationShell,

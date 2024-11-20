@@ -271,7 +271,7 @@ class TicketWidget extends StatelessWidget {
       children: [
         Text(
           ticket.subject,
-          style: Theme.of(context).textTheme.headline6,
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
         const Spacer(),
         const SizedBox(width: 10.0),

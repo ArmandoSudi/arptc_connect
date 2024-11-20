@@ -2,18 +2,21 @@ import 'dart:developer';
 
 import 'package:arptc_connect/modules/administration/presentation/screens/add_agent_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/add_direction_screen.dart';
+import 'package:arptc_connect/modules/administration/presentation/screens/add_user_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/administration_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/agents_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/bureaux_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/direction_details_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/directions_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/services_screen.dart';
+import 'package:arptc_connect/modules/administration/presentation/screens/users_screen.dart';
 import 'package:arptc_connect/modules/authentication/screens/login_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/add_annotation_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/add_courrier_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/details_courrier.dart';
 import 'package:arptc_connect/modules/courrier/screens/list_courriers_screen.dart';
 import 'package:arptc_connect/modules/dashboard/presentation/screens/main_dashboard_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/inventory_main_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
 import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
 import 'package:arptc_connect/modules/social/screens/main_social_screen.dart';
@@ -48,7 +51,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: routerInitialLocation,
     navigatorKey: rootNavigatorKey,
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: false,
     routes: [
       GoRoute(
         path: '/login',
@@ -90,20 +93,24 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             navigatorKey: shellNavigatorServiceKey,
               routes: [
+                // Service
                 GoRoute(
                   path: '/service',
                   pageBuilder: (context, state) => NoTransitionPage(
                     child: MainServiceScreen(),
                   ),
                   routes: [
+                    // Social
                     GoRoute(
                       path: 'social',
                       builder: (context, state) => const MainSocialScreen(),
                     ),
+
+                    // Inventory
                     GoRoute(
                       path: 'inventory',
-                      pageBuilder: (context, state) => const NoTransitionPage(
-                        child: ManageItemScreen(),
+                      pageBuilder: (context, state) =>  NoTransitionPage(
+                        child: InventoryMainScreen(),
                       ),
                       routes: [
                         GoRoute(
@@ -225,13 +232,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   ),
                   GoRoute(
                     path: 'agents',
-                    builder: (context, state) => AgentsScreen(),
+                    builder: (context, state) => UsersSreen(),
                     routes: [
                       GoRoute(
                         path: 'add',
                         pageBuilder: (context, state) => const MaterialPage(
                           fullscreenDialog: true,
-                          child: AddAgentScreen(),
+                          child: AddUserScreen(),
                         ),
                       ),
                     ]
@@ -248,7 +255,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
       final _authState = ref.watch(authStateProvider);
 
-      log("1. REDIRECTING TO DASHBOARD SCREEN");
+      // log("1. REDIRECTING TO DASHBOARD SCREEN");
 
       return _authState.when(
           data: (data) {
@@ -260,7 +267,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               return '/login';
             }
 
-            log("2. REDIRECTING TO DASHBOARD SCREEN");
+            // log("2. REDIRECTING TO DASHBOARD SCREEN");
             // debugPrint(":: RETURNING LOGIN");
             // return '/login';
           },

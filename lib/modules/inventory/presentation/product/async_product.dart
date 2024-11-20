@@ -9,13 +9,14 @@ import '../../models/product.dart';
 
 part 'async_product.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class AsyncProduct extends _$AsyncProduct {
   List<Product> products = [];
 
   @override
   FutureOr<List<Product>> build() async {
     products = await fetchItems();
+    log("first product  quantity: ${products.first.quantity}");
     return products;
   }
 
@@ -30,16 +31,20 @@ class AsyncProduct extends _$AsyncProduct {
   }
 
   void restock(List<CartItem> cartItems) async {
-    log("restocking: Restocking the products");
+
     state = const AsyncValue.loading();
-    cartItems.forEach((cartItem) {
+    for (var cartItem in cartItems) {
       int newQuantity = cartItem.product.quantity + cartItem.quantity;
       updateProductQuantity(cartItem.product, newQuantity);
-    });
+
+      log("restocking: Restocking ${cartItem.product.name} : $newQuantity");
+    }
     ref.read(cartControllerProvider.notifier).clearCart();
     state = AsyncValue.data( await fetchItems());
+
   }
 
+  // Update the product quantity in the DB
   void updateProductQuantity(Product product, int quantity)async {
     final newProduct = product.copyWith(quantity: quantity);
     await ref.read(inventoryServProvider).updateProduct(newProduct);
@@ -52,6 +57,8 @@ class AsyncProduct extends _$AsyncProduct {
       //TODO Make sure that there is enough product in stock before delivery
       int newQuantity = cartItem.product.quantity - cartItem.quantity;
       updateProductQuantity(cartItem.product, newQuantity);
+
+      log("deliverTo: Delivery ${cartItem.product.name} : $newQuantity");
     });
     ref.read(cartControllerProvider.notifier).clearCart();
     state = AsyncValue.data( await fetchItems());

@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:arptc_connect/modules/administration/data/administration_api_provider.dart';
 import 'package:arptc_connect/modules/administration/domain/models/dependant.dart';
 import 'package:arptc_connect/modules/social/screens/data/voucher_service.dart';
-import 'package:arptc_connect/utils/firestore_document.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

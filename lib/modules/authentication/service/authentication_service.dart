@@ -1,14 +1,15 @@
 import 'dart:developer';
 
 import 'package:arptc_connect/modules/administration/domain/models/agent.dart';
+import 'package:arptc_connect/modules/administration/presentation/controllers/async_user.dart';
 import 'package:arptc_connect/utils/firebase_constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/firebase_providers.dart';
 import '../../../core/shared_preferences_provider.dart';
+import '../../administration/data/user_service.dart';
 
 class AuthService {
   late FirebaseAuth _auth;
@@ -89,11 +90,14 @@ class AuthService {
       String email,
       String password,
       BuildContext context) async {
+
     try {
       var user = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // _providerRef.read(asyncUserProvider.notifier).
 
     } on FirebaseAuthException catch (e) {
       await showDialog(

@@ -14,9 +14,9 @@ class NavigationAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-    Future.delayed(Duration(seconds: 2), (){
-      log("NavigationAppBar EMAIL::  ${ref.read(sharedPrefUtilityProvider).getEmail()}");
-    });
+    // Future.delayed(Duration(seconds: 2), (){
+    //   log("NavigationAppBar EMAIL::  ${ref.read(sharedPrefUtilityProvider).getEmail()}");
+    // });
 
     String email = ref.watch(sharedPrefUtilityProvider).getEmail();
 

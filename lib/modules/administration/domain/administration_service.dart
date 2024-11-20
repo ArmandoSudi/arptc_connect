@@ -4,9 +4,10 @@ import 'dart:developer';
 import 'package:arptc_connect/modules/administration/domain/models/agent.dart';
 import 'package:arptc_connect/modules/administration/domain/models/direction.dart';
 import 'package:arptc_connect/modules/administration/domain/models/service.dart';
+import 'package:arptc_connect/utils/firestore_client.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../utils/firestore_client.dart';
+// import '../../../../../viamo/lib/utils/firestore_client.dart';
 import 'models/bureau.dart';
 import 'models/dependant.dart';
 

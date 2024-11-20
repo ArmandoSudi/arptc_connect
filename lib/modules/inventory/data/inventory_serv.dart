@@ -21,9 +21,9 @@ class InventoryServ {
 
   Future<void> updateProduct(Product product) async {
     try {
-      log("2. InventorySer::updateProduct => PRODUCT ID : ${product.id}");
-      log("3. InventorySer::updateProduct => PRODUCT ID : ${product.toMap().toString()}");
-      log("4. InventorySer::updateProduct => PRODUCT ID : ${product.toString()}");
+      // log("2. InventorySer::updateProduct => PRODUCT ID : ${product.id}");
+      // log("3. InventorySer::updateProduct => PRODUCT ID : ${product.toMap().toString()}");
+      // log("4. InventorySer::updateProduct => PRODUCT ID : ${product.toString()}");
       await firestoreClient.update(collection: 'products', data: product.toMap());
     } catch (err) {
       log("InventorySer::updateProduct => Error : ${err}");
@@ -33,7 +33,7 @@ class InventoryServ {
   Future<List<Product>> fetchAllProducts() async {
     try {
       final results = await firestoreClient.fetchAll(collection: "products");
-      log("InventoryServ::fetchAllProducts FIRST PRODUCT ID ${results.first.id}");
+      log("InventoryServ::fetchAllProducts : Fetching all products");
       return results.map((item) => Product.fromMap(item.data, id: item.id)).toList();
     } catch(err){
       log("InventoryServ: fetchAllProducts couldn't fetch");

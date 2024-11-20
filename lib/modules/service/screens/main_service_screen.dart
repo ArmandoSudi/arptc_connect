@@ -9,12 +9,14 @@ class MainServiceScreen extends StatelessWidget {
   MainServiceScreen({super.key});
 
   final services = [
+    {"Courrier": "Courrier"},
     {"Social": "Social"},
     {"Inventory": "Inventaire"},
     {"Ticketing": "Ticketerie"},
   ];
 
   final List<Service> serv = [
+    Service("Courrier", "social", Icons.mail),
     Service("Social", "social", Icons.family_restroom),
     Service("Inventaire", "inventory", Icons.inventory_rounded),
     Service("Support IT", "ticketing", Icons.airplane_ticket_outlined),
