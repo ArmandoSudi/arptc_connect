@@ -16,7 +16,7 @@ class MainServiceScreen extends StatelessWidget {
   ];
 
   final List<Service> serv = [
-    Service("Courrier", "social", Icons.mail),
+    Service("Courrier", "courriers", Icons.mail),
     Service("Social", "social", Icons.family_restroom),
     Service("Inventaire", "inventory", Icons.inventory_rounded),
     Service("Support IT", "ticketing", Icons.airplane_ticket_outlined),

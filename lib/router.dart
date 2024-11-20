@@ -16,7 +16,9 @@ import 'package:arptc_connect/modules/courrier/screens/add_courrier_screen.dart'
 import 'package:arptc_connect/modules/courrier/screens/details_courrier.dart';
 import 'package:arptc_connect/modules/courrier/screens/list_courriers_screen.dart';
 import 'package:arptc_connect/modules/dashboard/presentation/screens/main_dashboard_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/appro_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/inventory_main_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/livraison_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
 import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
 import 'package:arptc_connect/modules/social/screens/main_social_screen.dart';
@@ -113,12 +115,33 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                         child: InventoryMainScreen(),
                       ),
                       routes: [
+
+                        // Management
+                        GoRoute(
+                          path: 'management',
+                          builder: (context, state) => ManageItemScreen(),
+                        ),
+
+                        // Approvisionnement
+                        GoRoute(
+                          path: 'appro',
+                          builder: (context, state) => ApproScreen(),
+                        ),
+
+                        // Livraison
+                        GoRoute(
+                          path: 'livraison',
+                          builder: (context, state) => LivraisonScreen(),
+                        ),
+
                         GoRoute(
                           path: 'cart',
                           builder: (context, state) => CartScreen(),
                         ),
                       ],
                     ),
+
+                    // Ticketing
                     GoRoute(
                       path: 'ticketing',
                       builder: (context, state)
@@ -137,6 +160,29 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                         ),
                       ]
                     ),
+
+                    // Courriers
+                    GoRoute(
+                      path: 'courriers',
+                      pageBuilder: (context, state) => const NoTransitionPage(
+                        child: ListCourriersScreen(),
+                      ),
+                      routes: [
+                        GoRoute(
+                          path: ':courrierId',
+                          builder: (context, state) => DetailsCourrierScreen(state.pathParameters['courrierId'] as String),
+                        ),
+                        GoRoute(
+                          path: 'enregistrer',
+                          builder: (context, state) => const AddCourrierScreen(),
+                        ),GoRoute(
+                          path: ':courrierId/annotations/enregistrer',
+                          builder: (context, state) =>
+                              AddAnnotationScreen(courrierId: state.pathParameters['courrierId'] as String),
+                        ),
+                      ],
+                    ),
+
                   ],
                 ),
               ]

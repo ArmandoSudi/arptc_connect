@@ -83,7 +83,7 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                               .copyWith(fontWeight: FontWeight.w600),
                         ),
                         subtitle: Text(
-                          data[index].quantity.toString(),
+                          data[index].quantity.toString() + " " + data[index].unit + "(s)",
                           style: theme.textTheme.labelMedium,
                         ),
                         trailing: Container(

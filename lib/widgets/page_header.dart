@@ -16,7 +16,7 @@ class PageHeader extends StatelessWidget {
         Text(
           title,
           style: theme.textTheme.headlineMedium!.copyWith(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
           ),
         ),
       description == null ? Text(description!) : const SizedBox.shrink(),
