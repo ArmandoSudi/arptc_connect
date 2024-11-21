@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:arptc_connect/extensions/date_extension.dart';
 import 'package:arptc_connect/modules/ticketing/data/ticketing_service.dart';
+import 'package:arptc_connect/modules/ticketing/presentation/controllers/async_ticket_details.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_form_field.dart';
 import 'package:barcode_widget/barcode_widget.dart';
@@ -22,12 +25,19 @@ class TicketDetailsScreen extends ConsumerStatefulWidget {
   ConsumerState createState() => _TicketDetailsScreenState();
 }
 
+final ticketStatusProvider = StateProvider<bool>((_) {
+  return false;
+});
+
 class _TicketDetailsScreenState extends ConsumerState<TicketDetailsScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   Ticket? ticket;
 
   @override
   Widget build(BuildContext context) {
+    final ticketStatus = ref.watch(ticketStatusProvider);
+    final asyncTicket = ref.watch(asyncTicketDetailsProvider(widget.ticketId));
+
     return Scaffold(
       body: ContentView(
         child: Column(
@@ -52,28 +62,18 @@ class _TicketDetailsScreenState extends ConsumerState<TicketDetailsScreen> {
             ResponsiveCenter(
               child: Container(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    FutureBuilder(
-                        future: ref
-                            .watch(ticketingServiceProvider)
-                            .getTicketById(widget.ticketId),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          }
-                          if (snapshot.hasError) {
-                            return const Center(
-                                child: Text('Erreur de connection'));
-                          }
-                          ticket = snapshot.data as Ticket;
-                          return TicketWidget(ticket: ticket!);
-                        }),
-                  ],
+                child: asyncTicket.when(
+                  data: (Ticket data) {
+                    return TicketWidget(ticket: data);
+                  },
+                  error: (Object error, StackTrace stackTrace) {
+                    log("Error: $error");
+                  },
+                  loading: () {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
                 ),
               ),
             ),
@@ -84,26 +84,27 @@ class _TicketDetailsScreenState extends ConsumerState<TicketDetailsScreen> {
         child: Row(
           children: [
             Expanded(
-              child: CustomFilledButton(
-                  onPressed: () async {
-                    // saveTicket();
-                    // context.pop();
-                    await showSolutionFormDialog(context, widget.ticketId);
-                  },
-                  text: "Cloturer"),
-            ),
-            const Gap(16),
-            Expanded(
               child: TextButton(
                 style: TextButton.styleFrom(
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                  minimumSize: const Size.fromHeight(50),
-                ),
+                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    minimumSize: const Size.fromHeight(50),
+                    foregroundColor: Colors.grey),
                 onPressed: () {
                   context.pop();
                 },
                 child: const Text("Annuler"),
               ),
+            ),
+            const Gap(16),
+            Expanded(
+              child: CustomFilledButton(
+                  onPressed: ticketStatus
+                      ? null
+                      : () async {
+                          await showSolutionFormDialog(
+                              context, widget.ticketId);
+                        },
+                  text: "Cloturer"),
             ),
           ],
         ),
@@ -131,12 +132,26 @@ class _TicketDetailsScreenState extends ConsumerState<TicketDetailsScreen> {
                       hintText: "",
                       textInputType: TextInputType.name,
                       controller: solutionTEC,
-                      borderRadius: 30,
+                      borderRadius: 5,
                       maxLine: 4,
                     ),
                     const Gap(16),
                     Row(
                       children: [
+                        Expanded(
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                                minimumSize: const Size.fromHeight(50)),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text(
+                              "Annuler",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: CustomFilledButton(
                             onPressed: () {
@@ -150,20 +165,6 @@ class _TicketDetailsScreenState extends ConsumerState<TicketDetailsScreen> {
                               context.pop();
                             },
                             text: 'confirmer',
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                                minimumSize: const Size.fromHeight(50)),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text(
-                              "Annuler",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
                           ),
                         ),
                       ],
@@ -197,7 +198,8 @@ class TicketWidget extends StatelessWidget {
           const Gap(16),
           _buildLabels(context, "agent", "date"),
           const Gap(4),
-          _buildTitles(context, ticket.agent, ticket!.creationDate.formatedDate),
+          _buildTitles(
+              context, ticket.agent, ticket!.creationDate.formatedDate),
           const Gap(16),
           _buildDottedLine(context),
           const Gap(16),
@@ -205,32 +207,41 @@ class TicketWidget extends StatelessWidget {
           const Gap(4),
           Row(
             children: [
-              Text(
-                  ticket.category,
-                  style: Theme.of(context).textTheme.bodyLarge
-              ),
+              Text(ticket.category,
+                  style: Theme.of(context).textTheme.bodyLarge),
               Spacer(),
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration:  ShapeDecoration(
-                  color: ticket.isSolved ? Colors.grey: Colors.green, // Adjust color as needed
+                decoration: ShapeDecoration(
+                  color: ticket.isSolved ? Colors.grey : Colors.green,
+                  // Adjust color as needed
                   shape: StadiumBorder(),
                 ),
                 child: Text(
                   ticket.isSolved ? "Cloturé" : "Ouvert",
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Colors.white),
                 ),
               ),
             ],
           ),
           const Gap(16),
+          _buildLabels(context, "Solution", ""),
+          Row(
+            children: [
+              Text(ticket.solution ?? " - ",
+                  style: Theme.of(context).textTheme.bodyLarge),
+            ],
+          ),
           Text("Numéro ticket", style: Theme.of(context).textTheme.titleSmall),
           const Gap(8),
-        BarcodeWidget(
-          width: 200,
-          barcode: Barcode.code128(),
-          data: 'XASFDEF',
-        ),
+          BarcodeWidget(
+            width: 200,
+            barcode: Barcode.code128(),
+            data: ticket.id!,
+          ),
         ],
       ),
     );
@@ -240,24 +251,24 @@ class TicketWidget extends StatelessWidget {
     return Row(
       children: [
         Text(
-            label1,
-          style: Theme.of(context).textTheme.titleSmall
+          label1,
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
         ),
         Spacer(),
         Text(
           label2,
-          style: Theme.of(context).textTheme.titleSmall,
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
         ),
       ],
     );
   }
+
   Widget _buildTitles(BuildContext context, String title1, String title2) {
     return Row(
       children: [
-        Text(
-          title1,
-          style: Theme.of(context).textTheme.bodyLarge
-        ),
+        Text(title1, style: Theme.of(context).textTheme.bodyLarge),
         Spacer(),
         Text(
           title2,
@@ -266,6 +277,7 @@ class TicketWidget extends StatelessWidget {
       ],
     );
   }
+
   Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
@@ -300,7 +312,8 @@ class DottedLinePainter extends CustomPainter {
     double startX = 0.0;
 
     while (startX < max) {
-      canvas.drawLine(Offset(startX, 0.0), Offset(startX + dashWidth, 0.0), paint);
+      canvas.drawLine(
+          Offset(startX, 0.0), Offset(startX + dashWidth, 0.0), paint);
       startX += dashWidth + dashSpace;
     }
   }
@@ -310,4 +323,3 @@ class DottedLinePainter extends CustomPainter {
     return false;
   }
 }
-

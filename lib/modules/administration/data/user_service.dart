@@ -3,9 +3,6 @@ import 'dart:developer';
 import 'package:arptc_connect/modules/administration/domain/models/user.dart';
 import 'package:arptc_connect/utils/firestore_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:arptc_connect/modules/administration/domain/models/user.dart';
-
-// import '../../../../../viamo/lib/utils/firestore_client.dart';
 
 class UserService {
   final FirestoreClient firestoreClient;

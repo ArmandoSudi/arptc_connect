@@ -16,14 +16,15 @@ class InventoryMainScreen extends StatelessWidget {
   ];
 
   final List<Service> _inventoryServices = [
-    Service("Gestion des Stocks", "management", Icons.inventory_2_outlined),
-    Service("Approvisionnement", "appro", Icons.download),
-    Service("Livraison", "livraison", Icons.upload),
+    Service("Gestion des articles", "management", Icons.inventory_2_outlined, color: Colors.green),
+    Service("Approvisionnement", "appro", Icons.download, color: Colors.blue),
+    Service("Livraison", "livraison", Icons.upload, color: Colors.amber),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // backgroundColor: Colors.white,
         body: ContentView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +84,7 @@ class InventoryMainScreen extends StatelessWidget {
             children: [
               Icon(
                 service.iconData,
-                color: Colors.grey[700],
+                color: service.color,
                 size: 40,
               ),
               const Gap(8),

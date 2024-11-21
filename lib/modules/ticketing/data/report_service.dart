@@ -139,7 +139,7 @@ class ReportService {
       children: [
         pw.Text(
           'Rapport de support IT',
-          style: pw.TextStyle(fontSize: 12),
+          style: const pw.TextStyle(fontSize: 12),
         ),
       ],
     );
@@ -195,9 +195,17 @@ class ReportService {
         tickets.length,
             (row) => List<String>.generate(
           tableHeaders.length,
-              (col) => tickets[row].getIndex(col),
+              (col) => tickets[row].getField(col),
         ),
       ),
+      columnWidths: {
+        // Specify fixed width for each column
+        0: pw.FixedColumnWidth(15), // 50 units width for the first column
+        1: pw.FixedColumnWidth(80), // 80 units width for the second column
+        2: pw.FixedColumnWidth(80), // 100 units width for the third column
+        3: pw.FixedColumnWidth(80), // 120 units width for the fourth column
+        4: pw.FlexColumnWidth(), // 150 units width for the fifth column
+      },
     );
   }
 

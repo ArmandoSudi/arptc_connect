@@ -57,4 +57,3 @@ final ticketingServiceProvider = Provider<TicketingService>((ref) {
   return TicketingService(ref.read(firestoreClientProvider),);
 });
 
-

@@ -32,6 +32,7 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
     return Scaffold(
       body: ContentView(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
@@ -45,18 +46,6 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                     title: "Articles",
                     description: 'Gestion des articles en stock'),
                 Expanded(child: Container()),
-                IconButton(
-                  onPressed: () => context.go('/service/inventory/cart'),
-                  icon: Badge(
-                    label: Text(
-                        "${ref.watch(cartControllerProvider.notifier).count}"),
-                    isLabelVisible:
-                        ref.watch(cartControllerProvider.notifier).count > 0
-                            ? true
-                            : false,
-                    child: Icon(Icons.shopping_cart_outlined),
-                  ),
-                ),
                 const Gap(16),
                 FilledButton.icon(
                   icon: const Icon(Icons.add),
@@ -69,58 +58,47 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
               ],
             ),
             const Gap(16),
-            asyncProducts.when(
-              data: (data) {
-                return Expanded(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: data.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(
-                          data[index].name,
-                          style: theme.textTheme.bodyMedium!
-                              .copyWith(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: Text(
-                          data[index].quantity.toString() + " " + data[index].unit + "(s)",
-                          style: theme.textTheme.labelMedium,
-                        ),
-                        trailing: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.transparent,
-                              width: 1.0, // Adjust border width as needed
-                            ),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+                ),
+                child: asyncProducts.when(
+                  data: (data) {
+                    return ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: data.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(
+                            data[index].name,
+                            style: theme.textTheme.bodyMedium!
+                                .copyWith(fontWeight: FontWeight.w600),
                           ),
-                          child: IconButton(
-                            onPressed: () async {
-                              await showSelectedItemDialog(
-                                  context, data[index]);
-                              // context.pop();
-                            },
-                            icon: Icon(
-                              Icons.add,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    separatorBuilder: (BuildContext context, int index) {
-                      return const Divider();
-                    },
+                          // subtitle: Text(
+                          //   data[index].quantity.toString() + " " + data[index].unit + "(s)",
+                          //   style: theme.textTheme.labelMedium,
+                          // ),
+                          trailing: Text(
+                            data[index].quantity.toString() + " " + data[index].unit + "(s)",
+                            style: theme.textTheme.labelMedium,
+                          )
+                        );
+                      },
+                      separatorBuilder: (BuildContext context, int index) {
+                        return const Divider();
+                      },
+                    );
+                  },
+                  error: (error, stackTrace) {
+                    //TODO log the error that going to occur here
+                    return const Text("An error occured when loading the items");
+                  },
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(),
                   ),
-                );
-              },
-              error: (error, stackTrace) {
-                //TODO log the error that going to occur here
-                return const Text("An error occured when loading the items");
-              },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
+                ),
               ),
             ),
           ],

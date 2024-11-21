@@ -14,20 +14,21 @@ class NavigationAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-    // Future.delayed(Duration(seconds: 2), (){
-    //   log("NavigationAppBar EMAIL::  ${ref.read(sharedPrefUtilityProvider).getEmail()}");
-    // });
-
-    String email = ref.watch(sharedPrefUtilityProvider).getEmail();
-
-    // log("NavigationAppBar Email::  $email");
-
     return AppBar(
       title: const NavigationTitle(),
       centerTitle: false,
       elevation: 4,
       actions: [
-        Text(email),
+        FutureBuilder(
+          future: ref.watch(sharedPrefUtilityProvider).getEmail(),
+          builder:
+            (BuildContext context, AsyncSnapshot<String> snapshot) {
+              if (snapshot.hasData){
+                return Text(snapshot.data!);
+              }
+              return Text("N/A");
+            },
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: PopupMenuButton<void>(

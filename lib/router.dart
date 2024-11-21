@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:arptc_connect/core/shared_preferences_provider.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/add_agent_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/add_direction_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/add_user_screen.dart';
@@ -304,7 +305,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // log("1. REDIRECTING TO DASHBOARD SCREEN");
 
       return _authState.when(
-          data: (data) {
+          data: (data) async {
             User? user = data;
 
             // if (user == null && state.location == '/'){
@@ -313,9 +314,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               return '/login';
             }
 
-            // log("2. REDIRECTING TO DASHBOARD SCREEN");
-            // debugPrint(":: RETURNING LOGIN");
-            // return '/login';
+            var email = user.email;
+            await  ref.read(authServiceProvider).getUser(email!);
+            await ref.read(authServiceProvider).saveAgent(email);
+            // await ref.read(sharedPrefUtilityProvider).setRoles(roles)
+
           },
           loading: () => '/login',
           error: (e, trace) => '/error');
@@ -324,94 +327,3 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   );
 }
 );
-
-// final goRouterProviderTwo = Provider<GoRouter>((ref){
-//   return router(ref);
-// });
-
-// GoRouter router(ProviderRef ref) {
-//
-// final rootNavigatorKey = GlobalKey<NavigatorState>();
-//   final shellNavigatorCourrierKey =
-//       GlobalKey<NavigatorState>(debugLabel: 'shellCourrier');
-//   final shellNavigatorDashboardKey =
-//       GlobalKey<NavigatorState>(debugLabel: 'shellDashboard');
-//   final shellNavigatorErrorKey =
-//       GlobalKey<NavigatorState>(debugLabel: 'shellError');
-//   final shellNavigatorLoginKey =
-//       GlobalKey<NavigatorState>(debugLabel: 'shellLogin');
-//
-//   return GoRouter(
-//     initialLocation: '/courriers',
-//     navigatorKey: rootNavigatorKey,
-//     debugLogDiagnostics: true,
-//     routes: [
-//       GoRoute(
-//         path: '/login',
-//         pageBuilder: (context, state) => const NoTransitionPage(
-//           child: LoginScreen(),
-//         ),
-//       ),
-//       GoRoute(
-//         path: '/dashboard',
-//         pageBuilder: (context, state) => const NoTransitionPage(
-//           child: DashboardPage(),
-//         ),
-//       ),
-//       GoRoute(
-//         path: '/courriers',
-//         pageBuilder: (context, state) => const NoTransitionPage(
-//           child: ListCourriersScreen(),
-//         ),
-//         // routes: [
-//         //   GoRoute(
-//         //     path: 'details/:courrierId',
-//         //     pageBuilder: (context, state) {
-//         //
-//         //       return NoTransitionPage(
-//         //           child: DetailsCourrierScreen(state.pathParameters['courrierId'] as String));
-//         //     },
-//         //   ),
-//         // ],
-//       ),
-//       GoRoute(
-//         path: '/courriers/:courrierId',
-//         pageBuilder: (context, state) {
-//
-//           return NoTransitionPage(
-//               child: DetailsCourrierScreen(state.pathParameters['courrierId'] as String));
-//         },
-//       ),
-//       GoRoute(
-//         path: '/error',
-//         pageBuilder: (context, state) => const NoTransitionPage(
-//           child: Center(
-//             child: Text('Error'),
-//           ),
-//         ),
-//       )
-//     ],
-//     redirect: (context, state) async {
-//
-//       log("1. REDIRECTING TO DASHBOARD SCREEN");
-//
-//       final _authState = ref.watch(authStateProvider);
-//
-//       return _authState.when(
-//           data: (data) {
-//             User? user = data;
-//
-//             log("2. REDIRECTING TO DASHBOARD SCREEN");
-//
-//             // if (user == null && state.location == '/'){
-//             if (user == null ){
-//               debugPrint(":: GO TO LOGIN SCREEN");
-//               return '/login';
-//             }
-//           },
-//           loading: () => '/login',
-//           error: (e, trace) => '/error');
-//
-//     },
-//   );
-// }

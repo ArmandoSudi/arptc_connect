@@ -69,8 +69,8 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
 
                     // AGENT NAME FIELD
                     CustomFormField(
-                      label: "Nom",
-                      hintText: "nom de l'agent",
+                      label: "Demandeur",
+                      hintText: "nom de l'agent demandeur",
                       textInputType: TextInputType.name,
                       controller: agentNameTEC,
                     ),
@@ -78,7 +78,7 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
 
                     // CATEGORY FIELD
                     CustomDropDown(
-                      label: "Catégorie",
+                      label: "Catégorie de l'incident",
                       hintText: "Sélectionner la catégorie",
                       items: categories,
                       onChanged: (value) {
@@ -91,7 +91,7 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
 
                     // SUBJECT FIELD
                     CustomFormField(
-                      label: "Objet",
+                      label: "Incident",
                       hintText:
                           "Quel est le problème que l'agent a rencontré ?",
                       textInputType: TextInputType.name,
@@ -109,15 +109,6 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
         child: Row(
           children: [
             Expanded(
-              child: CustomFilledButton(
-                  onPressed: () {
-                    saveTicket();
-                    context.pop();
-                  },
-                  text: "Enregistrer"),
-            ),
-            const Gap(16),
-            Expanded(
               child: TextButton(
                 style: TextButton.styleFrom(
                   textStyle: const TextStyle(fontWeight: FontWeight.bold),
@@ -129,6 +120,15 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
                 child: const Text("Annuler"),
               ),
             ),
+            const Gap(16),
+            Expanded(
+              child: CustomFilledButton(
+                  onPressed: () {
+                    saveTicket();
+                    context.pop();
+                  },
+                  text: "Enregistrer"),
+            ),
           ],
         ),
       ),
@@ -137,11 +137,10 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
 
   // create a ticket object from the form fields
 
-  void saveTicket() {
+  void saveTicket() async {
     String agentName = agentNameTEC.text;
     String subject = subjectTEC.text;
-    String solution = solutionTEC.text;
-    String email = ref.watch(sharedPrefUtilityProvider).getEmail();
+    String email = await ref.watch(sharedPrefUtilityProvider).getEmail();
 
     DateTime creationDate = DateTime.now();
 
@@ -150,7 +149,7 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
       agent: agentName,
       category: selectedCategory,
       subject: subject,
-      solution: solution,
+      solution: null,
       creationDate: creationDate,
       isSolved: false,
     );

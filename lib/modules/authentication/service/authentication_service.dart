@@ -6,6 +6,7 @@ import 'package:arptc_connect/utils/firebase_constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/firebase_providers.dart';
 import '../../../core/shared_preferences_provider.dart';
@@ -26,6 +27,8 @@ class AuthService {
   Stream<User?> get authStateChange => _auth.authStateChanges();
 
   CollectionReference get _agents => _firestore.collection(FirebaseConstants.agentsCollection);
+  CollectionReference get users => _firestore.collection(FirebaseConstants.userCollection);
+
 
   ///  SignIn the user using Email and Password
   Future<void> signInWithEmailAndPassword(
@@ -38,6 +41,8 @@ class AuthService {
 
       //TODO Create an agent in the DB with email as ID
       var agent = await getAgentByEmail(result.user!.email!);
+      await getUser(result.user!.email!);
+      log("signInWithEmail:: agent ${agent ?? "INEXISTANT"}");
 
       saveAgent(result.user!.email!);
 
@@ -126,10 +131,10 @@ class AuthService {
                       },
                       child: const Text("OK"))
                 ]));
-        print('Email already in use.');
+        log('Email already in use.');
 
       } else {
-        print('Error: $e');
+        log('Error: $e');
       }
     }
   }
@@ -160,7 +165,30 @@ class AuthService {
       log("Error getAgetnByEmail: $email ::  $error");
       return null;
     }
+  }
 
+  Future<void> getUser(String email) async {
+    try {
+
+      final documentSnapshot = await users.doc(email).get();
+
+      // Save the user info in the sharedPrefs
+      if (documentSnapshot.exists) {
+
+        Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+
+        log("getUser:: Roles ${data["roles"]}");
+        log("getUser:: Roles runtime ${data["roles"].runtimeType}");
+        await _providerRef.read(sharedPrefUtilityProvider).setRoles(data["roles"]);
+        log("getUser:: User data: $data");
+      } else {
+        log("getUser:: User does not exist");
+      }
+
+    } catch (error) {
+      log("Error getUser: $email ::  $error");
+      return null;
+    }
   }
 
   Future<void> createAgent(Agent) async {

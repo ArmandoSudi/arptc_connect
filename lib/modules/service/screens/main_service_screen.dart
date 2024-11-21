@@ -1,11 +1,16 @@
+import 'dart:developer';
+
+import 'package:arptc_connect/core/constants.dart';
+import 'package:arptc_connect/core/shared_preferences_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../widgets/content_view.dart';
 import '../../../widgets/page_header.dart';
 
-class MainServiceScreen extends StatelessWidget {
+class MainServiceScreen extends ConsumerWidget {
   MainServiceScreen({super.key});
 
   final services = [
@@ -15,16 +20,15 @@ class MainServiceScreen extends StatelessWidget {
     {"Ticketing": "Ticketerie"},
   ];
 
-  final List<Service> serv = [
-    Service("Courrier", "courriers", Icons.mail),
-    Service("Social", "social", Icons.family_restroom),
-    Service("Inventaire", "inventory", Icons.inventory_rounded),
-    Service("Support IT", "ticketing", Icons.airplane_ticket_outlined),
-    Service("Parc Informatique", "ticketing", Icons.devices),
-  ];
+
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+
+    final roles = ref.read(sharedPrefUtilityProvider).getRoles();
+
+    final authorizedServices = getAccreditedService(roles);
+
     return Scaffold(
         body: ContentView(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -48,7 +52,7 @@ class MainServiceScreen extends StatelessWidget {
                 mainAxisSpacing: 10.0, // Adjust spacing as needed
                 crossAxisSpacing: 10.0,
                 childAspectRatio: 5 / 3,
-                children: serv.map((service) => serviceCard(context, service)).toList(),// Adjust spacing as needed
+                children: authorizedServices.map((service) => serviceCard(context, service)).toList(),// Adjust spacing as needed
               );
             },
           ),
@@ -80,7 +84,7 @@ class MainServiceScreen extends StatelessWidget {
             children: [
               Icon(
                 service.iconData,
-                color: Colors.grey[700],
+                color: service.color,
                 size: 40,
               ),
               const Gap(8),
@@ -100,6 +104,19 @@ class MainServiceScreen extends StatelessWidget {
       },
     );
   }
+  
+  List<Service> getAccreditedService(List<String> roles) {
+
+    List<Service> services = [];
+
+    for (String role in roles) {
+      if (Constants.modules.containsKey(role)) {
+        services.add(Constants.modules[role]!);
+      }
+    }
+
+    return services;
+  }
 
 }
 
@@ -108,5 +125,7 @@ final String name;
   final String path;
   final IconData iconData;
 
-  Service(this.name, this.path, this.iconData);
+  Color? color;
+
+  Service(this.name, this.path, this.iconData, {this.color});
 }

@@ -28,7 +28,6 @@ Future<void> main() async {
     ),
   );
 
-  // runApp(SidebarXExampleApp());
 }
 
 class MyApp extends ConsumerWidget {

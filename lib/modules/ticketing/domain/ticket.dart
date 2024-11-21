@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:arptc_connect/extensions/date_extension.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -7,9 +9,11 @@ class Ticket {
   final String subject;
   final String category;
   final String agent;
-  final String solution;
+  final String? solution;
   final bool isSolved;
   final DateTime creationDate;
+
+  final DateTime? closureDate;
 
 //<editor-fold desc="Data Methods">
   const Ticket({
@@ -18,9 +22,10 @@ class Ticket {
     required this.subject,
     required this.agent,
     required this.category,
-    required this.solution,
+    this.solution,
     required this.isSolved,
     required this.creationDate,
+    this.closureDate,
   });
 
   @override
@@ -35,7 +40,8 @@ class Ticket {
           agent == other.agent &&
           solution == other.solution &&
           isSolved == other.isSolved &&
-          creationDate == other.creationDate);
+          creationDate == other.creationDate &&
+          closureDate == other.closureDate );
 
   @override
   int get hashCode =>
@@ -46,7 +52,8 @@ class Ticket {
       agent.hashCode ^
       solution.hashCode ^
       isSolved.hashCode ^
-      creationDate.hashCode;
+      creationDate.hashCode^
+    closureDate.hashCode;
 
   @override
   String toString() {
@@ -59,6 +66,7 @@ class Ticket {
         ' solution: $solution,' +
         ' isSolved: $isSolved,' +
         ' creationDate: $creationDate,' +
+        ' closureDate: $closureDate,' +
         '}';
   }
 
@@ -80,6 +88,7 @@ class Ticket {
       solution: solution ?? this.solution,
       isSolved: isSolved ?? this.isSolved,
       creationDate: creationDate ?? this.creationDate,
+      closureDate: closureDate ?? this.closureDate,
     );
   }
 
@@ -95,12 +104,20 @@ class Ticket {
       'solution': this.solution,
       'isSolved': this.isSolved,
       'creationDate': Timestamp.fromDate(this.creationDate),
+      // 'closureDate': Timestamp.fromDate(this.closureDate),
     };
   }
 
   factory Ticket.fromMap(Map<String, dynamic> map, {String? id}) {
 
     final timestampCreationDate = map['creationDate'] as Timestamp;
+    var closureDate;
+
+    if (map['closureDate'] == null) {
+      closureDate = null;
+    } else {
+      closureDate = (map['closureDate'] as Timestamp).toDate(); // Convert to DateTime
+    }
 
     return Ticket(
       id: id ?? map['id'] as String,
@@ -108,15 +125,16 @@ class Ticket {
       subject: map['subject'] as String,
       category: map['category'] as String,
       agent: map['agent'] as String,
-      solution: map['solution'] as String,
+      solution: map['solution'],
       isSolved: map['isSolved'] as bool,
       creationDate: timestampCreationDate.toDate(),
+      closureDate: closureDate,
     );
   }
 
 //</editor-fold>
 
-  String getIndex(int index) {
+  String getField(int index) {
     switch (index) {
       case 0:
         return index.toString();

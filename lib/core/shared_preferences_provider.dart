@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,7 +20,7 @@ class SharedPrefUtility {
 
   final SharedPreferences sharedPreferences;
 
-  String getEmail() {
+  Future<String> getEmail() async {
     return sharedPreferences.getString('email') ?? '';
   }
 
@@ -28,12 +29,33 @@ class SharedPrefUtility {
     log("EMAIL : $email SAVED");
   }
 
-  String getName() {
+  Future<String> getName() async {
     return sharedPreferences.getString('name') ?? '';
   }
 
   void setName(String name) {
     sharedPreferences.setString('name', name);
   }
+
+  void setRoles(List<dynamic> roles) async {
+    final _roles = roles.map((e) => e.toString()).toList();
+    String encodedList = jsonEncode(_roles);
+    sharedPreferences.setString('roles', encodedList);
+  }
+
+  List<String> getRoles(){
+
+    var encodedList = sharedPreferences.getString('roles');
+
+    // If the string exists, decode it into a list of strings
+    if (encodedList != null) {
+      List<dynamic> jsonResponse = jsonDecode(encodedList);
+      return List<String>.from(jsonResponse);
+    }
+
+    return [];
+  }
+
+
 
 }

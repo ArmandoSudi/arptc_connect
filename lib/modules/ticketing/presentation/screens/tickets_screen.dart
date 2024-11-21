@@ -99,13 +99,6 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
                   label: const Text("Rapport"),
                 ),
                 const Gap(16),
-                FilledButton.icon(
-                  onPressed: () {
-                    context.go("/service/ticketing/add");
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text("Nouveau"),
-                )
               ],
             ),
 
@@ -147,6 +140,7 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
               },
               error: (error, stackTrace) {
                 log("Error loading tickets:: $error");
+                log("$stackTrace");
                 return const Text("An error occurer when loading the items");
               },
               loading: () => const Center(
@@ -155,6 +149,10 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
             )
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () => context.go("/service/ticketing/add"),
       ),
     );
   }
