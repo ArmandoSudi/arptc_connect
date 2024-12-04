@@ -46,4 +46,4 @@ app.*.map.json
 
 # Web related
 /public
-/.firebase
+/.firebase/
