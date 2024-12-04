@@ -134,10 +134,10 @@ class Ticket {
 
 //</editor-fold>
 
-  String getField(int index) {
-    switch (index) {
+  String getField(int row, int col) {
+    switch (col) {
       case 0:
-        return index.toString();
+        return (row+1).toString();
       case 1:
         return creationDate.formatedDate;
       case 2:

@@ -12,70 +12,6 @@ import 'package:flutter/services.dart';
 import '../../../utils/pdf_api.dart';
 
 class ReportService {
-  // Future<void> printTicketReport(List<Ticket> tickets) async {
-  //   PdfDocument document = PdfDocument();
-  //   document.pageSettings.orientation = PdfPageOrientation.landscape;
-  //   PdfGrid grid = PdfGrid();
-  //
-  //
-  //   grid.columns.add(count: 5);
-  //
-  //   // Add header to the grid
-  //   grid.headers.add(1);
-  //
-  //   PdfGridRow header = grid.headers[0];
-  //   header.cells[0].value = 'Date';
-  //   header.cells[1].value = 'Intervenant';
-  //   header.cells[2].value = 'Agent';
-  //   header.cells[3].value = 'Problème';
-  //   header.cells[4].value = 'Solution';
-  //
-  //   header.style = PdfGridCellStyle(
-  //     backgroundBrush: PdfSolidBrush(PdfColor(68, 114, 196)),
-  //     textBrush: PdfBrushes.white,
-  //     font: PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold),
-  //   );
-  //
-  //   for (Ticket ticket in tickets) {
-  //     PdfGridRow row = grid.rows.add();
-  //     row.cells[0].value = ticket.creationDate.formatedDate;
-  //     row.cells[1].value = ticket.author;
-  //     row.cells[2].value = ticket.agent;
-  //     row.cells[3].value = ticket.subject;
-  //     row.cells[4].value = ticket.solution;
-  //   }
-  //
-  //   grid.style = PdfGridStyle(
-  //     cellPadding: PdfPaddings(left: 2, right: 2, top: 2, bottom: 2),
-  //   );
-  //
-  //   //Adds a page to the document
-  //   PdfPage page = document.pages.add();
-  //
-  //   final imageData = await rootBundle.load('assets/icons/app_logo.jpg'); // Assuming image in assets folder
-  //   final imageBytes = imageData.buffer.asUint8List();
-  //   final pdfImage = PdfBitmap(imageBytes);
-  //
-  //   page.graphics.drawImage(
-  //       pdfImage,
-  //       Rect.fromLTWH(
-  //           0, 0, page.getClientSize().width, page.getClientSize().height));
-  //
-  //   grid.draw(
-  //     page: document.pages.add(),
-  //     bounds: Rect.fromLTWH(0, 0, 0, 0),
-  //   );
-  //
-  //   List<int> bytes = await document.save();
-  //
-  //   // Download document
-  //   AnchorElement(href: 'data:application/octet-stream;base64,${base64.encode(bytes)}')
-  //     ..setAttribute('download', 'ticket_report.pdf')
-  //     ..click();
-  //
-  //   // Dispose the document
-  //    document.dispose();
-  // }
 
   Future<void> generateReport(List<Ticket> tickets) async {
     final pdf = pw.Document();
@@ -195,7 +131,7 @@ class ReportService {
         tickets.length,
             (row) => List<String>.generate(
           tableHeaders.length,
-              (col) => tickets[row].getField(col),
+              (col) => tickets[row].getField(row, col),
         ),
       ),
       columnWidths: {

@@ -28,6 +28,8 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
 
   DateTime? _selectedDate;
 
+  List<Ticket> _tickets = [];
+
   @override
   Widget build(BuildContext context) {
     final asyncTickets = ref.watch(asyncTicketProvider);
@@ -91,7 +93,7 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
                     ];
 
                     // ReportService().printTicketReport(tickets);
-                    ReportService().generateReport(tickets);
+                    ReportService().generateReport(_tickets);
 
                     // context.go("/service/ticketing/add");
                   },
@@ -105,6 +107,15 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
             // LIST OF TICKETS
             asyncTickets.when(
               data: (data) {
+
+                // _tickets = data;
+                _tickets.clear();
+
+                // Order list in data by ticket creation date
+                data.sort((a, b) => a.creationDate.compareTo(b.creationDate));
+
+                _tickets.addAll(data);
+
                 return Expanded(
                   child: ListView.separated(
                     shrinkWrap: true,
