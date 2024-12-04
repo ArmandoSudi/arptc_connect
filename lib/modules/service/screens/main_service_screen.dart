@@ -36,7 +36,7 @@ class MainServiceScreen extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             PageHeader(
-              title: 'Applications métiers',
+              title: 'Services',
               description: '',
             ),
           ],

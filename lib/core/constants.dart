@@ -18,6 +18,7 @@ class Constants {
     "INVENTORY" : Service("Inventaire", "inventory", Icons.inventory_rounded, color: Colors.red),
     "TICKETING" : Service("Support IT", "ticketing", Icons.airplane_ticket_outlined, color: Colors.deepPurple),
     "PARC_INFORMATIQUE" : Service("Parc Informatique", "ticketing", Icons.devices, color: Colors.greenAccent),
+    "TASK" : Service("Activités", "tasks", Icons.task_alt_outlined, color: Colors.pink),
   };
 
 }

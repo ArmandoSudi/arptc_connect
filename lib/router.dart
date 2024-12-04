@@ -23,6 +23,7 @@ import 'package:arptc_connect/modules/inventory/presentation/livraison_screen.da
 import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
 import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
 import 'package:arptc_connect/modules/social/screens/main_social_screen.dart';
+import 'package:arptc_connect/modules/task/presentation/screens/tasks_screen.dart';
 import 'package:arptc_connect/modules/ticketing/presentation/screens/add_ticket_screen.dart';
 import 'package:arptc_connect/modules/ticketing/presentation/screens/ticket_details_screen.dart';
 import 'package:arptc_connect/modules/ticketing/presentation/screens/tickets_screen.dart';
@@ -182,6 +183,28 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                               AddAnnotationScreen(courrierId: state.pathParameters['courrierId'] as String),
                         ),
                       ],
+                    ),
+
+                    // Tasks
+                    GoRoute(
+                      path: 'tasks',
+                      pageBuilder: (context, state) => const NoTransitionPage(
+                        child: TasksScreen(),
+                      ),
+                      // routes: [
+                      //   GoRoute(
+                      //     path: ':courrierId',
+                      //     builder: (context, state) => DetailsCourrierScreen(state.pathParameters['courrierId'] as String),
+                      //   ),
+                      //   GoRoute(
+                      //     path: 'enregistrer',
+                      //     builder: (context, state) => const AddCourrierScreen(),
+                      //   ),GoRoute(
+                      //     path: ':courrierId/annotations/enregistrer',
+                      //     builder: (context, state) =>
+                      //         AddAnnotationScreen(courrierId: state.pathParameters['courrierId'] as String),
+                      //   ),
+                      // ],
                     ),
 
                   ],

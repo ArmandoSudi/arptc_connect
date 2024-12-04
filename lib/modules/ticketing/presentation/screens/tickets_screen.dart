@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:arptc_connect/extensions/date_extension.dart';
+import 'package:arptc_connect/modules/task/presentation/controllers/async_tasks.dart';
 import 'package:arptc_connect/modules/ticketing/data/report_service.dart';
 import 'package:arptc_connect/modules/ticketing/presentation/controllers/async_ticket.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
@@ -33,6 +34,18 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
   @override
   Widget build(BuildContext context) {
     final asyncTickets = ref.watch(asyncTicketProvider);
+    final asyncTasks = ref.watch(asyncTasksProvider);
+
+    asyncTasks.when(
+      data: (data) {
+        log("Tasks data: $data");
+      },
+    loading: () {},
+      error: (error, stackTrace) {
+        log("Error loading tasks:: $error");
+      }
+    );
+
     final theme = Theme.of(context);
 
     return Scaffold(
