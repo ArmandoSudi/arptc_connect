@@ -96,7 +96,7 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
                           "Quel est le problème que l'agent a rencontré ?",
                       textInputType: TextInputType.name,
                       controller: subjectTEC,
-                      maxLine: 2,
+                      // maxLine: 2,
                     ),
                   ],
                 ),

@@ -58,7 +58,7 @@ class _ApproScreenState extends ConsumerState<ApproScreen> {
                         return Container(
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                            borderRadius: const BorderRadius.all(Radius.circular(5.0)),
                           ),
                           child: ListView.separated(
                             shrinkWrap: true,

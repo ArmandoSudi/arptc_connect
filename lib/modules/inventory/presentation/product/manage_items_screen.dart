@@ -81,7 +81,7 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                           //   style: theme.textTheme.labelMedium,
                           // ),
                           trailing: Text(
-                            data[index].quantity.toString() + " " + data[index].unit + "(s)",
+                            "${data[index].quantity} ${data[index].unit}(s)",
                             style: theme.textTheme.labelMedium,
                           )
                         );
@@ -108,8 +108,8 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
   }
 
   Future<void> showCreateProductDialog(BuildContext context) async {
-    final TextEditingController _nameController = TextEditingController();
-    final TextEditingController _quantityController = TextEditingController();
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController quantityController = TextEditingController();
     String? selectedUnitValue;
 
     return await showDialog(
@@ -128,7 +128,7 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                       label: "Nom",
                       hintText: "nom de l'article",
                       textInputType: TextInputType.text,
-                      controller: _nameController,
+                      controller: nameController,
                     ),
                     const Gap(12),
 
@@ -137,14 +137,14 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                       label: "Quantité",
                       hintText: "quantité de l'article en stock",
                       textInputType: TextInputType.number,
-                      controller: _quantityController,
+                      controller: quantityController,
                     ),
                     const Gap(12),
 
                     // UNIT
                     CustomDropDown(
                         label: "Unité",
-                        hintText: "Selectionner l\'unité de l\'article",
+                        hintText: "Selectionner l'unité de l'article",
                         items: Constants.productUnits,
                         onChanged: (value) {
                           setState(() {
@@ -160,10 +160,10 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                           child: CustomFilledButton(
                             onPressed: () {
                               final product = Product(
-                                name: _nameController.text,
+                                name: nameController.text,
                                 unit: selectedUnitValue ??
                                     Constants.productUnits.first,
-                                quantity: int.parse(_quantityController.text),
+                                quantity: int.parse(quantityController.text),
                               );
 
                               ref

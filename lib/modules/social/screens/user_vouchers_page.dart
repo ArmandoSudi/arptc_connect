@@ -48,7 +48,7 @@ class UserVoucherPage extends StatelessWidget {
       leading: const Icon(Icons.person),
       title: Text(voucher.agentName),
       subtitle: Text(voucher.dependantName),
-      trailing: voucher.isApproved ? Text("Approuvé", style: TextStyle(color: Colors.green)) : Text("En attente", style: TextStyle(color: Colors.red)),
+      trailing: voucher.isApproved ? const Text("Approuvé", style: TextStyle(color: Colors.green)) : const Text("En attente", style: TextStyle(color: Colors.red)),
       onTap: () {
         debugPrint("Doc ID: ${voucher.reference.id}");
         // Navigator.of(context).push(

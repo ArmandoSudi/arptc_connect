@@ -32,7 +32,7 @@ class InventoryMainScreen extends StatelessWidget {
               Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back_ios),
+                    icon: const Icon(Icons.arrow_back_ios),
                     onPressed: () => context.pop(),
                   ),
                   const PageHeader(

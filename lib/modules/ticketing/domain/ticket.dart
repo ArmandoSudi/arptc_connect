@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:arptc_connect/extensions/date_extension.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -57,17 +56,7 @@ class Ticket {
 
   @override
   String toString() {
-    return 'Ticket{' +
-        ' id: $id,' +
-        ' author: $author,' +
-        ' subject: $subject,' +
-        ' category: $category,' +
-        ' agent: $agent,' +
-        ' solution: $solution,' +
-        ' isSolved: $isSolved,' +
-        ' creationDate: $creationDate,' +
-        ' closureDate: $closureDate,' +
-        '}';
+    return 'Ticket{ id: $id, author: $author, subject: $subject, category: $category, agent: $agent, solution: $solution, isSolved: $isSolved, creationDate: $creationDate, closureDate: $closureDate,}';
   }
 
   Ticket copyWith({
@@ -83,12 +72,12 @@ class Ticket {
       id: id ?? this.id,
       author: author ?? this.author,
       subject: subject ?? this.subject,
-      category: category ?? this.category,
+      category: category ?? category,
       agent: agent ?? this.agent,
       solution: solution ?? this.solution,
       isSolved: isSolved ?? this.isSolved,
       creationDate: creationDate ?? this.creationDate,
-      closureDate: closureDate ?? this.closureDate,
+      closureDate: closureDate ?? closureDate,
     );
   }
 
@@ -96,14 +85,14 @@ class Ticket {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': this.id,
-      'author': this.author,
-      'subject': this.subject,
-      'agent': this.agent,
-      'category': this.category,
-      'solution': this.solution,
-      'isSolved': this.isSolved,
-      'creationDate': Timestamp.fromDate(this.creationDate),
+      'id': id,
+      'author': author,
+      'subject': subject,
+      'agent': agent,
+      'category': category,
+      'solution': solution,
+      'isSolved': isSolved,
+      'creationDate': Timestamp.fromDate(creationDate),
       // 'closureDate': Timestamp.fromDate(this.closureDate),
     };
   }
@@ -111,7 +100,7 @@ class Ticket {
   factory Ticket.fromMap(Map<String, dynamic> map, {String? id}) {
 
     final timestampCreationDate = map['creationDate'] as Timestamp;
-    var closureDate;
+    DateTime? closureDate;
 
     if (map['closureDate'] == null) {
       closureDate = null;
@@ -141,11 +130,11 @@ class Ticket {
       case 1:
         return creationDate.formatedDate;
       case 2:
-        return this.author;
+        return author;
       case 3:
-        return this.agent;
+        return agent;
       case 4:
-        return this.subject;
+        return subject;
     }
     return '';
   }

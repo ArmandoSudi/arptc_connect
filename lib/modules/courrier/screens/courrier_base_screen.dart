@@ -1,6 +1,5 @@
 import 'package:arptc_connect/modules/courrier/screens/details_courrier.dart';
 import 'package:arptc_connect/modules/courrier/screens/details_courrier_two.dart';
-import 'package:arptc_connect/modules/courrier/screens/list_courriers_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -147,7 +146,7 @@ class _CourrierBaseScreenState extends ConsumerState<CourrierBaseScreen> {
                       subtitle: Text(courrier.object,
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, color: Colors.grey)),
-                      trailing: Icon(Icons.arrow_forward_ios),
+                      trailing: const Icon(Icons.arrow_forward_ios),
                       onTap: () {
                         debugPrint("Selecting a courrier");
                         // ref.watch(selectedCourrier.notifier).state =
@@ -157,7 +156,7 @@ class _CourrierBaseScreenState extends ConsumerState<CourrierBaseScreen> {
                       },
                     );
 
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

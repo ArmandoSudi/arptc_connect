@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:arptc_connect/core/constants.dart';
 import 'package:arptc_connect/core/shared_preferences_provider.dart';

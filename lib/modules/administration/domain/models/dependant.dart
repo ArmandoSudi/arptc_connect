@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Dependant {
   final String name;
@@ -30,12 +29,7 @@ class Dependant {
 
   @override
   String toString() {
-    return 'Dependant{' +
-        ' name: $name,' +
-        ' relationship: $relationship,' +
-        ' imageURL: $imageURL,' +
-        ' id: $id,' +
-        '}';
+    return 'Dependant{ name: $name, relationship: $relationship, imageURL: $imageURL, id: $id,}';
   }
 
   Dependant copyWith({
@@ -54,10 +48,10 @@ class Dependant {
 
   Map<String, dynamic> toMap() {
     return {
-      'name': this.name,
-      'relationship': this.relationship,
-      'imageURL': this.imageURL,
-      'id': this.id,
+      'name': name,
+      'relationship': relationship,
+      'imageURL': imageURL,
+      'id': id,
     };
   }
 

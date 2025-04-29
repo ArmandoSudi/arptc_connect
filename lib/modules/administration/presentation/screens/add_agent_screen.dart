@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:arptc_connect/extensions/date_extension.dart';
 import 'package:arptc_connect/modules/administration/data/bureau_provider.dart';
@@ -143,7 +142,7 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                           label: "Date de naissance",
                           hintText: "Date de naissance de l'agent",
                           textInputType: TextInputType.name,
-                          suffixIcon: Icon(Icons.calendar_month),
+                          suffixIcon: const Icon(Icons.calendar_month),
                           controller: dobController,
                           onTap: () async {
                             dobDate = (await showDatePicker(
@@ -154,7 +153,7 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                             ))!;
 
                             setState(() {
-                              dobController.text = dobDate!.formatedDate;
+                              dobController.text = dobDate.formatedDate;
                             });
                           },
                         ),
@@ -180,7 +179,7 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                           label: "Date d'engagement",
                           hintText: "Date d'engagement de l'agent",
                           textInputType: TextInputType.name,
-                          suffixIcon: Icon(Icons.calendar_month),
+                          suffixIcon: const Icon(Icons.calendar_month),
                           controller: dateEngagementController,
                           onTap: () async {
                             dateEngagement = (await showDatePicker(
@@ -192,7 +191,7 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
 
                             setState(() {
                               dateEngagementController.text =
-                                  dateEngagement!.formatedDate;
+                                  dateEngagement.formatedDate;
                             });
                           },
                         ),
@@ -204,12 +203,12 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 5),
-                              child: const Text("Sexe"),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 5),
+                              child: Text("Sexe"),
                             ),
                             DropdownButtonFormField<String>(
-                              hint: Text("m"),
+                              hint: const Text("m"),
                               decoration: const InputDecoration(
                                 contentPadding: EdgeInsets.symmetric(
                                     horizontal: 20, vertical: 10),
@@ -227,7 +226,7 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                               value: genres.first,
                               items:
                                   genres.map<DropdownMenuItem<String>>((genre) {
-                                print("Dropdown menuitem value ${genre}");
+                                print("Dropdown menuitem value $genre");
                                 return DropdownMenuItem<String>(
                                   value: genre,
                                   child: Text(genre),

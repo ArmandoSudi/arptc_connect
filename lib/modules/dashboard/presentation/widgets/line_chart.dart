@@ -40,7 +40,7 @@ class _LineChart extends StatelessWidget {
     minY: 0,
   );
 
-  LineTouchData get lineTouchData1 => LineTouchData(
+  LineTouchData get lineTouchData1 => const LineTouchData(
     handleBuiltInTouches: true,
     touchTooltipData: LineTouchTooltipData(
       // getTooltipColor: (touchedSpot) => Colors.blueGrey.withOpacity(0.8),

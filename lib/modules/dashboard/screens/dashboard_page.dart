@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DashboardPage extends StatelessWidget {
-  const DashboardPage({Key? key}) : super(key: key);
+  const DashboardPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -9,7 +9,7 @@ class DashboardPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Dashboard"),
       ),
-      body: Center(
+      body: const Center(
         child: Text("Le dahsboard va varier dependamment du role de l'utilisateur"),
       ),
     );

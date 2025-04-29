@@ -1,11 +1,9 @@
 import 'dart:developer';
 
 import 'package:arptc_connect/modules/administration/data/administration_api_provider.dart';
-import 'package:arptc_connect/modules/administration/data/service_provider.dart';
 import 'package:arptc_connect/modules/administration/domain/models/service.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/add_service_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -16,7 +14,7 @@ import '../../../../widgets/page_header.dart';
 import '../../../../widgets/yes_or_no_dialog.dart';
 
 class ServicesScreen extends ConsumerWidget {
-  const ServicesScreen({Key? key}) : super(key: key);
+  const ServicesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,7 +40,7 @@ class ServicesScreen extends ConsumerWidget {
                     Row(
                       // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        IconButton(icon:Icon(Icons.arrow_back_ios), onPressed: () {
+                        IconButton(icon:const Icon(Icons.arrow_back_ios), onPressed: () {
                           context.pop();
                         },),
                         const Gap(16),

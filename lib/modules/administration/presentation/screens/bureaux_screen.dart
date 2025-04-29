@@ -12,10 +12,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../widgets/content_view.dart';
 import '../../../../widgets/page_header.dart';
 import '../../../../widgets/yes_or_no_dialog.dart';
-import 'direction_details_screen.dart';
 
 class BureauxScreen extends ConsumerWidget {
-  BureauxScreen({Key? key}) : super(key: key);
+  BureauxScreen({super.key});
 
   final bureaux = [
     "Bureau Webmaster",

@@ -15,7 +15,7 @@ class Service with _$Service {
     @JsonKey(name: "direction_ref") required String directionRef,
   }) = _Service;
 
-  factory Service.newEmpty({required String userId}) => Service(
+  factory Service.newEmpty({required String userId}) => const Service(
       id: null,
       name: '',
       directionRef: '',

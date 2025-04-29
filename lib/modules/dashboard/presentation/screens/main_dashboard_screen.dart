@@ -1,4 +1,3 @@
-import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:flutter/material.dart';

@@ -17,7 +17,7 @@ class ListCourriersScreen extends ConsumerStatefulWidget {
 }
 
 class _ListCourriersScreenState extends ConsumerState<ListCourriersScreen> {
-  String _searchDate = "Date d'enregistrement";
+  final String _searchDate = "Date d'enregistrement";
   bool isFiltering = false;
 
   @override
@@ -41,7 +41,7 @@ class _ListCourriersScreenState extends ConsumerState<ListCourriersScreen> {
                   icon: const Icon(Icons.add),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => AddCourrierScreen()));
+                        builder: (context) => const AddCourrierScreen()));
                   },
                   label: const Text("Enregistrer courrier",
                       style: TextStyle(fontWeight: FontWeight.bold)),

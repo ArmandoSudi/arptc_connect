@@ -1,4 +1,3 @@
-import 'package:arptc_connect/modules/courrier/screens/add_annotation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -41,7 +40,7 @@ class DetailsCourrierScreen extends ConsumerWidget {
               ),
               const Gap(16),
               StreamBuilder<Courrier>(
-                  stream: ref.watch(courrierServiceProvider).getCourrier(courrierId!),
+                  stream: ref.watch(courrierServiceProvider).getCourrier(courrierId),
                   builder: (context, snapshot) {
 
                     if (snapshot.hasError) {
@@ -71,7 +70,7 @@ class DetailsCourrierScreen extends ConsumerWidget {
                                     ),
                                   ),
                                   Text(
-                                    "${snapshot.data!.sender}",
+                                    snapshot.data!.sender,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -90,7 +89,7 @@ class DetailsCourrierScreen extends ConsumerWidget {
                                     ),
                                   ),
                                   Text(
-                                    "${snapshot.data!.object}",
+                                    snapshot.data!.object,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -165,10 +164,10 @@ class DetailsCourrierScreen extends ConsumerWidget {
                                               },
                                             ));
                                       },
-                                      separatorBuilder: (context, index) => Divider(),
+                                      separatorBuilder: (context, index) => const Divider(),
                                       itemCount: snapshot.data!.annotations.length,
                                       shrinkWrap: true,
-                                      physics: NeverScrollableScrollPhysics()),
+                                      physics: const NeverScrollableScrollPhysics()),
                                 ]),
                           ),
                         ),

@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:arptc_connect/modules/administration/data/service_provider.dart';
 import 'package:arptc_connect/widgets/responsive_center.dart';
@@ -16,7 +15,7 @@ import '../../domain/models/service.dart';
 
 
 class AddServiceScreen extends ConsumerStatefulWidget {
-  const AddServiceScreen({Key? key}) : super(key: key);
+  const AddServiceScreen({super.key});
 
   @override
   ConsumerState createState() => _AddServiceScreenState();
@@ -45,7 +44,7 @@ class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
                     Row(
                       children: [
                         IconButton(
-                          icon: Icon(Icons.arrow_back_ios),
+                          icon: const Icon(Icons.arrow_back_ios),
                           onPressed: () {
                             context.pop();
                           },

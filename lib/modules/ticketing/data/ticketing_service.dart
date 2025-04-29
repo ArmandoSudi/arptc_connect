@@ -48,7 +48,7 @@ class TicketingService {
     try {
       await firestoreClient.update(collection: 'tickets', data: ticket.toMap());
     } catch (err) {
-      log("InventorySer::updateProduct => Error : ${err}");
+      log("InventorySer::updateProduct => Error : $err");
     }
   }
 }

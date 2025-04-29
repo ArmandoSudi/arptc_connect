@@ -34,11 +34,7 @@ class AsyncCourrier extends _$AsyncCourrier {
 
   Future<void> filterByDate(DateTime date) async {
     state = const AsyncValue.loading();
-    if (date == null) {
-      state = AsyncValue.data(courriers);
-    } else {
-      state = AsyncValue.data(courriers.where((courrier) => courrier.date.month == date.month).toList());
+    state = AsyncValue.data(courriers.where((courrier) => courrier.date.month == date.month).toList());
     }
-  }
 
 }

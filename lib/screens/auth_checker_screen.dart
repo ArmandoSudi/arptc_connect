@@ -14,7 +14,7 @@ class AuthCheckerScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
 
     // Constantly checking the authentication state
-    final _authState = ref.watch(authStateProvider);
+    final authState = ref.watch(authStateProvider);
 
     // return _authState.when(
     //     data: (data) {

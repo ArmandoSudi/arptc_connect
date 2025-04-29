@@ -6,7 +6,7 @@ import '../../../../widgets/content_view.dart';
 import '../../../../widgets/page_header.dart';
 
 class AdministrationScreen extends StatelessWidget {
-  AdministrationScreen({Key? key}) : super(key: key);
+  AdministrationScreen({super.key});
 
   final entities = [
   {"Directions" : "directions"},

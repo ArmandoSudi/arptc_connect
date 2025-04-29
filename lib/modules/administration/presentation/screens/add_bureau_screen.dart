@@ -20,7 +20,7 @@ List<String> services = <String>[
 ];
 
 class AddBureauScreen extends ConsumerStatefulWidget {
-  const AddBureauScreen({Key? key}) : super(key: key);
+  const AddBureauScreen({super.key});
 
   @override
   ConsumerState createState() => _AddBureauScreenState();

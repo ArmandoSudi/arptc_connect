@@ -25,7 +25,7 @@ class Agent with _$Agent{
     List<Map<String, dynamic>>? dependants
   }) = _Agent;
 
-  factory Agent.newEmpty({required String userId}) => Agent(
+  factory Agent.newEmpty({required String userId}) => const Agent(
       id: null,
       name: '',
       email: '',

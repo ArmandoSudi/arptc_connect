@@ -6,7 +6,7 @@ import '../modules/administration/presentation/screens/administration_screen.dar
 enum Modules {social, inventory, helpDesk, administration}
 
 class HomePage extends StatelessWidget {
-  HomePage({Key? key}) : super(key: key);
+  HomePage({super.key});
 
   final _services = [
     Services(
@@ -70,7 +70,7 @@ class HomePage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _services[index].icon,
-                      Text("${_services[index].name}"),
+                      Text(_services[index].name),
                     ],
                   ),
                 )),

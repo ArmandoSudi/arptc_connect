@@ -53,13 +53,13 @@ class AsyncProduct extends _$AsyncProduct {
   void deliverTo(List<CartItem> cartItems, String direction) async {
 
     state = const AsyncValue.loading();
-    cartItems.forEach((cartItem) {
+    for (var cartItem in cartItems) {
       //TODO Make sure that there is enough product in stock before delivery
       int newQuantity = cartItem.product.quantity - cartItem.quantity;
       updateProductQuantity(cartItem.product, newQuantity);
 
       log("deliverTo: Delivery ${cartItem.product.name} : $newQuantity");
-    });
+    }
     ref.read(cartControllerProvider.notifier).clearCart();
     state = AsyncValue.data( await fetchItems());
   }

@@ -50,9 +50,9 @@ class AdminSocialRefundsScreen extends StatelessWidget {
     final refund = Refund.fromSnapshot(data);
     return ListTile(
       leading: const Icon(Icons.person),
-      title: Text(refund.amount.toString() + " \$"),
+      title: Text("${refund.amount} \$"),
       subtitle: Text(refund.hospital),
-      trailing: refund.isApproved ? Text("Approuvé", style: TextStyle(color: Colors.green)) : Text("En attente", style: TextStyle(color: Colors.red)),
+      trailing: refund.isApproved ? const Text("Approuvé", style: TextStyle(color: Colors.green)) : const Text("En attente", style: TextStyle(color: Colors.red)),
       onTap: () {
         debugPrint("Doc ID: ${refund.reference.id}");
         // Navigator.of(context).push(

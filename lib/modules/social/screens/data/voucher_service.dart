@@ -1,12 +1,7 @@
-import 'dart:convert';
 
-import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import 'package:arptc_connect/extensions/date_extension.dart';
-import 'package:arptc_connect/modules/ticketing/domain/ticket.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../utils/pdf_api.dart';

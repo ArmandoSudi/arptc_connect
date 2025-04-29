@@ -11,7 +11,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../courrier/providers/courrier_provider.dart';
 import '../../domain/ticket.dart';
 
 class TicketsScreen extends ConsumerStatefulWidget {
@@ -29,7 +28,7 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
 
   DateTime? _selectedDate;
 
-  List<Ticket> _tickets = [];
+  final List<Ticket> _tickets = [];
 
   @override
   Widget build(BuildContext context) {

@@ -14,7 +14,7 @@ class Direction with _$Direction {
     @JsonKey(name: "short_name") required String shortName,
   }) = _Direction;
 
-  factory Direction.newEmpty({required String userId}) => Direction(
+  factory Direction.newEmpty({required String userId}) => const Direction(
       id: null,
       name: '',
       shortName: '',

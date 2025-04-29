@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../modules/authentication/providers/authentication_provider.dart';
 
 class AccountPage extends ConsumerStatefulWidget {
-  const AccountPage({Key? key}) : super(key: key);
+  const AccountPage({super.key});
 
   @override
   ConsumerState createState() => _AccountPageState();
@@ -41,7 +41,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                     height: 100,
                     decoration: BoxDecoration(
                         shape: BoxShape.circle, color: Colors.grey[300]),
-                    child: Icon(Icons.person, size: 70)),
+                    child: const Icon(Icons.person, size: 70)),
 
                 const SizedBox(height: 20),
 
@@ -171,7 +171,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
 
   Widget _buildDepandant(BuildContext context, DocumentSnapshot data) {
     // final dependant = Dependant.fromSnapshot(data);
-    final dependant = Dependant(
+    const dependant = Dependant(
       name: "John Doe, Jr",
       relationship: "Fils",
       imageURL: "www.google.com",
@@ -179,8 +179,8 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
     return ListTile(
       leading: const Icon(Icons.person),
-      title: Text("${dependant.name}"),
-      subtitle: Text("${dependant.relationship}"),
+      title: Text(dependant.name),
+      subtitle: Text(dependant.relationship),
       onTap: () {
         debugPrint("Doc ID: ${dependant.id}");
         // Navigator.of(context).push(

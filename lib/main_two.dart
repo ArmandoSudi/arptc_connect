@@ -6,7 +6,7 @@ void main() {
 }
 
 class SidebarXExampleApp extends StatelessWidget {
-  SidebarXExampleApp({Key? key}) : super(key: key);
+  SidebarXExampleApp({super.key});
 
   final _controller = SidebarXController(selectedIndex: 0, extended: true);
   final _key = GlobalKey<ScaffoldState>();
@@ -70,10 +70,9 @@ class SidebarXExampleApp extends StatelessWidget {
 
 class SideMenuX extends StatelessWidget {
   const SideMenuX({
-    Key? key,
+    super.key,
     required SidebarXController controller,
-  })  : _controller = controller,
-        super(key: key);
+  })  : _controller = controller;
 
   final SidebarXController _controller;
 
@@ -128,10 +127,10 @@ class SideMenuX extends StatelessWidget {
       ),
       footerDivider: divider,
       headerBuilder: (context, extended) {
-        return SizedBox(
+        return const SizedBox(
           height: 100,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Icon(Icons.person),
           ),
         );
@@ -167,9 +166,8 @@ class SideMenuX extends StatelessWidget {
 
 class _ScreensExample extends StatelessWidget {
   const _ScreensExample({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final SidebarXController controller;
 

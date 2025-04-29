@@ -14,7 +14,7 @@ import '../../data/directions_provider.dart';
 import '../../domain/models/direction.dart';
 
 class AddDirectionScreen extends ConsumerStatefulWidget {
-  const AddDirectionScreen({Key? key}) : super(key: key);
+  const AddDirectionScreen({super.key});
 
   @override
   ConsumerState createState() => _AddDirectionScreenState();

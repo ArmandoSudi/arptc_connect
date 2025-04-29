@@ -58,7 +58,7 @@ class _LivraisonScreenState extends ConsumerState<LivraisonScreen> {
                         return Container(
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                            borderRadius: const BorderRadius.all(Radius.circular(5.0)),
                           ),
                           child: ListView.separated(
                             shrinkWrap: true,
@@ -124,7 +124,7 @@ class _LivraisonScreenState extends ConsumerState<LivraisonScreen> {
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           Padding(
-                            padding: EdgeInsets.all(16.0),
+                            padding: const EdgeInsets.all(16.0),
                             child: Row(
                               mainAxisAlignment:  MainAxisAlignment.spaceBetween,
                               children: [
@@ -143,7 +143,7 @@ class _LivraisonScreenState extends ConsumerState<LivraisonScreen> {
                           ),
                           cartController.items.isEmpty ?
                           const Expanded(
-                            child: const Center(
+                            child: Center(
                               child: Text("Votre panier est vide..."),
                             ),
                           ) : Expanded(

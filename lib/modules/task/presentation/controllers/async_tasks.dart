@@ -1,6 +1,5 @@
 import 'package:arptc_connect/modules/task/data/task_repository.dart';
-import 'package:arptc_connect/modules/task/domain/task.dart';
-import 'package:arptc_connect/modules/ticketing/data/ticketing_service.dart';
+import 'package:arptc_connect/modules/task/domain/task_two.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'async_tasks.g.dart';

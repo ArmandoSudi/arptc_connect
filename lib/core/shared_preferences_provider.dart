@@ -38,8 +38,8 @@ class SharedPrefUtility {
   }
 
   void setRoles(List<dynamic> roles) async {
-    final _roles = roles.map((e) => e.toString()).toList();
-    String encodedList = jsonEncode(_roles);
+    final roles0 = roles.map((e) => e.toString()).toList();
+    String encodedList = jsonEncode(roles0);
     sharedPreferences.setString('roles', encodedList);
   }
 

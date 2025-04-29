@@ -9,7 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../widgets/content_view.dart';
 
 class AgentsScreen extends StatefulWidget {
-  const AgentsScreen({Key? key}) : super(key: key);
+  const AgentsScreen({super.key});
 
   @override
   State<AgentsScreen> createState() => _AgentsScreenState();
@@ -96,7 +96,7 @@ class _AgentsScreenState extends State<AgentsScreen> {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => DropdownMenuExample(),
+              builder: (context) => const DropdownMenuExample(),
             ),
           );
         },

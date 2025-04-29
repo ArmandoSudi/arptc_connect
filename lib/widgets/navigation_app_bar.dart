@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:arptc_connect/core/shared_preferences_provider.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +25,7 @@ class NavigationAppBar extends ConsumerWidget implements PreferredSizeWidget {
               if (snapshot.hasData){
                 return Text(snapshot.data!);
               }
-              return Text("N/A");
+              return const Text("N/A");
             },
         ),
         Padding(

@@ -1,16 +1,13 @@
 import 'dart:developer';
 
 import 'package:arptc_connect/modules/administration/domain/models/agent.dart';
-import 'package:arptc_connect/modules/administration/presentation/controllers/async_user.dart';
 import 'package:arptc_connect/utils/firebase_constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/firebase_providers.dart';
 import '../../../core/shared_preferences_provider.dart';
-import '../../administration/data/user_service.dart';
 
 class AuthService {
   late FirebaseAuth _auth;
@@ -55,14 +52,14 @@ class AuthService {
         await showDialog(
           context: context! ,
           builder: (ctx) => AlertDialog(
-            title: Text('Une erreur est survenue'),
-            content: Text("Email ou Mot de Passe incorrect"),
+            title: const Text('Une erreur est survenue'),
+            content: const Text("Email ou Mot de Passe incorrect"),
             actions: [
               TextButton(
                   onPressed: () {
                     Navigator.of(ctx).pop();
                   },
-                  child: Text("OK"))
+                  child: const Text("OK"))
             ],
           ),
         );
@@ -71,14 +68,14 @@ class AuthService {
         await showDialog(
           context: context!,
           builder: (ctx) => AlertDialog(
-            title: Text('Une erreur est survenue'),
+            title: const Text('Une erreur est survenue'),
             content: Text(e.toString()),
             actions: [
               TextButton(
                   onPressed: () {
                     Navigator.of(ctx).pop();
                   },
-                  child: Text("OK"))
+                  child: const Text("OK"))
             ],
           ),
         );
@@ -108,14 +105,14 @@ class AuthService {
       await showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-              title: Text('Error Occured'),
+              title: const Text('Error Occured'),
               content: Text(e.toString()),
               actions: [
                 TextButton(
                     onPressed: () {
                       Navigator.of(ctx).pop();
                     },
-                    child: Text("OK"))
+                    child: const Text("OK"))
               ]));
     } catch (e) {
       if (e == 'email-already-in-use') {
@@ -187,7 +184,7 @@ class AuthService {
 
     } catch (error) {
       log("Error getUser: $email ::  $error");
-      return null;
+      return;
     }
   }
 

@@ -1,7 +1,6 @@
 import 'package:arptc_connect/modules/administration/data/administration_api_provider.dart';
 import 'package:arptc_connect/modules/administration/data/providers.dart';
 import 'package:arptc_connect/modules/administration/domain/models/service.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../domain/models/bureau.dart';

@@ -14,7 +14,7 @@ class SocialRefundsPage extends StatefulWidget {
 class _SocialRefundsPageState extends State<SocialRefundsPage> {
 
   final db = FirebaseFirestore.instance;
-  bool _isSearching = false;
+  final bool _isSearching = false;
 
   CollectionReference agentsRef =
   FirebaseFirestore.instance.collection('refunds');
@@ -54,7 +54,7 @@ class _SocialRefundsPageState extends State<SocialRefundsPage> {
                             title: Text(refunds![index].agentName),
                             trailing: const Icon(Icons.arrow_forward_ios),
                             onTap: () {
-                              debugPrint("Doc ID: ${refunds?[index].reference}");
+                              debugPrint("Doc ID: ${refunds[index].reference}");
                               // Navigator.of(context).push(
                               //   MaterialPageRoute(
                               //     builder: (context) => DirectionDetailsScreen(),
@@ -63,7 +63,7 @@ class _SocialRefundsPageState extends State<SocialRefundsPage> {
                             },
                           );
                         },
-                        separatorBuilder: (context, index) => Divider(),
+                        separatorBuilder: (context, index) => const Divider(),
                         itemCount: refunds?.length ?? 0)
                 );
               }

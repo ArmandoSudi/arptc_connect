@@ -26,10 +26,10 @@ class _CourrierMainScreenState extends State<CourrierMainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xF6F9FC),
+      backgroundColor: const Color(0x00f6f9fc),
       // backgroundColor: Colors.red,
       appBar: AppBar(
-          title: Text("Gestion des courriers"),
+          title: const Text("Gestion des courriers"),
         centerTitle: false,
       ),
       drawer: Drawer(
@@ -65,9 +65,9 @@ class _CourrierMainScreenState extends State<CourrierMainScreen> {
         child: _widgetOptions[_selectedIndex],
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
         onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (contxt) => AddCourrierScreen()));
+          Navigator.of(context).push(MaterialPageRoute(builder: (contxt) => const AddCourrierScreen()));
         },
 
       ),

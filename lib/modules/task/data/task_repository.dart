@@ -1,4 +1,6 @@
-import 'package:arptc_connect/modules/task/domain/task.dart';
+import 'dart:developer';
+
+import 'package:arptc_connect/modules/task/domain/task_two.dart';
 import 'package:arptc_connect/utils/firestore_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,7 +19,9 @@ class TaskRepository {
             (item) => Task.fromMap(item.data, id: item.id),
       )
           .toList();
-    } catch (err) {
+    } catch (err, stckTrace) {
+      log("Error fetching tasks: $err");
+      log("StackTrace: $stckTrace");
       throw (Exception(err));
     }
   }
@@ -45,4 +49,10 @@ class TaskRepository {
 
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {
   return TaskRepository(ref.read(firestoreClientProvider),);
+});
+
+// Provider to retunr a single task
+final taskProvider = FutureProvider.family<Task, String>((ref, id) async {
+  final taskRepository = ref.watch(taskRepositoryProvider);
+  return await taskRepository.getTaskById(id);
 });

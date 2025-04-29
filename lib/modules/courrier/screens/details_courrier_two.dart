@@ -1,4 +1,3 @@
-import 'package:arptc_connect/modules/courrier/screens/courrier_base_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,7 +15,7 @@ class DetailsCourrierTwo extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
 
     return Scaffold(
-        backgroundColor: Color(0xF6F9FC),
+        backgroundColor: const Color(0x00f6f9fc),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Center(
@@ -57,7 +56,7 @@ class DetailsCourrierTwo extends ConsumerWidget {
                             ),
                           ),
                           Text(
-                            "${courrier.sender}",
+                            courrier.sender,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -76,7 +75,7 @@ class DetailsCourrierTwo extends ConsumerWidget {
                             ),
                           ),
                           Text(
-                            "${courrier.object}",
+                            courrier.object,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -118,12 +117,12 @@ class DetailsCourrierTwo extends ConsumerWidget {
                                 ),
                               ),
                               TextButton.icon(
-                                icon: Icon(Icons.add),
+                                icon: const Icon(Icons.add),
                                 onPressed: () {
                                   Navigator.of(context).push(MaterialPageRoute(
                                       builder: (context) => AddAnnotationScreen(courrierId: courrier.id!)));
                                 },
-                                label: Text("Ajouter Annotation"),
+                                label: const Text("Ajouter Annotation"),
                               )
                             ],
                           ),
@@ -151,10 +150,10 @@ class DetailsCourrierTwo extends ConsumerWidget {
                                       },
                                     ));
                               },
-                              separatorBuilder: (context, index) => Divider(),
+                              separatorBuilder: (context, index) => const Divider(),
                               itemCount: courrier.annotations.length,
                               shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics()),
+                              physics: const NeverScrollableScrollPhysics()),
                         ]);
                   }
               ),

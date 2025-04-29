@@ -92,7 +92,7 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: NavigationAppBar(),
+      appBar: const NavigationAppBar(),
       body: Row(
         children: [
           NavigationRail(

@@ -22,10 +22,10 @@ class AdminSocialStatistics extends StatelessWidget {
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (snapshot.hasError) {
-            return Text('Failed loading user data');
+            return const Text('Failed loading user data');
           }
           if (snapshot.hasData && !snapshot.data!.exists) {
-            return Text('User data does not exist');
+            return const Text('User data does not exist');
           }
           if (snapshot.connectionState == ConnectionState.done) {
             Map<String, dynamic> data =
@@ -62,12 +62,12 @@ class AdminSocialStatistics extends StatelessWidget {
                                       Navigator.of(context).push(
                                           MaterialPageRoute(
                                               builder: (context) =>
-                                                  AgentsScreen()));
+                                                  const AgentsScreen()));
                                     },
-                                    child: const Text("    Voir    "),
                                     style: OutlinedButton.styleFrom(
                                         foregroundColor: Colors.black,
-                                        side: BorderSide(color: Colors.black)))
+                                        side: const BorderSide(color: Colors.black)),
+                                    child: const Text("    Voir    "))
                               ],
                             ),
                             const Icon(
@@ -112,10 +112,10 @@ class AdminSocialStatistics extends StatelessWidget {
                                         ),
                                       );
                                     },
-                                    child: const Text("    Voir    "),
                                     style: OutlinedButton.styleFrom(
                                         foregroundColor: Colors.black,
-                                        side: BorderSide(color: Colors.black)))
+                                        side: const BorderSide(color: Colors.black)),
+                                    child: const Text("    Voir    "))
                               ],
                             ),
                             const Icon(

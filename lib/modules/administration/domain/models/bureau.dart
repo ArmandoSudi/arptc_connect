@@ -13,7 +13,7 @@ class Bureau with _$Bureau {
     @JsonKey(name: "direction_ref") required String directionRef,
   }) = _Bureau;
 
-  factory Bureau.newEmpty({required String userId}) => Bureau(
+  factory Bureau.newEmpty({required String userId}) => const Bureau(
     id: null,
     name: '',
     directionRef: '',

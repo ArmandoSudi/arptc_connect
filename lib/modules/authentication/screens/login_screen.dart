@@ -1,12 +1,11 @@
 import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
-import 'package:arptc_connect/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../widgets/custom_form_field.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   ConsumerState createState() => _LoginScreenState();
@@ -70,6 +69,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         hintText: "",
                         textInputType: TextInputType.emailAddress,
                         controller: emailController,
+                        prefixIcon: const Icon(Icons.email, color: Colors.grey),
                         validator: (value) {
                           if (value!.isEmpty || !value.contains('@')) {
                             return 'Email invalide, veuillez votre email professionnel';
@@ -85,8 +85,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         hintText: "",
                         textInputType: TextInputType.text,
                         obscureText: true,
-                        maxLine: 1,
                         controller: passwordController,
+                        prefixIcon: const Icon(Icons.lock, color: Colors.grey),
                         validator: (value) {
                           if (value!.isEmpty || value.length < 6) {
                             return 'Le mot de passe doit avoir plus de 6 caractères';

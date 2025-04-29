@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_breakpoints.dart';
 
-import '../../../widgets/content_view.dart';
 
 class SocialAgentsPage extends StatefulWidget {
   const SocialAgentsPage({super.key});
@@ -16,7 +15,7 @@ class SocialAgentsPage extends StatefulWidget {
 
 class _SocialAgentsPageState extends State<SocialAgentsPage> {
   final db = FirebaseFirestore.instance;
-  bool _isSearching = false;
+  final bool _isSearching = false;
 
   CollectionReference agentsRef =
   FirebaseFirestore.instance.collection('agents');
@@ -58,21 +57,21 @@ class _SocialAgentsPageState extends State<SocialAgentsPage> {
                                   borderRadius: BorderRadius.circular(50),
                                   color: Colors.grey[300]
                               ),
-                              child: Icon(Icons.person)
+                              child: const Icon(Icons.person)
                           ),
                           title: Text(agents![index].name),
                           trailing: const Icon(Icons.arrow_forward_ios),
                           onTap: () {
-                            debugPrint("Doc ID : ${agents?[index].id}");
+                            debugPrint("Doc ID : ${agents[index].id}");
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => SocialAgentDetailsScreen(agentId: agents![index].id!),
+                                builder: (context) => SocialAgentDetailsScreen(agentId: agents[index].id!),
                               ),
                             );
                           },
                         );
                       },
-                      separatorBuilder: (context, index) => Divider(),
+                      separatorBuilder: (context, index) => const Divider(),
                       itemCount: agents?.length ?? 0);
                 }
 

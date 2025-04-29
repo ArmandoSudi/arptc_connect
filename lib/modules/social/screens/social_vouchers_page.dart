@@ -14,7 +14,7 @@ class SocialVouchersPage extends StatefulWidget {
 class _SocialVouchersPageState extends State<SocialVouchersPage> {
 
   final db = FirebaseFirestore.instance;
-  bool _isSearching = false;
+  final bool _isSearching = false;
 
   CollectionReference agentsRef =
   FirebaseFirestore.instance.collection('vouchers');
@@ -54,7 +54,7 @@ class _SocialVouchersPageState extends State<SocialVouchersPage> {
                             title: Text(vouchers![index].agentName),
                             trailing: const Icon(Icons.arrow_forward_ios),
                             onTap: () {
-                              debugPrint("Doc ID: ${vouchers?[index].reference}");
+                              debugPrint("Doc ID: ${vouchers[index].reference}");
                               // Navigator.of(context).push(
                               //   MaterialPageRoute(
                               //     builder: (context) => DirectionDetailsScreen(),
@@ -63,7 +63,7 @@ class _SocialVouchersPageState extends State<SocialVouchersPage> {
                             },
                           );
                         },
-                        separatorBuilder: (context, index) => Divider(),
+                        separatorBuilder: (context, index) => const Divider(),
                         itemCount: vouchers?.length ?? 0)
                 );
               }

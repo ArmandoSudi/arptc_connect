@@ -1,11 +1,7 @@
-import 'dart:convert';
 
-import 'dart:ui';
-import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-import 'package:arptc_connect/extensions/date_extension.dart';
 import 'package:arptc_connect/modules/ticketing/domain/ticket.dart';
 import 'package:flutter/services.dart';
 
@@ -37,11 +33,11 @@ class ReportService {
               pw.Column(children: [
                 pw.Text(
                   'Direction des Systèmes d\'Information',
-                  style: pw.TextStyle(fontSize: 16),
+                  style: const pw.TextStyle(fontSize: 16),
                 ),
                 pw.Text(
                   'Rapport de support IT',
-                  style: pw.TextStyle(fontSize: 12),
+                  style: const pw.TextStyle(fontSize: 12),
                 ),
               ],),
             ],),
@@ -63,7 +59,7 @@ class ReportService {
       children: [
         pw.Text(
           'Direction des Systèmes d\'Information',
-          style: pw.TextStyle(fontSize: 16),
+          style: const pw.TextStyle(fontSize: 16),
         ),
       ],
     );
@@ -136,11 +132,11 @@ class ReportService {
       ),
       columnWidths: {
         // Specify fixed width for each column
-        0: pw.FixedColumnWidth(15), // 50 units width for the first column
-        1: pw.FixedColumnWidth(80), // 80 units width for the second column
-        2: pw.FixedColumnWidth(80), // 100 units width for the third column
-        3: pw.FixedColumnWidth(80), // 120 units width for the fourth column
-        4: pw.FlexColumnWidth(), // 150 units width for the fifth column
+        0: const pw.FixedColumnWidth(15), // 50 units width for the first column
+        1: const pw.FixedColumnWidth(80), // 80 units width for the second column
+        2: const pw.FixedColumnWidth(80), // 100 units width for the third column
+        3: const pw.FixedColumnWidth(80), // 120 units width for the fourth column
+        4: const pw.FlexColumnWidth(), // 150 units width for the fifth column
       },
     );
   }

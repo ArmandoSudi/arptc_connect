@@ -1,4 +1,3 @@
-import 'package:arptc_connect/modules/dashboard/screens/dashboard_page.dart';
 import 'package:arptc_connect/modules/social/screens/admin_social_dashboard_page.dart';
 import 'package:arptc_connect/screens/account_page.dart';
 import 'package:arptc_connect/screens/home_page.dart';
@@ -9,7 +8,7 @@ import '../widgets/custom_nav_bar.dart';
 enum _SelectedTab { dahsboard, home, account }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -19,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late TabController tabController;
 
-  var _selectedTab = _SelectedTab.home;
+  final _selectedTab = _SelectedTab.home;
   int curTabIndex = 0;
 
   List<Map<String, Widget>> pages = [

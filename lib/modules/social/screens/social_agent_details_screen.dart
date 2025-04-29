@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:arptc_connect/modules/administration/data/administration_api_provider.dart';
-import 'package:arptc_connect/modules/administration/domain/models/dependant.dart';
 import 'package:arptc_connect/modules/social/screens/data/voucher_service.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/responsive_center.dart';
@@ -17,7 +16,7 @@ class SocialAgentDetailsScreen extends ConsumerStatefulWidget {
   late CollectionReference agentsRef;
 
   SocialAgentDetailsScreen({required this.agentId, super.key}) {
-    this.agentsRef =
+    agentsRef =
         FirebaseFirestore.instance.collection('agents/$agentId/dependants');
   }
 
@@ -51,7 +50,7 @@ class _SocialAgentDetailsScreenState
           }
           Agent agent = snapshot.data!;
 
-          log("AGENT DETAILS : ${agent}");
+          log("AGENT DETAILS : $agent");
           return ContentView(
             child: ResponsiveCenter(
               child: Column(
@@ -134,7 +133,7 @@ class _SocialAgentDetailsScreenState
                                 ),
                                 FilledButton(
                                   onPressed: () => log("Add dependant"),
-                                  child: Text("Ajouter dépendant"),
+                                  child: const Text("Ajouter dépendant"),
                                 ),
                               ],
                             ),
@@ -192,7 +191,7 @@ class _SocialAgentDetailsScreenState
         onPressed: () => log("Generer bon"),
       ),
       onTap: () {
-        debugPrint("Doc ID: ${data}");
+        debugPrint("Doc ID: $data");
         // Navigator.of(context).push(
         //   MaterialPageRoute(
         //     builder: (context) => DirectionDetailsScreen(),

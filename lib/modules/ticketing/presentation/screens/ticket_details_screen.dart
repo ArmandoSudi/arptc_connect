@@ -68,6 +68,7 @@ class _TicketDetailsScreenState extends ConsumerState<TicketDetailsScreen> {
                   },
                   error: (Object error, StackTrace stackTrace) {
                     log("Error: $error");
+                    return null;
                   },
                   loading: () {
                     return const Center(
@@ -133,7 +134,7 @@ class _TicketDetailsScreenState extends ConsumerState<TicketDetailsScreen> {
                       textInputType: TextInputType.name,
                       controller: solutionTEC,
                       borderRadius: 5,
-                      maxLine: 4,
+                      // maxLine: 4,
                     ),
                     const Gap(16),
                     Row(
@@ -182,7 +183,7 @@ class _TicketDetailsScreenState extends ConsumerState<TicketDetailsScreen> {
 class TicketWidget extends StatelessWidget {
   final Ticket ticket;
 
-  const TicketWidget({Key? key, required this.ticket}) : super(key: key);
+  const TicketWidget({super.key, required this.ticket});
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +200,7 @@ class TicketWidget extends StatelessWidget {
           _buildLabels(context, "agent", "date"),
           const Gap(4),
           _buildTitles(
-              context, ticket.agent, ticket!.creationDate.formatedDate),
+              context, ticket.agent, ticket.creationDate.formatedDate),
           const Gap(16),
           _buildDottedLine(context),
           const Gap(16),
@@ -209,13 +210,13 @@ class TicketWidget extends StatelessWidget {
             children: [
               Text(ticket.category,
                   style: Theme.of(context).textTheme.bodyLarge),
-              Spacer(),
+              const Spacer(),
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: ShapeDecoration(
                   color: ticket.isSolved ? Colors.grey : Colors.green,
                   // Adjust color as needed
-                  shape: StadiumBorder(),
+                  shape: const StadiumBorder(),
                 ),
                 child: Text(
                   ticket.isSolved ? "Cloturé" : "Ouvert",
@@ -255,7 +256,7 @@ class TicketWidget extends StatelessWidget {
           style:
               const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
         ),
-        Spacer(),
+        const Spacer(),
         Text(
           label2,
           style:
@@ -269,7 +270,7 @@ class TicketWidget extends StatelessWidget {
     return Row(
       children: [
         Text(title1, style: Theme.of(context).textTheme.bodyLarge),
-        Spacer(),
+        const Spacer(),
         Text(
           title2,
           style: Theme.of(context).textTheme.bodyLarge,
@@ -307,8 +308,8 @@ class DottedLinePainter extends CustomPainter {
       ..strokeWidth = 1.0;
 
     final max = size.width;
-    final dashWidth = 5.0;
-    final dashSpace = 5.0;
+    const dashWidth = 5.0;
+    const dashSpace = 5.0;
     double startX = 0.0;
 
     while (startX < max) {

@@ -12,7 +12,7 @@ import '../../domain/models/direction.dart';
 class DirectionDetailsScreen extends ConsumerStatefulWidget {
 
   final String directionId;
-  const DirectionDetailsScreen({Key? key, required this.directionId}) : super(key: key);
+  const DirectionDetailsScreen({super.key, required this.directionId});
 
   @override
   ConsumerState createState() => _DirectionDetailsScreenState();
@@ -62,7 +62,7 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
                           borderRadius: BorderRadius.circular(5),
                         ),
                         child: Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: Column(
                             children: [
                               Row(
@@ -75,7 +75,7 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
                                     ),
                                   ),
                                   IconButton(
-                                    icon: Icon(Icons.keyboard_arrow_down_rounded),
+                                    icon: const Icon(Icons.keyboard_arrow_down_rounded),
                                     onPressed: () {
                                       setState(() {
                                         isServiceExpanded = !isServiceExpanded;
@@ -84,11 +84,11 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
                                   )
                                 ],
                               ),
-                              SizedBox(height: 20),
+                              const SizedBox(height: 20),
                               isServiceExpanded
                                   ? ListView.builder(
                                   shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
+                                  physics: const NeverScrollableScrollPhysics(),
                                   itemCount: 3,
                                   itemBuilder: (context, index) {
                                     return ListTile(
@@ -132,7 +132,7 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
                               isAgentExpanded
                                   ? ListView.builder(
                                   shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
+                                  physics: const NeverScrollableScrollPhysics(),
                                   itemCount: 3,
                                   itemBuilder: (context, index) {
                                     return ListTile(

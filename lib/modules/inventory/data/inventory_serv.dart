@@ -26,7 +26,7 @@ class InventoryServ {
       // log("4. InventorySer::updateProduct => PRODUCT ID : ${product.toString()}");
       await firestoreClient.update(collection: 'products', data: product.toMap());
     } catch (err) {
-      log("InventorySer::updateProduct => Error : ${err}");
+      log("InventorySer::updateProduct => Error : $err");
     }
   }
 

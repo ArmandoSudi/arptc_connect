@@ -37,13 +37,7 @@ class User {
 
   @override
   String toString() {
-    return 'User{' +
-        ' id: $id,' +
-        ' firstName: $firstName,' +
-        ' name: $name,' +
-        ' email: $email,' +
-        ' roles: $roles,' +
-        '}';
+    return 'User{ id: $id, firstName: $firstName, name: $name, email: $email, roles: $roles,}';
   }
 
   User copyWith({
@@ -64,11 +58,11 @@ class User {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': this.id,
-      'firstName': this.firstName,
-      'name': this.name,
-      'email': this.email,
-      'roles': this.roles,
+      'id': id,
+      'firstName': firstName,
+      'name': name,
+      'email': email,
+      'roles': roles,
     };
   }
 

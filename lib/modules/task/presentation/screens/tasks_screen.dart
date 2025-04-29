@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:arptc_connect/extensions/date_extension.dart';
-import 'package:arptc_connect/modules/task/domain/task.dart';
+import 'package:arptc_connect/modules/task/domain/task_two.dart';
 import 'package:arptc_connect/modules/task/presentation/controllers/async_tasks.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
@@ -9,8 +9,13 @@ import 'package:arptc_connect/widgets/custom_form_field.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+
+enum TaskState {
+  New,
+  Doing,
+  Done,
+}
 
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
@@ -20,14 +25,10 @@ class TasksScreen extends ConsumerStatefulWidget {
 }
 
 class _TasksScreenState extends ConsumerState<TasksScreen> {
-  DateTimeRange _selectedDateRange = DateTimeRange(
-    start: DateTime.now(),
-    end: DateTime.now(),
-  );
 
-  DateTime? _selectedDate;
 
-  List<Task> _tasks = [];
+  final List<Task> _tasks = [];
+  TaskState selectedFilterOption = TaskState.New;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +50,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       body: ContentView(
         child: Column(
           children: [
+            // TITLE
             Row(
               children: [
                 IconButton(
@@ -63,8 +65,53 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 Expanded(
                   child: Container(),
                 ),
+                TextButton(
+                  onPressed: () {
+                    context.go("/service/tasks/task}");
+                  },
+                  child: const Text(
+                    "Voir les tickets",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
               ],
             ),
+
+            // SEGEMENTED BUTTONS BASED ON THE TASK STATE
+            SegmentedButton<TaskState>(
+              segments: const <ButtonSegment<TaskState>>[
+                ButtonSegment<TaskState>(
+                  value: TaskState.New,
+                  label: Text('Nouvelle'),
+                ),
+                ButtonSegment<TaskState>(
+                    value: TaskState.Doing,
+                    label: Text('En Traitement')),
+                ButtonSegment<TaskState>(
+                  value: TaskState.Done,
+                  label: Text('Traitée'),
+                )
+              ],
+              selected: {selectedFilterOption},
+              onSelectionChanged: (Set<TaskState> newSelection) {
+                setState(() {
+                  log("Selected $newSelection");
+
+                  switch (newSelection.first) {
+                    case TaskState.New:
+                      selectedFilterOption = TaskState.New;
+                      break;
+                    case TaskState.Doing:
+                      selectedFilterOption = TaskState.Doing;
+                      break;
+                    case TaskState.Done:
+                      selectedFilterOption = TaskState.Done;
+                      break;
+                  }
+                });
+              },
+            ),
+            const SizedBox(height: 20),
 
             // LIST OF TICKETS
             asyncTasks.when(
@@ -83,30 +130,88 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     shrinkWrap: true,
                     itemCount: data.length,
                     itemBuilder: (context, index) {
-                      return ListTile(
-                        leading: Icon(
-                          Icons.circle,
-                          color: data[index].isDone
-                              ? Colors.grey
-                              : Colors.lightGreen,
-                        ),
-                        title: Text(
-                          data[index].title,
-                          style: theme.textTheme.bodyMedium!
-                              .copyWith(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: Text(
-                          data[index].observation,
-                          style: theme.textTheme.labelMedium,
-                        ),
-                        trailing: Text(data[index].creationDate.formatedDate),
-                        onTap: () {
-                          // context.go("/service/ticketing/${data[index].id}");
+
+                      log("Task ID ${data[index].id} ");
+
+                      // add Inkwell
+                      return InkWell(
+                        onTap: (){
+                          context.push("/service/tasks/${data[index].id}");
                         },
+                        child: Card(
+                          child: ClipRect(
+                            // borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    spreadRadius: 1,
+                                    blurRadius: 5,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    data[index].label,
+                                    style: theme.textTheme.titleMedium!
+                                        .copyWith(fontWeight: FontWeight.w600),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Text("De : ",  style: theme.textTheme.labelMedium,),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        data[index].sender!,
+                                        style: theme.textTheme.labelLarge,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+
+                                  // DATE LABEL
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Date d'émission",
+                                        style: theme.textTheme.labelMedium,
+                                      ),Text(
+                                        "Date d'accusé réception",
+                                        style: theme.textTheme.labelMedium,
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        data[index].emissionDate.formatedDate,
+                                        style: theme.textTheme.labelLarge,
+                                      ),Text(
+                                        data[index].receptionDate?.formatedDate ?? " - ",
+                                        style: theme.textTheme.labelLarge,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                        ),
                       );
+
                     },
                     separatorBuilder: (BuildContext context, int index) {
-                      return const Divider();
+                      return const SizedBox.shrink();
                     },
                   ),
                 );
@@ -125,153 +230,245 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
-        onPressed: () => showCreateTaskDialog(context),
+        onPressed: () {
+          // showCreateTaskDialog(context);
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            builder: (context) => const TaskBottomSheet(),
+          );
+        } ,
       ),
     );
   }
 
 
-  // void _showBottomModal(BuildContext context) {
-  //   final _formKey = GlobalKey<FormState>();
-  //   String _title = '';
-  //   String _observation = '';
-  //
-  //   showModalBottomSheet(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return Padding(
-  //         padding: const EdgeInsets.all(16.0),
-  //         child: Form(
-  //           key: _formKey,
-  //           child: Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: <Widget>[
-  //               TextFormField(
-  //                 decoration: const InputDecoration(labelText: 'Title'),
-  //                 onSaved: (value) {
-  //                   _title = value ?? '';
-  //                 },
-  //                 validator: (value) {
-  //                   if (value == null || value.isEmpty) {
-  //                     return 'Please enter a title';
-  //                   }
-  //                   return null;
-  //                 },
-  //               ),
-  //               TextFormField(
-  //                 decoration: const InputDecoration(labelText: 'Observation'),
-  //                 onSaved: (value) {
-  //                   _observation = value ?? '';
-  //                 },
-  //                 validator: (value) {
-  //                   if (value == null || value.isEmpty) {
-  //                     return 'Please enter an observation';
-  //                   }
-  //                   return null;
-  //                 },
-  //               ),
-  //               const SizedBox(height: 16.0),
-  //               ElevatedButton(
-  //                 onPressed: () {
-  //                   if (_formKey.currentState!.validate()) {
-  //                     _formKey.currentState!.save();
-  //                     // Handle the form submission
-  //                     // For example, you can create a new Task object and add it to the list
-  //                     Navigator.pop(context);
-  //                   }
-  //                 },
-  //                 child: const Text('Create Task'),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
+}
 
-  void showCreateTaskDialog(BuildContext context) {
-    final TextEditingController _titleController = TextEditingController();
-    final TextEditingController _observationController = TextEditingController();
-    final _formKey = GlobalKey<FormState>();
+class TaskBottomSheet extends ConsumerStatefulWidget {
+  const TaskBottomSheet({super.key});
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: SizedBox(
-            width: 700,
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+  @override
+  ConsumerState<TaskBottomSheet> createState() => _TaskBottomSheetState();
+}
+
+class _TaskBottomSheetState extends ConsumerState<TaskBottomSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _observationController = TextEditingController();
+  final TextEditingController _emissionDateController = TextEditingController();
+  final TextEditingController _receptionDateController = TextEditingController();
+  final TextEditingController _senderController = TextEditingController();
+  final TextEditingController _receiverController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
+  String _type = 'task';
+  DateTime? _receptionDate, _emissionDate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        top: 16,
+        left: 16,
+        right: 16,
+      ),
+      child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Créer une activité', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height:20),
+
+              // TYPE OF THE TASK
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: DropdownButtonFormField<String>(
+                  // underline: const SizedBox.shrink(),
+                  decoration: const InputDecoration(labelText: 'Type', border: InputBorder.none),
+                  value: _type,
+                  items: const [
+                    DropdownMenuItem(value: 'task', child: Text('Projets / Autre Traitement')),
+                    DropdownMenuItem(value: 'mail', child: Text('Courrier / NSI')),
+                  ],
+                  onChanged: (val) => setState(() => _type = val ?? 'task'),
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // DATE D'EMISSION ET DATE D'ACCUSE RECEPTION
+              Row(
                 children: [
-                  // TITLE
-                  CustomFormField(
-                    label: "Nom",
-                    hintText: "Nom de la tâche",
-                    textInputType: TextInputType.text,
-                    controller: _titleController,
-                  ),
-                  const Gap(12),
+                  Expanded(
+                    child: CustomFormField(
+                      label: "Date d'émission",
+                      hintText: "Date d'émission",
+                      textInputType: TextInputType.datetime,
+                      controller: _emissionDateController,
+                      onTap: () => showDatePicker(
+                        context: context,
+                        initialDate: _emissionDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      ).then((date) {
+                        if (date != null) {
+                          setState(() {
+                            _emissionDate = date;
+                            _emissionDateController.text = date.formatedDate;
+                          });
+                        }
+                      }
+                    ),
+                  ),),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: CustomFormField(
+                      label: "Date d'accusé de réception",
+                      hintText: "Date d'accusé de réception",
+                      textInputType: TextInputType.datetime,
+                      controller: _receptionDateController,
+                      enable: _type == 'mail',
+                      onTap: _type == 'mail' ? () => showDatePicker(
+                        context: context,
+                        initialDate: _receptionDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      ).then((date) {
+                        if (date != null) {
+                          setState(() {
+                            _receptionDate = date;
+                            _receptionDateController.text = date.formatedDate;
+                          });
+                        }
+                      }
+                    ) : null,
+                  ),)
+                ],
+              ),
+              const SizedBox(height: 10),
 
-                  // OBSERVATION
-                  CustomFormField(
-                    label: "Observation",
-                    hintText: "Observation de la tâche",
-                    textInputType: TextInputType.text,
-                    controller: _observationController,
-                  ),
-                  const Gap(32),
+              // DATE D'EMISSION ET DATE D'ACCUSE RECEPTION
+              if (_type == 'mail') ... [
+                Row(
+                children: [
+                  Expanded(
+                    child: // NAME OF THE SENDER
+                    CustomFormField(
+                      label: "Emetteur",
+                      hintText: "Entrer l'émetteur du courrier",
+                      textInputType: TextInputType.text,
+                      controller: _senderController,
+                    ),),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: CustomFormField(
+                      label: "Destinataire",
+                      hintText: "Entrer le destinataire",
+                      textInputType: TextInputType.text,
+                      controller: _receiverController,
+                    ),)
+                ],
+              ),
+                const SizedBox(height: 10),
+              ]
+              else ... [
+                // NOM DU RESPONSABLE
+                CustomFormField(
+                  label: "Responsable / Initiateur",
+                  hintText: "Entrer le responable du projet",
+                  textInputType: TextInputType.text,
+                  controller: _senderController,
+                ),
+                const SizedBox(height: 10),
+              ],
 
-                  // BUTTON TO SAVE OR CANCEL
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomFilledButton(
-                          onPressed: () {
+              // OBJET DE L'ACTIVITE
+              CustomFormField(
+                label: "Objet",
+                hintText: "Entrez l'objet de l'activité",
+                textInputType: TextInputType.text,
+                controller: _titleController,
+              ),
+              const SizedBox(height: 10),
 
-                            final task = Task(
-                              title: _titleController.text,
-                              observation: _observationController.text,
-                              isDone: false,
-                              creationDate: DateTime.now(),
-                            );
+              // DESCRIPTION OF THE TASK
+              CustomFormField(
+                label: "Remarques",
+                hintText: "Entrer la remarque du projet/courrier",
+                textInputType: TextInputType.text,
+                controller: _observationController,
+              ),
+              const SizedBox(height: 10),
 
-                            ref
-                                .read(asyncTasksProvider.notifier)
-                                .addTask(task);
-
-                            Navigator.of(context).pop();
-                          },
-                          text: "Enregistrer",
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                                minimumSize: const Size.fromHeight(50)),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text(
-                              "Annuler",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                          side: const BorderSide(color: Colors.grey),
+                          foregroundColor: Colors.grey,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50),
                           ),
                         ),
-                      ),
-                    ],
+                        onPressed: () {
+                          context.pop();
+                        },
+                        child: const Text(
+                          "Annuler",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      )),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: CustomFilledButton(
+                      text: "Enregistrer",
+                      onPressed: ()  {
+                          final task = Task(
+                            id: "",
+                            label: _titleController.text,
+                            observation: _observationController.text,
+                            creationDate: DateTime.now(),
+                            emissionDate: _emissionDate ?? DateTime.now(),
+                            receptionDate: _receptionDate,
+                            status: "new",
+                            type: _type,
+                            sender: _senderController.text,
+                            receiver: _receiverController.text,
+                            mailScanUrl: "",
+                            reportFileUrl: "",
+                            department: "IT",
+                          );
+
+                          ref
+                              .read(asyncTasksProvider.notifier)
+                              .addTask(task);
+
+                          Navigator.of(context).pop();
+
+                      },
+                    ),
                   ),
                 ],
               ),
-            ),
+              const SizedBox(height: 40),
+            ],
           ),
-          title: const Text('Enregistrer une nouvelle tâche'),
-        );
-      },
+        ),
+      ),
     );
   }
 }
+

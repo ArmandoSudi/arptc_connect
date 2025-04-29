@@ -1,11 +1,7 @@
-import 'dart:developer';
 
-import 'package:arptc_connect/core/shared_preferences_provider.dart';
-import 'package:arptc_connect/modules/administration/presentation/screens/add_agent_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/add_direction_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/add_user_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/administration_screen.dart';
-import 'package:arptc_connect/modules/administration/presentation/screens/agents_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/bureaux_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/direction_details_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/directions_screen.dart';
@@ -23,6 +19,8 @@ import 'package:arptc_connect/modules/inventory/presentation/livraison_screen.da
 import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
 import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
 import 'package:arptc_connect/modules/social/screens/main_social_screen.dart';
+import 'package:arptc_connect/modules/task/presentation/screens/task_details_page.dart';
+import 'package:arptc_connect/modules/task/presentation/screens/task_list_page.dart';
 import 'package:arptc_connect/modules/task/presentation/screens/tasks_screen.dart';
 import 'package:arptc_connect/modules/ticketing/presentation/screens/add_ticket_screen.dart';
 import 'package:arptc_connect/modules/ticketing/presentation/screens/ticket_details_screen.dart';
@@ -36,7 +34,6 @@ import 'package:go_router/go_router.dart';
 import 'modules/administration/presentation/screens/add_bureau_screen.dart';
 import 'modules/administration/presentation/screens/add_service_screen.dart';
 import 'modules/authentication/providers/authentication_provider.dart';
-import 'modules/dashboard/screens/dashboard_page.dart';
 import 'modules/inventory/presentation/cart/cart_screen.dart';
 
 const routerInitialLocation = '/dashboard';
@@ -121,24 +118,24 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                         // Management
                         GoRoute(
                           path: 'management',
-                          builder: (context, state) => ManageItemScreen(),
+                          builder: (context, state) => const ManageItemScreen(),
                         ),
 
                         // Approvisionnement
                         GoRoute(
                           path: 'appro',
-                          builder: (context, state) => ApproScreen(),
+                          builder: (context, state) => const ApproScreen(),
                         ),
 
                         // Livraison
                         GoRoute(
                           path: 'livraison',
-                          builder: (context, state) => LivraisonScreen(),
+                          builder: (context, state) => const LivraisonScreen(),
                         ),
 
                         GoRoute(
                           path: 'cart',
-                          builder: (context, state) => CartScreen(),
+                          builder: (context, state) => const CartScreen(),
                         ),
                       ],
                     ),
@@ -152,7 +149,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                         GoRoute(
                           path: 'add',
                           builder: (context, state)
-                            => AddTicketScreen(),
+                            => const AddTicketScreen(),
                         ),
                         GoRoute(
                           path: ':ticketId',
@@ -191,20 +188,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                       pageBuilder: (context, state) => const NoTransitionPage(
                         child: TasksScreen(),
                       ),
-                      // routes: [
-                      //   GoRoute(
-                      //     path: ':courrierId',
-                      //     builder: (context, state) => DetailsCourrierScreen(state.pathParameters['courrierId'] as String),
-                      //   ),
-                      //   GoRoute(
-                      //     path: 'enregistrer',
-                      //     builder: (context, state) => const AddCourrierScreen(),
-                      //   ),GoRoute(
-                      //     path: ':courrierId/annotations/enregistrer',
-                      //     builder: (context, state) =>
-                      //         AddAnnotationScreen(courrierId: state.pathParameters['courrierId'] as String),
-                      //   ),
-                      // ],
+                      routes: [
+                        GoRoute(
+                          path: ':taskId',
+                          builder: (context, state) => TaskDetailsPage(state.pathParameters['taskId'] as String),
+                        ),
+
+                      ],
                     ),
 
                   ],
@@ -254,7 +244,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'directions',
                     builder: (context, state) =>
-                        DirectionsScreen(),
+                        const DirectionsScreen(),
                     routes: [
                       GoRoute(
                         path: 'add',
@@ -276,7 +266,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   ),
                   GoRoute(
                     path: 'services',
-                    builder: (context, state) => ServicesScreen(),
+                    builder: (context, state) => const ServicesScreen(),
                     routes: [
                       GoRoute(
                           path: 'add',
@@ -302,7 +292,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   ),
                   GoRoute(
                     path: 'agents',
-                    builder: (context, state) => UsersSreen(),
+                    builder: (context, state) => const UsersSreen(),
                     routes: [
                       GoRoute(
                         path: 'add',
@@ -323,11 +313,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     ],
     redirect: (context, state)  {
 
-      final _authState = ref.watch(authStateProvider);
+      final authState = ref.watch(authStateProvider);
 
       // log("1. REDIRECTING TO DASHBOARD SCREEN");
 
-      return _authState.when(
+      return authState.when(
           data: (data) async {
             User? user = data;
 
@@ -340,6 +330,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             var email = user.email;
             await  ref.read(authServiceProvider).getUser(email!);
             await ref.read(authServiceProvider).saveAgent(email);
+            return null;
             // await ref.read(sharedPrefUtilityProvider).setRoles(roles)
 
           },

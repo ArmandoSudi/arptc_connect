@@ -41,7 +41,7 @@ class UserDependantPage extends StatelessWidget {
   }
 
   Widget _buildDependant(BuildContext context, DocumentSnapshot data) {
-    final entity = Dependant(
+    const entity = Dependant(
       name: "John",
       relationship: "Fils",
       id: "ads",
@@ -53,7 +53,7 @@ class UserDependantPage extends StatelessWidget {
       title: Text(entity.name),
       subtitle: Text(entity.relationship),
       trailing: ElevatedButton(
-        child: Text("Demander Bon"),
+        child: const Text("Demander Bon"),
         onPressed: () => print("Demander bon"),
       ),
       onTap: () {

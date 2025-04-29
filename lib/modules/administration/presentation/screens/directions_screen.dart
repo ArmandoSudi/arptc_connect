@@ -11,7 +11,7 @@ import '../../../../widgets/content_view.dart';
 import '../../../../widgets/page_header.dart';
 
 class DirectionsScreen extends ConsumerWidget {
-  const DirectionsScreen({Key? key}) : super(key: key);
+  const DirectionsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,7 +39,7 @@ class DirectionsScreen extends ConsumerWidget {
                     Row(
                       children: [
                         IconButton(
-                          icon: Icon(Icons.arrow_back_ios),
+                          icon: const Icon(Icons.arrow_back_ios),
                           onPressed: () {
                             context.pop();
                           },
@@ -93,7 +93,7 @@ class DirectionsScreen extends ConsumerWidget {
     return ListTile(
       title: Text(
         entity.name,
-        style: TextStyle(
+        style: const TextStyle(
           // fontWeight: FontWeight.bold,
         ),
       ),

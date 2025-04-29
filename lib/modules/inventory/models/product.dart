@@ -28,12 +28,7 @@ class Product {
 
   @override
   String toString() {
-    return 'Product{' +
-        ' id: $id,' +
-        ' name: $name,' +
-        ' unit: $unit,' +
-        ' quantity: $quantity,' +
-        '}';
+    return 'Product{ id: $id, name: $name, unit: $unit, quantity: $quantity,}';
   }
 
   Product copyWith({
