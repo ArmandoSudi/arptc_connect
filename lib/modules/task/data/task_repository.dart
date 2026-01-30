@@ -1,9 +1,9 @@
 import 'dart:developer';
 
-import 'package:arptc_connect/modules/task/domain/task_two.dart';
+import 'package:arptc_connect/modules/task/domain/task.dart';
 import 'package:arptc_connect/utils/firestore_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 class TaskRepository {
 
   final String path = "tasks";
@@ -45,6 +45,28 @@ class TaskRepository {
       throw (Exception(err));
     }
   }
+
+  Future<void> deleteTask(String id) async {
+    try {
+      await firestoreClient.delete(
+        collection: path,
+        id: id,
+      );
+    } catch (err) {
+      throw (Exception(err));
+    }
+  }
+
+  // Just an experiment to see if we can use update with the repository
+  Query<Task> tasksQuery() {
+    return firestoreClient.firestore
+        .collection(path)
+        .withConverter<Task>(
+      fromFirestore: (snapshot, _) => Task.fromMap(snapshot.data()!, id: snapshot.id),
+      toFirestore: (task, _) => task.toMap(),
+    );
+  }
+
 }
 
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {

@@ -3,7 +3,7 @@ import 'package:arptc_connect/modules/social/screens/social_agent_details_screen
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:responsive_framework/responsive_breakpoints.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 
 class SocialAgentsPage extends StatefulWidget {
@@ -24,7 +24,7 @@ class _SocialAgentsPageState extends State<SocialAgentsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading: false,
+          // automaticallyImplyLeading: false,
             // title: _isSearching ? CupertinoSearchTextField() : Container(),
             title: const CupertinoSearchTextField(placeholder: "Rechercher un agent",),
         ),

@@ -1,6 +1,6 @@
+import 'dart:developer';
 
 import 'package:arptc_connect/core/constants.dart';
-import 'package:arptc_connect/core/shared_preferences_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -17,15 +17,15 @@ class MainServiceScreen extends ConsumerWidget {
     {"Social": "Social"},
     {"Inventory": "Inventaire"},
     {"Ticketing": "Ticketerie"},
+    {"MeetingHall": "Salles de réunion"}, // Added meeting hall service
   ];
-
-
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // final roles = ref.read(sharedPrefUtilityProvider).getRoles();
 
-    final roles = ref.read(sharedPrefUtilityProvider).getRoles();
-
+    // TODO : Get all the services for now but later we will filter them based on the roles
+    final roles = ["TICKETING", "TASK", "COURRIER", "INVENTORY", "MEETING"];
     final authorizedServices = getAccreditedService(roles);
 
     return Scaffold(
@@ -51,7 +51,9 @@ class MainServiceScreen extends ConsumerWidget {
                 mainAxisSpacing: 10.0, // Adjust spacing as needed
                 crossAxisSpacing: 10.0,
                 childAspectRatio: 5 / 3,
-                children: authorizedServices.map((service) => serviceCard(context, service)).toList(),// Adjust spacing as needed
+                children: authorizedServices
+                    .map((service) => serviceCard(context, service))
+                    .toList(), // Adjust spacing as needed
               );
             },
           ),
@@ -62,7 +64,8 @@ class MainServiceScreen extends ConsumerWidget {
   }
 
   int calculateColumnCount(double maxWidth) {
-    if (maxWidth >= 800) { // Adjust width thresholds as needed
+    if (maxWidth >= 800) {
+      // Adjust width thresholds as needed
       return 4;
     } else if (maxWidth >= 600) {
       return 3;
@@ -103,9 +106,8 @@ class MainServiceScreen extends ConsumerWidget {
       },
     );
   }
-  
-  List<Service> getAccreditedService(List<String> roles) {
 
+  List<Service> getAccreditedService(List<String> roles) {
     List<Service> services = [];
 
     for (String role in roles) {
@@ -116,11 +118,10 @@ class MainServiceScreen extends ConsumerWidget {
 
     return services;
   }
-
 }
 
 class Service {
-final String name;
+  final String name;
   final String path;
   final IconData iconData;
 

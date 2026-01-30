@@ -4,7 +4,10 @@ import 'dart:developer';
 import 'package:arptc_connect/extensions/date_extension.dart';
 import 'package:arptc_connect/modules/task/data/task_repository.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
+import 'package:arptc_connect/widgets/custom_filledbutton.dart';
+import 'package:arptc_connect/widgets/custom_form_field.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
+import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,7 +16,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart';
+import 'dart:html' as html;
 
+enum UploadFileType { mail, report }
 class TaskDetailsPage extends ConsumerStatefulWidget {
   final String taskId;
 
@@ -25,6 +30,7 @@ class TaskDetailsPage extends ConsumerStatefulWidget {
 
 class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
   late Future<String> _imageUrlFuture;
+  String? _mailScanName, _reportFileName;
 
   @override
   void initState() {
@@ -33,311 +39,572 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
         "gs://arptc-connect.firebasestorage.app/20131010_184913-MIX_Original.jpg");
   }
 
+
   // Function to get the download URL
   Future<String> _getDownloadUrl(String imagePath) async {
     try {
-      final ref = FirebaseStorage.instance.ref().child(imagePath);
+      final ref = FirebaseStorage
+          .instanceFor(bucket: 'gs://arptc-connect.firebasestorage.app')
+          .ref()
+          .child(imagePath);
       final url = await ref.getDownloadURL();
       return url;
     } catch (e) {
-      print("Error getting download URL: $e");
+      log("Error getting download URL: $e");
       // Return a placeholder URL or rethrow the error depending on your logic
       // For simplicity, rethrowing here. Handle appropriately in your UI.
       rethrow;
     }
   }
 
+  Future<void> deleteFile(String filePath, UploadFileType fileType) async {
+    try {
+      // Create a reference to the file
+      final ref = FirebaseStorage
+          .instanceFor(bucket: 'gs://arptc-connect.firebasestorage.app')
+          .ref()
+          .child(filePath);
+
+      // Delete the file
+      await ref.delete();
+
+      deleteFileUrl(widget.taskId, fileType);
+
+      log("File deleted successfully.");
+    } catch (e,stck) {
+      log("Error deleting file: $e");
+      log("Error deleting file stackTrace: $stck");
+    }
+  }
+
+  Future<void> deleteFileUrl(String taskId, UploadFileType fileType) async {
+    try {
+      final String fieldName = fileType == UploadFileType.mail ? "mail_scan_url" : "report_file_url";
+      final taskRef =
+      FirebaseFirestore.instance.collection("tasks").doc(taskId);
+      await taskRef.update({fieldName: ""});
+      ref.invalidate(taskProvider(widget.taskId));
+      log("Task scan URL updated successfully.");
+    } catch (e) {
+      log("Failed to update task scan URL: $e");
+    }
+  }
+
+  Future<void> deleteFileFromUrl(String fileUrl) async {
+    try {
+      // Extract the file path from the URL
+      final uri = Uri.parse(fileUrl);
+      final filePath = uri.pathSegments
+          .skipWhile((segment) => segment != 'o')
+          .skip(1)
+          .join('/')
+          .replaceAll('%2F', '/'); // Decode URL-encoded slashes
+
+      log("File path: $filePath");
+
+      // Create a reference to the file
+      final ref = FirebaseStorage.instance.ref().child(filePath);
+
+      // Delete the file
+      await ref.delete();
+
+      log("File deleted successfully: $filePath");
+    } catch (e) {
+      log("Error deleting file: $e");
+    }
+  }
+
+  String _setTitle(String type) {
+    return type == "mail" ? "Détails du courrier" : "Détails de la tâche";
+  }
+
   @override
   Widget build(BuildContext context) {
-    final asyncTask = ref.watch(taskProvider(widget.taskId));
+    // final asyncTask = ref.watch(taskProvider(widget.taskId));
+
+    final task = ref.watch(taskProvider(widget.taskId));
 
     final theme = Theme.of(context);
 
     return Scaffold(
       body: ContentView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            // TITLE
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: () {
-                    context.pop();
-                  },
-                ),
-                const PageHeader(
-                    title: "Tasks",
-                    description: 'Gestion des tickets d\'intervention'),
-                Expanded(
-                  child: Container(),
-                ),
-                TextButton(
-                  onPressed: () {
-                    context.go("/service/tasks/task}");
-                  },
-                  child: const Text(
-                    "Voir les tickets",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              // TITLE
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios),
+                    onPressed: () {
+                      context.pop();
+                    },
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
+                  const PageHeader(
+                      title: "Détails de la tâche",
+                      description: 'Gestion des tickets d\'intervention'),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Container(),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete_outline, color: Colors.red[300]),
+                    onPressed: () {
+                      context.pushNamed("edit_task", pathParameters: {"taskId": widget.taskId});
+                    },
+                  )
+                ],
+              ),
+              const SizedBox(height: 20),
 
-            asyncTask.when(
-              data: (task) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[100],
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(task.label,
-                                style: theme.textTheme.titleMedium!
-                                    .copyWith(fontWeight: FontWeight.w600)),
-                            const SizedBox(height: 20),
+              task.when(
+                data: (task) {
 
-                            // DATE LABEL
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Date d'émission",
-                                  style: theme.textTheme.labelMedium,
-                                ),
-                                Text(
-                                  "Date d'accusé réception",
-                                  style: theme.textTheme.labelMedium,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 5),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  task.emissionDate.formatedDate,
-                                  style: theme.textTheme.labelLarge,
-                                ),
-                                Text(
-                                  task.receptionDate?.formatedDate ?? " - ",
-                                  style: theme.textTheme.labelLarge,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
+                  // Extract the file names from the URLs
+                  if (task.mailScanUrl == null || task.mailScanUrl!.isEmpty) {
+                    _mailScanName = "";
+                  } else {
+                    Uri uriMail = Uri.parse(task.mailScanUrl!);
+                    _mailScanName = Uri.decodeComponent(uriMail.pathSegments.last);
+                  }
 
-                            const Text("Remarques"),
-                            const SizedBox(height: 10),
-                            Text(task.observation),
+                  if (task.reportFileUrl == null || task.reportFileUrl!.isEmpty) {
+                    _reportFileName = "";
+                  } else {
+                    Uri uriReport = Uri.parse(task.reportFileUrl!);
+                    _reportFileName = Uri.decodeComponent(uriReport.pathSegments.last);
+                  }
 
-                            Text(task.status),
-                            Text(task.type),
-                            Text(task.sender ?? "N/A"),
-                            Text(task.receiver ?? "N/A"),
-                            Text(task.mailScanUrl ?? "N/A"),
-                            Text(task.reportFileUrl ?? "N/A"),
-                            Text(task.department),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
+
+                  return ResponsiveCenter(
+                    child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Scans",
-                                  style: theme.textTheme.titleMedium!.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.green)),
-                              IconButton(
-                                onPressed: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(20)),
-                                    ),
-                                    builder: (context) =>
-                                        const FilePickerBottomSheet(),
-                                  );
-                                },
-                                icon:
-                                    const Icon(Icons.add, color: Colors.green),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
+                          // GENERAL INFORMATION
                           Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.green[100],
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                                color: Colors.grey[100],
                                 borderRadius: BorderRadius.circular(10),
-                              ),
+                                border: Border.all(color: Colors.black)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(task.label,
+                                    style: theme.textTheme.titleMedium!
+                                        .copyWith(fontWeight: FontWeight.w600)),
+                                const SizedBox(height: 20),
+                      
+                                // DATE LABEL
+                                const Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Date d'émission",
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Date d'accusé réception",
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 5),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      task.emissionDate.formatedDate,
+                                      style: theme.textTheme.labelLarge,
+                                    ),
+                                    Text(
+                                      task.receptionDate?.formatedDate ?? " - ",
+                                      style: theme.textTheme.labelLarge,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 20),
+                      
+                                const Text(
+                                  "Remarques",
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  task.observation,
+                                  style: theme.textTheme.bodyLarge,
+                                ),
+                      
+                                Text(task.status),
+                                Text(task.type),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                      
+                          // SCANS / PROJECTS
+                          Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                  color: Colors.green.shade50,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: Colors.black)),
                               child: Column(
                                 children: [
-                                  ListTile(
-                                    leading:
-                                        Icon(Icons.remove_red_eye_outlined),
-                                    title: Text("image 001.png"),
-                                    trailing:
-                                        Icon(Icons.delete_outline_outlined),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Pièces jointes",
+                                        style: theme.textTheme.titleMedium!
+                                            .copyWith(
+                                                fontWeight: FontWeight.w900,
+                                                color: Colors.green[900]),
+                                      ),
+                                      FilledButton(
+                                        style: FilledButton.styleFrom(
+                                          backgroundColor: Colors.black,
+                                          // Black background
+                                          foregroundColor: Colors.white,
+                                          // White text
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                20), // Rounded corners
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          showModalBottomSheet(
+                                            context: context,
+                                            isScrollControlled: true,
+                                            shape: const RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.vertical(
+                                                  top: Radius.circular(20)),
+                                            ),
+                                            builder: (context) =>
+                                                FilePickerBottomSheet(
+                                                    widget.taskId, UploadFileType.mail),
+                                          );
+                                        },
+                                        child: const Text(
+                                          "Ajouter",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  ListTile(
-                                    leading:
-                                        Icon(Icons.remove_red_eye_outlined),
-                                    title: Text("Scan.pdf"),
-                                    trailing:
-                                        Icon(Icons.delete_outline_outlined),
-                                  ),
+                                  const SizedBox(height: 10),
+                      
+                                  if (task.mailScanUrl != null && task.mailScanUrl!.isNotEmpty)
+                                    ListTile(
+                                      leading: IconButton(
+                                        icon: const Icon(Icons.download),
+                                        onPressed: () {
+                                          // Download file from task.mailScanUrl
+                                          try {
+                                            // Open the file in a new tab or trigger a download
+                                            html.AnchorElement anchor = html.AnchorElement(
+                                              href: task.mailScanUrl!,
+                                            )
+                                              ..target = '_blank'
+                                              ..download = task.mailScanUrl!.split('/').last; // Optional: Set a default file name
+                                            anchor.click();
+                                          } catch (e) {
+                                            log("Error: $e");
+                                          }
+                                        },
+                                      ),
+                                      title: Text(_mailScanName!),
+                                      subtitle: const Text("2.5 MB"),
+                                      trailing: IconButton(
+                                        icon: const Icon(
+                                          Icons.delete_outline_outlined,
+                                          color: Colors.redAccent,
+                                        ),
+                                        onPressed: () {
+                                          // Handle delete action
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text("Confirmation"),
+                                              content: const Text(
+                                                  "Êtes-vous sûr de vouloir supprimer ce fichier ?"),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: const Text("Annuler"),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    // Perform delete action
+                                                    deleteFile(task.mailScanUrl!, UploadFileType.mail);
+                                                    ref.invalidate(taskProvider(widget.taskId));
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: const Text("Supprimer"),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  else
+                                    const ListTile(
+                                      title: Text("Aucun fichier joint"),
+                                    ),
                                 ],
                               )),
-                          const SizedBox(height: 30),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Livrables",
-                                  style: theme.textTheme.titleMedium!.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.blue)),
-                              IconButton(
-                                onPressed: () {
-                                  context.go(
-                                      "/service/tasks/task/${task.id}/scan");
-                                },
-                                icon: const Icon(Icons.add, color: Colors.blue),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 20),
+                      
+                          // RESULTS / LIVRABLES
                           Container(
-                              padding: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.blue[100],
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Column(
+                                  color: Colors.blue.shade50,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: Colors.black)),
+                              child: Column(
                                 children: [
-                                  ListTile(
-                                    leading:
-                                        Icon(Icons.remove_red_eye_outlined),
-                                    title: Text("Rapport de l'activite 1"),
-                                    trailing:
-                                        Icon(Icons.delete_outline_outlined),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Livrables",
+                                        style: theme.textTheme.titleMedium!
+                                            .copyWith(
+                                                fontWeight: FontWeight.w900,
+                                                color: Colors.blue[900]),
+                                      ),
+                                      FilledButton(
+                                        style: FilledButton.styleFrom(
+                                          backgroundColor: Colors.black,
+                                          // Black background
+                                          foregroundColor: Colors.white,
+                                          // White text
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                20), // Rounded corners
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          showModalBottomSheet(
+                                            context: context,
+                                            isScrollControlled: true,
+                                            shape: const RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.vertical(
+                                                  top: Radius.circular(20)),
+                                            ),
+                                            builder: (context) =>
+                                                FilePickerBottomSheet(
+                                                    widget.taskId, UploadFileType.report),
+                                          );
+                                        },
+                                        child: const Text(
+                                          "Ajouter",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  ListTile(
-                                    leading:
-                                        Icon(Icons.remove_red_eye_outlined),
-                                    title: Text(
-                                        "Contrat de maintenance avec le prestateur"),
-                                    trailing:
-                                        Icon(Icons.delete_outline_outlined),
-                                  ),
+                                  const SizedBox(height: 10),
+                                  if (task.reportFileUrl != null && task.reportFileUrl!.isNotEmpty)
+                                    ListTile(
+                                      leading: IconButton(
+                                        icon: const Icon(Icons.download),
+                                        onPressed: () {
+                                          // Download file from task.mailScanUrl
+                                          try {
+                                            // Open the file in a new tab or trigger a download
+                                            html.AnchorElement anchor = html.AnchorElement(
+                                              href: task.reportFileUrl!,
+                                            )
+                                              ..target = '_blank'
+                                              ..download = task.mailScanUrl!.split('/').last; // Optional: Set a default file name
+                                            anchor.click();
+                                          } catch (e) {
+                                            log("Error: $e");
+                                          }
+                                        },
+                                      ),
+                                      title: Text(_reportFileName!),
+                                      subtitle: const Text("2.5 MB"),
+                                      trailing: IconButton(
+                                        icon: const Icon(
+                                          Icons.delete_outline_outlined,
+                                          color: Colors.redAccent,
+                                        ),
+                                        onPressed: () {
+                                          // Handle delete action
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text("Confirmation"),
+                                              content: const Text(
+                                                  "Êtes-vous sûr de vouloir supprimer ce fichier ?"),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: const Text("Annuler"),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    // Perform delete action
+                                                    deleteFile(task.reportFileUrl!, UploadFileType.report);
+                                                    ref.invalidate(taskProvider(widget.taskId));
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: const Text("Supprimer"),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  else
+                                    const ListTile(
+                                      title: Text("Aucun rapport / livrable joint"),
+                                    ),
                                 ],
                               )),
+                          const SizedBox(height: 20),
+                      
+                          // ANNOTATIONS
+                          if (task.type == 'mail') ...[
+                            Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                    color: Colors.yellow.shade50,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: Colors.black)),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Annotations",
+                                          style: theme.textTheme.titleMedium!
+                                              .copyWith(
+                                              fontWeight: FontWeight.w900,
+                                              color: Colors.yellow[900]),
+                                        ),
+                                        FilledButton(
+                                          style: FilledButton.styleFrom(
+                                            backgroundColor: Colors.black,
+                                            // Black background
+                                            foregroundColor: Colors.white,
+                                            // White text
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                  20), // Rounded corners
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            showModalBottomSheet(
+                                              context: context,
+                                              isScrollControlled: true,
+                                              shape: const RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.vertical(
+                                                    top: Radius.circular(20)),
+                                              ),
+                                              builder: (context) =>
+                                                  AnnotationBottomSheet(
+                                                      widget.taskId, task.annotations),
+                                            );
+                                          },
+                                          child: const Text(
+                                            "Ajouter",
+                                            style: TextStyle(color: Colors.white),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    if (task.annotations != null && task.annotations!.isNotEmpty)
+                                      ...task.annotations!.entries.map((entry) {
+                                        return ListTile(
+                                          title: Text(entry.key), // Annotation key
+                                          subtitle: Text(entry.value), // Annotation value
+                                        );
+                                      }).toList()
+                                    else
+                                      const ListTile(
+                                        title: Text("Aucune annotation disponible"),
+                                      ),
+                                  ],
+                                )),
+                          ] ,
+                          const SizedBox(height: 20),
+                      
+                          // ACTIONS
+                          FilledButton.icon(
+                            icon: Icon(Icons.task_alt, color: Colors.white),
+                            label: const Text("Marquer la tâche complète",
+                                style: TextStyle(color: Colors.white)),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Colors.black,
+                              // Black background
+                              foregroundColor: Colors.white,
+                              // White text
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    20), // Rounded corners
+                              ),
+                            ),
+                            onPressed: null,
+                          )
                         ],
                       ),
-                    )
-                  ],
-                );
-              },
-              error: (error, stack) => const Center(child: Text("Error")),
-              loading: () => const Center(child: CircularProgressIndicator()),
-            ),
-
-            Image.network(
-              "https://firebasestorage.googleapis.com/v0/b/arptc-connect.firebasestorage.app/o/20131010_184913-MIX_Original.jpg?alt=media&token=da23b1d2-c2c6-486d-bc67-c83763918c7a",
-              width: 100,
-              height: 100,
-            ),
-
-            FutureBuilder<String>(
-              future: _imageUrlFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  // Show a loading indicator while waiting for the URL
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  // Show an error message or placeholder if URL fetching fails
-                  print(
-                      "FutureBuilder Error: ${snapshot.error}"); // Log the specific error
-                  return const Center(
-                      child: Icon(Icons.error_outline,
-                          color: Colors.red, size: 50));
-                  // Or return Text('Error loading image: ${snapshot.error}');
-                } else if (snapshot.hasData) {
-                  // Once the URL is available, display the image
-                  final imageUrl = snapshot.data!;
-                  return Image.network(
-                    imageUrl,
-                    width: 250,
-                    height: 250,
-                    fit: BoxFit.cover, // Adjust fit as needed
-                    // Optional: Add a loading builder for Image.network itself
-                    loadingBuilder: (BuildContext context, Widget child,
-                        ImageChunkEvent? loadingProgress) {
-                      if (loadingProgress == null) return child; // Image loaded
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null, // Show progress if possible
-                        ),
-                      );
-                    },
-                    // Optional: Add an error builder for Image.network errors (e.g., 404)
-                    errorBuilder: (context, error, stackTrace) {
-                      print(
-                          "Image.network Error: $error"); // Log the specific error
-                      return const Center(
-                          child: Icon(Icons.broken_image,
-                              size: 50, color: Colors.grey));
-                      // Or return Text('Could not load image');
-                    },
+                    ),
                   );
-                } else {
-                  // Should not happen in typical cases, but good to have a fallback
-                  return const Center(child: Text('No image URL found.'));
-                }
-              },
-            )
-          ],
+                },
+                error: (error, stack) => const Center(child: Text("Error")),
+                loading: () => const Center(child: CircularProgressIndicator()),
+              ),
+
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // Add your onPressed code here!
-        },
-        label: const Text('Next'),
-        icon: const Icon(Icons.thumb_up),
-        backgroundColor: Colors.pink,
       ),
     );
   }
 }
 
-class FilePickerBottomSheet extends StatefulWidget {
-  const FilePickerBottomSheet({super.key});
+
+class FilePickerBottomSheet extends ConsumerStatefulWidget {
+  final String taskId;
+  final UploadFileType fileType;
+
+  const FilePickerBottomSheet(this.taskId, this.fileType, {super.key});
 
   @override
-  State<FilePickerBottomSheet> createState() => _FilePickerBottomSheetState();
+  ConsumerState<FilePickerBottomSheet> createState() => _FilePickerBottomSheetState();
 }
 
-class _FilePickerBottomSheetState extends State<FilePickerBottomSheet> {
+class _FilePickerBottomSheetState extends ConsumerState<FilePickerBottomSheet> {
   PlatformFile? _selectedFile;
   bool _isUploading = false;
   String? _uploadUrl;
@@ -351,197 +618,72 @@ class _FilePickerBottomSheetState extends State<FilePickerBottomSheet> {
     }
   }
 
-  Future<void> _uploadFile(BuildContext context) async {
+  Future<void> _uploadFile(BuildContext context, UploadFileType type ) async {
+
+    String relativePath = type == UploadFileType.mail ? "scans" : "reports";
+
     if (_selectedFile == null) return;
 
     setState(() => _isUploading = true);
 
     try {
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('uploads')
-          .child(_selectedFile!.name);
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final path = "task/$relativePath/${timestamp}_${_selectedFile!.name}";
+      final storage = FirebaseStorage.instanceFor(
+          bucket: 'gs://arptc-connect.firebasestorage.app');
+      final storageRef = storage.ref().child(path);
 
-      final metadata = SettableMetadata(
-        contentType: _selectedFile!.extension == 'pdf'
-            ? 'application/pdf'
-            : 'application/octet-stream',
-        customMetadata: {'picked-file-path': _selectedFile!.path ?? ''},
-      );
+      UploadTask uploadTask = kIsWeb || _selectedFile!.bytes != null
+          ? storageRef.putData(_selectedFile!.bytes!)
+          : storageRef.putFile(io.File(_selectedFile!.path!));
 
-      log('_selectedFile!.path: ${_selectedFile!.path}');
-      log('METADATA $metadata');
-
-      UploadTask uploadTask;
-
-      if (kIsWeb || _selectedFile!.bytes != null) {
-        log('_selectedFile!.bytes: LENGTH:: ${_selectedFile!.bytes?.length}');
-        uploadTask = storageRef.putData(_selectedFile!.bytes!, metadata);
-      } else if (_selectedFile!.path != null) {
-        final file = io.File(_selectedFile!.path!);
-        uploadTask = storageRef.putFile(file, metadata);
-      } else {
-        throw Exception("Invalid file data or path.");
-      }
-
-      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+      uploadTask.snapshotEvents.listen((snapshot) {
         final progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        debugPrint(
-            "Upload is ${progress.toStringAsFixed(2)}% complete. State: ${snapshot.state}");
-      }, onError: (e) {
-        debugPrint("Error during upload stream: $e");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload stream failed: $e')),
-        );
-        setState(() => _isUploading = false);
+        log("Upload is ${progress.toStringAsFixed(2)}% complete.");
       });
 
       final snapshot = await uploadTask;
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
-      await FirebaseFirestore.instance.collection('uploads').add({
-        'file_name': _selectedFile!.name,
-        'url': downloadUrl,
-        'uploaded_at': Timestamp.now(),
-        'size_kb': (_selectedFile!.size / 1024).toStringAsFixed(2),
-      });
+      log("Download URL: $downloadUrl");
+      log("File Type: ${widget.fileType}");
+
+      await updateTaskScanUrl(widget.taskId, widget.fileType, downloadUrl);
 
       setState(() {
         _uploadUrl = downloadUrl;
       });
-    } catch (e) {
-      debugPrint("Upload failed: $e");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Upload successful!')),
+      );
+
+      context.pop();
+
+    } catch (e, stck) {
+      log("UPLAOD FAILED ERROR : $e");
+      log("UPLAOD FAILED STACKTRACE : $stck");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Upload failed: $e')),
       );
+      context.pop();
     } finally {
       setState(() => _isUploading = false);
     }
   }
 
-  Future<void> _upload() async {
-    UploadTask? uploadTask;
-
+  Future<void> updateTaskScanUrl(String taskId, UploadFileType fileType, String downloadUrl) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-        withData: true,
-      );
-
-      if (result == null || !mounted) return;
-
-      setState(() {
-        _isUploading = true;
-        progress = 0;
-      });
-
-      final fileName = result.files.first.name;
-      final fileBytes = result.files.first.bytes;
-      if (fileBytes == null) throw Exception("File data is null");
-
-      // Improve reliability (especially on web)
-      final storage = FirebaseStorage.instance
-        ..setMaxUploadRetryTime(const Duration(minutes: 10))
-        ..setMaxOperationRetryTime(const Duration(minutes: 5));
-
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final path = "files/${timestamp}_$fileName";
-      final ref = storage.ref().child(path);
-
-      final metadata = SettableMetadata(
-        contentType: result.files.first.extension == 'pdf'
-            ? 'application/pdf'
-            : 'application/octet-stream',
-        cacheControl: 'public,max-age=31536000',
-      );
-
-      uploadTask = ref.putData(fileBytes, metadata);
-
-      bool isUploadStarted = false;
-
-      uploadTask.snapshotEvents.listen(
-        (snapshot) {
-          isUploadStarted = true;
-
-          if (!mounted) return;
-          setState(() {
-            progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          });
-
-          if (snapshot.state == TaskState.success) {
-            snapshot.ref.getDownloadURL().then((url) {
-              if (!mounted) return;
-              setState(() => _uploadUrl = url);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Upload successful!')),
-              );
-            });
-          }
-        },
-        onError: (error) {
-          log("Upload stream error: $error");
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Upload failed: ${error.toString()}')),
-            );
-            setState(() => _isUploading = false);
-          }
-        },
-        cancelOnError: true,
-      );
-    } catch (e, stack) {
-      log("Upload error: $e");
-      log("Stack trace: $stack");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
-        setState(() => _isUploading = false);
-      }
+      final String fieldName = fileType == UploadFileType.mail ? "mail_scan_url" : "report_file_url";
+      final taskRef =
+          FirebaseFirestore.instance.collection("tasks").doc(taskId);
+      await taskRef.update({fieldName: downloadUrl});
+      ref.invalidate(taskProvider(widget.taskId));
+      log("Task scan URL updated successfully.");
+    } catch (e) {
+      log("Failed to update task scan URL: $e");
     }
-  }
-
-  Future<UploadTask?> uploadFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-      withData: true,
-    );
-
-    if (result == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No file was selected'),
-        ),
-      );
-
-      return null;
-    }
-
-    final fileName = result?.files.first.name;
-    final fileBytes = result?.files.first.bytes;
-    if (fileBytes == null) throw Exception("File data is null");
-
-    UploadTask uploadTask;
-
-    // Create a Reference to the file
-    Reference ref = FirebaseStorage.instance
-        .ref()
-        .child('flutter-tests')
-        .child('/some-image.jpg');
-
-    final metadata = SettableMetadata(
-      contentType: 'image/jpeg',
-      customMetadata: {'picked-file-path': fileName!},
-    );
-
-    if (kIsWeb) {
-      uploadTask = ref.putData(fileBytes, metadata);
-    } else {
-      uploadTask = ref.putFile(io.File(fileName!), metadata);
-    }
-
-    return Future.value(uploadTask);
   }
 
   @override
@@ -567,10 +709,6 @@ class _FilePickerBottomSheetState extends State<FilePickerBottomSheet> {
                   Text('${(_selectedFile!.size / 1024).toStringAsFixed(2)} KB'),
             ),
           ],
-          ElevatedButton(
-            onPressed: _upload,
-            child: const Text('Televerser'),
-          ),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -587,7 +725,7 @@ class _FilePickerBottomSheetState extends State<FilePickerBottomSheet> {
               if (_selectedFile != null) ...[
                 const SizedBox(width: 12),
                 ElevatedButton(
-                  onPressed: _isUploading ? null : () => _uploadFile(context),
+                  onPressed: _isUploading ? null : () => _uploadFile(context, widget.fileType),
                   // onPressed: _upload,
                   child: _isUploading
                       ? const CircularProgressIndicator()
@@ -605,6 +743,116 @@ class _FilePickerBottomSheetState extends State<FilePickerBottomSheet> {
           ],
           const SizedBox(height: 20),
         ],
+      ),
+    );
+  }
+}
+
+class AnnotationBottomSheet extends ConsumerStatefulWidget {
+
+  final String taskId;
+  Map<String, String>? currentAnnotations;
+
+  AnnotationBottomSheet(this.taskId, this.currentAnnotations, {super.key});
+
+  @override
+  ConsumerState<AnnotationBottomSheet> createState() => _AnnotationBottomSheetState();
+}
+
+class _AnnotationBottomSheetState extends ConsumerState<AnnotationBottomSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _objectController = TextEditingController();
+  final TextEditingController _receiverController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        top: 16,
+        left: 16,
+        right: 16,
+      ),
+      child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Ajouter une annotation', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height:20),
+
+
+              // OBJET DE L'ACTIVITE
+              CustomFormField(
+                label: "Destinateur",
+                hintText: "Entrez l'destinataire de l'annotation",
+                textInputType: TextInputType.text,
+                controller: _receiverController,
+              ),
+              const SizedBox(height: 10),
+
+              // DESCRIPTION OF THE TASK
+              CustomFormField(
+                label: "Objet",
+                hintText: "Entrer la objet de l'annotation",
+                textInputType: TextInputType.text,
+                controller: _objectController,
+              ),
+              const SizedBox(height: 10),
+
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                          side: const BorderSide(color: Colors.grey),
+                          foregroundColor: Colors.grey,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                        ),
+                        onPressed: () {
+                          context.pop();
+                        },
+                        child: const Text(
+                          "Annuler",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      )),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: CustomFilledButton(
+                      text: "Enregistrer",
+                      onPressed: ()  async {
+
+                        final receiver = _receiverController.text;
+                        final object = _objectController.text;
+
+                        if (widget.currentAnnotations != null) widget.currentAnnotations![receiver] = object;
+                        else widget.currentAnnotations = {receiver: object};
+
+                        final taskRef =
+                        FirebaseFirestore.instance.collection("tasks").doc(widget.taskId);
+                        await taskRef.update({
+                          "annotations": widget.currentAnnotations,
+                        });
+                        ref.invalidate(taskProvider(widget.taskId));
+                        log("Task scan URL updated successfully.");
+
+                        Navigator.of(context).pop();
+
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
       ),
     );
   }

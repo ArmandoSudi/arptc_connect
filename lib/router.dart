@@ -1,4 +1,3 @@
-
 import 'package:arptc_connect/modules/administration/presentation/screens/add_direction_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/add_user_screen.dart';
 import 'package:arptc_connect/modules/administration/presentation/screens/administration_screen.dart';
@@ -19,6 +18,7 @@ import 'package:arptc_connect/modules/inventory/presentation/livraison_screen.da
 import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
 import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
 import 'package:arptc_connect/modules/social/screens/main_social_screen.dart';
+import 'package:arptc_connect/modules/social/screens/social_agents_page.dart';
 import 'package:arptc_connect/modules/task/presentation/screens/task_details_page.dart';
 import 'package:arptc_connect/modules/task/presentation/screens/task_list_page.dart';
 import 'package:arptc_connect/modules/task/presentation/screens/tasks_screen.dart';
@@ -35,6 +35,7 @@ import 'modules/administration/presentation/screens/add_bureau_screen.dart';
 import 'modules/administration/presentation/screens/add_service_screen.dart';
 import 'modules/authentication/providers/authentication_provider.dart';
 import 'modules/inventory/presentation/cart/cart_screen.dart';
+import 'package:arptc_connect/modules/meeting_hall/meeting_hall.dart';
 
 const routerInitialLocation = '/dashboard';
 
@@ -48,6 +49,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   final shellNavigatorServiceKey = GlobalKey<NavigatorState>(debugLabel: 'shellService');
   final shellNavigatorCourrierKey = GlobalKey<NavigatorState>(debugLabel: 'shellCourrier');
   final shellNavigatorTicketingKey = GlobalKey<NavigatorState>(debugLabel: 'shellTicketing');
+  final shellNavigatorMeetingHallKey = GlobalKey<NavigatorState>(debugLabel: 'shellMeetingHall');
 
   return GoRouter(
     initialLocation: routerInitialLocation,
@@ -104,7 +106,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     // Social
                     GoRoute(
                       path: 'social',
-                      builder: (context, state) => const MainSocialScreen(),
+                      builder: (context, state) => const SocialAgentsPage(),
                     ),
 
                     // Inventory
@@ -194,6 +196,27 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                           builder: (context, state) => TaskDetailsPage(state.pathParameters['taskId'] as String),
                         ),
 
+                      ],
+                    ),
+
+                    // Meeting Halls
+                    GoRoute(
+                      path: 'meeting-hall',
+                      pageBuilder: (context, state) => const NoTransitionPage(
+                        child: MeetingHallsScreen(),
+                      ),
+                      routes: [
+                        GoRoute(
+                          path: ':id',
+                          builder: (context, state) {
+                            final hallId = state.pathParameters['id']!;
+                            // return HallDetailsScreen(
+                            //   hall: ref.read(meetingHallsProvider)
+                            //       .firstWhere((hall) => hall.id == hallId),
+                            // );
+                            return HallDetailsScreen(hallId: hallId);
+                          },
+                        ),
                       ],
                     ),
 

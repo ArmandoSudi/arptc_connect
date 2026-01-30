@@ -12,7 +12,7 @@ part of 'agent.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Agent _$AgentFromJson(Map<String, dynamic> json) {
   return _Agent.fromJson(json);
@@ -36,8 +36,12 @@ mixin _$Agent {
   List<Map<String, dynamic>>? get dependants =>
       throw _privateConstructorUsedError;
 
+  /// Serializes this Agent to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of Agent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $AgentCopyWith<Agent> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -72,6 +76,8 @@ class _$AgentCopyWithImpl<$Res, $Val extends Agent>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of Agent
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -177,6 +183,8 @@ class __$$AgentImplCopyWithImpl<$Res>
       _$AgentImpl _value, $Res Function(_$AgentImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of Agent
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -322,7 +330,7 @@ class _$AgentImpl extends _Agent {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$AgentImpl &&
@@ -346,7 +354,7 @@ class _$AgentImpl extends _Agent {
                 .equals(other._dependants, _dependants));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -364,7 +372,9 @@ class _$AgentImpl extends _Agent {
       const DeepCollectionEquality().hash(_roles),
       const DeepCollectionEquality().hash(_dependants));
 
-  @JsonKey(ignore: true)
+  /// Create a copy of Agent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$AgentImplCopyWith<_$AgentImpl> get copyWith =>
@@ -424,8 +434,11 @@ abstract class _Agent extends Agent {
   List<String> get roles;
   @override
   List<Map<String, dynamic>>? get dependants;
+
+  /// Create a copy of Agent
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$AgentImplCopyWith<_$AgentImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -2,7 +2,7 @@ import 'package:arptc_connect/modules/administration/domain/models/voucher.dart'
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:responsive_framework/responsive_breakpoints.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class SocialVouchersPage extends StatefulWidget {
   const SocialVouchersPage({super.key});

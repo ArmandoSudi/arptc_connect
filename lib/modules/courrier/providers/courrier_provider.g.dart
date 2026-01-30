@@ -6,7 +6,7 @@ part of 'courrier_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$asyncCourrierHash() => r'92615da5479d3c865482bd3b5d059703fd250100';
+String _$asyncCourrierHash() => r'2116d5fd6a8bc38d3c78735fb7f950fdb6fd3437';
 
 /// See also [AsyncCourrier].
 @ProviderFor(AsyncCourrier)

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:arptc_connect/utils/firestore_document.dart';
+import 'package:arptc_connect/utils/firestore_filter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,6 +9,8 @@ import '../core/firebase_providers.dart';
 
 class FirestoreClient {
   final FirebaseFirestore _firestore;
+
+  FirebaseFirestore get firestore => _firestore;
 
   FirestoreClient({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -21,6 +24,20 @@ class FirestoreClient {
       return docRef.id;
     } catch (err) {
       throw Exception('Error adding a document: $err');
+    }
+  }
+
+  Future<void> delete({
+    required String collection,
+    required String id,
+  }) async {
+    try {
+      final docRef = _firestore.collection(collection).doc(id);
+      await docRef.delete();
+    } catch (exception) {
+      log("FireStoreClient::delete err => $exception");
+      log("FireStoreClient::delete id => $id");
+      throw Exception('Error deleting document: $exception');
     }
   }
 
@@ -54,6 +71,19 @@ class FirestoreClient {
     }
   }
 
+  Stream<List<FirestoreDocument>> streamAll({required String collection}) {
+    try {
+      final colRef = _firestore.collection(collection);
+      return colRef.snapshots().map((snapshot) {
+        return snapshot.docs
+            .map((doc) => FirestoreDocument(id: doc.id, data: doc.data()))
+            .toList();
+      });
+    } catch (err) {
+      throw Exception('Error streaming all documents: $err');
+    }
+  }
+
   Future<List<FirestoreDocument>> fetchAllBy({
     required String collection,
     required String field,
@@ -71,6 +101,25 @@ class FirestoreClient {
     }
   }
 
+  // Fetch all documents with a multiple specific field values
+  // Future<List<FirestoreDocument>> fetchAllByMultiple({
+  //   required String collection,
+  //   required Map<String, dynamic> filters,
+  // }) async {
+  //   try {
+  //     Query query = _firestore.collection(collection);
+  //     filters.forEach((field, value) {
+  //       query = query.where(field, isEqualTo: value);
+  //     });
+  //     final documents = await query.get();
+  //     return documents.docs
+  //         .map((doc) => FirestoreDocument(id: doc.id, data: doc.data()))
+  //         .toList();
+  //   } catch (err) {
+  //     throw Exception('Error fetching all by multiple documents: $err');
+  //   }
+  // }
+
   Future<FirestoreDocument> fetchById({
     required String collection,
     required String id,
@@ -84,54 +133,66 @@ class FirestoreClient {
     }
   }
 
-  // Future<List<FirestoreDocument>> fetchAllFromBundle<T>({
-  //   required String collection, // bundleId
-  //   required String bundleUrl,
-  // }) async {
-  //   final response = await http.get(Uri.parse('$bundleUrl/$collection'));
-  //   final buffer = Uint8List.fromList(response.body.codeUnits);
-  //   final task = _firestore.loadBundle(buffer);
-  //
-  //   task.stream.listen((taskStateProgress) {
-  //     if (taskStateProgress.taskState == LoadBundleTaskState.success) {
-  //       print('Bundle loaded successfully');
-  //     }
-  //   });
-  //
-  //   await task.stream.last;
-  //
-  //   final querySnap = _firestore.collection(collection).get(
-  //     const GetOptions(source: Source.cache),
-  //   );
-  //
-  //   return querySnap.then((querySnap) {
-  //     return querySnap.docs
-  //         .map((doc) => DbRecord(id: doc.id, data: doc.data()))
-  //         .toList();
-  //   });
-  // }
-
-  Stream<List<FirestoreDocument>> streamAll({required String collection}) {
-    final colRef = _firestore.collection(collection);
-    return colRef.snapshots().map((snapshot) {
-      return snapshot.docs
-          .map((doc) => FirestoreDocument(id: doc.id, data: doc.data()))
-          .toList();
-    });
+  Future<List<FirestoreDocument>> fetchWhereWithFilters({
+    required String collection,
+    required List<FirestoreFilter> filters,
+  }) async {
+    try {
+      Query query = _firestore.collection(collection);
+      for (final filter in filters) {
+        query = query.where(
+          filter.field,
+          isEqualTo: filter.isEqualTo,
+          isGreaterThan: filter.isGreaterThan,
+          isGreaterThanOrEqualTo: filter.isGreaterThanOrEqualTo,
+          isLessThan: filter.isLessThan,
+          isLessThanOrEqualTo: filter.isLessThanOrEqualTo,
+          arrayContains: filter.arrayContains,
+          arrayContainsAny: filter.arrayContainsAny,
+          whereIn: filter.whereIn,
+          whereNotIn: filter.whereNotIn,
+          isNull: filter.isNull,
+        );
+      }
+      final documents = await query.get();
+      return documents.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return FirestoreDocument(id: doc.id, data: data);
+      }).toList();
+    } catch (err) {
+      throw Exception('Error fetching documents with filters: $err');
+    }
   }
 
-  Stream<List<FirestoreDocument>> streamAllBy({
+  // Stream version for real-time updates
+  Stream<List<FirestoreDocument>> streamWhereWithFilters({
     required String collection,
-    required String field,
-    required String value,
+    required List<FirestoreFilter> filters,
   }) {
-    final colRef = _firestore.collection(collection);
-    final query = colRef.where(field, isEqualTo: value);
-    return query.snapshots().map((snapshot) {
-      return snapshot.docs
-          .map((doc) => FirestoreDocument(id: doc.id, data: doc.data()))
-          .toList();
-    });
+    try {
+      Query query = _firestore.collection(collection);
+      for (final filter in filters) {
+        query = query.where(
+          filter.field,
+          isEqualTo: filter.isEqualTo,
+          isGreaterThan: filter.isGreaterThan,
+          isGreaterThanOrEqualTo: filter.isGreaterThanOrEqualTo,
+          isLessThan: filter.isLessThan,
+          isLessThanOrEqualTo: filter.isLessThanOrEqualTo,
+          arrayContains: filter.arrayContains,
+          arrayContainsAny: filter.arrayContainsAny,
+          whereIn: filter.whereIn,
+          whereNotIn: filter.whereNotIn,
+          isNull: filter.isNull,
+        );
+      }
+      return query.snapshots().map((snapshot) => snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return FirestoreDocument(id: doc.id, data: data);
+      }).toList());
+    } catch (err) {
+      throw Exception('Error streaming documents with filters: $err');
+    }
   }
 }
 

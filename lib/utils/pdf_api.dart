@@ -53,13 +53,23 @@ class PdfApi {
   //   return File('$path/invoice.pdf');
   // }
 
-  static Future<void> downloadDocument(Document pdf) async {
+  static Future<void> downloadDocument(Document pdf, {String? title}) async {
     var savedFile = await pdf.save();
     List<int> fileInts = List.from(savedFile);
 
     // Download document
     AnchorElement(href: 'data:application/octet-stream;base64,${base64.encode(fileInts)}')
-      ..setAttribute('download', "Rapport_${DateTime.now().millisecondsSinceEpoch}.pdf")
+      ..setAttribute('download', "${title ?? "rapport"}_${DateTime.now().millisecondsSinceEpoch}.pdf")
+      ..click();
+  }
+
+  static Future<void> downloadExcel(List<int> excelBytes, {String? title}) async {
+    // Convert the Excel bytes to a Base64 string
+    final base64Excel = base64.encode(excelBytes);
+
+    // Create a downloadable link
+    AnchorElement(href: 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,$base64Excel')
+      ..setAttribute('download', "${title ?? "report"}_${DateTime.now().millisecondsSinceEpoch}.xlsx")
       ..click();
   }
 }

@@ -56,6 +56,7 @@ class _SocialAgentDetailsScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // PROFILE PICTURE
                   const Gap(16),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -64,13 +65,16 @@ class _SocialAgentDetailsScreenState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          // PROFILE
                           const CircleAvatar(
-                            radius: 150,
+                            radius: 50,
                             backgroundImage: NetworkImage(
                                 'https://i.pravatar.cc/300?img=49',
                                 scale: 2),
                           ),
                           const Gap(24),
+
+                          // NAME
                           Text(
                             agent.name,
                             style: theme.textTheme.titleLarge!.copyWith(
@@ -78,6 +82,8 @@ class _SocialAgentDetailsScreenState
                             ),
                           ),
                           const Gap(16),
+
+                          // DEPARTMENT
                           Text(
                             "Direction Générale",
                             style: theme.textTheme.titleMedium!.copyWith(
@@ -85,32 +91,59 @@ class _SocialAgentDetailsScreenState
                             ),
                           ),
                           const Gap(16),
+
+                          // SERVICE
                           Text(
-                            "Service  Juridique",
+                            "Service  Developpement et Base des données",
                             style: theme.textTheme.titleSmall!.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           const Gap(16),
-                          OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              // primary: theme.primaryColor
-                              padding:
+
+                          // ACTIONS
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  // primary: theme.primaryColor
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 32),
+                                  side: BorderSide(color: theme.primaryColor),
+                                ),
+                                onPressed: () async {
+                                  log("Generer bon");
+                                  VoucherService().generateVoucher(agent);
+                                },
+                                icon: const Icon(Icons.file_copy_outlined),
+                                label: const Text("Bon Médical"),
+                              ),
+                              const Gap(16),
+                              OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  // primary: theme.primaryColor
+                                  padding:
                                   const EdgeInsets.symmetric(horizontal: 32),
-                              side: BorderSide(color: theme.primaryColor),
-                            ),
-                            onPressed: () async {
-                              log("Generer bon");
-                              VoucherService().generateVoucher(agent);
-                            },
-                            icon: const Icon(Icons.file_copy_outlined),
-                            label: const Text("Générer bon"),
+                                  side: BorderSide(color: theme.primaryColor),
+                                ),
+                                onPressed: () async {
+                                  log("Générer attestation");
+                                  VoucherService().generateAttestation(agent);
+                                },
+                                icon: const Icon(Icons.file_copy_outlined),
+                                label: const Text("Attestation de Service"),
+                              ),
+                            ],
                           ),
+
                         ],
                       ),
                     ),
                   ),
                   const Gap(16),
+
+                  // DEPENDANTS
                   Card(
                     color: Colors.white,
                     elevation: 5,

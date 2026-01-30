@@ -1,12 +1,15 @@
 import 'dart:developer';
 
 import 'package:arptc_connect/extensions/date_extension.dart';
-import 'package:arptc_connect/modules/task/domain/task_two.dart';
+import 'package:arptc_connect/modules/task/application/activite_reporting_excel_service.dart';
+import 'package:arptc_connect/modules/task/application/activite_reporting_service.dart';
+import 'package:arptc_connect/modules/task/domain/task.dart';
 import 'package:arptc_connect/modules/task/presentation/controllers/async_tasks.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
 import 'package:arptc_connect/widgets/custom_form_field.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
+import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +19,10 @@ enum TaskState {
   Doing,
   Done,
 }
+
+final taskFilter = StateProvider<TaskState>((ref) {
+  return TaskState.New;
+});
 
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
@@ -32,17 +39,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final asyncTasks = ref.watch(asyncTasksProvider);
 
-    asyncTasks.when(
-        data: (data) {
-          log("Tasks data: $data");
-        },
-        loading: () {},
-        error: (error, stackTrace) {
-          log("Error loading tasks:: $error");
-        }
-    );
+    final asyncTasks = ref.watch(asyncTasksProvider);
 
     final theme = Theme.of(context);
 
@@ -60,171 +58,206 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   },
                 ),
                 const PageHeader(
-                    title: "Tasks",
+                    title: "Tâches",
                     description: 'Gestion des tickets d\'intervention'),
                 Expanded(
                   child: Container(),
                 ),
-                TextButton(
+                IconButton(
                   onPressed: () {
-                    context.go("/service/tasks/task}");
+
+                    // final ActiviteReportingService ARS = ActiviteReportingService();
+                    final excelReport = ActiviteExcelReportingService();
+
+                    // ARS.generateReport(_tasks);
+                    excelReport.generateExcelReport(_tasks, "reports.xlsx");
                   },
-                  child: const Text(
-                    "Voir les tickets",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  icon: const Icon(
+                      Icons.print
                   ),
                 ),
               ],
             ),
 
-            // SEGEMENTED BUTTONS BASED ON THE TASK STATE
-            SegmentedButton<TaskState>(
-              segments: const <ButtonSegment<TaskState>>[
-                ButtonSegment<TaskState>(
-                  value: TaskState.New,
-                  label: Text('Nouvelle'),
-                ),
-                ButtonSegment<TaskState>(
-                    value: TaskState.Doing,
-                    label: Text('En Traitement')),
-                ButtonSegment<TaskState>(
-                  value: TaskState.Done,
-                  label: Text('Traitée'),
-                )
-              ],
-              selected: {selectedFilterOption},
-              onSelectionChanged: (Set<TaskState> newSelection) {
-                setState(() {
-                  log("Selected $newSelection");
-
-                  switch (newSelection.first) {
-                    case TaskState.New:
-                      selectedFilterOption = TaskState.New;
-                      break;
-                    case TaskState.Doing:
-                      selectedFilterOption = TaskState.Doing;
-                      break;
-                    case TaskState.Done:
-                      selectedFilterOption = TaskState.Done;
-                      break;
-                  }
-                });
-              },
+            // SEGMENTED BUTTONS - Outside of scrollable area
+            ResponsiveCenter(
+              child: SegmentedButton<TaskState>(
+                segments: const <ButtonSegment<TaskState>>[
+                  ButtonSegment<TaskState>(
+                    value: TaskState.New,
+                    label: Text('Nouvelle'),
+                  ),
+                  ButtonSegment<TaskState>(
+                      value: TaskState.Doing,
+                      label: Text('En Traitement')),
+                  ButtonSegment<TaskState>(
+                    value: TaskState.Done,
+                    label: Text('Traitée'),
+                  )
+                ],
+                selected: {selectedFilterOption},
+                onSelectionChanged: (Set<TaskState> newSelection) {
+                  setState(() {
+                    log("Selected $newSelection");
+                    ref.read(taskFilter.notifier).state = newSelection.first;
+                    selectedFilterOption = newSelection.first;
+                  });
+                },
+              ),
             ),
             const SizedBox(height: 20),
 
-            // LIST OF TICKETS
-            asyncTasks.when(
-              data: (data) {
+            Expanded(
+              child: asyncTasks.when(
+                data: (data) {
 
-                // _tickets = data;
-                _tasks.clear();
+                  _tasks.clear();
 
-                // Order list in data by ticket creation date
-                data.sort((a, b) => a.creationDate.compareTo(b.creationDate));
+                  data.sort((a, b) => a.creationDate.compareTo(b.creationDate));
 
-                _tasks.addAll(data);
+                  _tasks.addAll(data);
 
-                return Expanded(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: data.length,
-                    itemBuilder: (context, index) {
+                  return SingleChildScrollView(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: data.length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
 
-                      log("Task ID ${data[index].id} ");
+                        log("Task ID ${data[index].id} ");
 
-                      // add Inkwell
-                      return InkWell(
-                        onTap: (){
-                          context.push("/service/tasks/${data[index].id}");
-                        },
-                        child: Card(
-                          child: ClipRect(
-                            // borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    spreadRadius: 1,
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    data[index].label,
-                                    style: theme.textTheme.titleMedium!
-                                        .copyWith(fontWeight: FontWeight.w600),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      Text("De : ",  style: theme.textTheme.labelMedium,),
-                                      const SizedBox(width: 2),
-                                      Text(
-                                        data[index].sender!,
-                                        style: theme.textTheme.labelLarge,
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
+                        // add Inkwell
+                        return InkWell(
+                          onTap: (){
+                            context.push("/service/tasks/${data[index].id}");
+                          },
+                          child: Card(
+                            child: ClipRect(
+                              // borderRadius: BorderRadius.circular(10),
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.2),
+                                      spreadRadius: 1,
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      data[index].label,
+                                      style: theme.textTheme.titleMedium!
+                                          .copyWith(fontWeight: FontWeight.w600),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Text("De : ",  style: theme.textTheme.labelMedium,),
+                                        const SizedBox(width: 2),
+                                        Text(
+                                          data[index].sender!,
+                                          style: theme.textTheme.labelLarge,
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
 
-                                  // DATE LABEL
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "Date d'émission",
-                                        style: theme.textTheme.labelMedium,
-                                      ),Text(
-                                        "Date d'accusé réception",
-                                        style: theme.textTheme.labelMedium,
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        data[index].emissionDate.formatedDate,
-                                        style: theme.textTheme.labelLarge,
-                                      ),Text(
-                                        data[index].receptionDate?.formatedDate ?? " - ",
-                                        style: theme.textTheme.labelLarge,
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                    // DATE LABEL
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Date d'émission",
+                                          style: theme.textTheme.labelMedium,
+                                        ),Text(
+                                          "Date d'accusé réception",
+                                          style: theme.textTheme.labelMedium,
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          data[index].emissionDate.formatedDate,
+                                          style: theme.textTheme.labelLarge,
+                                        ),Text(
+                                          data[index].receptionDate?.formatedDate ?? " - ",
+                                          style: theme.textTheme.labelLarge,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
+
                           ),
+                          onLongPress: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Supprimer la tâche'),
+                                  content: Text('Voulez-vous vraiment supprimer "${data[index].label}"?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(); // Close dialog
+                                      },
+                                      child: const Text('Non'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        // Delete the task
+                                        ref.read(asyncTasksProvider.notifier).deleteTask(data[index].id);
+                                        Navigator.of(context).pop(); // Close dialog
 
-                        ),
-                      );
+                                        // Optional: Show a snackbar for confirmation
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Tâche supprimée'),
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                      },
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Colors.red,
+                                      ),
+                                      child: const Text('Oui'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        );
 
-                    },
-                    separatorBuilder: (BuildContext context, int index) {
-                      return const SizedBox.shrink();
-                    },
-                  ),
-                );
-              },
-              error: (error, stackTrace) {
-                log("Error loading tickets:: $error");
-                log("$stackTrace");
-                return const Text("An error occurer when loading the items");
-              },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
+                      },
+                      separatorBuilder: (BuildContext context, int index) {
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  );
+                },
+                error: (error, stackTrace) {
+                  log("Error loading tickets:: $error");
+                  log("$stackTrace");
+                  return const Text("An error occurer when loading the items");
+                },
+                loading: () => const Center(
+                  child: CircularProgressIndicator(),
+                ),
               ),
             )
+
           ],
         ),
       ),

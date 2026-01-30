@@ -3,8 +3,7 @@ import 'package:arptc_connect/router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:responsive_framework/breakpoint.dart';
-import 'package:responsive_framework/responsive_breakpoints.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/shared_preferences_provider.dart';
@@ -40,9 +39,9 @@ class MyApp extends ConsumerWidget {
 
     return ResponsiveBreakpoints.builder(
       breakpoints: [
-        const Breakpoint(start: 0, end: 450, name: MOBILE),
-        const Breakpoint(start: 451, end: 960, name: TABLET),
-        const Breakpoint(start: 961, end: double.infinity, name: DESKTOP),
+        const Breakpoint(start: 0, end: 450, name: 'MOBILE'),
+        const Breakpoint(start: 451, end: 960, name: 'TABLET'),
+        const Breakpoint(start: 961, end: double.infinity, name: 'DESKTOP'),
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
