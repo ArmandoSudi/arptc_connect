@@ -1,61 +1,87 @@
 import 'package:flutter/material.dart';
 
+/// Material Design 3 Dropdown Field
+///
+/// A styled dropdown menu that follows M3 design guidelines
+/// with proper surface tints and rounded corners
 class CustomDropDown extends StatefulWidget {
-  CustomDropDown({
+  const CustomDropDown({
     super.key,
     this.label,
     required this.hintText,
     required this.items,
     required this.onChanged,
+    this.initialValue,
   });
 
   final String hintText;
-  String? label;
+  final String? label;
   final List<String> items;
   final ValueChanged<String?>? onChanged;
+  final String? initialValue;
 
   @override
   State<CustomDropDown> createState() => _CustomDropDownState();
 }
 
 class _CustomDropDownState extends State<CustomDropDown> {
-
   String? selectedValue;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedValue = widget.initialValue;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        widget.label == null 
-        ? Container() 
-        : Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          child: Text(
+        if (widget.label != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8, left: 4),
+            child: Text(
               widget.label!,
-              style: TextStyle(fontSize: 14, color: Colors.grey[700])),
-        ),
-        DropdownButtonFormField<String>(
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            hintText: widget.hintText,
-            border: const OutlineInputBorder(
-                borderRadius: BorderRadius.all(
-                    Radius.circular( 5)
-                )
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-            // suffixIcon: Icon(Icons.arrow_drop_down)
           ),
-          icon: const Icon(Icons.keyboard_arrow_down_outlined),
+        DropdownButtonFormField<String>(
+          decoration: const InputDecoration(
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          dropdownColor: colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
           isExpanded: true,
           value: selectedValue,
-          items: widget.items
-              .map<DropdownMenuItem<String>>((String value) {
+          hint: Text(
+            widget.hintText,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          items: widget.items.map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
               value: value,
               child: Text(value),
             );
           }).toList(),
-          onChanged: widget.onChanged,
+          onChanged: (value) {
+            setState(() {
+              selectedValue = value;
+            });
+            widget.onChanged?.call(value);
+          },
         ),
       ],
     );

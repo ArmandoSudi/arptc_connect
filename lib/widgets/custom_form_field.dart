@@ -2,6 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// Material Design 3 Form Field
+///
+/// Features:
+/// - Filled container with proper tonal colors
+/// - Label animation with proper contrast
+/// - Error state styling
+/// - Support for prefix/suffix icons
 class CustomFormField extends StatelessWidget {
   const CustomFormField(
       {super.key,
@@ -9,10 +16,9 @@ class CustomFormField extends StatelessWidget {
       this.hintText,
       required this.textInputType,
       required this.controller,
-      this.borderRadius = 5,
+      this.borderRadius = 12,
       this.inputFormatters,
       this.textInputAction,
-      // this.maxLine = 1,
       this.validator,
       this.obscureText,
       this.enable,
@@ -22,7 +28,9 @@ class CustomFormField extends StatelessWidget {
       this.onChanged,
       this.prefix,
       this.onFieldSubmitted,
-      this.focusNode});
+      this.focusNode,
+      this.maxLines = 1,
+      this.minLines});
 
   final String? label;
   final String? hintText;
@@ -36,7 +44,8 @@ class CustomFormField extends StatelessWidget {
 
   final TextInputAction? textInputAction;
 
-  // final int? maxLine;
+  final int? maxLines;
+  final int? minLines;
   final bool? obscureText;
   final bool? enable;
   final Widget? suffixIcon;
@@ -47,48 +56,38 @@ class CustomFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        label == null
-            ? Container()
-            : Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                child: Text(
-                  label!,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    // color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+        if (label != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8, left: 4),
+            child: Text(
+              label!,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
               ),
+            ),
+          ),
         TextFormField(
-          style: const TextStyle(fontSize: 18),
+          style: theme.textTheme.bodyLarge,
           decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.blue[10],
-              prefixIcon: prefixIcon,
-              prefix: prefix,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 10,
-              ),
-              hintText: hintText,
-              hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
-              border: OutlineInputBorder(
-                borderSide: BorderSide.none,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(borderRadius ?? 5),
-                ),
-              ),
-              suffixIcon: suffixIcon),
+            prefixIcon: prefixIcon,
+            prefix: prefix,
+            hintText: hintText,
+            suffixIcon: suffixIcon,
+          ),
           controller: controller,
           keyboardType: textInputType,
           inputFormatters: inputFormatters,
           validator: validator,
           textInputAction: textInputAction,
-          // maxLines: maxLine,
+          maxLines: maxLines,
+          minLines: minLines,
           obscureText: obscureText ?? false,
           enabled: enable ?? true,
           onTap: onTap,
@@ -100,3 +99,4 @@ class CustomFormField extends StatelessWidget {
     );
   }
 }
+

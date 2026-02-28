@@ -1,11 +1,14 @@
 import 'package:arptc_connect/core/theme.dart';
+import 'package:arptc_connect/core/theme_provider.dart';
 import 'package:arptc_connect/router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/constants.dart';
 import 'core/shared_preferences_provider.dart';
 import 'firebase_options.dart';
 
@@ -14,6 +17,19 @@ Future<void> main() async {
   final sharedPreferences = await SharedPreferences.getInstance();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Set system UI overlay style for M3 edge-to-edge design
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
+
+  // Enable edge-to-edge mode on Android
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   // import flutter_web_plugings/url_strategy.dart
   // usePathUrlStrategy();
@@ -35,7 +51,9 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final goRouter = ref.watch(goRouterProvider);
-    final theme = MaterialTheme(Theme.of(context).textTheme);
+    final themeMode = ref.watch(themeModeProvider);
+    final textTheme = Theme.of(context).textTheme;
+    final theme = MaterialTheme(textTheme);
 
     return ResponsiveBreakpoints.builder(
       breakpoints: [
@@ -47,14 +65,21 @@ class MyApp extends ConsumerWidget {
         debugShowCheckedModeBanner: false,
         routerConfig: goRouter,
         title: 'ARPTC',
-        theme: theme.light(),
-        // theme: ThemeData(
-        //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        //   useMaterial3: true,
-        // ),
-        // routerDelegate: ref.watch(goRouterProvider).routerDelegate,
-        // routeInformationParser: ref.watch(goRouterProvider).routeInformationParser,
-        // home: const AuthCheckerScreen(),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: AppColors.primary,
+            brightness: Brightness.light,
+          ),
+          useMaterial3: true,
+        ),
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: AppColors.primary,
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+        ),
+        themeMode: themeMode,
       ),
     );
   }

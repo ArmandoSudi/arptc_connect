@@ -3,6 +3,9 @@ import 'package:arptc_connect/modules/social/screens/user_refund_page.dart';
 import 'package:arptc_connect/modules/social/screens/user_vouchers_page.dart';
 import 'package:flutter/material.dart';
 
+/// User Social Screen
+///
+/// Tabbed interface for social module features using M3 design
 class UserSocialScreen extends StatefulWidget {
   const UserSocialScreen({super.key});
 
@@ -17,14 +20,23 @@ class _UserSocialScreenState extends State<UserSocialScreen> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: "Dependants"),
-              Tab(text: "Bons"),
-              Tab(text: "Remboursements"),
+          title: const Text('Social'),
+          bottom: TabBar(
+            tabs: const [
+              Tab(
+                icon: Icon(Icons.people_outline),
+                text: "Dépendants",
+              ),
+              Tab(
+                icon: Icon(Icons.receipt_long_outlined),
+                text: "Bons",
+              ),
+              Tab(
+                icon: Icon(Icons.payments_outlined),
+                text: "Remboursements",
+              ),
             ],
           ),
-          title: const Text('Social'),
         ),
         body: TabBarView(
           children: [

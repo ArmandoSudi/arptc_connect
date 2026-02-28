@@ -1,36 +1,36 @@
 import 'package:flutter/material.dart';
 
-class CustomNavBar extends StatefulWidget {
+/// Material Design 3 Navigation Bar
+///
+/// Uses NavigationBar with proper M3 styling including:
+/// - Filled indicator for selected item
+/// - Proper icon and label colors
+/// - Animated transitions
+class CustomNavBar extends StatelessWidget {
   final int curTabIndex;
   final Function(int) onTap;
   const CustomNavBar(Key? key, this.onTap, this.curTabIndex) : super(key: key);
 
   @override
-  State<CustomNavBar> createState() => _CustomNavBarState();
-}
-
-class _CustomNavBarState extends State<CustomNavBar> {
-  @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      onTap: (tabIndex){
-        widget.onTap(tabIndex);
-      },
-      // selectedItemColor: Colors.orange,
-      // unselectedItemColor: Colors.pinkAccent,
-      currentIndex: widget.curTabIndex,
-      showUnselectedLabels: true,
-      items: const [
-        BottomNavigationBarItem(
+    return NavigationBar(
+      selectedIndex: curTabIndex,
+      onDestinationSelected: onTap,
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      destinations: const [
+        NavigationDestination(
           icon: Icon(Icons.dashboard_outlined),
+          selectedIcon: Icon(Icons.dashboard),
           label: 'Dashboard',
         ),
-        BottomNavigationBarItem(
+        NavigationDestination(
           icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home),
           label: 'Home',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_today_outlined),
+        NavigationDestination(
+          icon: Icon(Icons.person_outline),
+          selectedIcon: Icon(Icons.person),
           label: 'Account',
         ),
       ],

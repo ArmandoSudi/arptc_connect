@@ -1,5 +1,12 @@
 import "package:flutter/material.dart";
 
+/// Material Design 3 Theme Configuration
+///
+/// This theme follows M3 design guidelines with:
+/// - Dynamic color scheme with proper contrast ratios
+/// - Consistent component theming
+/// - Proper typography scale
+/// - Elevated surfaces with tonal colors
 class MaterialTheme {
   final TextTheme textTheme;
 
@@ -370,6 +377,291 @@ class MaterialTheme {
      ),
      scaffoldBackgroundColor: colorScheme.surface,
      canvasColor: colorScheme.surface,
+
+     // AppBar Theme - M3 uses surface color with scroll under elevation
+     appBarTheme: AppBarTheme(
+       centerTitle: false,
+       elevation: 0,
+       scrolledUnderElevation: 2,
+       backgroundColor: colorScheme.surface,
+       foregroundColor: colorScheme.onSurface,
+       surfaceTintColor: colorScheme.surfaceTint,
+       titleTextStyle: textTheme.titleLarge?.copyWith(
+         color: colorScheme.onSurface,
+         fontWeight: FontWeight.w600,
+       ),
+     ),
+
+     // Card Theme - M3 cards use surfaceContainerLow with elevation tint
+     cardTheme: CardTheme(
+       elevation: 0,
+       shape: RoundedRectangleBorder(
+         borderRadius: BorderRadius.circular(12),
+       ),
+       color: colorScheme.surfaceContainerLow,
+       surfaceTintColor: colorScheme.surfaceTint,
+       clipBehavior: Clip.antiAlias,
+     ),
+
+     // Navigation Bar Theme - M3 bottom navigation
+     navigationBarTheme: NavigationBarThemeData(
+       elevation: 0,
+       backgroundColor: colorScheme.surfaceContainer,
+       indicatorColor: colorScheme.secondaryContainer,
+       iconTheme: WidgetStateProperty.resolveWith((states) {
+         if (states.contains(WidgetState.selected)) {
+           return IconThemeData(color: colorScheme.onSecondaryContainer);
+         }
+         return IconThemeData(color: colorScheme.onSurfaceVariant);
+       }),
+       labelTextStyle: WidgetStateProperty.resolveWith((states) {
+         if (states.contains(WidgetState.selected)) {
+           return textTheme.labelMedium?.copyWith(
+             color: colorScheme.onSurface,
+             fontWeight: FontWeight.w600,
+           );
+         }
+         return textTheme.labelMedium?.copyWith(
+           color: colorScheme.onSurfaceVariant,
+         );
+       }),
+     ),
+
+     // Tab Bar Theme - M3 tabs
+     tabBarTheme: TabBarTheme(
+       labelColor: colorScheme.primary,
+       unselectedLabelColor: colorScheme.onSurfaceVariant,
+       indicatorColor: colorScheme.primary,
+       indicatorSize: TabBarIndicatorSize.label,
+       dividerColor: colorScheme.surfaceContainerHighest,
+     ),
+
+     // Filled Button Theme
+     filledButtonTheme: FilledButtonThemeData(
+       style: FilledButton.styleFrom(
+         minimumSize: const Size(64, 48),
+         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+         shape: RoundedRectangleBorder(
+           borderRadius: BorderRadius.circular(12),
+         ),
+         textStyle: textTheme.labelLarge?.copyWith(
+           fontWeight: FontWeight.w600,
+         ),
+       ),
+     ),
+
+     // Elevated Button Theme
+     elevatedButtonTheme: ElevatedButtonThemeData(
+       style: ElevatedButton.styleFrom(
+         minimumSize: const Size(64, 48),
+         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+         shape: RoundedRectangleBorder(
+           borderRadius: BorderRadius.circular(12),
+         ),
+         elevation: 1,
+       ),
+     ),
+
+     // Outlined Button Theme
+     outlinedButtonTheme: OutlinedButtonThemeData(
+       style: OutlinedButton.styleFrom(
+         minimumSize: const Size(64, 48),
+         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+         shape: RoundedRectangleBorder(
+           borderRadius: BorderRadius.circular(12),
+         ),
+         side: BorderSide(color: colorScheme.outline),
+       ),
+     ),
+
+     // Text Button Theme
+     textButtonTheme: TextButtonThemeData(
+       style: TextButton.styleFrom(
+         minimumSize: const Size(64, 40),
+         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+         shape: RoundedRectangleBorder(
+           borderRadius: BorderRadius.circular(12),
+         ),
+       ),
+     ),
+
+     // Input Decoration Theme - M3 text fields
+     inputDecorationTheme: InputDecorationTheme(
+       filled: true,
+       fillColor: colorScheme.surfaceContainerHighest,
+       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+       border: OutlineInputBorder(
+         borderRadius: BorderRadius.circular(12),
+         borderSide: BorderSide.none,
+       ),
+       enabledBorder: OutlineInputBorder(
+         borderRadius: BorderRadius.circular(12),
+         borderSide: BorderSide.none,
+       ),
+       focusedBorder: OutlineInputBorder(
+         borderRadius: BorderRadius.circular(12),
+         borderSide: BorderSide(color: colorScheme.primary, width: 2),
+       ),
+       errorBorder: OutlineInputBorder(
+         borderRadius: BorderRadius.circular(12),
+         borderSide: BorderSide(color: colorScheme.error),
+       ),
+       focusedErrorBorder: OutlineInputBorder(
+         borderRadius: BorderRadius.circular(12),
+         borderSide: BorderSide(color: colorScheme.error, width: 2),
+       ),
+       labelStyle: textTheme.bodyLarge?.copyWith(
+         color: colorScheme.onSurfaceVariant,
+       ),
+       hintStyle: textTheme.bodyLarge?.copyWith(
+         color: colorScheme.onSurfaceVariant,
+       ),
+       prefixIconColor: colorScheme.onSurfaceVariant,
+       suffixIconColor: colorScheme.onSurfaceVariant,
+     ),
+
+     // Dropdown Menu Theme
+     dropdownMenuTheme: DropdownMenuThemeData(
+       inputDecorationTheme: InputDecorationTheme(
+         filled: true,
+         fillColor: colorScheme.surfaceContainerHighest,
+         border: OutlineInputBorder(
+           borderRadius: BorderRadius.circular(12),
+           borderSide: BorderSide.none,
+         ),
+       ),
+     ),
+
+     // Dialog Theme
+     dialogTheme: DialogTheme(
+       elevation: 3,
+       backgroundColor: colorScheme.surfaceContainerHigh,
+       surfaceTintColor: colorScheme.surfaceTint,
+       shape: RoundedRectangleBorder(
+         borderRadius: BorderRadius.circular(28),
+       ),
+       titleTextStyle: textTheme.headlineSmall?.copyWith(
+         color: colorScheme.onSurface,
+       ),
+       contentTextStyle: textTheme.bodyMedium?.copyWith(
+         color: colorScheme.onSurfaceVariant,
+       ),
+     ),
+
+     // Bottom Sheet Theme
+     bottomSheetTheme: BottomSheetThemeData(
+       backgroundColor: colorScheme.surfaceContainerLow,
+       surfaceTintColor: colorScheme.surfaceTint,
+       shape: const RoundedRectangleBorder(
+         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+       ),
+       dragHandleColor: colorScheme.onSurfaceVariant,
+       dragHandleSize: const Size(32, 4),
+       showDragHandle: true,
+     ),
+
+     // Chip Theme
+     chipTheme: ChipThemeData(
+       backgroundColor: colorScheme.surfaceContainerLow,
+       selectedColor: colorScheme.secondaryContainer,
+       labelStyle: textTheme.labelLarge,
+       shape: RoundedRectangleBorder(
+         borderRadius: BorderRadius.circular(8),
+       ),
+       side: BorderSide(color: colorScheme.outline),
+     ),
+
+     // List Tile Theme
+     listTileTheme: ListTileThemeData(
+       iconColor: colorScheme.onSurfaceVariant,
+       textColor: colorScheme.onSurface,
+       shape: RoundedRectangleBorder(
+         borderRadius: BorderRadius.circular(12),
+       ),
+       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+     ),
+
+     // Divider Theme
+     dividerTheme: DividerThemeData(
+       color: colorScheme.outlineVariant,
+       thickness: 1,
+       space: 1,
+     ),
+
+     // Floating Action Button Theme
+     floatingActionButtonTheme: FloatingActionButtonThemeData(
+       backgroundColor: colorScheme.primaryContainer,
+       foregroundColor: colorScheme.onPrimaryContainer,
+       elevation: 3,
+       shape: RoundedRectangleBorder(
+         borderRadius: BorderRadius.circular(16),
+       ),
+     ),
+
+     // Snackbar Theme
+     snackBarTheme: SnackBarThemeData(
+       backgroundColor: colorScheme.inverseSurface,
+       contentTextStyle: textTheme.bodyMedium?.copyWith(
+         color: colorScheme.onInverseSurface,
+       ),
+       shape: RoundedRectangleBorder(
+         borderRadius: BorderRadius.circular(8),
+       ),
+       behavior: SnackBarBehavior.floating,
+     ),
+
+     // Progress Indicator Theme
+     progressIndicatorTheme: ProgressIndicatorThemeData(
+       color: colorScheme.primary,
+       linearTrackColor: colorScheme.surfaceContainerHighest,
+       circularTrackColor: colorScheme.surfaceContainerHighest,
+     ),
+
+     // Icon Theme
+     iconTheme: IconThemeData(
+       color: colorScheme.onSurface,
+     ),
+
+     // Switch Theme
+     switchTheme: SwitchThemeData(
+       thumbColor: WidgetStateProperty.resolveWith((states) {
+         if (states.contains(WidgetState.selected)) {
+           return colorScheme.onPrimary;
+         }
+         return colorScheme.outline;
+       }),
+       trackColor: WidgetStateProperty.resolveWith((states) {
+         if (states.contains(WidgetState.selected)) {
+           return colorScheme.primary;
+         }
+         return colorScheme.surfaceContainerHighest;
+       }),
+     ),
+
+     // Checkbox Theme
+     checkboxTheme: CheckboxThemeData(
+       fillColor: WidgetStateProperty.resolveWith((states) {
+         if (states.contains(WidgetState.selected)) {
+           return colorScheme.primary;
+         }
+         return Colors.transparent;
+       }),
+       checkColor: WidgetStateProperty.all(colorScheme.onPrimary),
+       shape: RoundedRectangleBorder(
+         borderRadius: BorderRadius.circular(2),
+       ),
+       side: BorderSide(color: colorScheme.onSurfaceVariant, width: 2),
+     ),
+
+     // Radio Theme
+     radioTheme: RadioThemeData(
+       fillColor: WidgetStateProperty.resolveWith((states) {
+         if (states.contains(WidgetState.selected)) {
+           return colorScheme.primary;
+         }
+         return colorScheme.onSurfaceVariant;
+       }),
+     ),
   );
 
 

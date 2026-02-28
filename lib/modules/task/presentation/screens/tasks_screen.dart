@@ -12,6 +12,7 @@ import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 enum TaskState {
@@ -78,6 +79,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 ),
               ],
             ),
+            const Gap(20),
 
             // SEGMENTED BUTTONS - Outside of scrollable area
             ResponsiveCenter(
