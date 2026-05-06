@@ -14,6 +14,7 @@ class UserService {
       final results = await firestoreClient.fetchAll(collection: "users");
       return results.map((item) => User.fromMap(item.data, id: item.id)).toList();
     } catch (err) {
+      log("fetchAllUsers => Error : ${err}");
       throw (Exception(err));
     }
   }

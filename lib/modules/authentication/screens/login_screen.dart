@@ -19,66 +19,63 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      body: Form(
-        key: _formKey,
-        child: Container(
-          color: Colors.grey[200],
-          child: Center(
-              child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 700),
               child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0), // Adjust corner radius as desired
-                ),
-                elevation: 10,
-                child: Container(
-                  width: 700,
-                  padding: const EdgeInsets.all(32.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.white,
-                  ),
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(height: 20),
-                
+
                       // Logo
                       Image.asset(
                         'assets/icons/app_logo.png',
                         height: 120,
                       ),
                       const SizedBox(height: 40),
-                
+
                       // Title
-                      const Text(
+                      Text(
                         "ARPTC CONNECT",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const Text(
-                          "Plateforme integrée de gestion des ressources "),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Plateforme integrée de gestion des ressources",
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                       const SizedBox(height: 40),
-                
+
                       // Email
                       CustomFormField(
                         label: "Email",
                         hintText: "",
                         textInputType: TextInputType.emailAddress,
                         controller: emailController,
-                        prefixIcon: const Icon(Icons.email, color: Colors.grey),
+                        prefixIcon: const Icon(Icons.email),
                         validator: (value) {
-                          if (value!.isEmpty || !value.contains('@')) {
+                          if (value == null || value.isEmpty || !value.contains('@')) {
                             return 'Email invalide, veuillez votre email professionnel';
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 20),
-                
+
                       // Password
                       CustomFormField(
                         label: "Mot de passe",
@@ -86,50 +83,55 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         textInputType: TextInputType.text,
                         obscureText: true,
                         controller: passwordController,
-                        prefixIcon: const Icon(Icons.lock, color: Colors.grey),
+                        prefixIcon: const Icon(Icons.lock),
                         validator: (value) {
-                          if (value!.isEmpty || value.length < 6) {
+                          if (value == null || value.length < 6) {
                             return 'Le mot de passe doit avoir plus de 6 caractères';
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 20),
-                
+
                       // Login Button
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size.fromHeight(60),
-                          shape: const StadiumBorder(),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: () {
+                            if (!_formKey.currentState!.validate()) {
+                              return;
+                            }
+
+                            signinWithEmailAndPassword(
+                              emailController.text,
+                              passwordController.text,
+                            );
+                          },
+                          child: const Text('Se connecter'),
                         ),
-                        onPressed: () {
-                          if (!_formKey.currentState!.validate()) {
-                            return;
-                          }
-                
-                          signinWithEmailAndPassword(emailController.text,
-                            passwordController.text);
-                        },
-                        child: const Text("se connecter", style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                       const SizedBox(height: 20),
-                      const Text(
-                          "Veuillez contacter l'administrateur si votre adresse email n'est pas reconnue",
-                          style: TextStyle(
-                            fontSize: 10,
-                          )), 
+                      Text(
+                        "Veuillez contacter l'administrateur si votre adresse email n'est pas reconnue",
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
-          )),
+          ),
         ),
       ),
     );
   }
 
   void signinWithEmailAndPassword(String email, String password) {
-    ref.read(authServiceProvider).signInWithEmailAndPassword(email, password, context);
+    ref
+        .read(authServiceProvider)
+        .signInWithEmailAndPassword(email, password, context);
   }
 }

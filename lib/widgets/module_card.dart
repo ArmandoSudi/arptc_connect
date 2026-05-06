@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class ModuleCard extends StatelessWidget {
-  const ModuleCard({required this.module});
+  const ModuleCard({
+    required this.module,
+    super.key,
+  });
 
   final ModuleInfo module;
 
@@ -38,8 +41,8 @@ class ModuleCard extends StatelessWidget {
               Text(
                 module.name,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -50,8 +53,8 @@ class ModuleCard extends StatelessWidget {
               Text(
                 module.description,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                      color: Colors.grey[600],
+                    ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -64,11 +67,6 @@ class ModuleCard extends StatelessWidget {
   }
 
   void _navigateToModule(BuildContext context, AppModule module) {
-
-    context.go('/service/${module.name}');
-    // Navigate to Store Management module
-
-
-
+    context.go('/service/${module.routeSegment}');
   }
 }

@@ -7,10 +7,51 @@ enum AppModule {
   inventory,
   ticketing,
   meetinghall,
+  usermanagement
   // assets,
   // pos,
   // production,
   // contacts,
+}
+
+extension AppModuleX on AppModule {
+  String get routeSegment {
+    switch (this) {
+      case AppModule.tasks:
+        return 'tasks';
+      case AppModule.courriers:
+        return 'courriers';
+      case AppModule.social:
+        return 'social';
+      case AppModule.inventory:
+        return 'inventory';
+      case AppModule.ticketing:
+        return 'ticketing';
+      case AppModule.meetinghall:
+        return 'meetinghall';
+      case AppModule.usermanagement:
+        return 'usermanagement';
+    }
+  }
+
+  String get permissionKey {
+    switch (this) {
+      case AppModule.tasks:
+        return 'tasks';
+      case AppModule.courriers:
+        return 'courriers';
+      case AppModule.social:
+        return 'social';
+      case AppModule.inventory:
+        return 'inventory';
+      case AppModule.ticketing:
+        return 'ticketing';
+      case AppModule.meetinghall:
+        return 'meetinghall';
+      case AppModule.usermanagement:
+        return 'usermanagement';
+    }
+  }
 }
 
 class ModuleInfo {
@@ -75,13 +116,13 @@ class ModulesConfig {
       color: Color(0xFF00BCD4), // Cyan
     ),
 
-    // ModuleInfo(
-    //   module: AppModule.pos,
-    //   name: 'Point of Sale',
-    //   description: 'Sales transactions',
-    //   icon: Icons.shopping_cart_outlined,
-    //   color: Color(0xFF8BC34A), // Light Green
-    // ),
+    ModuleInfo(
+      module: AppModule.usermanagement,
+      name: 'User Management',
+      description: 'Manages users and their permissions',
+      icon: Icons.supervised_user_circle_outlined,
+      color: Color(0xFF8BC34A), // Light Green
+    ),
     // ModuleInfo(
     //   module: AppModule.production,
     //   name: 'Production',

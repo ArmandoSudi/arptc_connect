@@ -1,11 +1,5 @@
-import 'package:arptc_connect/modules/administration/presentation/screens/add_direction_screen.dart';
-import 'package:arptc_connect/modules/administration/presentation/screens/add_user_screen.dart';
-import 'package:arptc_connect/modules/administration/presentation/screens/administration_screen.dart';
-import 'package:arptc_connect/modules/administration/presentation/screens/bureaux_screen.dart';
-import 'package:arptc_connect/modules/administration/presentation/screens/direction_details_screen.dart';
-import 'package:arptc_connect/modules/administration/presentation/screens/directions_screen.dart';
-import 'package:arptc_connect/modules/administration/presentation/screens/services_screen.dart';
-import 'package:arptc_connect/modules/administration/presentation/screens/users_screen.dart';
+import 'dart:async';
+
 import 'package:arptc_connect/modules/authentication/screens/login_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/add_annotation_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/add_courrier_screen.dart';
@@ -16,23 +10,31 @@ import 'package:arptc_connect/modules/inventory/presentation/appro_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/inventory_main_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/livraison_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
+import 'package:arptc_connect/modules/profile/presentation/screens/profile_screen.dart';
 import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
-import 'package:arptc_connect/modules/social/screens/main_social_screen.dart';
 import 'package:arptc_connect/modules/social/screens/social_agents_page.dart';
 import 'package:arptc_connect/modules/task/presentation/screens/task_details_page.dart';
-import 'package:arptc_connect/modules/task/presentation/screens/task_list_page.dart';
 import 'package:arptc_connect/modules/task/presentation/screens/tasks_screen.dart';
 import 'package:arptc_connect/modules/ticketing/presentation/screens/add_ticket_screen.dart';
 import 'package:arptc_connect/modules/ticketing/presentation/screens/ticket_details_screen.dart';
 import 'package:arptc_connect/modules/ticketing/presentation/screens/tickets_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/agents_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/bureau_details_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/bureaux_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/department_details_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/departments_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/module_details_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/modules_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/service_details_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/services_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/agent_details_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/user_management_main_screen.dart';
 import 'package:arptc_connect/screens/navigators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'modules/administration/presentation/screens/add_bureau_screen.dart';
-import 'modules/administration/presentation/screens/add_service_screen.dart';
 import 'modules/authentication/providers/authentication_provider.dart';
 import 'modules/inventory/presentation/cart/cart_screen.dart';
 import 'package:arptc_connect/modules/meeting_hall/meeting_hall.dart';
@@ -40,16 +42,15 @@ import 'package:arptc_connect/modules/meeting_hall/meeting_hall.dart';
 const routerInitialLocation = '/dashboard';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
-
   final rootNavigatorKey = GlobalKey<NavigatorState>();
-  final shellNavigatorLoginKey = GlobalKey<NavigatorState>(debugLabel: 'shellLogin');
-  final shellNavigatorErrorKey = GlobalKey<NavigatorState>(debugLabel: 'shellError');
-  final shellNavigatorDashboardKey = GlobalKey<NavigatorState>(debugLabel: 'shellDashboard');
-  final shellNavigatorAdministrationKey = GlobalKey<NavigatorState>(debugLabel: 'shellAdministration');
-  final shellNavigatorServiceKey = GlobalKey<NavigatorState>(debugLabel: 'shellService');
-  final shellNavigatorCourrierKey = GlobalKey<NavigatorState>(debugLabel: 'shellCourrier');
-  final shellNavigatorTicketingKey = GlobalKey<NavigatorState>(debugLabel: 'shellTicketing');
-  final shellNavigatorMeetingHallKey = GlobalKey<NavigatorState>(debugLabel: 'shellMeetingHall');
+  final shellNavigatorDashboardKey =
+      GlobalKey<NavigatorState>(debugLabel: 'shellDashboard');
+  final shellNavigatorProfileKey =
+      GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
+  final shellNavigatorServiceKey =
+      GlobalKey<NavigatorState>(debugLabel: 'shellService');
+  final shellNavigatorCourrierKey =
+      GlobalKey<NavigatorState>(debugLabel: 'shellCourrier');
 
   return GoRouter(
     initialLocation: routerInitialLocation,
@@ -74,13 +75,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           // the UI shell
-          return ScaffoldWithNestedNavigation(
-              navigationShell: navigationShell);
+          return ScaffoldWithNestedNavigation(navigationShell: navigationShell);
         },
         branches: [
           // Dashboard branch
           StatefulShellBranch(
-            navigatorKey: shellNavigatorDashboardKey,
+              navigatorKey: shellNavigatorDashboardKey,
               routes: [
                 GoRoute(
                   path: '/dashboard',
@@ -89,141 +89,226 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     child: MainDashboardScreen(),
                   ),
                 ),
-              ]
-          ),
+              ]),
 
           // Service branch
-          StatefulShellBranch(
-            navigatorKey: shellNavigatorServiceKey,
+          StatefulShellBranch(navigatorKey: shellNavigatorServiceKey, routes: [
+            // Service
+            GoRoute(
+              path: '/service',
+              pageBuilder: (context, state) => const NoTransitionPage(
+                child: MainServiceScreen(),
+              ),
               routes: [
-                // Service
+                // Social
                 GoRoute(
-                  path: '/service',
+                  path: 'social',
+                  builder: (context, state) => const SocialAgentsPage(),
+                ),
+
+                // Inventory
+                GoRoute(
+                  path: 'inventory',
                   pageBuilder: (context, state) => NoTransitionPage(
-                    child: MainServiceScreen(),
+                    child: InventoryMainScreen(),
                   ),
                   routes: [
-                    // Social
+                    // Management
                     GoRoute(
-                      path: 'social',
-                      builder: (context, state) => const SocialAgentsPage(),
+                      path: 'management',
+                      builder: (context, state) => const ManageItemScreen(),
                     ),
 
-                    // Inventory
+                    // Approvisionnement
                     GoRoute(
-                      path: 'inventory',
-                      pageBuilder: (context, state) =>  NoTransitionPage(
-                        child: InventoryMainScreen(),
+                      path: 'appro',
+                      builder: (context, state) => const ApproScreen(),
+                    ),
+
+                    // Livraison
+                    GoRoute(
+                      path: 'livraison',
+                      builder: (context, state) => const LivraisonScreen(),
+                    ),
+
+                    GoRoute(
+                      path: 'cart',
+                      builder: (context, state) => const CartScreen(),
+                    ),
+                  ],
+                ),
+
+                // Ticketing
+                GoRoute(
+                    path: 'ticketing',
+                    builder: (context, state) => const TicketsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'add',
+                        builder: (context, state) => const AddTicketScreen(),
                       ),
+                      GoRoute(
+                        path: ':ticketId',
+                        builder: (context, state) => TicketDetailsScreen(
+                            ticketId:
+                                state.pathParameters['ticketId'] as String),
+                      ),
+                    ]),
+
+                // Courriers
+                GoRoute(
+                  path: 'courriers',
+                  pageBuilder: (context, state) => const NoTransitionPage(
+                    child: ListCourriersScreen(),
+                  ),
+                  routes: [
+                    GoRoute(
+                      path: ':courrierId',
+                      builder: (context, state) => DetailsCourrierScreen(
+                          state.pathParameters['courrierId'] as String),
+                    ),
+                    GoRoute(
+                      path: 'enregistrer',
+                      builder: (context, state) => const AddCourrierScreen(),
+                    ),
+                    GoRoute(
+                      path: ':courrierId/annotations/enregistrer',
+                      builder: (context, state) => AddAnnotationScreen(
+                          courrierId:
+                              state.pathParameters['courrierId'] as String),
+                    ),
+                  ],
+                ),
+
+                // Tasks
+                GoRoute(
+                  path: 'tasks',
+                  pageBuilder: (context, state) => const MaterialPage(
+                    child: TasksScreen(),
+                  ),
+                  routes: [
+                    GoRoute(
+                      path: ':taskId',
+                      builder: (context, state) => TaskDetailsPage(
+                          state.pathParameters['taskId'] as String),
+                    ),
+                  ],
+                ),
+
+                // Meeting Halls
+                GoRoute(
+                  path: 'meetinghall',
+                  pageBuilder: (context, state) => const NoTransitionPage(
+                    child: MeetingHallsScreen(),
+                  ),
+                  routes: [
+                    GoRoute(
+                      path: ':id',
+                      builder: (context, state) {
+                        final hallId = state.pathParameters['id']!;
+                        // return HallDetailsScreen(
+                        //   hall: ref.read(meetingHallsProvider)
+                        //       .firstWhere((hall) => hall.id == hallId),
+                        // );
+                        return HallDetailsScreen(hallId: hallId);
+                      },
+                    ),
+                  ],
+                ),
+
+                // User Management
+                GoRoute(
+                  path: 'usermanagement',
+                  pageBuilder: (context, state) => const MaterialPage(
+                    child: UserManagementMainScreen(),
+                  ),
+                  routes: [
+                    GoRoute(
+                      path: 'departments',
+                      builder: (context, state) => const DepartmentsScreen(),
                       routes: [
-
-                        // Management
                         GoRoute(
-                          path: 'management',
-                          builder: (context, state) => const ManageItemScreen(),
-                        ),
-
-                        // Approvisionnement
-                        GoRoute(
-                          path: 'appro',
-                          builder: (context, state) => const ApproScreen(),
-                        ),
-
-                        // Livraison
-                        GoRoute(
-                          path: 'livraison',
-                          builder: (context, state) => const LivraisonScreen(),
-                        ),
-
-                        GoRoute(
-                          path: 'cart',
-                          builder: (context, state) => const CartScreen(),
+                          path: ':departmentId',
+                          pageBuilder: (context, state) => MaterialPage(
+                              fullscreenDialog: true,
+                              child: DepartmentDetailsScreen(
+                                departmentId: state
+                                    .pathParameters['departmentId'] as String,
+                              )),
                         ),
                       ],
                     ),
-
-                    // Ticketing
                     GoRoute(
-                      path: 'ticketing',
-                      builder: (context, state)
-                        => const TicketsScreen(),
+                      path: 'services',
+                      builder: (context, state) =>
+                          const ServicesManagementScreen(),
+                      routes: [
+                        GoRoute(
+                          path: ':serviceId',
+                          builder: (context, state) => ServiceDetailsScreen(
+                            serviceId:
+                                state.pathParameters['serviceId'] as String,
+                          ),
+                        ),
+                      ],
+                    ),
+                    GoRoute(
+                      path: 'bureaux',
+                      builder: (context, state) =>
+                          const BureauxManagementScreen(),
+                      routes: [
+                        GoRoute(
+                          path: ':bureauId',
+                          builder: (context, state) => BureauDetailsScreen(
+                            bureauId:
+                                state.pathParameters['bureauId'] as String,
+                          ),
+                        ),
+                      ],
+                    ),
+                    GoRoute(
+                      path: 'agents',
+                      builder: (context, state) =>
+                          const AgentsManagementScreen(),
                       routes: [
                         GoRoute(
                           path: 'add',
-                          builder: (context, state)
-                            => const AddTicketScreen(),
+                          pageBuilder: (context, state) => const MaterialPage(
+                            fullscreenDialog: true,
+                            child: AddAgentSheet(),
+                          ),
                         ),
                         GoRoute(
-                          path: ':ticketId',
-                          builder: (context, state)
-                            => TicketDetailsScreen(
-                                ticketId: state.pathParameters['ticketId'] as String),
-                        ),
-                      ]
-                    ),
-
-                    // Courriers
-                    GoRoute(
-                      path: 'courriers',
-                      pageBuilder: (context, state) => const NoTransitionPage(
-                        child: ListCourriersScreen(),
-                      ),
-                      routes: [
-                        GoRoute(
-                          path: ':courrierId',
-                          builder: (context, state) => DetailsCourrierScreen(state.pathParameters['courrierId'] as String),
-                        ),
-                        GoRoute(
-                          path: 'enregistrer',
-                          builder: (context, state) => const AddCourrierScreen(),
-                        ),GoRoute(
-                          path: ':courrierId/annotations/enregistrer',
-                          builder: (context, state) =>
-                              AddAnnotationScreen(courrierId: state.pathParameters['courrierId'] as String),
+                          path: ':agentId',
+                          pageBuilder: (context, state) => MaterialPage(
+                            fullscreenDialog: true,
+                            child: AgentDetailsScreen(
+                              agentId:
+                                  state.pathParameters['agentId'] as String,
+                            ),
+                          ),
                         ),
                       ],
                     ),
-
-                    // Tasks
                     GoRoute(
-                      path: 'tasks',
-                      pageBuilder: (context, state) => const NoTransitionPage(
-                        child: TasksScreen(),
-                      ),
+                      path: 'modules',
+                      builder: (context, state) =>
+                          const ModulesManagementScreen(),
                       routes: [
                         GoRoute(
-                          path: ':taskId',
-                          builder: (context, state) => TaskDetailsPage(state.pathParameters['taskId'] as String),
-                        ),
-
-                      ],
-                    ),
-
-                    // Meeting Halls
-                    GoRoute(
-                      path: 'meeting-hall',
-                      pageBuilder: (context, state) => const NoTransitionPage(
-                        child: MeetingHallsScreen(),
-                      ),
-                      routes: [
-                        GoRoute(
-                          path: ':id',
-                          builder: (context, state) {
-                            final hallId = state.pathParameters['id']!;
-                            // return HallDetailsScreen(
-                            //   hall: ref.read(meetingHallsProvider)
-                            //       .firstWhere((hall) => hall.id == hallId),
-                            // );
-                            return HallDetailsScreen(hallId: hallId);
-                          },
+                          path: ':moduleId',
+                          builder: (context, state) => ModuleDetailsScreen(
+                            moduleId:
+                                state.pathParameters['moduleId'] as String,
+                          ),
                         ),
                       ],
                     ),
-
                   ],
                 ),
-              ]
-          ),
+              ],
+            ),
+          ]),
 
           // Courriers branch
           StatefulShellBranch(
@@ -237,130 +322,65 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: ':courrierId',
-                    builder: (context, state) => DetailsCourrierScreen(state.pathParameters['courrierId'] as String),
+                    builder: (context, state) => DetailsCourrierScreen(
+                        state.pathParameters['courrierId'] as String),
                   ),
                   GoRoute(
                     path: 'enregistrer',
                     builder: (context, state) => const AddCourrierScreen(),
-                  ),GoRoute(
+                  ),
+                  GoRoute(
                     path: ':courrierId/annotations/enregistrer',
-                    builder: (context, state) =>
-                        AddAnnotationScreen(courrierId: state.pathParameters['courrierId'] as String),
+                    builder: (context, state) => AddAnnotationScreen(
+                        courrierId:
+                            state.pathParameters['courrierId'] as String),
                   ),
                 ],
               ),
             ],
           ),
 
-          // Administration branch
+          // Profile branch
           StatefulShellBranch(
-            navigatorKey: shellNavigatorAdministrationKey,
+            navigatorKey: shellNavigatorProfileKey,
             routes: [
-              // Administration
               GoRoute(
-                path: '/administration',
-                pageBuilder: (context, state) =>
-                    NoTransitionPage(
-                  child: AdministrationScreen(),
+                path: '/profile',
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: ProfileScreen(),
                 ),
-                routes: [
-                  GoRoute(
-                    path: 'directions',
-                    builder: (context, state) =>
-                        const DirectionsScreen(),
-                    routes: [
-                      GoRoute(
-                        path: 'add',
-                        pageBuilder: (context, state) =>
-                        const MaterialPage(
-                          fullscreenDialog: true,
-                          child: AddDirectionScreen(),
-                        )
-                      ),
-                      GoRoute(
-                        path: ':directionId',
-                        pageBuilder: (context, state) =>
-                        MaterialPage(
-                          fullscreenDialog: true,
-                          child: DirectionDetailsScreen(directionId: state.pathParameters['directionId'] as String),
-                        )
-                      ),
-                    ]
-                  ),
-                  GoRoute(
-                    path: 'services',
-                    builder: (context, state) => const ServicesScreen(),
-                    routes: [
-                      GoRoute(
-                          path: 'add',
-                          pageBuilder: (context, state) => const MaterialPage(
-                            fullscreenDialog: true,
-                            child: AddServiceScreen(),
-                          )
-                      )
-                    ]
-                  ),
-                  GoRoute(
-                    path: 'bureaux',
-                    builder: (context, state) => BureauxScreen(),
-                    routes: [
-                      GoRoute(
-                        path: 'add',
-                        pageBuilder: (context, state) => const MaterialPage(
-                          fullscreenDialog: true,
-                          child: AddBureauScreen(),
-                        ),
-                      ),
-                    ]
-                  ),
-                  GoRoute(
-                    path: 'agents',
-                    builder: (context, state) => const UsersSreen(),
-                    routes: [
-                      GoRoute(
-                        path: 'add',
-                        pageBuilder: (context, state) => const MaterialPage(
-                          fullscreenDialog: true,
-                          child: AddUserScreen(),
-                        ),
-                      ),
-                    ]
-                  ),
-                ],
               ),
             ],
           ),
-
         ],
       )
     ],
-    redirect: (context, state)  {
-
+    redirect: (context, state) {
       final authState = ref.watch(authStateProvider);
 
       // log("1. REDIRECTING TO DASHBOARD SCREEN");
 
       return authState.when(
-          data: (data) async {
+          data: (data) {
             User? user = data;
 
             // if (user == null && state.location == '/'){
-            if (user == null ){
+            if (user == null) {
               debugPrint(":: GO TO LOGIN SCREEN");
               return '/login';
             }
 
-            var email = user.email;
-            await  ref.read(authServiceProvider).getUser(email!);
-            await ref.read(authServiceProvider).saveAgent(email);
-            return null;
-            // await ref.read(sharedPrefUtilityProvider).setRoles(roles)
+            final email = user.email;
+            if (email != null && email.isNotEmpty) {
+              unawaited(
+                ref.read(authServiceProvider).warmLocalSessionIfNeeded(email),
+              );
+            }
 
+            return null;
           },
           loading: () => '/login',
           error: (e, trace) => '/error');
-
     },
   );
-}
-);
+});

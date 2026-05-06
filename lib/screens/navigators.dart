@@ -7,7 +7,7 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
     Key? key,
     required this.navigationShell,
   }) : super(
-      key: key ?? const ValueKey<String>('ScaffoldWithNestedNavigation'));
+            key: key ?? const ValueKey<String>('ScaffoldWithNestedNavigation'));
   final StatefulNavigationShell navigationShell;
 
   void _goBranch(int index) {
@@ -24,10 +24,7 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-
-
       if (constraints.maxWidth < 960) {
-
         // print("Constraints width : ${constraints.maxWidth} : NAVIGATION BAR");
 
         return ScaffoldWithNavigationBar(
@@ -36,7 +33,6 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
           onDestinationSelected: _goBranch,
         );
       } else {
-
         // print("Constraints width : ${constraints.maxWidth} : NAVIGATION RAIL");
 
         return ScaffoldWithNavigationRail(
@@ -67,10 +63,14 @@ class ScaffoldWithNavigationBar extends StatelessWidget {
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
         destinations: const [
-          NavigationDestination(label: 'Dashboard', icon: Icon(Icons.dashboard)),
-          NavigationDestination(label: 'Services', icon: Icon(Icons.apps)),
-          NavigationDestination(label: 'Courrier', icon: Icon(Icons.mail_outline)),
-          NavigationDestination(label: 'Administration', icon: Icon(Icons.admin_panel_settings)),
+          NavigationDestination(
+              label: 'Dashboard', icon: Icon(Icons.dashboard)),
+          NavigationDestination(
+              label: 'Services', icon: Icon(Icons.apps)),
+          NavigationDestination(
+              label: 'Courrier', icon: Icon(Icons.mail_outline)),
+          NavigationDestination(
+              label: 'Profile', icon: Icon(Icons.person_outline)),
         ],
         onDestinationSelected: onDestinationSelected,
       ),
@@ -113,8 +113,8 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
                 icon: Icon(Icons.mail_outline),
               ),
               NavigationRailDestination(
-                label: Text('Administration'),
-                icon: Icon(Icons.admin_panel_settings_outlined),
+                label: Text('Profile'),
+                icon: Icon(Icons.person_outline),
               ),
             ],
           ),

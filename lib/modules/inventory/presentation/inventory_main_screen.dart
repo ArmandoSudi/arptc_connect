@@ -1,4 +1,4 @@
-import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
+import 'package:arptc_connect/modules/service/domain/service.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -16,7 +16,8 @@ class InventoryMainScreen extends StatelessWidget {
   ];
 
   final List<Service> _inventoryServices = [
-    Service("Gestion des articles", "management", Icons.inventory_2_outlined, color: Colors.green),
+    Service("Gestion des articles", "management", Icons.inventory_2_outlined,
+        color: Colors.green),
     Service("Approvisionnement", "appro", Icons.download, color: Colors.blue),
     Service("Livraison", "livraison", Icons.upload, color: Colors.amber),
   ];
@@ -24,46 +25,49 @@ class InventoryMainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: Colors.white,
+        // backgroundColor: Colors.white,
         body: ContentView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios),
-                    onPressed: () => context.pop(),
-                  ),
-                  const PageHeader(
-                    title: 'Inventaire',
-                    description: '',
-                  ),
-                ],
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios),
+                onPressed: () => context.pop(),
               ),
-              const Gap(16),
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final double maxWidth = constraints.maxWidth;
-                    final int columnCount = calculateColumnCount(maxWidth);
-                    return GridView.count(
-                      crossAxisCount: columnCount,
-                      mainAxisSpacing: 10.0, // Adjust spacing as needed
-                      crossAxisSpacing: 10.0,
-                      childAspectRatio: 5 / 3,
-                      children: _inventoryServices.map((service) => serviceCard(context, service)).toList(),// Adjust spacing as needed
-                    );
-                  },
-                ),
-              )
+              const PageHeader(
+                title: 'Inventaire',
+                description: '',
+              ),
             ],
           ),
-        ));
+          const Gap(16),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final double maxWidth = constraints.maxWidth;
+                final int columnCount = calculateColumnCount(maxWidth);
+                return GridView.count(
+                  crossAxisCount: columnCount,
+                  mainAxisSpacing: 10.0, // Adjust spacing as needed
+                  crossAxisSpacing: 10.0,
+                  childAspectRatio: 5 / 3,
+                  children: _inventoryServices
+                      .map((service) => serviceCard(context, service))
+                      .toList(), // Adjust spacing as needed
+                );
+              },
+            ),
+          )
+        ],
+      ),
+    ));
   }
 
   int calculateColumnCount(double maxWidth) {
-    if (maxWidth >= 800) { // Adjust width thresholds as needed
+    if (maxWidth >= 800) {
+      // Adjust width thresholds as needed
       return 4;
     } else if (maxWidth >= 600) {
       return 3;
@@ -77,8 +81,7 @@ class InventoryMainScreen extends StatelessWidget {
       child: Card(
         child: Container(
           alignment: Alignment.center,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15)),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

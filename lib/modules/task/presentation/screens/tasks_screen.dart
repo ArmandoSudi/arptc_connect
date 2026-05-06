@@ -130,117 +130,120 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
                         // add Inkwell
                         return InkWell(
-                          onTap: (){
+                          onTap: () {
                             context.push("/service/tasks/${data[index].id}");
                           },
                           child: Card(
-                            child: ClipRect(
-                              // borderRadius: BorderRadius.circular(10),
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.2),
-                                      spreadRadius: 1,
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 3),
+                            elevation: 0,
+                            color: theme.colorScheme.surfaceContainerLow,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    data[index].label,
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: theme.colorScheme.onSurface,
                                     ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      data[index].label,
-                                      style: theme.textTheme.titleMedium!
-                                          .copyWith(fontWeight: FontWeight.w600),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        Text("De : ",  style: theme.textTheme.labelMedium,),
-                                        const SizedBox(width: 2),
-                                        Text(
-                                          data[index].sender!,
-                                          style: theme.textTheme.labelLarge,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "De : ",
+                                        style: theme.textTheme.labelMedium?.copyWith(
+                                          color: theme.colorScheme.onSurfaceVariant,
                                         ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-
-                                    // DATE LABEL
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          "Date d'émission",
-                                          style: theme.textTheme.labelMedium,
-                                        ),Text(
-                                          "Date d'accusé réception",
-                                          style: theme.textTheme.labelMedium,
+                                      ),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        data[index].sender!,
+                                        style: theme.textTheme.labelLarge?.copyWith(
+                                          color: theme.colorScheme.onSurface,
                                         ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          data[index].emissionDate.formatedDate,
-                                          style: theme.textTheme.labelLarge,
-                                        ),Text(
-                                          data[index].receptionDate?.formatedDate ?? " - ",
-                                          style: theme.textTheme.labelLarge,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  // DATE LABELS
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Date d'émission",
+                                        style: theme.textTheme.labelMedium?.copyWith(
+                                          color: theme.colorScheme.onSurfaceVariant,
                                         ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                      ),
+                                      Text(
+                                        "Date d'accusé réception",
+                                        style: theme.textTheme.labelMedium?.copyWith(
+                                          color: theme.colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        data[index].emissionDate.formatedDate,
+                                        style: theme.textTheme.labelLarge?.copyWith(
+                                          color: theme.colorScheme.onSurface,
+                                        ),
+                                      ),
+                                      Text(
+                                        data[index].receptionDate?.formatedDate ?? " - ",
+                                        style: theme.textTheme.labelLarge?.copyWith(
+                                          color: theme.colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
-
-                          ),
-                          onLongPress: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Supprimer la tâche'),
-                                  content: Text('Voulez-vous vraiment supprimer "${data[index].label}"?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop(); // Close dialog
-                                      },
-                                      child: const Text('Non'),
+                          ),onLongPress: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Supprimer la tâche'),
+                                content: Text('Voulez-vous vraiment supprimer "${data[index].label}"?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    child: const Text('Non'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      ref.read(asyncTasksProvider.notifier).deleteTask(data[index].id);
+                                      Navigator.of(context).pop();
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Tâche supprimée'),
+                                          duration: Duration(seconds: 2),
+                                        ),
+                                      );
+                                    },
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: theme.colorScheme.error,
                                     ),
-                                    TextButton(
-                                      onPressed: () {
-                                        // Delete the task
-                                        ref.read(asyncTasksProvider.notifier).deleteTask(data[index].id);
-                                        Navigator.of(context).pop(); // Close dialog
-
-                                        // Optional: Show a snackbar for confirmation
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('Tâche supprimée'),
-                                            duration: Duration(seconds: 2),
-                                          ),
-                                        );
-                                      },
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Colors.red,
-                                      ),
-                                      child: const Text('Oui'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
+                                    child: const Text('Oui'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
                         );
+
 
                       },
                       separatorBuilder: (BuildContext context, int index) {

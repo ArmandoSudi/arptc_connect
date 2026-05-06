@@ -24,7 +24,7 @@ class SharedPrefUtility {
     return sharedPreferences.getString('email') ?? '';
   }
 
-  void setEmail(String email) async {
+  Future<void> setEmail(String email) async {
     await sharedPreferences.setString('email', email);
     log("EMAIL : $email SAVED");
   }
@@ -37,25 +37,34 @@ class SharedPrefUtility {
     sharedPreferences.setString('name', name);
   }
 
-  void setRoles(List<dynamic> roles) async {
-    final roles0 = roles.map((e) => e.toString()).toList();
-    String encodedList = jsonEncode(roles0);
-    sharedPreferences.setString('roles', encodedList);
+  Future<void> setAgentProfile(Map<String, dynamic> profile) async {
+    final encoded = jsonEncode(profile);
+    await sharedPreferences.setString('agent_profile', encoded);
   }
 
-  List<String> getRoles(){
-
-    var encodedList = sharedPreferences.getString('roles');
-
-    // If the string exists, decode it into a list of strings
-    if (encodedList != null) {
-      List<dynamic> jsonResponse = jsonDecode(encodedList);
-      return List<String>.from(jsonResponse);
+  Map<String, dynamic> getAgentProfile() {
+    final encoded = sharedPreferences.getString('agent_profile');
+    if (encoded == null || encoded.isEmpty) {
+      return <String, dynamic>{};
     }
 
-    return [];
+    final decoded = jsonDecode(encoded);
+    if (decoded is Map<String, dynamic>) {
+      return decoded;
+    }
+    if (decoded is Map) {
+      return Map<String, dynamic>.from(decoded);
+    }
+
+    return <String, dynamic>{};
   }
 
+  Future<void> clearAgentProfile() async {
+    await sharedPreferences.remove('agent_profile');
+  }
 
-
+  Future<void> clearSession() async {
+    await sharedPreferences.remove('email');
+    await sharedPreferences.remove('agent_profile');
+  }
 }
