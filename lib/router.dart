@@ -6,19 +6,28 @@ import 'package:arptc_connect/modules/courrier/screens/add_courrier_screen.dart'
 import 'package:arptc_connect/modules/courrier/screens/details_courrier.dart';
 import 'package:arptc_connect/modules/courrier/screens/list_courriers_screen.dart';
 import 'package:arptc_connect/modules/dashboard/presentation/screens/main_dashboard_screen.dart';
+import 'package:arptc_connect/modules/incident_management/presentation/screens/create_incident_screen.dart';
+import 'package:arptc_connect/modules/incident_management/presentation/screens/incident_dashboard_router.dart';
+import 'package:arptc_connect/modules/incident_management/presentation/screens/incident_role_gate_screen.dart';
+import 'package:arptc_connect/modules/incident_management/presentation/screens/manager_incident_details_screen.dart';
+import 'package:arptc_connect/modules/incident_management/presentation/screens/manager_incident_parameters_screen.dart';
+import 'package:arptc_connect/modules/incident_management/presentation/screens/manager_incident_queue_screen.dart';
+import 'package:arptc_connect/modules/incident_management/presentation/screens/my_incident_details_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/appro_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/inventory_main_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/livraison_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
+import 'package:arptc_connect/modules/news/presentation/screens/news_editor_screen.dart';
+import 'package:arptc_connect/modules/news/presentation/screens/news_module_screen.dart';
+import 'package:arptc_connect/modules/news/presentation/screens/news_post_details_screen.dart';
+import 'package:arptc_connect/modules/news/presentation/screens/news_review_screen.dart';
+import 'package:arptc_connect/modules/notifications/presentation/screens/notifications_inbox_screen.dart';
 import 'package:arptc_connect/modules/profile/presentation/screens/profile_screen.dart';
 import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
 import 'package:arptc_connect/modules/social/screens/social_agents_page.dart';
 import 'package:arptc_connect/modules/task/presentation/screens/task_details_page.dart';
 import 'package:arptc_connect/modules/task/presentation/screens/tasks_screen.dart';
-import 'package:arptc_connect/modules/ticketing/presentation/screens/add_ticket_screen.dart';
-import 'package:arptc_connect/modules/ticketing/presentation/screens/ticket_details_screen.dart';
-import 'package:arptc_connect/modules/ticketing/presentation/screens/tickets_screen.dart';
-import 'package:arptc_connect/modules/usermanagement/presentation/screens/agents_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/agents_list_screen.dart';
 import 'package:arptc_connect/modules/usermanagement/presentation/screens/bureau_details_screen.dart';
 import 'package:arptc_connect/modules/usermanagement/presentation/screens/bureaux_screen.dart';
 import 'package:arptc_connect/modules/usermanagement/presentation/screens/department_details_screen.dart';
@@ -36,13 +45,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'modules/authentication/providers/authentication_provider.dart';
+import 'modules/home/presentation/home_screen.dart';
 import 'modules/inventory/presentation/cart/cart_screen.dart';
 import 'package:arptc_connect/modules/meeting_hall/meeting_hall.dart';
 
-const routerInitialLocation = '/dashboard';
+const routerInitialLocation = '/home';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final rootNavigatorKey = GlobalKey<NavigatorState>();
+  final shellNavigatorHomeKey =
+      GlobalKey<NavigatorState>(debugLabel: 'shellHome');
   final shellNavigatorDashboardKey =
       GlobalKey<NavigatorState>(debugLabel: 'shellDashboard');
   final shellNavigatorProfileKey =
@@ -78,18 +90,28 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return ScaffoldWithNestedNavigation(navigationShell: navigationShell);
         },
         branches: [
-          // Dashboard branch
-          StatefulShellBranch(
-              navigatorKey: shellNavigatorDashboardKey,
+          // Home branch
+          StatefulShellBranch(navigatorKey: shellNavigatorHomeKey, routes: [
+            GoRoute(
+              path: '/home',
+              pageBuilder: (context, state) => const NoTransitionPage(
+                // child: RootScreen(label: 'A', detailsPath: '/courriers/details'),
+                child: HomeScreen(),
+              ),
               routes: [
                 GoRoute(
-                  path: '/dashboard',
-                  pageBuilder: (context, state) => const NoTransitionPage(
-                    // child: RootScreen(label: 'A', detailsPath: '/courriers/details'),
-                    child: MainDashboardScreen(),
+                  path: 'news/:postId',
+                  builder: (context, state) => NewsPostDetailsScreen(
+                    postId: state.pathParameters['postId'] as String,
                   ),
                 ),
-              ]),
+                GoRoute(
+                  path: 'notifications',
+                  builder: (context, state) => const NotificationsInboxScreen(),
+                ),
+              ],
+            ),
+          ]),
 
           // Service branch
           StatefulShellBranch(navigatorKey: shellNavigatorServiceKey, routes: [
@@ -104,6 +126,36 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 GoRoute(
                   path: 'social',
                   builder: (context, state) => const SocialAgentsPage(),
+                ),
+
+                // News / company communication
+                GoRoute(
+                  path: 'news',
+                  builder: (context, state) => const NewsModuleScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'new',
+                      builder: (context, state) => const NewsEditorScreen(),
+                    ),
+                    GoRoute(
+                      path: 'edit/:postId',
+                      builder: (context, state) => NewsEditorScreen(
+                        postId: state.pathParameters['postId'] as String,
+                      ),
+                    ),
+                    GoRoute(
+                      path: 'review/:postId',
+                      builder: (context, state) => NewsReviewScreen(
+                        postId: state.pathParameters['postId'] as String,
+                      ),
+                    ),
+                    GoRoute(
+                      path: 'details/:postId',
+                      builder: (context, state) => NewsPostDetailsScreen(
+                        postId: state.pathParameters['postId'] as String,
+                      ),
+                    ),
+                  ],
                 ),
 
                 // Inventory
@@ -138,22 +190,70 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   ],
                 ),
 
-                // Ticketing
+                // Incident Management
                 GoRoute(
-                    path: 'ticketing',
-                    builder: (context, state) => const TicketsScreen(),
-                    routes: [
-                      GoRoute(
-                        path: 'add',
-                        builder: (context, state) => const AddTicketScreen(),
+                  path: 'incidents',
+                  builder: (context, state) => const IncidentRoleGateScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'dashboard',
+                      builder: (context, state) =>
+                          const IncidentDashboardRouter(),
+                    ),
+                    GoRoute(
+                      path: 'create',
+                      builder: (context, state) => const CreateIncidentScreen(),
+                    ),
+                    GoRoute(
+                      path: 'parameters',
+                      builder: (context, state) =>
+                          const ManagerIncidentParametersScreen(),
+                    ),
+                    GoRoute(
+                      path: 'queue/:queueKey',
+                      builder: (context, state) => ManagerIncidentQueueScreen(
+                        queueKey: state.pathParameters['queueKey'] as String,
                       ),
-                      GoRoute(
-                        path: ':ticketId',
-                        builder: (context, state) => TicketDetailsScreen(
-                            ticketId:
-                                state.pathParameters['ticketId'] as String),
+                    ),
+                    GoRoute(
+                      path: 'my/:ticketId',
+                      builder: (context, state) => MyIncidentDetailsScreen(
+                        ticketId: state.pathParameters['ticketId'] as String,
                       ),
-                    ]),
+                    ),
+                    GoRoute(
+                      path: 'manager/:ticketId',
+                      builder: (context, state) => ManagerIncidentDetailsScreen(
+                        ticketId: state.pathParameters['ticketId'] as String,
+                      ),
+                    ),
+                    GoRoute(
+                      path: 'admin/:ticketId',
+                      builder: (context, state) => MyIncidentDetailsScreen(
+                        ticketId: state.pathParameters['ticketId'] as String,
+                        showInternalNotes: true,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Legacy Ticketing route kept as a compatibility alias.
+                GoRoute(
+                  path: 'ticketing',
+                  builder: (context, state) => const IncidentRoleGateScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'add',
+                      builder: (context, state) => const CreateIncidentScreen(),
+                    ),
+                    GoRoute(
+                      path: ':ticketId',
+                      builder: (context, state) => MyIncidentDetailsScreen(
+                        ticketId: state.pathParameters['ticketId'] as String,
+                      ),
+                    ),
+                  ],
+                ),
 
                 // Courriers
                 GoRoute(
@@ -340,6 +440,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
 
+          // Dashboard branch
+          StatefulShellBranch(
+              navigatorKey: shellNavigatorDashboardKey,
+              routes: [
+                GoRoute(
+                  path: '/dashboard',
+                  pageBuilder: (context, state) => const NoTransitionPage(
+                    // child: RootScreen(label: 'A', detailsPath: '/courriers/details'),
+                    child: MainDashboardScreen(),
+                  ),
+                ),
+              ]),
+
           // Profile branch
           StatefulShellBranch(
             navigatorKey: shellNavigatorProfileKey,
@@ -363,11 +476,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       return authState.when(
           data: (data) {
             User? user = data;
+            final isLoginRoute = state.matchedLocation == '/login';
 
             // if (user == null && state.location == '/'){
             if (user == null) {
+              if (isLoginRoute) {
+                return null;
+              }
               debugPrint(":: GO TO LOGIN SCREEN");
-              return '/login';
+              final from = Uri.encodeComponent(state.location);
+              return '/login?from=$from';
             }
 
             final email = user.email;
@@ -377,10 +495,24 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               );
             }
 
+            if (isLoginRoute) {
+              return _postLoginRedirectLocation(state);
+            }
+
             return null;
           },
-          loading: () => '/login',
-          error: (e, trace) => '/error');
+          loading: () => null,
+          error: (e, trace) =>
+              state.matchedLocation == '/error' ? null : '/error');
     },
   );
 });
+
+String _postLoginRedirectLocation(GoRouterState state) {
+  final from = state.queryParameters['from'];
+  if (from == null || from.isEmpty || from == '/login') {
+    return routerInitialLocation;
+  }
+
+  return from;
+}

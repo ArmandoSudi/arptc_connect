@@ -1,6 +1,9 @@
+import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
 import 'package:arptc_connect/modules/service/module_config.dart';
 import 'package:arptc_connect/modules/usermanagement/domain/modules.dart';
+import 'package:arptc_connect/modules/usermanagement/domain/user_management_module.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/controllers/management_providers.dart';
 import 'package:arptc_connect/widgets/module_card.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
@@ -12,16 +15,27 @@ class MainServiceScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = S.of(context);
     final profileAsync = ref.watch(liveAgentProfileProvider);
+    final modulesAsync = ref.watch(umModulesProvider);
+    final configuredModules =
+        modulesAsync.valueOrNull ?? const <UserManagementModule>[];
     final agentDisplayName = profileAsync.maybeWhen(
-      data: _buildAgentDisplayName,
-      orElse: () => 'Agent',
+      data: (profile) => _buildAgentDisplayName(
+        profile,
+        fallback: l10n.agent,
+      ),
+      orElse: () => l10n.agent,
     );
     final permittedModules = profileAsync.maybeWhen(
-      data: _resolvePermittedModules,
+      data: (profile) => _resolvePermittedModules(
+        profile,
+        configuredModules: configuredModules,
+      ),
       orElse: () => const <ModuleInfo>[],
     );
-    final loadingPermissions = profileAsync.isLoading;
+    final loadingPermissions =
+        profileAsync.isLoading && permittedModules.isEmpty;
 
     return CustomScrollView(
       slivers: [
@@ -33,7 +47,7 @@ class MainServiceScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Welcome",
+                  l10n.serviceWelcome,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -53,21 +67,20 @@ class MainServiceScreen extends ConsumerWidget {
         ),
 
         if (loadingPermissions)
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(24),
-              child: LoadingStateView(message: 'Loading modules...'),
+              padding: const EdgeInsets.all(24),
+              child: LoadingStateView(message: l10n.loadingModules),
             ),
           )
         else if (permittedModules.isEmpty)
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(24),
+              padding: const EdgeInsets.all(24),
               child: EmptyStateView(
                 icon: Icons.lock_outline,
-                title: 'No authorized module',
-                description:
-                    'No module is assigned to this agent. Please contact an administrator.',
+                title: l10n.noAuthorizedModule,
+                description: l10n.noAuthorizedModuleDescription,
               ),
             ),
           )
@@ -84,7 +97,9 @@ class MainServiceScreen extends ConsumerWidget {
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   final module = permittedModules[index];
-                  return ModuleCard(module: module);
+                  return ModuleCard(
+                    module: _localizedModuleInfo(context, module),
+                  );
                 },
                 childCount: permittedModules.length,
               ),
@@ -103,7 +118,10 @@ class MainServiceScreen extends ConsumerWidget {
   }
 }
 
-String _buildAgentDisplayName(Map<String, dynamic> data) {
+String _buildAgentDisplayName(
+  Map<String, dynamic> data, {
+  required String fallback,
+}) {
   final pieces = [
     (data['firstName'] ?? '').toString().trim(),
     (data['name'] ?? '').toString().trim(),
@@ -120,22 +138,99 @@ String _buildAgentDisplayName(Map<String, dynamic> data) {
     return fallback;
   }
 
-  return 'Agent';
+  return fallback;
 }
 
-List<ModuleInfo> _resolvePermittedModules(Map<String, dynamic> profile) {
+ModuleInfo _localizedModuleInfo(BuildContext context, ModuleInfo moduleInfo) {
+  if (!_usesStaticModuleText(moduleInfo)) {
+    return moduleInfo;
+  }
+
+  final l10n = S.of(context);
+
+  switch (moduleInfo.module) {
+    case AppModule.tasks:
+      return _withLocalizedModuleText(
+        moduleInfo,
+        name: l10n.moduleTasksName,
+        description: l10n.moduleTasksDescription,
+      );
+    case AppModule.courriers:
+      return _withLocalizedModuleText(
+        moduleInfo,
+        name: l10n.moduleCourrierName,
+        description: l10n.moduleCourrierDescription,
+      );
+    case AppModule.news:
+      return _withLocalizedModuleText(
+        moduleInfo,
+        name: l10n.moduleNewsName,
+        description: l10n.moduleNewsDescription,
+      );
+    case AppModule.inventory:
+      return _withLocalizedModuleText(
+        moduleInfo,
+        name: l10n.moduleInventoryName,
+        description: l10n.moduleInventoryDescription,
+      );
+    case AppModule.ticketing:
+      return _withLocalizedModuleText(
+        moduleInfo,
+        name: l10n.moduleIncidentName,
+        description: l10n.moduleIncidentDescription,
+      );
+    case AppModule.usermanagement:
+      return _withLocalizedModuleText(
+        moduleInfo,
+        name: l10n.moduleUserManagementName,
+        description: l10n.moduleUserManagementDescription,
+      );
+    case AppModule.social:
+    case AppModule.meetinghall:
+      return moduleInfo;
+  }
+}
+
+bool _usesStaticModuleText(ModuleInfo moduleInfo) {
+  for (final staticModule in ModulesConfig.allModules) {
+    if (staticModule.module == moduleInfo.module) {
+      return moduleInfo.name == staticModule.name &&
+          moduleInfo.description == staticModule.description;
+    }
+  }
+  return false;
+}
+
+ModuleInfo _withLocalizedModuleText(
+  ModuleInfo moduleInfo, {
+  required String name,
+  required String description,
+}) {
+  return ModuleInfo(
+    module: moduleInfo.module,
+    name: name,
+    description: description,
+    icon: moduleInfo.icon,
+    color: moduleInfo.color,
+  );
+}
+
+List<ModuleInfo> _resolvePermittedModules(
+  Map<String, dynamic> profile, {
+  required List<UserManagementModule> configuredModules,
+}) {
   final rawPermissions = _asPermissionMap(profile['modulePermissions']);
   final normalizedPermissions = Modules.normalizePermissions(
     rawPermissions,
     includeDefaultModules: false,
   );
+  final availableModules = _resolveAvailableModules(configuredModules);
 
-  return ModulesConfig.allModules.where((moduleInfo) {
-    final permissionValue = _resolvePermissionValueForModule(
-      module: moduleInfo.module,
-      normalizedPermissions: normalizedPermissions,
-      rawPermissions: rawPermissions,
-    );
+  return availableModules.where((moduleInfo) {
+    final canonicalKey =
+        Modules.normalizeModuleKey(moduleInfo.module.permissionKey);
+    final permissionValue =
+        normalizedPermissions[canonicalKey] ?? ModuleAccessRole.none.value;
     return ModuleAccessRole.fromValue(permissionValue) != ModuleAccessRole.none;
   }).toList();
 }
@@ -172,38 +267,45 @@ Map<String, dynamic>? _asPermissionMap(dynamic raw) {
   return null;
 }
 
-String _resolvePermissionValueForModule({
-  required AppModule module,
-  required Map<String, String> normalizedPermissions,
-  required Map<String, dynamic>? rawPermissions,
-}) {
-  final candidates = _permissionKeyCandidates(module);
-
-  for (final candidate in candidates) {
-    final normalizedKey = Modules.normalizeModuleKey(candidate);
-    final normalizedValue = normalizedPermissions[normalizedKey];
-    if (normalizedValue != null) {
-      return normalizedValue;
-    }
-
-    final rawValue = rawPermissions?[candidate];
-    if (rawValue != null) {
-      return ModuleAccessRole.fromDynamic(rawValue).value;
+List<ModuleInfo> _resolveAvailableModules(
+  List<UserManagementModule> configuredModules,
+) {
+  final configuredByKey = <String, UserManagementModule>{};
+  for (final configured in configuredModules) {
+    final key = Modules.normalizeModuleKey(configured.key);
+    if (key.isNotEmpty) {
+      configuredByKey[key] = configured;
     }
   }
 
-  return ModuleAccessRole.none.value;
+  final modules = <ModuleInfo>[];
+  for (final staticModule in ModulesConfig.allModules) {
+    final key = Modules.normalizeModuleKey(staticModule.module.permissionKey);
+    final configured = configuredByKey[key];
+    if (configured != null && !configured.isActive) {
+      continue;
+    }
+    modules.add(
+      configured == null
+          ? staticModule
+          : _applyConfiguredModuleMetadata(staticModule, configured),
+    );
+  }
+
+  return modules;
 }
 
-List<String> _permissionKeyCandidates(AppModule module) {
-  switch (module) {
-    case AppModule.courriers:
-      return const ['courriers', 'courrier', 'mail', 'mails'];
-    case AppModule.ticketing:
-      return const ['ticketing', 'ticket', 'tickets'];
-    case AppModule.meetinghall:
-      return const ['meetinghall', 'meeting_hall', 'meeting'];
-    default:
-      return [module.permissionKey];
-  }
+ModuleInfo _applyConfiguredModuleMetadata(
+  ModuleInfo base,
+  UserManagementModule configured,
+) {
+  return ModuleInfo(
+    module: base.module,
+    name: configured.name.trim().isEmpty ? base.name : configured.name.trim(),
+    description: configured.description.trim().isEmpty
+        ? base.description
+        : configured.description.trim(),
+    icon: base.icon,
+    color: base.color,
+  );
 }

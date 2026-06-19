@@ -4,6 +4,7 @@ enum AppModule {
   tasks,
   courriers,
   social,
+  news,
   inventory,
   ticketing,
   meetinghall,
@@ -23,10 +24,12 @@ extension AppModuleX on AppModule {
         return 'courriers';
       case AppModule.social:
         return 'social';
+      case AppModule.news:
+        return 'news';
       case AppModule.inventory:
         return 'inventory';
       case AppModule.ticketing:
-        return 'ticketing';
+        return 'incidents';
       case AppModule.meetinghall:
         return 'meetinghall';
       case AppModule.usermanagement:
@@ -42,6 +45,8 @@ extension AppModuleX on AppModule {
         return 'courriers';
       case AppModule.social:
         return 'social';
+      case AppModule.news:
+        return 'news';
       case AppModule.inventory:
         return 'inventory';
       case AppModule.ticketing:
@@ -75,8 +80,8 @@ class ModulesConfig {
   static const List<ModuleInfo> allModules = [
     ModuleInfo(
       module: AppModule.tasks,
-      name: 'Tasks',
-      description: 'Tasks & activities management',
+      name: 'Tâches',
+      description: 'Gestion des activités',
       icon: Icons.task_alt,
       color: Color(0xFFFF5722), // Deep Orange
     ),
@@ -95,6 +100,13 @@ class ModulesConfig {
       color: Color(0xFF4CAF50), // Green
     ),
     ModuleInfo(
+      module: AppModule.news,
+      name: 'Actualités',
+      description: 'Gestion des communiqués et de l\'information interne',
+      icon: Icons.campaign_outlined,
+      color: Color(0xFF3F51B5), // Indigo
+    ),
+    ModuleInfo(
       module: AppModule.inventory,
       name: 'Inventory',
       description: 'Inventory & Store operations',
@@ -103,9 +115,9 @@ class ModulesConfig {
     ),
     ModuleInfo(
       module: AppModule.ticketing,
-      name: 'Ticketing',
-      description: 'Ticketing & IT support',
-      icon: Icons.airplane_ticket_outlined,
+      name: 'Support',
+      description: 'Gestion des incidents IT',
+      icon: Icons.support_agent_rounded,
       color: Color(0xFFFF9800), // Orange
     ),
     ModuleInfo(
@@ -115,11 +127,10 @@ class ModulesConfig {
       icon: Icons.meeting_room_outlined,
       color: Color(0xFF00BCD4), // Cyan
     ),
-
     ModuleInfo(
       module: AppModule.usermanagement,
-      name: 'User Management',
-      description: 'Manages users and their permissions',
+      name: 'Utilisateurs',
+      description: 'Gestions des utilisateurs',
       icon: Icons.supervised_user_circle_outlined,
       color: Color(0xFF8BC34A), // Light Green
     ),

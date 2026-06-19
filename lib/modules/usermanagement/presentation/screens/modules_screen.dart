@@ -146,6 +146,13 @@ class _AddModuleSheetState extends ConsumerState<_AddModuleSheet> {
       final defaultDefinition = _definitionForKey(_selectedKey!);
       if (defaultDefinition != null) {
         _nameController.text = defaultDefinition.name;
+        _selectedRoleValues
+          ..clear()
+          ..addAll(
+            defaultDefinition.availableRoles
+                .where((role) => role != ModuleAccessRole.none)
+                .map((role) => role.value),
+          );
       }
     }
   }
@@ -219,9 +226,15 @@ class _AddModuleSheetState extends ConsumerState<_AddModuleSheet> {
                   final defaultDefinition = _definitionForKey(value);
                   setState(() {
                     _selectedKey = value;
-                    if (defaultDefinition != null &&
-                        _nameController.text.trim().isEmpty) {
+                    if (defaultDefinition != null) {
                       _nameController.text = defaultDefinition.name;
+                      _selectedRoleValues
+                        ..clear()
+                        ..addAll(
+                          defaultDefinition.availableRoles
+                              .where((role) => role != ModuleAccessRole.none)
+                              .map((role) => role.value),
+                        );
                     }
                   });
                 },

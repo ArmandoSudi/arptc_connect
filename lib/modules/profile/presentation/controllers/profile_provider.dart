@@ -8,12 +8,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final cachedAgentProfileProvider = FutureProvider<Map<String, dynamic>>(
   (ref) async {
     final sharedPref = ref.read(sharedPrefUtilityProvider);
+    final authState = ref.watch(authStateProvider);
+    final authUser =
+        authState.valueOrNull ?? ref.read(firebaseAuthProvider).currentUser;
     final cached = sharedPref.getAgentProfile();
-    if (cached.isNotEmpty) {
+
+    if (authState.isLoading && authUser == null) {
       return cached;
     }
 
-    final email = await sharedPref.getEmail();
+    if (authState.hasValue && authUser == null) {
+      await sharedPref.clearAgentProfile();
+      return <String, dynamic>{};
+    }
+
+    final cachedEmail = (await sharedPref.getEmail()).trim();
+    final authEmail = authUser?.email?.trim() ?? '';
+    final email = authEmail.isNotEmpty ? authEmail : cachedEmail;
+
+    if (cached.isNotEmpty && _profileMatchesEmail(cached, email)) {
+      return cached;
+    }
+
+    if (email.isNotEmpty && cachedEmail.toLowerCase() != email.toLowerCase()) {
+      await sharedPref.setEmail(email);
+    }
+
     if (email.isNotEmpty) {
       await ref.read(authServiceProvider).cacheAgentProfileByEmail(email);
     }
@@ -25,17 +45,41 @@ final cachedAgentProfileProvider = FutureProvider<Map<String, dynamic>>(
 final liveAgentProfileProvider = StreamProvider<Map<String, dynamic>>(
   (ref) async* {
     final sharedPref = ref.read(sharedPrefUtilityProvider);
+    final authState = ref.watch(authStateProvider);
+    final authUser =
+        authState.valueOrNull ?? ref.read(firebaseAuthProvider).currentUser;
     final cached = sharedPref.getAgentProfile();
-    if (cached.isNotEmpty) {
+
+    if (authState.isLoading && authUser == null) {
+      if (cached.isNotEmpty) {
+        yield cached;
+      }
+      return;
+    }
+
+    if (authState.hasValue && authUser == null) {
+      await sharedPref.clearAgentProfile();
+      yield <String, dynamic>{};
+      return;
+    }
+
+    final cachedEmail = (await sharedPref.getEmail()).trim();
+    final authEmail = authUser?.email?.trim() ?? '';
+    final email = authEmail.isNotEmpty ? authEmail : cachedEmail;
+
+    if (cached.isNotEmpty && _profileMatchesEmail(cached, email)) {
       yield cached;
     }
 
-    final email = (await sharedPref.getEmail()).trim();
     if (email.isEmpty) {
       if (cached.isEmpty) {
         yield <String, dynamic>{};
       }
       return;
+    }
+
+    if (cachedEmail.toLowerCase() != email.toLowerCase()) {
+      await sharedPref.setEmail(email);
     }
 
     final firestore = ref.read(fireStoreProvider);
@@ -153,6 +197,15 @@ Map<String, dynamic> _docDataAsMap(Object? raw) {
     return Map<String, dynamic>.from(raw);
   }
   return <String, dynamic>{};
+}
+
+bool _profileMatchesEmail(Map<String, dynamic> profile, String email) {
+  final normalizedEmail = email.trim().toLowerCase();
+  if (normalizedEmail.isEmpty) {
+    return true;
+  }
+
+  return _emailMatchScore(profile, normalizedEmail) > 0;
 }
 
 int _emailMatchScore(Map<String, dynamic> data, String normalizedEmail) {

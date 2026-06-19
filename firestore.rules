@@ -1,0 +1,503 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function agentPath(agentId) {
+      return /databases/$(database)/documents/agents/$(agentId);
+    }
+
+    function authAgentPath() {
+      return /databases/$(database)/documents/agents/$(request.auth.uid);
+    }
+
+    function authAgentEmailPath() {
+      return /databases/$(database)/documents/agents/$(request.auth.token.email);
+    }
+
+    function hasAgent(agentId) {
+      return signedIn() && exists(agentPath(agentId));
+    }
+
+    function hasAuthAgentDocument() {
+      return signedIn() && exists(authAgentPath());
+    }
+
+    function hasAuthAgentEmailDocument() {
+      return signedIn() &&
+        request.auth.token.email is string &&
+        request.auth.token.email != '' &&
+        exists(authAgentEmailPath());
+    }
+
+    function agentEmailMatches(agentId) {
+      return hasAgent(agentId) &&
+        (get(agentPath(agentId)).data.email == request.auth.token.email ||
+         get(agentPath(agentId)).data.emailLower == request.auth.token.email);
+    }
+
+    function isSelfAgent(agentId) {
+      return signedIn() &&
+        (agentId == request.auth.uid || agentEmailMatches(agentId));
+    }
+
+    function userPath() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    function hasUserDocument() {
+      return signedIn() && exists(userPath());
+    }
+
+    function principalData() {
+      return hasAuthAgentDocument()
+        ? get(authAgentPath()).data
+        : (
+          hasAuthAgentEmailDocument()
+            ? get(authAgentEmailPath()).data
+            : (hasUserDocument() ? get(userPath()).data : request.auth.token)
+        );
+    }
+
+    function isUser() {
+      return incidentRole() in ['USER', 'user', 'User'];
+    }
+
+    function isManager() {
+      return incidentRole() in ['MANAGER', 'manager', 'Manager'];
+    }
+
+    function isAdmin() {
+      return incidentRole() in ['ADMIN', 'admin', 'Admin'];
+    }
+
+    function hasIncidentAccess() {
+      return isUser() || isManager() || isAdmin();
+    }
+
+    function incidentRole() {
+      let data = principalData();
+      let permissions = data.keys().hasAny(['modulePermissions'])
+        ? data.modulePermissions
+        : {};
+      return permissions.keys().hasAny(['support'])
+        ? permissions.support
+        : (
+          permissions.keys().hasAny(['ticketing'])
+            ? permissions.ticketing
+            : (
+              permissions.keys().hasAny(['incident'])
+                ? permissions.incident
+                : (
+                  permissions.keys().hasAny(['incidents'])
+                    ? permissions.incidents
+                    : (
+                      permissions.keys().hasAny(['incident_management'])
+                        ? permissions.incident_management
+                        : (
+                          permissions.keys().hasAny(['incidentmanagement'])
+                            ? permissions.incidentmanagement
+                            : (
+                              permissions.keys().hasAny(['ticket'])
+                                ? permissions.ticket
+                                : (
+                                  permissions.keys().hasAny(['tickets'])
+                                    ? permissions.tickets
+                                    : (
+                                      data.keys().hasAny(['incidentRole']) &&
+                                      data.incidentRole is string &&
+                                      data.incidentRole != ''
+                                        ? data.incidentRole
+                                        : 'NONE'
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        );
+    }
+
+    function newsRole() {
+      let data = principalData();
+      let permissions = data.keys().hasAny(['modulePermissions'])
+        ? data.modulePermissions
+        : {};
+      return permissions.keys().hasAny(['news'])
+        ? permissions.news
+        : (
+          permissions.keys().hasAny(['communication'])
+            ? permissions.communication
+            : (
+              permissions.keys().hasAny(['feed'])
+                ? permissions.feed
+                : 'NONE'
+            )
+        );
+    }
+
+    function isNewsManager() {
+      return newsRole() == 'MANAGER';
+    }
+
+    function isNewsReviewer() {
+      return newsRole() == 'REVIEWER';
+    }
+
+    function userManagementRole() {
+      let data = principalData();
+      let permissions = data.keys().hasAny(['modulePermissions'])
+        ? data.modulePermissions
+        : {};
+      return permissions.keys().hasAny(['usermanagement'])
+        ? permissions.usermanagement
+        : (
+          permissions.keys().hasAny(['user_management'])
+            ? permissions.user_management
+            : 'NONE'
+        );
+    }
+
+    function canReadUserManagement() {
+      return userManagementRole() in ['USER', 'MANAGER', 'ADMIN'];
+    }
+
+    function canManageUserManagement() {
+      return userManagementRole() == 'MANAGER';
+    }
+
+    function validNotificationEventCreate() {
+      return signedIn() &&
+        request.resource.data.keys().hasAll([
+          'eventType',
+          'moduleKey',
+          'title',
+          'body',
+          'entityType',
+          'entityId',
+          'route',
+          'createdByUserId',
+          'createdByName',
+          'createdByEmail',
+          'target',
+          'status',
+          'createdAt'
+        ]) &&
+        request.resource.data.status == 'PENDING' &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.target is map &&
+        request.resource.data.target.type in ['ALL', 'MODULE_ROLE', 'USERS'] &&
+        (
+          request.resource.data.createdByUserId == request.auth.uid ||
+          request.resource.data.createdByEmail == request.auth.token.email ||
+          (
+            request.resource.data.createdByUserId is string &&
+            request.resource.data.createdByUserId.size() > 0 &&
+            agentEmailMatches(request.resource.data.createdByUserId)
+          )
+        );
+    }
+
+    function isTicketOwner(ticket) {
+      return signedIn() &&
+        (ticket.createdByUserId == request.auth.uid ||
+         ticket.affectedUserId == request.auth.uid ||
+         ticket.createdByEmail == request.auth.token.email ||
+         ticket.affectedUserEmail == request.auth.token.email);
+    }
+
+    function canReadTicket(ticket) {
+      return isAdmin() ||
+        (isManager() && ticket.lifecycleState in ['active', 'closed']) ||
+        (isUser() && isTicketOwner(ticket));
+    }
+
+    function validUserCreate() {
+      return isUser() &&
+        request.resource.data.status == 'open' &&
+        request.resource.data.lifecycleState == 'active' &&
+        (request.resource.data.createdByUserId == request.auth.uid ||
+         request.resource.data.createdByEmail == request.auth.token.email) &&
+        (request.resource.data.affectedUserId == request.auth.uid ||
+         request.resource.data.affectedUserEmail == request.auth.token.email) &&
+        request.resource.data.createdByEmail == request.resource.data.affectedUserEmail &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time &&
+        request.resource.data.isDeleted == false &&
+        request.resource.data.assignedToUserId == '' &&
+        request.resource.data.categoryId == '' &&
+        request.resource.data.impact == '' &&
+        request.resource.data.urgency == '' &&
+        request.resource.data.priority == '';
+    }
+
+    function validManagerCreate() {
+      return isManager() &&
+        request.resource.data.status in ['open', 'in_progress'] &&
+        request.resource.data.lifecycleState == 'active' &&
+        (request.resource.data.createdByUserId == request.auth.uid ||
+         request.resource.data.createdByEmail == request.auth.token.email) &&
+        request.resource.data.affectedUserId is string &&
+        request.resource.data.affectedUserId != '' &&
+        request.resource.data.affectedUserEmail is string &&
+        request.resource.data.affectedUserEmail != '' &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time &&
+        request.resource.data.isDeleted == false &&
+        request.resource.data.assignedToUserId == '' &&
+        (
+          (
+            request.resource.data.status == 'open' &&
+            request.resource.data.categoryId == '' &&
+            request.resource.data.impact == '' &&
+            request.resource.data.urgency == '' &&
+            request.resource.data.priority == ''
+          ) ||
+          (
+            request.resource.data.status == 'in_progress' &&
+            request.resource.data.categoryId is string &&
+            request.resource.data.categoryId != '' &&
+            request.resource.data.impact in ['low', 'medium', 'high'] &&
+            request.resource.data.urgency in ['low', 'medium', 'high'] &&
+            request.resource.data.priority in ['P1', 'P2', 'P3', 'P4']
+          )
+        );
+    }
+
+    function managerUpdateKeys() {
+      return [
+        'categoryId',
+        'categoryName',
+        'subcategoryId',
+        'subcategoryName',
+        'affectedServiceId',
+        'affectedServiceName',
+        'location',
+        'deviceType',
+        'assetId',
+        'userImpactDescription',
+        'impact',
+        'urgency',
+        'priority',
+        'assignedToUserId',
+        'assignedToName',
+        'assignedToEmail',
+        'status',
+        'lifecycleState',
+        'resolutionSummary',
+        'resolutionCode',
+        'closedByUserId',
+        'closedByName',
+        'closedAt',
+        'archiveEligibleAt',
+        'updatedAt',
+        'lastCommentAt',
+        'lastStatusChangedAt',
+        'commentCount',
+        'attachmentCount'
+      ];
+    }
+
+    function validManagerUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return isManager() &&
+        resource.data.lifecycleState in ['active', 'closed'] &&
+        request.resource.data.lifecycleState in ['active', 'closed'] &&
+        request.resource.data.status != 'archived' &&
+        request.resource.data.isDeleted == resource.data.isDeleted &&
+        request.resource.data.archivedAt == resource.data.archivedAt &&
+        changed.hasOnly(managerUpdateKeys()) &&
+        request.resource.data.updatedAt == request.time;
+    }
+
+    match /incidentTickets/{ticketId} {
+      allow get, list: if signedIn() && canReadTicket(resource.data);
+      allow create: if validUserCreate() || validManagerCreate();
+      allow update: if validManagerUpdate();
+      allow delete: if false;
+
+      match /comments/{commentId} {
+        allow get, list: if signedIn() &&
+          canReadTicket(get(/databases/$(database)/documents/incidentTickets/$(ticketId)).data) &&
+          (!resource.data.isInternal || isManager() || isAdmin());
+
+        allow create: if signedIn() &&
+          canReadTicket(get(/databases/$(database)/documents/incidentTickets/$(ticketId)).data) &&
+          (request.resource.data.createdByUserId == request.auth.uid ||
+           request.resource.data.createdByEmail == request.auth.token.email) &&
+          request.resource.data.createdAt == request.time &&
+          (
+            (isUser() && request.resource.data.isInternal == false) ||
+            (isManager() && request.resource.data.isInternal == true)
+          );
+
+        allow update, delete: if false;
+      }
+
+      match /attachments/{attachmentId} {
+        allow get, list: if signedIn() &&
+          canReadTicket(get(/databases/$(database)/documents/incidentTickets/$(ticketId)).data);
+
+        allow create: if signedIn() &&
+          canReadTicket(getAfter(/databases/$(database)/documents/incidentTickets/$(ticketId)).data) &&
+          request.resource.data.uploadedByUserId == request.auth.uid &&
+          request.resource.data.createdAt == request.time &&
+          (isUser() || isManager());
+
+        allow update, delete: if false;
+      }
+
+      match /auditLogs/{logId} {
+        allow get, list: if signedIn() &&
+          canReadTicket(get(/databases/$(database)/documents/incidentTickets/$(ticketId)).data);
+
+        allow create: if signedIn() &&
+          canReadTicket(getAfter(/databases/$(database)/documents/incidentTickets/$(ticketId)).data) &&
+          (request.resource.data.actorUserId == request.auth.uid ||
+           request.resource.data.actorEmail == request.auth.token.email) &&
+          request.resource.data.createdAt == request.time &&
+          (isUser() || isManager());
+
+        allow update, delete: if false;
+      }
+    }
+
+    match /incidentCategories/{categoryId} {
+      allow get, list: if signedIn() && hasIncidentAccess();
+      allow create, update: if signedIn() && isManager();
+      allow delete: if false;
+    }
+
+    match /itServices/{serviceId} {
+      allow get, list: if signedIn() && hasIncidentAccess();
+      allow create, update: if signedIn() && isManager();
+      allow delete: if false;
+    }
+
+    match /newsPosts/{postId} {
+      allow get, list: if signedIn() &&
+        (resource.data.status == 'PUBLISHED' || isNewsManager() || isNewsReviewer());
+
+      allow create: if signedIn() &&
+        isNewsManager() &&
+        request.resource.data.status == 'DRAFT' &&
+        (request.resource.data.authorId == request.auth.uid ||
+         request.resource.data.authorEmail == request.auth.token.email) &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time;
+
+      allow update: if signedIn() &&
+        (
+          (
+            isNewsManager() &&
+            (resource.data.authorId == request.auth.uid ||
+             resource.data.authorEmail == request.auth.token.email) &&
+            (
+              (
+                request.resource.data.status in ['DRAFT', 'PENDING'] &&
+                resource.data.status in ['DRAFT', 'REJECTED']
+              ) ||
+              (
+                resource.data.status == 'ACCEPTED' &&
+                request.resource.data.status == 'PUBLISHED'
+              ) ||
+              (
+                resource.data.status == 'PUBLISHED' &&
+                request.resource.data.status == 'ARCHIVED'
+              )
+            )
+          ) ||
+          (
+            isNewsReviewer() &&
+            resource.data.status == 'PENDING' &&
+            request.resource.data.status in ['ACCEPTED', 'REJECTED'] &&
+            (request.resource.data.reviewedByUserId == request.auth.uid ||
+             request.resource.data.reviewedByEmail == request.auth.token.email)
+          )
+        );
+
+      allow delete: if false;
+    }
+
+    match /notificationEvents/{eventId} {
+      allow create: if validNotificationEventCreate();
+      allow get, list, update, delete: if false;
+    }
+
+    match /globalNotifications/{notificationId} {
+      allow get, list: if signedIn();
+      allow create, update, delete: if false;
+    }
+
+    match /departments/{departmentId} {
+      allow get, list: if signedIn();
+      allow create, update, delete: if signedIn() && canManageUserManagement();
+    }
+
+    match /directions/{directionId} {
+      allow get, list: if signedIn();
+      allow create, update, delete: if signedIn() && canManageUserManagement();
+    }
+
+    match /services/{serviceId} {
+      allow get, list: if signedIn();
+      allow create, update, delete: if signedIn() && canManageUserManagement();
+    }
+
+    match /bureaux/{bureauId} {
+      allow get, list: if signedIn();
+      allow create, update, delete: if signedIn() && canManageUserManagement();
+    }
+
+    match /modules/{moduleId} {
+      allow get, list: if signedIn();
+      allow create, update, delete: if signedIn() && canManageUserManagement();
+    }
+
+    match /users/{userId} {
+      allow get: if signedIn() &&
+        (request.auth.uid == userId || canReadUserManagement());
+      allow list: if signedIn() && canReadUserManagement();
+      allow create, update, delete: if false;
+    }
+
+    match /agents/{agentId} {
+      allow get, list: if signedIn();
+      allow create, update, delete: if signedIn() && canManageUserManagement();
+
+      match /deviceTokens/{tokenId} {
+        allow get, list: if isSelfAgent(agentId);
+        allow create, update: if isSelfAgent(agentId) &&
+          request.resource.data.agentId == agentId &&
+          request.resource.data.token is string &&
+          request.resource.data.token.size() > 0 &&
+          request.resource.data.updatedAt == request.time;
+        allow delete: if isSelfAgent(agentId);
+      }
+
+      match /notifications/{notificationId} {
+        allow get, list: if isSelfAgent(agentId);
+        allow create: if false;
+        allow update: if isSelfAgent(agentId) &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['isRead', 'readAt']) &&
+          request.resource.data.isRead == true &&
+          request.resource.data.readAt == request.time;
+        allow delete: if false;
+      }
+
+      match /notificationReads/{notificationId} {
+        allow get, list: if isSelfAgent(agentId);
+        allow create, update: if isSelfAgent(agentId) &&
+          request.resource.data.notificationId == notificationId &&
+          request.resource.data.isRead == true &&
+          request.resource.data.readAt == request.time;
+        allow delete: if false;
+      }
+    }
+  }
+}

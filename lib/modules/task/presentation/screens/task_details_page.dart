@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:arptc_connect/extensions/date_extension.dart';
 import 'package:arptc_connect/modules/task/data/task_repository.dart';
+import 'package:arptc_connect/utils/download_helper.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
 import 'package:arptc_connect/widgets/custom_form_field.dart';
@@ -16,9 +17,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart';
-import 'dart:html' as html;
 
 enum UploadFileType { mail, report }
+
 class TaskDetailsPage extends ConsumerStatefulWidget {
   final String taskId;
 
@@ -39,12 +40,11 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
         "gs://arptc-connect.firebasestorage.app/20131010_184913-MIX_Original.jpg");
   }
 
-
   // Function to get the download URL
   Future<String> _getDownloadUrl(String imagePath) async {
     try {
-      final ref = FirebaseStorage
-          .instanceFor(bucket: 'gs://arptc-connect.firebasestorage.app')
+      final ref = FirebaseStorage.instanceFor(
+              bucket: 'gs://arptc-connect.firebasestorage.app')
           .ref()
           .child(imagePath);
       final url = await ref.getDownloadURL();
@@ -60,8 +60,8 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
   Future<void> deleteFile(String filePath, UploadFileType fileType) async {
     try {
       // Create a reference to the file
-      final ref = FirebaseStorage
-          .instanceFor(bucket: 'gs://arptc-connect.firebasestorage.app')
+      final ref = FirebaseStorage.instanceFor(
+              bucket: 'gs://arptc-connect.firebasestorage.app')
           .ref()
           .child(filePath);
 
@@ -71,7 +71,7 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
       deleteFileUrl(widget.taskId, fileType);
 
       log("File deleted successfully.");
-    } catch (e,stck) {
+    } catch (e, stck) {
       log("Error deleting file: $e");
       log("Error deleting file stackTrace: $stck");
     }
@@ -79,9 +79,10 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
 
   Future<void> deleteFileUrl(String taskId, UploadFileType fileType) async {
     try {
-      final String fieldName = fileType == UploadFileType.mail ? "mail_scan_url" : "report_file_url";
+      final String fieldName =
+          fileType == UploadFileType.mail ? "mail_scan_url" : "report_file_url";
       final taskRef =
-      FirebaseFirestore.instance.collection("tasks").doc(taskId);
+          FirebaseFirestore.instance.collection("tasks").doc(taskId);
       await taskRef.update({fieldName: ""});
       ref.invalidate(taskProvider(widget.taskId));
       log("Task scan URL updated successfully.");
@@ -151,7 +152,8 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                   IconButton(
                     icon: Icon(Icons.delete_outline, color: Colors.red[300]),
                     onPressed: () {
-                      context.pushNamed("edit_task", pathParameters: {"taskId": widget.taskId});
+                      context.pushNamed("edit_task",
+                          pathParameters: {"taskId": widget.taskId});
                     },
                   )
                 ],
@@ -160,22 +162,23 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
 
               task.when(
                 data: (task) {
-
                   // Extract the file names from the URLs
                   if (task.mailScanUrl == null || task.mailScanUrl!.isEmpty) {
                     _mailScanName = "";
                   } else {
                     Uri uriMail = Uri.parse(task.mailScanUrl!);
-                    _mailScanName = Uri.decodeComponent(uriMail.pathSegments.last);
+                    _mailScanName =
+                        Uri.decodeComponent(uriMail.pathSegments.last);
                   }
 
-                  if (task.reportFileUrl == null || task.reportFileUrl!.isEmpty) {
+                  if (task.reportFileUrl == null ||
+                      task.reportFileUrl!.isEmpty) {
                     _reportFileName = "";
                   } else {
                     Uri uriReport = Uri.parse(task.reportFileUrl!);
-                    _reportFileName = Uri.decodeComponent(uriReport.pathSegments.last);
+                    _reportFileName =
+                        Uri.decodeComponent(uriReport.pathSegments.last);
                   }
-
 
                   return ResponsiveCenter(
                     child: SingleChildScrollView(
@@ -195,7 +198,7 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                     style: theme.textTheme.titleMedium!
                                         .copyWith(fontWeight: FontWeight.w600)),
                                 const SizedBox(height: 20),
-                      
+
                                 // DATE LABEL
                                 const Row(
                                   mainAxisAlignment:
@@ -235,7 +238,7 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                   ],
                                 ),
                                 const SizedBox(height: 20),
-                      
+
                                 const Text(
                                   "Remarques",
                                   style: TextStyle(
@@ -249,14 +252,14 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                   task.observation,
                                   style: theme.textTheme.bodyLarge,
                                 ),
-                      
+
                                 Text(task.status),
                                 Text(task.type),
                               ],
                             ),
                           ),
                           const SizedBox(height: 20),
-                      
+
                           // SCANS / PROJECTS
                           Container(
                               padding: const EdgeInsets.all(20),
@@ -288,17 +291,19 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                                 20), // Rounded corners
                                           ),
                                         ),
-                                        onPressed: () {
+                                        onPressed: () async {
                                           showModalBottomSheet(
                                             context: context,
                                             isScrollControlled: true,
                                             shape: const RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.vertical(
-                                                  top: Radius.circular(20)),
+                                              borderRadius:
+                                                  BorderRadius.vertical(
+                                                      top: Radius.circular(20)),
                                             ),
                                             builder: (context) =>
                                                 FilePickerBottomSheet(
-                                                    widget.taskId, UploadFileType.mail),
+                                                    widget.taskId,
+                                                    UploadFileType.mail),
                                           );
                                         },
                                         child: const Text(
@@ -309,21 +314,20 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                     ],
                                   ),
                                   const SizedBox(height: 10),
-                      
-                                  if (task.mailScanUrl != null && task.mailScanUrl!.isNotEmpty)
+                                  if (task.mailScanUrl != null &&
+                                      task.mailScanUrl!.isNotEmpty)
                                     ListTile(
                                       leading: IconButton(
                                         icon: const Icon(Icons.download),
-                                        onPressed: () {
+                                        onPressed: () async {
                                           // Download file from task.mailScanUrl
                                           try {
-                                            // Open the file in a new tab or trigger a download
-                                            html.AnchorElement anchor = html.AnchorElement(
-                                              href: task.mailScanUrl!,
-                                            )
-                                              ..target = '_blank'
-                                              ..download = task.mailScanUrl!.split('/').last; // Optional: Set a default file name
-                                            anchor.click();
+                                            await openUrlForDownload(
+                                              url: task.mailScanUrl!,
+                                              fileName: task.mailScanUrl!
+                                                  .split('/')
+                                                  .last,
+                                            );
                                           } catch (e) {
                                             log("Error: $e");
                                           }
@@ -336,7 +340,7 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                           Icons.delete_outline_outlined,
                                           color: Colors.redAccent,
                                         ),
-                                        onPressed: () {
+                                        onPressed: () async {
                                           // Handle delete action
                                           showDialog(
                                             context: context,
@@ -354,11 +358,15 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                                 TextButton(
                                                   onPressed: () {
                                                     // Perform delete action
-                                                    deleteFile(task.mailScanUrl!, UploadFileType.mail);
-                                                    ref.invalidate(taskProvider(widget.taskId));
+                                                    deleteFile(
+                                                        task.mailScanUrl!,
+                                                        UploadFileType.mail);
+                                                    ref.invalidate(taskProvider(
+                                                        widget.taskId));
                                                     Navigator.of(context).pop();
                                                   },
-                                                  child: const Text("Supprimer"),
+                                                  child:
+                                                      const Text("Supprimer"),
                                                 ),
                                               ],
                                             ),
@@ -373,7 +381,7 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                 ],
                               )),
                           const SizedBox(height: 20),
-                      
+
                           // RESULTS / LIVRABLES
                           Container(
                               padding: const EdgeInsets.all(20),
@@ -410,12 +418,14 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                             context: context,
                                             isScrollControlled: true,
                                             shape: const RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.vertical(
-                                                  top: Radius.circular(20)),
+                                              borderRadius:
+                                                  BorderRadius.vertical(
+                                                      top: Radius.circular(20)),
                                             ),
                                             builder: (context) =>
                                                 FilePickerBottomSheet(
-                                                    widget.taskId, UploadFileType.report),
+                                                    widget.taskId,
+                                                    UploadFileType.report),
                                           );
                                         },
                                         child: const Text(
@@ -426,20 +436,20 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                     ],
                                   ),
                                   const SizedBox(height: 10),
-                                  if (task.reportFileUrl != null && task.reportFileUrl!.isNotEmpty)
+                                  if (task.reportFileUrl != null &&
+                                      task.reportFileUrl!.isNotEmpty)
                                     ListTile(
                                       leading: IconButton(
                                         icon: const Icon(Icons.download),
-                                        onPressed: () {
+                                        onPressed: () async {
                                           // Download file from task.mailScanUrl
                                           try {
-                                            // Open the file in a new tab or trigger a download
-                                            html.AnchorElement anchor = html.AnchorElement(
-                                              href: task.reportFileUrl!,
-                                            )
-                                              ..target = '_blank'
-                                              ..download = task.mailScanUrl!.split('/').last; // Optional: Set a default file name
-                                            anchor.click();
+                                            await openUrlForDownload(
+                                              url: task.reportFileUrl!,
+                                              fileName: task.reportFileUrl!
+                                                  .split('/')
+                                                  .last,
+                                            );
                                           } catch (e) {
                                             log("Error: $e");
                                           }
@@ -470,11 +480,15 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                                 TextButton(
                                                   onPressed: () {
                                                     // Perform delete action
-                                                    deleteFile(task.reportFileUrl!, UploadFileType.report);
-                                                    ref.invalidate(taskProvider(widget.taskId));
+                                                    deleteFile(
+                                                        task.reportFileUrl!,
+                                                        UploadFileType.report);
+                                                    ref.invalidate(taskProvider(
+                                                        widget.taskId));
                                                     Navigator.of(context).pop();
                                                   },
-                                                  child: const Text("Supprimer"),
+                                                  child:
+                                                      const Text("Supprimer"),
                                                 ),
                                               ],
                                             ),
@@ -484,12 +498,13 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                     )
                                   else
                                     const ListTile(
-                                      title: Text("Aucun rapport / livrable joint"),
+                                      title: Text(
+                                          "Aucun rapport / livrable joint"),
                                     ),
                                 ],
                               )),
                           const SizedBox(height: 20),
-                      
+
                           // ANNOTATIONS
                           if (task.type == 'mail') ...[
                             Container(
@@ -502,14 +517,14 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                   children: [
                                     Row(
                                       mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           "Annotations",
                                           style: theme.textTheme.titleMedium!
                                               .copyWith(
-                                              fontWeight: FontWeight.w900,
-                                              color: Colors.yellow[900]),
+                                                  fontWeight: FontWeight.w900,
+                                                  color: Colors.yellow[900]),
                                         ),
                                         FilledButton(
                                           style: FilledButton.styleFrom(
@@ -518,47 +533,57 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                                             foregroundColor: Colors.white,
                                             // White text
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(
-                                                  20), // Rounded corners
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      20), // Rounded corners
                                             ),
                                           ),
                                           onPressed: () {
                                             showModalBottomSheet(
                                               context: context,
                                               isScrollControlled: true,
-                                              shape: const RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.vertical(
-                                                    top: Radius.circular(20)),
+                                              shape:
+                                                  const RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.vertical(
+                                                        top: Radius.circular(
+                                                            20)),
                                               ),
                                               builder: (context) =>
                                                   AnnotationBottomSheet(
-                                                      widget.taskId, task.annotations),
+                                                      widget.taskId,
+                                                      task.annotations),
                                             );
                                           },
                                           child: const Text(
                                             "Ajouter",
-                                            style: TextStyle(color: Colors.white),
+                                            style:
+                                                TextStyle(color: Colors.white),
                                           ),
                                         ),
                                       ],
                                     ),
                                     const SizedBox(height: 10),
-                                    if (task.annotations != null && task.annotations!.isNotEmpty)
+                                    if (task.annotations != null &&
+                                        task.annotations!.isNotEmpty)
                                       ...task.annotations!.entries.map((entry) {
                                         return ListTile(
-                                          title: Text(entry.key), // Annotation key
-                                          subtitle: Text(entry.value), // Annotation value
+                                          title:
+                                              Text(entry.key), // Annotation key
+                                          subtitle: Text(
+                                              entry.value), // Annotation value
                                         );
                                       }).toList()
                                     else
                                       const ListTile(
-                                        title: Text("Aucune annotation disponible"),
+                                        title: Text(
+                                            "Aucune annotation disponible"),
                                       ),
                                   ],
                                 )),
-                          ] ,
+                          ],
                           const SizedBox(height: 20),
-                      
+
                           // ACTIONS
                           FilledButton.icon(
                             icon: Icon(Icons.task_alt, color: Colors.white),
@@ -584,7 +609,6 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
                 error: (error, stack) => const Center(child: Text("Error")),
                 loading: () => const Center(child: CircularProgressIndicator()),
               ),
-
             ],
           ),
         ),
@@ -593,7 +617,6 @@ class _TaskDetailsPageState extends ConsumerState<TaskDetailsPage> {
   }
 }
 
-
 class FilePickerBottomSheet extends ConsumerStatefulWidget {
   final String taskId;
   final UploadFileType fileType;
@@ -601,7 +624,8 @@ class FilePickerBottomSheet extends ConsumerStatefulWidget {
   const FilePickerBottomSheet(this.taskId, this.fileType, {super.key});
 
   @override
-  ConsumerState<FilePickerBottomSheet> createState() => _FilePickerBottomSheetState();
+  ConsumerState<FilePickerBottomSheet> createState() =>
+      _FilePickerBottomSheetState();
 }
 
 class _FilePickerBottomSheetState extends ConsumerState<FilePickerBottomSheet> {
@@ -618,8 +642,7 @@ class _FilePickerBottomSheetState extends ConsumerState<FilePickerBottomSheet> {
     }
   }
 
-  Future<void> _uploadFile(BuildContext context, UploadFileType type ) async {
-
+  Future<void> _uploadFile(BuildContext context, UploadFileType type) async {
     String relativePath = type == UploadFileType.mail ? "scans" : "reports";
 
     if (_selectedFile == null) return;
@@ -660,7 +683,6 @@ class _FilePickerBottomSheetState extends ConsumerState<FilePickerBottomSheet> {
       );
 
       context.pop();
-
     } catch (e, stck) {
       log("UPLAOD FAILED ERROR : $e");
       log("UPLAOD FAILED STACKTRACE : $stck");
@@ -673,9 +695,11 @@ class _FilePickerBottomSheetState extends ConsumerState<FilePickerBottomSheet> {
     }
   }
 
-  Future<void> updateTaskScanUrl(String taskId, UploadFileType fileType, String downloadUrl) async {
+  Future<void> updateTaskScanUrl(
+      String taskId, UploadFileType fileType, String downloadUrl) async {
     try {
-      final String fieldName = fileType == UploadFileType.mail ? "mail_scan_url" : "report_file_url";
+      final String fieldName =
+          fileType == UploadFileType.mail ? "mail_scan_url" : "report_file_url";
       final taskRef =
           FirebaseFirestore.instance.collection("tasks").doc(taskId);
       await taskRef.update({fieldName: downloadUrl});
@@ -725,7 +749,9 @@ class _FilePickerBottomSheetState extends ConsumerState<FilePickerBottomSheet> {
               if (_selectedFile != null) ...[
                 const SizedBox(width: 12),
                 ElevatedButton(
-                  onPressed: _isUploading ? null : () => _uploadFile(context, widget.fileType),
+                  onPressed: _isUploading
+                      ? null
+                      : () => _uploadFile(context, widget.fileType),
                   // onPressed: _upload,
                   child: _isUploading
                       ? const CircularProgressIndicator()
@@ -749,14 +775,14 @@ class _FilePickerBottomSheetState extends ConsumerState<FilePickerBottomSheet> {
 }
 
 class AnnotationBottomSheet extends ConsumerStatefulWidget {
-
   final String taskId;
   Map<String, String>? currentAnnotations;
 
   AnnotationBottomSheet(this.taskId, this.currentAnnotations, {super.key});
 
   @override
-  ConsumerState<AnnotationBottomSheet> createState() => _AnnotationBottomSheetState();
+  ConsumerState<AnnotationBottomSheet> createState() =>
+      _AnnotationBottomSheetState();
 }
 
 class _AnnotationBottomSheetState extends ConsumerState<AnnotationBottomSheet> {
@@ -779,9 +805,9 @@ class _AnnotationBottomSheetState extends ConsumerState<AnnotationBottomSheet> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Ajouter une annotation', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height:20),
-
+              const Text('Ajouter une annotation',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
 
               // OBJET DE L'ACTIVITE
               CustomFormField(
@@ -806,36 +832,38 @@ class _AnnotationBottomSheetState extends ConsumerState<AnnotationBottomSheet> {
                 children: [
                   Expanded(
                       child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(50),
-                          side: const BorderSide(color: Colors.grey),
-                          foregroundColor: Colors.grey,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                        ),
-                        onPressed: () {
-                          context.pop();
-                        },
-                        child: const Text(
-                          "Annuler",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      )),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(50),
+                      side: const BorderSide(color: Colors.grey),
+                      foregroundColor: Colors.grey,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                    ),
+                    onPressed: () {
+                      context.pop();
+                    },
+                    child: const Text(
+                      "Annuler",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  )),
                   const SizedBox(width: 10),
                   Expanded(
                     child: CustomFilledButton(
                       text: "Enregistrer",
-                      onPressed: ()  async {
-
+                      onPressed: () async {
                         final receiver = _receiverController.text;
                         final object = _objectController.text;
 
-                        if (widget.currentAnnotations != null) widget.currentAnnotations![receiver] = object;
-                        else widget.currentAnnotations = {receiver: object};
+                        if (widget.currentAnnotations != null)
+                          widget.currentAnnotations![receiver] = object;
+                        else
+                          widget.currentAnnotations = {receiver: object};
 
-                        final taskRef =
-                        FirebaseFirestore.instance.collection("tasks").doc(widget.taskId);
+                        final taskRef = FirebaseFirestore.instance
+                            .collection("tasks")
+                            .doc(widget.taskId);
                         await taskRef.update({
                           "annotations": widget.currentAnnotations,
                         });
@@ -843,7 +871,6 @@ class _AnnotationBottomSheetState extends ConsumerState<AnnotationBottomSheet> {
                         log("Task scan URL updated successfully.");
 
                         Navigator.of(context).pop();
-
                       },
                     ),
                   ),

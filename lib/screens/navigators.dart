@@ -1,3 +1,4 @@
+import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/widgets/navigation_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -58,19 +59,34 @@ class ScaffoldWithNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = S.of(context);
+
     return Scaffold(
+      appBar: const NavigationAppBar(),
       body: body,
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
-        destinations: const [
+        destinations: [
           NavigationDestination(
-              label: 'Dashboard', icon: Icon(Icons.dashboard)),
+            label: l10n.navigationHome,
+            icon: const Icon(Icons.home_filled),
+          ),
           NavigationDestination(
-              label: 'Services', icon: Icon(Icons.apps)),
+            label: l10n.navigationServices,
+            icon: const Icon(Icons.apps),
+          ),
           NavigationDestination(
-              label: 'Courrier', icon: Icon(Icons.mail_outline)),
+            label: l10n.navigationCourrier,
+            icon: const Icon(Icons.mail_outline),
+          ),
           NavigationDestination(
-              label: 'Profile', icon: Icon(Icons.person_outline)),
+            label: l10n.navigationDashboard,
+            icon: const Icon(Icons.dashboard_outlined),
+          ),
+          NavigationDestination(
+            label: l10n.navigationProfile,
+            icon: const Icon(Icons.person_outline),
+          ),
         ],
         onDestinationSelected: onDestinationSelected,
       ),
@@ -91,6 +107,8 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = S.of(context);
+
     return Scaffold(
       appBar: const NavigationAppBar(),
       body: Row(
@@ -99,22 +117,26 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
             selectedIndex: selectedIndex,
             onDestinationSelected: onDestinationSelected,
             labelType: NavigationRailLabelType.all,
-            destinations: const <NavigationRailDestination>[
+            destinations: <NavigationRailDestination>[
               NavigationRailDestination(
-                label: Text('Dashboard'),
-                icon: Icon(Icons.dashboard),
+                label: Text(l10n.navigationHome),
+                icon: const Icon(Icons.home_filled),
               ),
               NavigationRailDestination(
-                label: Text('Services'),
-                icon: Icon(Icons.apps),
+                label: Text(l10n.navigationServices),
+                icon: const Icon(Icons.apps),
               ),
               NavigationRailDestination(
-                label: Text('Courriers'),
-                icon: Icon(Icons.mail_outline),
+                label: Text(l10n.navigationCourriers),
+                icon: const Icon(Icons.mail_outline),
               ),
               NavigationRailDestination(
-                label: Text('Profile'),
-                icon: Icon(Icons.person_outline),
+                label: Text(l10n.navigationDashboard),
+                icon: const Icon(Icons.dashboard_outlined),
+              ),
+              NavigationRailDestination(
+                label: Text(l10n.navigationProfile),
+                icon: const Icon(Icons.person_outline),
               ),
             ],
           ),

@@ -10,18 +10,11 @@ class UserManagementMainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     const menus = [
       _UserManagementMenu(
-        title: 'Departments',
-        subtitle: 'Manage organizational departments',
-        icon: Icons.account_tree_outlined,
-        color: Color(0xFF1B5E20),
-        path: '/service/usermanagement/departments',
-      ),
-      _UserManagementMenu(
-        title: 'Services',
-        subtitle: 'Manage services by department',
-        icon: Icons.workspaces_outline,
-        color: Color(0xFF0D47A1),
-        path: '/service/usermanagement/services',
+        title: 'Agents',
+        subtitle: 'Manage agents and assignments',
+        icon: Icons.group_outlined,
+        color: Color(0xFF4A148C),
+        path: '/service/usermanagement/agents',
       ),
       _UserManagementMenu(
         title: 'Bureaux',
@@ -31,12 +24,20 @@ class UserManagementMainScreen extends StatelessWidget {
         path: '/service/usermanagement/bureaux',
       ),
       _UserManagementMenu(
-        title: 'Agents',
-        subtitle: 'Manage agents and assignments',
-        icon: Icons.group_outlined,
-        color: Color(0xFF4A148C),
-        path: '/service/usermanagement/agents',
+        title: 'Services',
+        subtitle: 'Manage services by department',
+        icon: Icons.workspaces_outline,
+        color: Color(0xFF0D47A1),
+        path: '/service/usermanagement/services',
       ),
+      _UserManagementMenu(
+        title: 'Departments',
+        subtitle: 'Manage organizational departments',
+        icon: Icons.account_tree_outlined,
+        color: Color(0xFF1B5E20),
+        path: '/service/usermanagement/departments',
+      ),
+
       _UserManagementMenu(
         title: 'Modules',
         subtitle: 'Manage modules and permission roles',

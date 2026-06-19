@@ -1,7 +1,11 @@
-import 'package:arptc_connect/core/theme.dart';
+import 'package:arptc_connect/core/fallback_framework_localizations.dart';
 import 'package:arptc_connect/core/theme_provider.dart';
+import 'package:arptc_connect/generated/l10n.dart';
+import 'package:arptc_connect/modules/notifications/data/notification_messaging_service.dart';
+import 'package:arptc_connect/modules/notifications/presentation/widgets/notification_bootstrapper.dart';
 import 'package:arptc_connect/router.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +21,7 @@ Future<void> main() async {
   final sharedPreferences = await SharedPreferences.getInstance();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   // Set system UI overlay style for M3 edge-to-edge design
   SystemChrome.setSystemUIOverlayStyle(
@@ -38,10 +43,11 @@ Future<void> main() async {
       overrides: [
         sharedPrefProvider.overrideWithValue(sharedPreferences),
       ],
-      child: const MyApp(),
+      child: const NotificationBootstrapper(
+        child: MyApp(),
+      ),
     ),
   );
-
 }
 
 class MyApp extends ConsumerWidget {
@@ -52,8 +58,6 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final goRouter = ref.watch(goRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
-    final textTheme = Theme.of(context).textTheme;
-    final theme = MaterialTheme(textTheme);
 
     return ResponsiveBreakpoints.builder(
       breakpoints: [
@@ -65,6 +69,13 @@ class MyApp extends ConsumerWidget {
         debugShowCheckedModeBanner: false,
         routerConfig: goRouter,
         title: 'ARPTC',
+        onGenerateTitle: (context) => S.of(context).appTitle,
+        localizationsDelegates: const [
+          S.delegate,
+          FallbackMaterialLocalizationsDelegate(),
+          FallbackCupertinoLocalizationsDelegate(),
+        ],
+        supportedLocales: S.delegate.supportedLocales,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: AppColors.primary,

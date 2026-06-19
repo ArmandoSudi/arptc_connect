@@ -1,11 +1,9 @@
-import 'dart:convert';
-import 'dart:html';
 // import 'package:open_file/open_file.dart';
 // import 'package:path_provider/path_provider.dart';
+import 'package:arptc_connect/utils/download_helper.dart';
 import 'package:pdf/widgets.dart';
 
 class PdfApi {
-
   // static Future<File> saveDocument({
   //   required String name,
   //   required Document pdf,
@@ -56,20 +54,22 @@ class PdfApi {
   static Future<void> downloadDocument(Document pdf, {String? title}) async {
     var savedFile = await pdf.save();
     List<int> fileInts = List.from(savedFile);
-
-    // Download document
-    AnchorElement(href: 'data:application/octet-stream;base64,${base64.encode(fileInts)}')
-      ..setAttribute('download', "${title ?? "rapport"}_${DateTime.now().millisecondsSinceEpoch}.pdf")
-      ..click();
+    await downloadBytes(
+      bytes: fileInts,
+      fileName:
+          "${title ?? "rapport"}_${DateTime.now().millisecondsSinceEpoch}.pdf",
+      mimeType: 'application/pdf',
+    );
   }
 
-  static Future<void> downloadExcel(List<int> excelBytes, {String? title}) async {
-    // Convert the Excel bytes to a Base64 string
-    final base64Excel = base64.encode(excelBytes);
-
-    // Create a downloadable link
-    AnchorElement(href: 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,$base64Excel')
-      ..setAttribute('download', "${title ?? "report"}_${DateTime.now().millisecondsSinceEpoch}.xlsx")
-      ..click();
+  static Future<void> downloadExcel(List<int> excelBytes,
+      {String? title}) async {
+    await downloadBytes(
+      bytes: excelBytes,
+      fileName:
+          "${title ?? "report"}_${DateTime.now().millisecondsSinceEpoch}.xlsx",
+      mimeType:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
   }
 }

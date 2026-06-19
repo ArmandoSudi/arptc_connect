@@ -11,6 +11,7 @@ import 'package:arptc_connect/widgets/custom_form_field.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
+import 'package:arptc_connect/widgets/page_header_simple.dart';
 import 'package:arptc_connect/widgets/yes_or_no_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,18 +37,10 @@ class AgentDetailsScreen extends ConsumerWidget {
     return Scaffold(
       body: ContentView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: () => context.pop(),
-                ),
-                const PageHeader(
-                  title: 'User Details',
-                  description: 'User information and permissions',
-                ),
-              ],
+            const PageHeaderSimple(
+              title: "Détails de l'agent",
             ),
             const SizedBox(height: 20),
             Expanded(

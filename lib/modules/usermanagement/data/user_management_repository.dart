@@ -302,10 +302,21 @@ class UserManagementRepository {
 
   Future<void> addAgent(UserManagementAgent agent) async {
     try {
-      await firestoreClient.add(
-        collection: _agentsPath,
-        data: agent.toMap(),
-      );
+      final agentDocIds = _agentRulesLookupIds(agent);
+      if (agentDocIds.isEmpty) {
+        await firestoreClient.add(
+          collection: _agentsPath,
+          data: agent.toMap(),
+        );
+        return;
+      }
+
+      final agents = firestoreClient.firestore.collection(_agentsPath);
+      for (final agentDocId in agentDocIds) {
+        await agents
+            .doc(agentDocId)
+            .set(agent.toMap(), SetOptions(merge: true));
+      }
     } catch (error, stackTrace) {
       log('UserManagementRepository::addAgent error => $error');
       log('UserManagementRepository::addAgent stackTrace => $stackTrace');
@@ -327,13 +338,18 @@ class UserManagementRepository {
 
   Future<void> updateAgent(UserManagementAgent agent) async {
     try {
-      await firestoreClient.firestore
-          .collection(_agentsPath)
-          .doc(agent.id)
-          .update({
+      final data = {
         ...agent.toMap(),
         'updatedAt': Timestamp.now(),
-      });
+      };
+      final agents = firestoreClient.firestore.collection(_agentsPath);
+      await agents.doc(agent.id).update(data);
+
+      for (final rulesLookupId in _agentRulesLookupIds(agent)) {
+        if (rulesLookupId != agent.id) {
+          await agents.doc(rulesLookupId).set(data, SetOptions(merge: true));
+        }
+      }
     } catch (error, stackTrace) {
       log('UserManagementRepository::updateAgent error => $error');
       log('UserManagementRepository::updateAgent stackTrace => $stackTrace');
@@ -343,15 +359,34 @@ class UserManagementRepository {
 
   Future<void> deleteAgent(String agentId) async {
     try {
-      await firestoreClient.delete(
-        collection: _agentsPath,
-        id: agentId,
-      );
+      final agents = firestoreClient.firestore.collection(_agentsPath);
+      final snapshot = await agents.doc(agentId).get();
+      final rawEmail = snapshot.data()?['email']?.toString().trim();
+      final emailIds = {
+        if (rawEmail != null && rawEmail.isNotEmpty) rawEmail,
+        if (rawEmail != null && rawEmail.isNotEmpty) rawEmail.toLowerCase(),
+      };
+
+      await firestoreClient.delete(collection: _agentsPath, id: agentId);
+
+      for (final emailId in emailIds) {
+        if (emailId != agentId) {
+          await agents.doc(emailId).delete();
+        }
+      }
     } catch (error, stackTrace) {
       log('UserManagementRepository::deleteAgent error => $error');
       log('UserManagementRepository::deleteAgent stackTrace => $stackTrace');
       throw Exception(error);
     }
+  }
+
+  Set<String> _agentRulesLookupIds(UserManagementAgent agent) {
+    final email = agent.email.trim();
+    return {
+      if (email.isNotEmpty) email,
+      if (email.isNotEmpty) email.toLowerCase(),
+    };
   }
 
   Future<List<UserManagementModule>> fetchModules() async {
@@ -371,6 +406,29 @@ class UserManagementRepository {
     } catch (error, stackTrace) {
       log('UserManagementRepository::fetchModules error => $error');
       log('UserManagementRepository::fetchModules stackTrace => $stackTrace');
+      throw Exception(error);
+    }
+  }
+
+  Stream<List<UserManagementModule>> watchModules() {
+    try {
+      return firestoreClient.streamAll(collection: _modulesPath).map(
+        (documents) {
+          final modules = documents
+              .map((document) =>
+                  UserManagementModule.fromMap(document.data, id: document.id))
+              .toList();
+
+          modules.sort(
+            (left, right) => left.nameLower.compareTo(right.nameLower),
+          );
+
+          return modules;
+        },
+      );
+    } catch (error, stackTrace) {
+      log('UserManagementRepository::watchModules error => $error');
+      log('UserManagementRepository::watchModules stackTrace => $stackTrace');
       throw Exception(error);
     }
   }

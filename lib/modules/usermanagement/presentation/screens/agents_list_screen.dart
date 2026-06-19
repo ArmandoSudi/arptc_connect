@@ -11,6 +11,7 @@ import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
+import 'package:arptc_connect/widgets/page_header_simple.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -55,15 +56,10 @@ class _AgentsManagementScreenState
           children: [
             Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: () => context.pop(),
-                ),
 
                 // PAGE HADER WITH ADD BUTTON
-                const PageHeader(
-                  title: 'Users',
-                  description: 'Current list of agents',
+                const PageHeaderSimple(
+                  title: 'Liste des agents',
                 ),
                 const Spacer(),
                 FilledButton.icon(
@@ -81,7 +77,7 @@ class _AgentsManagementScreenState
                     // context.push('/service/usermanagement/agents/add');
                   },
                   icon: const Icon(Icons.add),
-                  label: const Text('Add Agent'),
+                  label: const Text('Ajouter un Agent'),
                 ),
               ],
             ),
@@ -90,7 +86,7 @@ class _AgentsManagementScreenState
             // SEARCH BAR
             AppSearchBar(
               controller: _searchController,
-              hintText: 'Search agent by name',
+              hintText: 'Rechercher un agent par son nom',
               onChanged: (value) {
                 ref.read(umAgentSearchQueryProvider.notifier).state = value;
               },
@@ -99,6 +95,7 @@ class _AgentsManagementScreenState
             Expanded(
               child: agentsAsync.when(
                 data: (agents) {
+
                   if (agents.isEmpty) {
                     return EmptyStateView(
                       icon: Icons.group_outlined,
@@ -149,11 +146,11 @@ class _AgentsManagementScreenState
                           ),
                         ),
                         subtitle: Text(
-                          '${agent.matricule.isEmpty ? '-' : agent.matricule} • ${_formatPosition(agent.position)} • $department • $service • $bureau',
+                          '${_formatPosition(agent.position)} • $department ',
                           style: theme.textTheme.bodySmall,
                         ),
                         trailing:
-                            agent.email.isEmpty ? null : Text(agent.email),
+                            agent.matricule.isEmpty ? null : Text(agent.matricule),
                         onTap: () => context.push(
                           '/service/usermanagement/agents/${agent.id}',
                         ),

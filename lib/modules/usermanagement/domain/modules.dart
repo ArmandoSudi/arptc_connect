@@ -2,6 +2,7 @@ enum ModuleAccessRole {
   none('NONE', 'No access'),
   admin('ADMIN', 'Admin'),
   manager('MANAGER', 'Manager'),
+  reviewer('REVIEWER', 'Reviewer'),
   user('USER', 'User');
 
   const ModuleAccessRole(this.value, this.label);
@@ -81,12 +82,22 @@ class Modules {
       name: 'Social',
     ),
     ModuleDefinition(
+      key: 'news',
+      name: 'Company News',
+      availableRoles: [
+        ModuleAccessRole.none,
+        ModuleAccessRole.manager,
+        ModuleAccessRole.reviewer,
+        ModuleAccessRole.user,
+      ],
+    ),
+    ModuleDefinition(
       key: 'inventory',
       name: 'Inventory',
     ),
     ModuleDefinition(
       key: 'ticketing',
-      name: 'Ticketing',
+      name: 'Incident Management',
     ),
     ModuleDefinition(
       key: 'meetinghall',
@@ -164,12 +175,21 @@ class Modules {
       'mail': 'courriers',
       'mails': 'courriers',
       'social': 'social',
+      'news': 'news',
+      'company_news': 'news',
+      'communication': 'news',
+      'communications': 'news',
+      'feed': 'news',
       'inventory': 'inventory',
       'inventaire': 'inventory',
       'it_support': 'ticketing',
       'support_it': 'ticketing',
       'support': 'ticketing',
       'helpdesk': 'ticketing',
+      'incident': 'ticketing',
+      'incidents': 'ticketing',
+      'incident_management': 'ticketing',
+      'incidentmanagement': 'ticketing',
       'ticket': 'ticketing',
       'tickets': 'ticketing',
       'ticketing': 'ticketing',

@@ -25,9 +25,8 @@ final umAgentsProvider = FutureProvider<List<UserManagementAgent>>((ref) async {
   return ref.read(userManagementRepositoryProvider).fetchAgents();
 });
 
-final umModulesProvider =
-    FutureProvider<List<UserManagementModule>>((ref) async {
-  return ref.read(userManagementRepositoryProvider).fetchModules();
+final umModulesProvider = StreamProvider<List<UserManagementModule>>((ref) {
+  return ref.read(userManagementRepositoryProvider).watchModules();
 });
 
 final umBureauSearchQueryProvider = StateProvider<String>((ref) {
