@@ -5,7 +5,7 @@ import 'package:arptc_connect/modules/administration/presentation/controllers/as
 import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +21,6 @@ class AddUserScreen extends ConsumerStatefulWidget {
 }
 
 class _AddUserScreenState extends ConsumerState<AddUserScreen> {
-
   TextEditingController nameController = TextEditingController();
   TextEditingController firstNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -48,7 +47,7 @@ class _AddUserScreenState extends ConsumerState<AddUserScreen> {
                     const PageHeader(
                       title: 'Créer un utilisateur',
                       description:
-                      'Remplissez le formulaire pour créer un nouvel utilisateur',
+                          'Remplissez le formulaire pour créer un nouvel utilisateur',
                     ),
                   ],
                 ),
@@ -56,37 +55,36 @@ class _AddUserScreenState extends ConsumerState<AddUserScreen> {
                 ResponsiveCenter(
                   child: Column(
                     children: [
-                      CustomFormField(
+                      CommonTextInput(
                         label: "Prénom",
                         hintText: "Prénom de l'utilisateur",
-                        textInputType: TextInputType.name,
+                        type: CommonTextInputType.name,
                         controller: firstNameController,
                       ),
                       const Gap(16),
-                      CustomFormField(
+                      CommonTextInput(
                         label: "Nom",
                         hintText: "Nom de l'utilisateur",
-                        textInputType: TextInputType.name,
+                        type: CommonTextInputType.name,
                         controller: nameController,
                       ),
                       const Gap(16),
-                      CustomFormField(
+                      CommonTextInput(
                         label: "Email",
                         hintText: "Email de l'utilisateur",
-                        textInputType: TextInputType.name,
+                        type: CommonTextInputType.name,
                         controller: emailController,
                       ),
                       const Gap(16),
-                      CustomFormField(
+                      CommonTextInput(
                         label: "Rôles",
                         hintText: "Rôle de l'utilisateur",
-                        textInputType: TextInputType.name,
+                        type: CommonTextInputType.name,
                         controller: roleController,
                       ),
                     ],
                   ),
                 ),
-
               ],
             ),
           ),
@@ -98,22 +96,19 @@ class _AddUserScreenState extends ConsumerState<AddUserScreen> {
             Expanded(
               child: CustomFilledButton(
                 onPressed: () {
+                  createUser(
+                      User(
+                          firstName: firstNameController.text,
+                          name: nameController.text,
+                          email: emailController.text,
+                          roles: ["inventory", "admin", "social"]),
+                      "Arptc@1234");
 
-                  createUser(User(
+                  ref.read(asyncUserProvider.notifier).addUser(User(
                       firstName: firstNameController.text,
                       name: nameController.text,
                       email: emailController.text,
-                      roles: ["inventory", "admin", "social"]),
-                    "Arptc@1234"
-                  );
-
-                  ref.read(asyncUserProvider.notifier).addUser(
-                    User(
-                        firstName: firstNameController.text,
-                        name: nameController.text,
-                        email: emailController.text,
-                        roles: ["inventory", "admin", "social"])
-                  );
+                      roles: ["inventory", "admin", "social"]));
                   context.pop();
                 },
                 text: "Enregistrer",

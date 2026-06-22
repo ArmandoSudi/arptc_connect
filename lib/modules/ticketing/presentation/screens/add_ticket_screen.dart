@@ -1,6 +1,6 @@
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:flutter/material.dart';
@@ -68,10 +68,10 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
                     const Gap(16),
 
                     // AGENT NAME FIELD
-                    CustomFormField(
+                    CommonTextInput(
                       label: "Demandeur",
                       hintText: "nom de l'agent demandeur",
-                      textInputType: TextInputType.name,
+                      type: CommonTextInputType.name,
                       controller: agentNameTEC,
                     ),
                     const Gap(24),
@@ -90,11 +90,11 @@ class _AddTicketScreenState extends ConsumerState<AddTicketScreen> {
                     const Gap(24),
 
                     // SUBJECT FIELD
-                    CustomFormField(
+                    CommonTextInput(
                       label: "Incident",
                       hintText:
                           "Quel est le problème que l'agent a rencontré ?",
-                      textInputType: TextInputType.name,
+                      type: CommonTextInputType.name,
                       controller: subjectTEC,
                       // maxLine: 2,
                     ),

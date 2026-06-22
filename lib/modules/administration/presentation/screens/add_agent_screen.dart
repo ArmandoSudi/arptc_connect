@@ -1,4 +1,3 @@
-
 import 'package:arptc_connect/extensions/date_extension.dart';
 import 'package:arptc_connect/modules/administration/data/bureau_provider.dart';
 import 'package:arptc_connect/modules/administration/data/directions_provider.dart';
@@ -15,7 +14,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../widgets/content_view.dart';
-import '../../../../widgets/custom_form_field.dart';
+import '../../../../widgets/common_text_input.dart';
 import '../../../../widgets/page_header.dart';
 
 class AddAgentScreen extends ConsumerStatefulWidget {
@@ -87,28 +86,28 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: CustomFormField(
+                        child: CommonTextInput(
                           label: "Nom",
                           hintText: "Nom de l'agent",
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           controller: nomController,
                         ),
                       ),
                       const Gap(24),
                       Expanded(
-                        child: CustomFormField(
+                        child: CommonTextInput(
                           label: "Post Nom",
                           hintText: "Post-nom de l'agent",
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           controller: postNomController,
                         ),
                       ),
                       const Gap(24),
                       Expanded(
-                        child: CustomFormField(
+                        child: CommonTextInput(
                           label: "Prénom",
                           hintText: "Prénom de l'agent",
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           controller: prenomController,
                         ),
                       ),
@@ -120,28 +119,28 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: CustomFormField(
+                        child: CommonTextInput(
                           label: "Email",
                           hintText: "l'email professionel de l'agent",
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           controller: emailController,
                         ),
                       ),
                       const Gap(24),
                       Expanded(
-                        child: CustomFormField(
+                        child: CommonTextInput(
                           label: "Numéro de téléphone",
                           hintText: "Numéro de téléphone de l'agent",
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           controller: numeroTelephoneController,
                         ),
                       ),
                       const Gap(24),
                       Expanded(
-                        child: CustomFormField(
+                        child: CommonTextInput(
                           label: "Date de naissance",
                           hintText: "Date de naissance de l'agent",
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           suffixIcon: const Icon(Icons.calendar_month),
                           controller: dobController,
                           onTap: () async {
@@ -166,19 +165,19 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: CustomFormField(
+                        child: CommonTextInput(
                           label: "Matricule",
                           hintText: "Le numéro matricule de l'agent",
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           controller: matriculeController,
                         ),
                       ),
                       const Gap(24),
                       Expanded(
-                        child: CustomFormField(
+                        child: CommonTextInput(
                           label: "Date d'engagement",
                           hintText: "Date d'engagement de l'agent",
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           suffixIcon: const Icon(Icons.calendar_month),
                           controller: dateEngagementController,
                           onTap: () async {
@@ -366,8 +365,8 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                                       Icons.keyboard_arrow_down_outlined),
                                   isExpanded: true,
                                   value: data.first,
-                                  items: data
-                                      .map<DropdownMenuItem<Service>>((service) {
+                                  items: data.map<DropdownMenuItem<Service>>(
+                                      (service) {
                                     return DropdownMenuItem<Service>(
                                       value: service,
                                       child: Text(service.name),
@@ -556,9 +555,7 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
 
   void registerAgent() {
     Agent agent = getAgent();
-    ref
-        .read(authServiceProvider)
-        .createAgent(agent);
+    ref.read(authServiceProvider).createAgent(agent);
   }
 
   void signupWithEmailAndPassword(String email, String password) async {

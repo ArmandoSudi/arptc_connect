@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../widgets/content_view.dart';
-import '../../../widgets/custom_form_field.dart';
+import '../../../widgets/common_text_input.dart';
 import '../../../widgets/page_header.dart';
 import '../models/courrier_model.dart';
 import '../providers/courrier_service_provider.dart';
@@ -19,7 +19,6 @@ class AddCourrierScreen extends ConsumerStatefulWidget {
 }
 
 class _AddCourrierScreenState extends ConsumerState<AddCourrierScreen> {
-
   TextEditingController senderController = TextEditingController();
   TextEditingController objectController = TextEditingController();
   TextEditingController dateCourrierController = TextEditingController();
@@ -44,31 +43,31 @@ class _AddCourrierScreenState extends ConsumerState<AddCourrierScreen> {
                 child: Column(
                   children: [
                     // Expediteur
-                    CustomFormField(
+                    CommonTextInput(
                       label: "Expéditeur",
                       hintText: "nom de l'expéditeur",
-                      textInputType: TextInputType.name,
+                      type: CommonTextInputType.name,
                       controller: senderController,
                     ),
                     const SizedBox(height: 20),
 
                     // Object
-                    CustomFormField(
+                    CommonTextInput(
                       label: "Objet",
                       hintText: "object du courrier",
-                      textInputType: TextInputType.name,
+                      type: CommonTextInputType.name,
                       controller: objectController,
                     ),
                     const SizedBox(height: 20),
 
                     // Courrier entry Date
-                    CustomFormField(
+                    CommonTextInput(
                       label: "Date du courrier",
                       hintText: "",
-                      textInputType: TextInputType.name,
+                      type: CommonTextInputType.name,
                       controller: dateCourrierController,
-                      enable: true,
-                      suffixIcon: const Icon(Icons.calendar_month) ,
+                      enabled: true,
+                      suffixIcon: const Icon(Icons.calendar_month),
                       onTap: () async {
                         final DateTime? selectedDate = await showDatePicker(
                           context: context,
@@ -78,20 +77,21 @@ class _AddCourrierScreenState extends ConsumerState<AddCourrierScreen> {
                         );
 
                         setState(() {
-                          dateCourrierController.text = selectedDate!.formatedDate;
+                          dateCourrierController.text =
+                              selectedDate!.formatedDate;
                         });
                       },
                     ),
                     const SizedBox(height: 20),
 
                     // Reception Date
-                    CustomFormField(
+                    CommonTextInput(
                       label: "Date de la réception",
                       hintText: "",
-                      textInputType: TextInputType.name,
+                      type: CommonTextInputType.name,
                       controller: dateReceptionController,
-                      enable: true,
-                      suffixIcon: const Icon(Icons.calendar_month) ,
+                      enabled: true,
+                      suffixIcon: const Icon(Icons.calendar_month),
                       onTap: () async {
                         final DateTime? selectedDate = await showDatePicker(
                           context: context,
@@ -101,7 +101,8 @@ class _AddCourrierScreenState extends ConsumerState<AddCourrierScreen> {
                         );
 
                         setState(() {
-                          dateReceptionController.text = selectedDate!.formatedDate;
+                          dateReceptionController.text =
+                              selectedDate!.formatedDate;
                         });
                       },
                     ),
@@ -131,13 +132,14 @@ class _AddCourrierScreenState extends ConsumerState<AddCourrierScreen> {
                         annotations: [],
                       );
 
-                      ref.read(courrierServiceProvider).addCourrier(
-                          courrier
-                      );
+                      ref.read(courrierServiceProvider).addCourrier(courrier);
 
                       Navigator.of(context).pop();
                     },
-                    child: const Text("Enregistrer", style: TextStyle(fontWeight: FontWeight.bold),),
+                    child: const Text(
+                      "Enregistrer",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -152,7 +154,10 @@ class _AddCourrierScreenState extends ConsumerState<AddCourrierScreen> {
 
                       Navigator.of(context).pop();
                     },
-                    child: const Text("Annuler", style: TextStyle(fontWeight: FontWeight.bold),),
+                    child: const Text(
+                      "Annuler",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
               ],

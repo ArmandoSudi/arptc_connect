@@ -3,7 +3,7 @@ import 'package:arptc_connect/modules/inventory/presentation/product/async_produ
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_dropdown_field.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -71,20 +71,19 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                       itemCount: data.length,
                       itemBuilder: (context, index) {
                         return ListTile(
-                          title: Text(
-                            data[index].name,
-                            style: theme.textTheme.bodyMedium!
-                                .copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          // subtitle: Text(
-                          //   data[index].quantity.toString() + " " + data[index].unit + "(s)",
-                          //   style: theme.textTheme.labelMedium,
-                          // ),
-                          trailing: Text(
-                            "${data[index].quantity} ${data[index].unit}(s)",
-                            style: theme.textTheme.labelMedium,
-                          )
-                        );
+                            title: Text(
+                              data[index].name,
+                              style: theme.textTheme.bodyMedium!
+                                  .copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            // subtitle: Text(
+                            //   data[index].quantity.toString() + " " + data[index].unit + "(s)",
+                            //   style: theme.textTheme.labelMedium,
+                            // ),
+                            trailing: Text(
+                              "${data[index].quantity} ${data[index].unit}(s)",
+                              style: theme.textTheme.labelMedium,
+                            ));
                       },
                       separatorBuilder: (BuildContext context, int index) {
                         return const Divider();
@@ -93,7 +92,8 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                   },
                   error: (error, stackTrace) {
                     //TODO log the error that going to occur here
-                    return const Text("An error occured when loading the items");
+                    return const Text(
+                        "An error occured when loading the items");
                   },
                   loading: () => const Center(
                     child: CircularProgressIndicator(),
@@ -124,19 +124,19 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // NAME
-                    CustomFormField(
+                    CommonTextInput(
                       label: "Nom",
                       hintText: "nom de l'article",
-                      textInputType: TextInputType.text,
+                      type: CommonTextInputType.text,
                       controller: nameController,
                     ),
                     const Gap(12),
 
                     // QUANTITY
-                    CustomFormField(
+                    CommonTextInput(
                       label: "Quantité",
                       hintText: "quantité de l'article en stock",
-                      textInputType: TextInputType.number,
+                      type: CommonTextInputType.number,
                       controller: quantityController,
                     ),
                     const Gap(12),
@@ -227,10 +227,10 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
                       ),
                     ),
                     const Gap(16),
-                    CustomFormField(
+                    CommonTextInput(
                       label: "Quantité",
                       hintText: "0",
-                      textInputType: TextInputType.number,
+                      type: CommonTextInputType.number,
                       controller: quantityController,
                       borderRadius: 30,
                     ),

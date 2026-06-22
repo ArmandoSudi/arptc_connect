@@ -6,12 +6,11 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../widgets/content_view.dart';
-import '../../../widgets/custom_form_field.dart';
+import '../../../widgets/common_text_input.dart';
 import '../../../widgets/page_header.dart';
 import '../providers/courrier_service_provider.dart';
 
 class AddAnnotationScreen extends ConsumerStatefulWidget {
-
   String courrierId;
 
   AddAnnotationScreen({required this.courrierId, super.key});
@@ -21,7 +20,6 @@ class AddAnnotationScreen extends ConsumerStatefulWidget {
 }
 
 class _AddAnnotationScreenState extends ConsumerState<AddAnnotationScreen> {
-
   TextEditingController senderController = TextEditingController();
   TextEditingController objectController = TextEditingController();
 
@@ -42,24 +40,23 @@ class _AddAnnotationScreenState extends ConsumerState<AddAnnotationScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    CustomFormField(
+                    CommonTextInput(
                       label: "Destinataire",
                       hintText: "nom de l'agent désigné",
-                      textInputType: TextInputType.name,
+                      type: CommonTextInputType.name,
                       controller: senderController,
                     ),
                     const SizedBox(height: 20),
-                    CustomFormField(
+                    CommonTextInput(
                       label: "Objet",
                       hintText: "object du l'annotation",
-                      textInputType: TextInputType.name,
+                      type: CommonTextInputType.name,
                       controller: objectController,
                     ),
                   ],
                 ),
               ),
             ),
-
             const SizedBox(height: 20),
             Row(
               children: [
@@ -77,12 +74,13 @@ class _AddAnnotationScreenState extends ConsumerState<AddAnnotationScreen> {
                         "object": objectController.text,
                       };
 
-                      ref.read(courrierServiceProvider)
-                          .addAnnotationToCourrier(widget.courrierId, annotation);
+                      ref.read(courrierServiceProvider).addAnnotationToCourrier(
+                          widget.courrierId, annotation);
 
                       Navigator.of(context).pop();
                     },
-                    child: const Text("Enregistrer", style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text("Enregistrer",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -94,7 +92,8 @@ class _AddAnnotationScreenState extends ConsumerState<AddAnnotationScreen> {
                     onPressed: () {
                       context.pop();
                     },
-                    child: const Text("Annuler", style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text("Annuler",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],

@@ -6,7 +6,7 @@ import 'package:arptc_connect/modules/usermanagement/presentation/controllers/ma
 import 'package:arptc_connect/widgets/app_search_bar.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
@@ -56,7 +56,6 @@ class _AgentsManagementScreenState
           children: [
             Row(
               children: [
-
                 // PAGE HADER WITH ADD BUTTON
                 const PageHeaderSimple(
                   title: 'Liste des agents',
@@ -95,7 +94,6 @@ class _AgentsManagementScreenState
             Expanded(
               child: agentsAsync.when(
                 data: (agents) {
-
                   if (agents.isEmpty) {
                     return EmptyStateView(
                       icon: Icons.group_outlined,
@@ -149,8 +147,9 @@ class _AgentsManagementScreenState
                           '${_formatPosition(agent.position)} • $department ',
                           style: theme.textTheme.bodySmall,
                         ),
-                        trailing:
-                            agent.matricule.isEmpty ? null : Text(agent.matricule),
+                        trailing: agent.matricule.isEmpty
+                            ? null
+                            : Text(agent.matricule),
                         onTap: () => context.push(
                           '/service/usermanagement/agents/${agent.id}',
                         ),
@@ -283,38 +282,38 @@ class AddAgentSheetState extends ConsumerState<AddAgentSheet> {
                                   ),
                         ),
                         const SizedBox(height: 16),
-                        CustomFormField(
+                        CommonTextInput(
                           label: 'First name',
                           hintText: 'Enter first name',
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           controller: _firstNameController,
                         ),
                         const SizedBox(height: 12),
-                        CustomFormField(
+                        CommonTextInput(
                           label: 'Name',
                           hintText: 'Enter name',
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           controller: _nameController,
                         ),
                         const SizedBox(height: 12),
-                        CustomFormField(
+                        CommonTextInput(
                           label: 'Post name',
                           hintText: 'Enter post name',
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           controller: _postNameController,
                         ),
                         const SizedBox(height: 12),
-                        CustomFormField(
+                        CommonTextInput(
                           label: 'Matricule',
                           hintText: 'Enter matricule',
-                          textInputType: TextInputType.text,
+                          type: CommonTextInputType.text,
                           controller: _matriculeController,
                         ),
                         const SizedBox(height: 12),
-                        CustomFormField(
+                        CommonTextInput(
                           label: 'Email',
                           hintText: 'agent@organisation.com',
-                          textInputType: TextInputType.emailAddress,
+                          type: CommonTextInputType.email,
                           controller: _emailController,
                         ),
                         const SizedBox(height: 12),

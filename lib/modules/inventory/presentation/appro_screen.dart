@@ -5,7 +5,7 @@ import 'package:arptc_connect/modules/inventory/presentation/cart/cart_controlle
 import 'package:arptc_connect/modules/inventory/presentation/product/async_product.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -58,7 +58,8 @@ class _ApproScreenState extends ConsumerState<ApproScreen> {
                         return Container(
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey),
-                            borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(5.0)),
                           ),
                           child: ListView.separated(
                             shrinkWrap: true,
@@ -80,7 +81,8 @@ class _ApproScreenState extends ConsumerState<ApproScreen> {
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                       color: Colors.transparent,
-                                      width: 1.0, // Adjust border width as needed
+                                      width:
+                                          1.0, // Adjust border width as needed
                                     ),
                                   ),
                                   child: IconButton(
@@ -97,7 +99,8 @@ class _ApproScreenState extends ConsumerState<ApproScreen> {
                                 ),
                               );
                             },
-                            separatorBuilder: (BuildContext context, int index) {
+                            separatorBuilder:
+                                (BuildContext context, int index) {
                               return const Divider();
                             },
                           ),
@@ -105,7 +108,8 @@ class _ApproScreenState extends ConsumerState<ApproScreen> {
                       },
                       error: (error, stackTrace) {
                         //TODO log the error that going to occur here
-                        return const Text("An error occured when loading the items");
+                        return const Text(
+                            "An error occured when loading the items");
                       },
                       loading: () => const Center(
                         child: CircularProgressIndicator(),
@@ -117,7 +121,8 @@ class _ApproScreenState extends ConsumerState<ApproScreen> {
                     child: Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey),
-                        borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(5.0)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,119 +133,156 @@ class _ApproScreenState extends ConsumerState<ApproScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text("Panier", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                                const Text("Panier",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20)),
                                 Badge(
                                   label: Text(
                                       "${ref.watch(cartControllerProvider.notifier).count}"),
-                                  isLabelVisible:
-                                  ref.watch(cartControllerProvider.notifier).count > 0
+                                  isLabelVisible: ref
+                                              .watch(cartControllerProvider
+                                                  .notifier)
+                                              .count >
+                                          0
                                       ? true
                                       : false,
-                                  child: const Icon(Icons.shopping_cart_outlined),
+                                  child:
+                                      const Icon(Icons.shopping_cart_outlined),
                                 )
                               ],
                             ),
                           ),
-                          cartController.items.isEmpty ?
-                          const Expanded(
-                            child: Center(
-                              child: Text("Votre panier est vide..."),
-                            ),
-                          ) : Expanded(
-                            child: ListView.separated(
-                              shrinkWrap: true,
-                              itemCount: cartController.items.length,
-                              itemBuilder: (context, index) {
-                                return Slidable(
-                                  key: ValueKey(index),
-                                  endActionPane:  ActionPane(
-                                    extentRatio: 0.2 ,
-                                    motion: const ScrollMotion(),
-                                    children: [
-                                      SlidableAction(
-                                        // An action can be bigger than the others.
-                                        flex: 1,
-                                        onPressed: (value){
-                                          ref
-                                              .read(cartControllerProvider.notifier)
-                                              .removeProduct(cartController.items[index].product);
-                                        },
-                                        backgroundColor: Colors.white,
-                                        foregroundColor: Colors.grey,
-                                        icon: Icons.delete_forever_outlined,
-                                        borderRadius: BorderRadius.circular(5),
-                                      ),
-                                    ],
+                          cartController.items.isEmpty
+                              ? const Expanded(
+                                  child: Center(
+                                    child: Text("Votre panier est vide..."),
                                   ),
-                                  child: ListTile(
-                                    leading: Text("${index + 1} . "),
-                                    title: Text(
-                                      cartController.items[index].product.name,
-                                      style: theme.textTheme.bodyMedium!
-                                          .copyWith(fontWeight: FontWeight.w600),
-                                    ),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.red[50],
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: Colors.transparent,
-                                              width: 1.0, // Adjust border width as needed
+                                )
+                              : Expanded(
+                                  child: ListView.separated(
+                                    shrinkWrap: true,
+                                    itemCount: cartController.items.length,
+                                    itemBuilder: (context, index) {
+                                      return Slidable(
+                                        key: ValueKey(index),
+                                        endActionPane: ActionPane(
+                                          extentRatio: 0.2,
+                                          motion: const ScrollMotion(),
+                                          children: [
+                                            SlidableAction(
+                                              // An action can be bigger than the others.
+                                              flex: 1,
+                                              onPressed: (value) {
+                                                ref
+                                                    .read(cartControllerProvider
+                                                        .notifier)
+                                                    .removeProduct(
+                                                        cartController
+                                                            .items[index]
+                                                            .product);
+                                              },
+                                              backgroundColor: Colors.white,
+                                              foregroundColor: Colors.grey,
+                                              icon:
+                                                  Icons.delete_forever_outlined,
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
                                             ),
-                                          ),
-                                          child: IconButton(
-                                            icon: const Icon(Icons.remove, color: Colors.red),
-                                            visualDensity: VisualDensity.compact,
-                                            onPressed: (){
-                                              log("reduce quantity");
-                                              ref.read(cartControllerProvider.notifier)
-                                                  .decreaseQuantity(cartController.items[index].product);
-                                            },
-                                          ),
+                                          ],
                                         ),
-                                        SizedBox(
-                                          width:50,
-                                          child: Text(
-                                            "${cartController.items[index].quantity}",
-                                            style: theme.textTheme.bodyLarge,
-                                            textAlign: TextAlign.center,
+                                        child: ListTile(
+                                          leading: Text("${index + 1} . "),
+                                          title: Text(
+                                            cartController
+                                                .items[index].product.name,
+                                            style: theme.textTheme.bodyMedium!
+                                                .copyWith(
+                                                    fontWeight:
+                                                        FontWeight.w600),
                                           ),
+                                          trailing: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                  color: Colors.red[50],
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(
+                                                    color: Colors.transparent,
+                                                    width:
+                                                        1.0, // Adjust border width as needed
+                                                  ),
+                                                ),
+                                                child: IconButton(
+                                                  icon: const Icon(Icons.remove,
+                                                      color: Colors.red),
+                                                  visualDensity:
+                                                      VisualDensity.compact,
+                                                  onPressed: () {
+                                                    log("reduce quantity");
+                                                    ref
+                                                        .read(
+                                                            cartControllerProvider
+                                                                .notifier)
+                                                        .decreaseQuantity(
+                                                            cartController
+                                                                .items[index]
+                                                                .product);
+                                                  },
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 50,
+                                                child: Text(
+                                                  "${cartController.items[index].quantity}",
+                                                  style:
+                                                      theme.textTheme.bodyLarge,
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                  color: Colors.green[50],
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(
+                                                    color: Colors.transparent,
+                                                    width:
+                                                        1.0, // Adjust border width as needed
+                                                  ),
+                                                ),
+                                                child: IconButton(
+                                                  icon: const Icon(Icons.add,
+                                                      color: Colors.green),
+                                                  visualDensity:
+                                                      VisualDensity.compact,
+                                                  onPressed: () {
+                                                    log("increase quantity");
+                                                    ref
+                                                        .read(
+                                                            cartControllerProvider
+                                                                .notifier)
+                                                        .increaseQuantity(
+                                                            cartController
+                                                                .items[index]
+                                                                .product);
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          onTap: null,
                                         ),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.green[50],
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: Colors.transparent,
-                                              width: 1.0, // Adjust border width as needed
-                                            ),
-                                          ),
-                                          child: IconButton(
-                                            icon: const Icon(Icons.add, color: Colors.green),
-                                            visualDensity: VisualDensity.compact,
-                                            onPressed: (){
-                                              log("increase quantity");
-                                              ref.read(cartControllerProvider.notifier)
-                                                  .increaseQuantity(cartController.items[index].product);
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                            
-                                    onTap: null,
+                                      );
+                                    },
+                                    separatorBuilder:
+                                        (BuildContext context, int index) {
+                                      return const Divider();
+                                    },
                                   ),
-                                );
-                              },
-                              separatorBuilder: (BuildContext context, int index) {
-                                return const Divider();
-                              },
-                            ),
-                          ),
+                                ),
                           BottomAppBar(
                             // elevation: 5,
                             // shadowColor: Colors.grey,
@@ -249,25 +291,32 @@ class _ApproScreenState extends ConsumerState<ApproScreen> {
                               child: Row(
                                 children: [
                                   Expanded(
-                                    child: TextButton(
-                                      child: const Text("Annuler", style: TextStyle(fontWeight: FontWeight.bold),),
-                                      onPressed: (){
-                                        log("Annuler");
-                                      },
-                                    )
-                                  ),
+                                      child: TextButton(
+                                    child: const Text(
+                                      "Annuler",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    onPressed: () {
+                                      log("Annuler");
+                                    },
+                                  )),
                                   Expanded(
-                                    child: FilledButton(
-                                      style: FilledButton.styleFrom(
-                                        minimumSize: const Size.fromHeight(50),
-                                      ),
-                                      child: const Text("Approvisionner", style: TextStyle(fontWeight: FontWeight.bold),),
-                                      onPressed: () async {
-                                        log("Appro");
-                                        await showYesOrNoDialog(context, "Etes-vous sûr de vouloir mettre à jour le stock ?");
-                                      },
-                                    )
-                                  )
+                                      child: FilledButton(
+                                    style: FilledButton.styleFrom(
+                                      minimumSize: const Size.fromHeight(50),
+                                    ),
+                                    child: const Text(
+                                      "Approvisionner",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    onPressed: () async {
+                                      log("Appro");
+                                      await showYesOrNoDialog(context,
+                                          "Etes-vous sûr de vouloir mettre à jour le stock ?");
+                                    },
+                                  ))
                                 ],
                               ),
                             ),
@@ -288,7 +337,7 @@ class _ApproScreenState extends ConsumerState<ApproScreen> {
   Future<void> showSelectedItemDialog(
       BuildContext context, Product product) async {
     final TextEditingController quantityController =
-    TextEditingController(text: "1");
+        TextEditingController(text: "1");
 
     return await showDialog(
         context: context,
@@ -310,10 +359,10 @@ class _ApproScreenState extends ConsumerState<ApproScreen> {
                       ),
                     ),
                     const Gap(16),
-                    CustomFormField(
+                    CommonTextInput(
                       label: "Quantité",
                       hintText: "0",
-                      textInputType: TextInputType.number,
+                      type: CommonTextInputType.number,
                       controller: quantityController,
                       borderRadius: 30,
                     ),
@@ -360,7 +409,6 @@ class _ApproScreenState extends ConsumerState<ApproScreen> {
   }
 
   Future<void> showYesOrNoDialog(BuildContext context, String message) async {
-
     TextTheme textTheme = Theme.of(context).textTheme;
 
     return await showDialog(
@@ -398,8 +446,12 @@ class _ApproScreenState extends ConsumerState<ApproScreen> {
                             shape: const StadiumBorder(),
                           ),
                           onPressed: () {
-                            final cartItems = ref.read(cartControllerProvider.notifier).carItems;
-                            ref.watch(asyncProductProvider.notifier).restock(cartItems);
+                            final cartItems = ref
+                                .read(cartControllerProvider.notifier)
+                                .carItems;
+                            ref
+                                .watch(asyncProductProvider.notifier)
+                                .restock(cartItems);
                             Navigator.of(context).pop();
                             context.pop();
                           },
@@ -407,7 +459,6 @@ class _ApproScreenState extends ConsumerState<ApproScreen> {
                               style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ),
-
                     ],
                   )
                 ],

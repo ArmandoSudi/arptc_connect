@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/meeting_hall.dart';
 import '../providers/meeting_hall_provider.dart';
-import '../../../widgets/custom_form_field.dart';
+import '../../../widgets/common_text_input.dart';
 
 class CreateMeetingHallForm extends ConsumerStatefulWidget {
   const CreateMeetingHallForm({super.key});
 
   @override
-  ConsumerState<CreateMeetingHallForm> createState() => _CreateMeetingHallFormState();
+  ConsumerState<CreateMeetingHallForm> createState() =>
+      _CreateMeetingHallFormState();
 }
 
 class _CreateMeetingHallFormState extends ConsumerState<CreateMeetingHallForm> {
@@ -60,11 +61,11 @@ class _CreateMeetingHallFormState extends ConsumerState<CreateMeetingHallForm> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                CustomFormField(
+                CommonTextInput(
                   controller: _nameController,
                   label: 'Nom de la salle',
                   hintText: 'Ex: Salle de Réunion 6ème',
-                  textInputType: TextInputType.text,
+                  type: CommonTextInputType.text,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer un nom';
@@ -73,11 +74,11 @@ class _CreateMeetingHallFormState extends ConsumerState<CreateMeetingHallForm> {
                   },
                 ),
                 const SizedBox(height: 16),
-                CustomFormField(
+                CommonTextInput(
                   controller: _locationController,
                   label: 'Emplacement',
                   hintText: 'Ex: 6ème étage',
-                  textInputType: TextInputType.text,
+                  type: CommonTextInputType.text,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer l\'emplacement';
@@ -86,11 +87,11 @@ class _CreateMeetingHallFormState extends ConsumerState<CreateMeetingHallForm> {
                   },
                 ),
                 const SizedBox(height: 16),
-                CustomFormField(
+                CommonTextInput(
                   controller: _capacityController,
                   label: 'Capacité',
                   hintText: 'Nombre de personnes',
-                  textInputType: TextInputType.number,
+                  type: CommonTextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer la capacité';
@@ -102,12 +103,12 @@ class _CreateMeetingHallFormState extends ConsumerState<CreateMeetingHallForm> {
                   },
                 ),
                 const SizedBox(height: 16),
-                CustomFormField(
+                CommonTextInput(
                   controller: _descriptionController,
                   label: 'Description',
                   hintText: 'Description de la salle',
                   // maxLines: 3,
-                  textInputType: TextInputType.text,
+                  type: CommonTextInputType.text,
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(

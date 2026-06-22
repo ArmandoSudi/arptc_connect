@@ -6,7 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../widgets/content_view.dart';
-import '../../../../widgets/custom_form_field.dart';
+import '../../../../widgets/common_text_input.dart';
 import '../../../../widgets/page_header.dart';
 import '../../data/directions_provider.dart';
 import '../../data/service_provider.dart';
@@ -152,8 +152,7 @@ class _AddBureauScreenState extends ConsumerState<AddBureauScreen> {
                                   child: Text("Aucun service trouvé"),
                                 )
                               ],
-                              onChanged: (value) {
-                              },
+                              onChanged: (value) {},
                             ),
                           ],
                         ),
@@ -179,19 +178,18 @@ class _AddBureauScreenState extends ConsumerState<AddBureauScreen> {
                               ),
                               // suffixIcon: Icon(Icons.arrow_drop_down)
                             ),
-                            icon: const Icon(
-                                Icons.keyboard_arrow_down_outlined),
+                            icon:
+                                const Icon(Icons.keyboard_arrow_down_outlined),
                             isExpanded: true,
                             value: data.first,
-                            items: data
-                                .map<DropdownMenuItem<Service>>((service) {
+                            items:
+                                data.map<DropdownMenuItem<Service>>((service) {
                               return DropdownMenuItem<Service>(
                                 value: service,
                                 child: Text(service.name),
                               );
                             }).toList(),
                             onChanged: (value) {
-
                               serviceDropdownValue = value!.name;
                             },
                           )
@@ -218,17 +216,17 @@ class _AddBureauScreenState extends ConsumerState<AddBureauScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                CustomFormField(
+                CommonTextInput(
                   label: "Service",
                   hintText: "nom du service",
-                  textInputType: TextInputType.name,
+                  type: CommonTextInputType.name,
                   controller: serviceNameController,
                 ),
                 const SizedBox(height: 20),
-                CustomFormField(
+                CommonTextInput(
                   label: "Abreviation",
                   hintText: "l'abréviation du service",
-                  textInputType: TextInputType.name,
+                  type: CommonTextInputType.name,
                   controller: abreviationController,
                 ),
                 const Gap(16),

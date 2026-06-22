@@ -11,13 +11,14 @@ import 'package:arptc_connect/modules/incident_management/presentation/widgets/i
 import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_status_badge.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_timeline.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 class ManagerIncidentDetailsScreen extends ConsumerStatefulWidget {
@@ -195,10 +196,11 @@ class _ManagerIncidentDetailsScreenState
                                 ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 12),
-                          CustomFormField(
+                          CommonTextInput(
                             label: l10n.addNote,
                             hintText: l10n.addInternalNoteHint,
-                            textInputType: TextInputType.multiline,
+                            type: CommonTextInputType.text,
+                            isMultiline: true,
                             controller: _internalNoteController,
                             maxLines: 3,
                           ),
@@ -643,6 +645,7 @@ class _WorkflowStepper extends StatelessWidget {
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Gap(8),
                   _ResponsiveFields(
                     children: [
                       _ServiceDropdown(
@@ -651,26 +654,26 @@ class _WorkflowStepper extends StatelessWidget {
                         onChanged:
                             canCategorize ? onAffectedServiceChanged : null,
                       ),
-                      CustomFormField(
+                      CommonTextInput(
                         label: l10n.deviceType,
                         hintText: l10n.deviceTypeHint,
-                        textInputType: TextInputType.text,
+                        type: CommonTextInputType.text,
                         controller: deviceTypeController,
-                        enable: canCategorize,
+                        enabled: canCategorize,
                       ),
-                      CustomFormField(
+                      CommonTextInput(
                         label: l10n.location,
                         hintText: l10n.locationHint,
-                        textInputType: TextInputType.text,
+                        type: CommonTextInputType.text,
                         controller: locationController,
-                        enable: canCategorize,
+                        enabled: canCategorize,
                       ),
-                      CustomFormField(
+                      CommonTextInput(
                         label: l10n.assetId,
                         hintText: l10n.assetIdHint,
-                        textInputType: TextInputType.text,
+                        type: CommonTextInputType.text,
                         controller: assetIdController,
-                        enable: canCategorize,
+                        enabled: canCategorize,
                       ),
                       _CategoryDropdown(
                         categories: categories,
@@ -779,21 +782,22 @@ class _WorkflowStepper extends StatelessWidget {
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  CustomFormField(
+                  CommonTextInput(
                     label: l10n.resolutionSummary,
                     hintText: l10n.resolutionSummaryHint,
-                    textInputType: TextInputType.multiline,
+                    type: CommonTextInputType.text,
+                    isMultiline: true,
                     controller: resolutionSummaryController,
                     maxLines: 3,
-                    enable: !isClosed && !isCancelled,
+                    enabled: !isClosed && !isCancelled,
                   ),
                   const SizedBox(height: 12),
-                  CustomFormField(
+                  CommonTextInput(
                     label: l10n.resolutionCode,
                     hintText: l10n.resolutionCodeHint,
-                    textInputType: TextInputType.text,
+                    type: CommonTextInputType.text,
                     controller: resolutionCodeController,
-                    enable: !isClosed && !isCancelled,
+                    enabled: !isClosed && !isCancelled,
                   ),
                   const SizedBox(height: 12),
                   Align(

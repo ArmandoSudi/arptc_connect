@@ -4,7 +4,7 @@ import 'package:arptc_connect/extensions/date_extension.dart';
 import 'package:arptc_connect/modules/ticketing/data/ticketing_service.dart';
 import 'package:arptc_connect/modules/ticketing/presentation/controllers/async_ticket_details.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -128,10 +128,10 @@ class _TicketDetailsScreenState extends ConsumerState<TicketDetailsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CustomFormField(
+                    CommonTextInput(
                       label: "Solution",
                       hintText: "",
-                      textInputType: TextInputType.name,
+                      type: CommonTextInputType.name,
                       controller: solutionTEC,
                       borderRadius: 5,
                       // maxLine: 4,
@@ -199,8 +199,7 @@ class TicketWidget extends StatelessWidget {
           const Gap(16),
           _buildLabels(context, "agent", "date"),
           const Gap(4),
-          _buildTitles(
-              context, ticket.agent, ticket.creationDate.formatedDate),
+          _buildTitles(context, ticket.agent, ticket.creationDate.formatedDate),
           const Gap(16),
           _buildDottedLine(context),
           const Gap(16),

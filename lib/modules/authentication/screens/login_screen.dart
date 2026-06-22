@@ -2,7 +2,7 @@ import 'package:arptc_connect/modules/authentication/providers/authentication_pr
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../widgets/custom_form_field.dart';
+import '../../../widgets/common_text_input.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -61,14 +61,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 40),
 
                       // Email
-                      CustomFormField(
+                      CommonTextInput(
                         label: "Email",
                         hintText: "",
-                        textInputType: TextInputType.emailAddress,
+                        type: CommonTextInputType.email,
                         controller: emailController,
                         prefixIcon: const Icon(Icons.email),
                         validator: (value) {
-                          if (value == null || value.isEmpty || !value.contains('@')) {
+                          if (value == null ||
+                              value.isEmpty ||
+                              !value.contains('@')) {
                             return 'Email invalide, veuillez votre email professionnel';
                           }
                           return null;
@@ -77,11 +79,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 20),
 
                       // Password
-                      CustomFormField(
+                      CommonTextInput(
                         label: "Mot de passe",
                         hintText: "",
-                        textInputType: TextInputType.text,
-                        obscureText: true,
+                        type: CommonTextInputType.text,
+                        isPassword: true,
                         controller: passwordController,
                         prefixIcon: const Icon(Icons.lock),
                         validator: (value) {

@@ -4,7 +4,7 @@ import 'package:arptc_connect/modules/usermanagement/presentation/controllers/en
 import 'package:arptc_connect/modules/usermanagement/presentation/controllers/management_providers.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
@@ -244,17 +244,17 @@ class _EditServiceSheetState extends ConsumerState<_EditServiceSheet> {
                     ),
               ),
               const SizedBox(height: 16),
-              CustomFormField(
+              CommonTextInput(
                 label: 'Name',
                 hintText: 'Service name',
-                textInputType: TextInputType.name,
+                type: CommonTextInputType.name,
                 controller: _nameController,
               ),
               const SizedBox(height: 12),
-              CustomFormField(
+              CommonTextInput(
                 label: 'Code',
                 hintText: 'SRV_PROC',
-                textInputType: TextInputType.text,
+                type: CommonTextInputType.text,
                 controller: _codeController,
               ),
               const SizedBox(height: 12),
@@ -280,10 +280,10 @@ class _EditServiceSheetState extends ConsumerState<_EditServiceSheet> {
                 },
               ),
               const SizedBox(height: 12),
-              CustomFormField(
+              CommonTextInput(
                 label: 'Head user ID',
                 hintText: 'uid_123',
-                textInputType: TextInputType.text,
+                type: CommonTextInputType.text,
                 controller: _headUserController,
               ),
               const SizedBox(height: 8),

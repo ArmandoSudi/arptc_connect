@@ -11,7 +11,7 @@ export 'app_search_bar.dart';
 export 'content_view.dart';
 export 'custom_dropdown_field.dart';
 export 'custom_filledbutton.dart';
-export 'custom_form_field.dart';
+export 'common_text_input.dart';
 export 'custom_nav_bar.dart';
 export 'empty_state_view.dart';
 export 'error_state_view.dart';

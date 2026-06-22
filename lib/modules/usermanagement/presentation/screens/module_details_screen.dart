@@ -5,7 +5,7 @@ import 'package:arptc_connect/modules/usermanagement/presentation/controllers/en
 import 'package:arptc_connect/modules/usermanagement/presentation/controllers/management_providers.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
@@ -253,25 +253,25 @@ class _EditModuleSheetState extends ConsumerState<_EditModuleSheet> {
                   ),
             ),
             const SizedBox(height: 16),
-            CustomFormField(
+            CommonTextInput(
               label: 'Module key',
               hintText: 'tasks',
-              textInputType: TextInputType.text,
+              type: CommonTextInputType.text,
               controller: _keyController,
-              enable: false,
+              enabled: false,
             ),
             const SizedBox(height: 12),
-            CustomFormField(
+            CommonTextInput(
               label: 'Module name',
               hintText: 'Tasks',
-              textInputType: TextInputType.name,
+              type: CommonTextInputType.name,
               controller: _nameController,
             ),
             const SizedBox(height: 12),
-            CustomFormField(
+            CommonTextInput(
               label: 'Description (optional)',
               hintText: 'Tasks & activities management',
-              textInputType: TextInputType.text,
+              type: CommonTextInputType.text,
               controller: _descriptionController,
             ),
             const SizedBox(height: 12),

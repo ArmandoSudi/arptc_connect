@@ -4,6 +4,7 @@ import 'package:arptc_connect/modules/incident_management/domain/incident_enums.
 import 'package:arptc_connect/modules/incident_management/domain/incident_category.dart';
 import 'package:arptc_connect/modules/incident_management/domain/it_service.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/controllers/incident_providers.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
@@ -300,20 +301,19 @@ class _ItServiceSheetState extends ConsumerState<_ItServiceSheet> {
       isSaving: _isSaving,
       onSave: _save,
       children: [
-        TextField(
+        CommonTextInput(
+          label: l10n.name,
+          type: CommonTextInputType.name,
           controller: _nameController,
-          decoration: InputDecoration(
-            labelText: l10n.name,
-            border: const OutlineInputBorder(),
-          ),
+          decoration: const InputDecoration(border: OutlineInputBorder()),
         ),
         const SizedBox(height: 12),
-        TextField(
+        CommonTextInput(
+          label: l10n.description,
+          type: CommonTextInputType.text,
+          isMultiline: true,
           controller: _descriptionController,
-          decoration: InputDecoration(
-            labelText: l10n.description,
-            border: const OutlineInputBorder(),
-          ),
+          decoration: const InputDecoration(border: OutlineInputBorder()),
           maxLines: 3,
         ),
         SwitchListTile(
@@ -406,18 +406,19 @@ class _CategorySheetState extends ConsumerState<_CategorySheet> {
       isSaving: _isSaving,
       onSave: _save,
       children: [
-        TextField(
+        CommonTextInput(
+          label: l10n.name,
+          type: CommonTextInputType.name,
           controller: _nameController,
-          decoration: InputDecoration(
-            labelText: l10n.name,
-            border: const OutlineInputBorder(),
-          ),
+          decoration: const InputDecoration(border: OutlineInputBorder()),
         ),
         const SizedBox(height: 12),
-        TextField(
+        CommonTextInput(
+          label: l10n.subcategory,
+          type: CommonTextInputType.text,
+          isMultiline: true,
           controller: _subcategoriesController,
           decoration: InputDecoration(
-            labelText: l10n.subcategory,
             hintText: l10n.subcategory,
             border: const OutlineInputBorder(),
           ),

@@ -4,7 +4,7 @@ import 'package:arptc_connect/modules/news/domain/news_post.dart';
 import 'package:arptc_connect/modules/news/presentation/controllers/news_providers.dart';
 import 'package:arptc_connect/modules/news/presentation/widgets/news_status_badge.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
@@ -352,28 +352,29 @@ class _EditorContent extends StatelessWidget {
             padding: const EdgeInsets.all(18),
             child: Column(
               children: [
-                CustomFormField(
+                CommonTextInput(
                   label: 'Title',
                   hintText: 'Important company information',
-                  textInputType: TextInputType.text,
+                  type: CommonTextInputType.text,
                   controller: titleController,
-                  enable: canEdit,
+                  enabled: canEdit,
                 ),
                 const SizedBox(height: 14),
-                CustomFormField(
+                CommonTextInput(
                   label: 'Image URL (optional)',
                   hintText: 'https://...',
-                  textInputType: TextInputType.url,
+                  type: CommonTextInputType.url,
                   controller: imageUrlController,
-                  enable: canEdit,
+                  enabled: canEdit,
                 ),
                 const SizedBox(height: 14),
-                CustomFormField(
+                CommonTextInput(
                   label: 'Content',
                   hintText: 'Write the news, article, or information...',
-                  textInputType: TextInputType.multiline,
+                  type: CommonTextInputType.text,
+                  isMultiline: true,
                   controller: contentController,
-                  enable: canEdit,
+                  enabled: canEdit,
                   minLines: 8,
                   maxLines: 16,
                 ),

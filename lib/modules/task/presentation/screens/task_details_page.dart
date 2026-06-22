@@ -6,7 +6,7 @@ import 'package:arptc_connect/modules/task/data/task_repository.dart';
 import 'package:arptc_connect/utils/download_helper.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:flutter/material.dart';
@@ -810,19 +810,19 @@ class _AnnotationBottomSheetState extends ConsumerState<AnnotationBottomSheet> {
               const SizedBox(height: 20),
 
               // OBJET DE L'ACTIVITE
-              CustomFormField(
+              CommonTextInput(
                 label: "Destinateur",
                 hintText: "Entrez l'destinataire de l'annotation",
-                textInputType: TextInputType.text,
+                type: CommonTextInputType.text,
                 controller: _receiverController,
               ),
               const SizedBox(height: 10),
 
               // DESCRIPTION OF THE TASK
-              CustomFormField(
+              CommonTextInput(
                 label: "Objet",
                 hintText: "Entrer la objet de l'annotation",
-                textInputType: TextInputType.text,
+                type: CommonTextInputType.text,
                 controller: _objectController,
               ),
               const SizedBox(height: 10),

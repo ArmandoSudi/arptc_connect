@@ -5,7 +5,7 @@ import 'package:arptc_connect/modules/usermanagement/presentation/controllers/ma
 import 'package:arptc_connect/widgets/app_search_bar.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
@@ -293,17 +293,17 @@ class _AddBureauSheetState extends ConsumerState<_AddBureauSheet> {
                     ),
                   ],
                   const SizedBox(height: 12),
-                  CustomFormField(
+                  CommonTextInput(
                     label: 'Bureau name',
                     hintText: 'Enter bureau name',
-                    textInputType: TextInputType.name,
+                    type: CommonTextInputType.name,
                     controller: _nameController,
                   ),
                   const SizedBox(height: 12),
-                  CustomFormField(
+                  CommonTextInput(
                     label: 'Code (optional)',
                     hintText: 'BUR_LOCAL',
-                    textInputType: TextInputType.text,
+                    type: CommonTextInputType.text,
                     controller: _codeController,
                   ),
                   const SizedBox(height: 16),

@@ -1,3 +1,4 @@
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:flutter/material.dart';
 
 /// Material Design 3 Search Bar
@@ -83,7 +84,9 @@ class _AppSearchBarState extends State<AppSearchBar> {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: TextField(
+            child: CommonTextInput(
+              label: '',
+              type: CommonTextInputType.text,
               controller: _controller,
               focusNode: _focusNode,
               autofocus: widget.autofocus,
@@ -98,7 +101,6 @@ class _AppSearchBarState extends State<AppSearchBar> {
                 contentPadding: EdgeInsets.zero,
                 isDense: true,
               ),
-              style: theme.textTheme.bodyLarge,
               onChanged: widget.onChanged,
               onSubmitted: widget.onSubmitted,
             ),

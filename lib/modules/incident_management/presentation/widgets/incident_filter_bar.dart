@@ -1,6 +1,7 @@
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_enums.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/incident_localizations.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:flutter/material.dart';
 
 class IncidentFilterBar extends StatefulWidget {
@@ -53,12 +54,13 @@ class _IncidentFilterBarState extends State<IncidentFilterBar> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final stacked = constraints.maxWidth < 620;
-        final search = TextField(
+        final search = CommonTextInput(
+          label: l10n.searchIncidents,
+          type: CommonTextInputType.text,
           controller: _controller,
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.search),
-            labelText: l10n.searchIncidents,
-            border: const OutlineInputBorder(),
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.search),
+            border: OutlineInputBorder(),
           ),
           onChanged: widget.onQueryChanged,
         );

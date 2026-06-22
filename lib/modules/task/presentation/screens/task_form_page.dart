@@ -1,3 +1,4 @@
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:flutter/material.dart';
 
 class TaskFormPage extends StatefulWidget {
@@ -21,8 +22,15 @@ class _TaskFormPageState extends State<TaskFormPage> {
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(decoration: const InputDecoration(labelText: 'Label')),
-              TextFormField(decoration: const InputDecoration(labelText: 'Observation')),
+              const CommonTextInput(
+                label: 'Label',
+                type: CommonTextInputType.text,
+              ),
+              const CommonTextInput(
+                label: 'Observation',
+                type: CommonTextInputType.text,
+                isMultiline: true,
+              ),
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'Type'),
                 value: _type,
@@ -33,8 +41,14 @@ class _TaskFormPageState extends State<TaskFormPage> {
                 onChanged: (val) => setState(() => _type = val ?? 'task'),
               ),
               if (_type == 'mail') ...[
-                TextFormField(decoration: const InputDecoration(labelText: 'Sender')),
-                TextFormField(decoration: const InputDecoration(labelText: 'Receiver')),
+                const CommonTextInput(
+                  label: 'Sender',
+                  type: CommonTextInputType.name,
+                ),
+                const CommonTextInput(
+                  label: 'Receiver',
+                  type: CommonTextInputType.name,
+                ),
                 ElevatedButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.upload_file),

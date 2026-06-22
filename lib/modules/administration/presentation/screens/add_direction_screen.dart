@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,24 +53,23 @@ class _AddDirectionScreenState extends ConsumerState<AddDirectionScreen> {
                 ResponsiveCenter(
                   child: Column(
                     children: [
-                      CustomFormField(
+                      CommonTextInput(
                         label: "Direction",
                         hintText: "nom de la direction",
-                        textInputType: TextInputType.name,
+                        type: CommonTextInputType.name,
                         controller: directionNameController,
                       ),
                       const Gap(16),
-                      CustomFormField(
+                      CommonTextInput(
                         label: "Abreviation",
                         hintText: "l'abréviation de la direction",
-                        textInputType: TextInputType.name,
+                        type: CommonTextInputType.name,
                         controller: abreviationController,
                       ),
                       const Gap(16),
                     ],
                   ),
                 ),
-                
               ],
             ),
           ),

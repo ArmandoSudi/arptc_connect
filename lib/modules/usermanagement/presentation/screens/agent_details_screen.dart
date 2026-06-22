@@ -7,7 +7,7 @@ import 'package:arptc_connect/modules/usermanagement/presentation/controllers/en
 import 'package:arptc_connect/modules/usermanagement/presentation/controllers/management_providers.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
@@ -556,45 +556,45 @@ class _EditAgentSheetState extends ConsumerState<_EditAgentSheet> {
                                   ),
                         ),
                         const SizedBox(height: 16),
-                        CustomFormField(
+                        CommonTextInput(
                           label: 'First name',
                           hintText: 'First name',
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           controller: _firstNameController,
                         ),
                         const SizedBox(height: 12),
-                        CustomFormField(
+                        CommonTextInput(
                           label: 'Name',
                           hintText: 'Name',
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           controller: _nameController,
                         ),
                         const SizedBox(height: 12),
-                        CustomFormField(
+                        CommonTextInput(
                           label: 'Post name',
                           hintText: 'Post name',
-                          textInputType: TextInputType.name,
+                          type: CommonTextInputType.name,
                           controller: _postNameController,
                         ),
                         const SizedBox(height: 12),
-                        CustomFormField(
+                        CommonTextInput(
                           label: 'Matricule',
                           hintText: 'Matricule',
-                          textInputType: TextInputType.text,
+                          type: CommonTextInputType.text,
                           controller: _matriculeController,
                         ),
                         const SizedBox(height: 12),
-                        CustomFormField(
+                        CommonTextInput(
                           label: 'Email',
                           hintText: 'user@organisation.com',
-                          textInputType: TextInputType.emailAddress,
+                          type: CommonTextInputType.email,
                           controller: _emailController,
                         ),
                         const SizedBox(height: 12),
-                        CustomFormField(
+                        CommonTextInput(
                           label: 'Profile picture URL',
                           hintText: 'https://...',
-                          textInputType: TextInputType.url,
+                          type: CommonTextInputType.url,
                           controller: _profilePictureController,
                         ),
                         const SizedBox(height: 12),

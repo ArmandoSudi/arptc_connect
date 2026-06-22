@@ -4,7 +4,7 @@ import 'package:arptc_connect/modules/usermanagement/domain/user_management_modu
 import 'package:arptc_connect/modules/usermanagement/presentation/controllers/management_providers.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
@@ -240,17 +240,17 @@ class _AddModuleSheetState extends ConsumerState<_AddModuleSheet> {
                 },
               ),
               const SizedBox(height: 12),
-              CustomFormField(
+              CommonTextInput(
                 label: 'Module name',
                 hintText: 'Tasks',
-                textInputType: TextInputType.name,
+                type: CommonTextInputType.name,
                 controller: _nameController,
               ),
               const SizedBox(height: 12),
-              CustomFormField(
+              CommonTextInput(
                 label: 'Description (optional)',
                 hintText: 'Tasks & activities management',
-                textInputType: TextInputType.text,
+                type: CommonTextInputType.text,
                 controller: _descriptionController,
               ),
               const SizedBox(height: 12),

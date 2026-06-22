@@ -8,7 +8,7 @@ import 'package:arptc_connect/modules/incident_management/domain/it_service.dart
 import 'package:arptc_connect/modules/incident_management/presentation/incident_localizations.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/controllers/incident_providers.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
@@ -120,18 +120,19 @@ class _CreateIncidentScreenState extends ConsumerState<CreateIncidentScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            CustomFormField(
+                            CommonTextInput(
                               label: l10n.title,
                               hintText: l10n.titleExampleEmailAccess,
-                              textInputType: TextInputType.text,
+                              type: CommonTextInputType.text,
                               controller: _titleController,
                               validator: _required(l10n.enterTitle),
                             ),
                             const SizedBox(height: 12),
-                            CustomFormField(
+                            CommonTextInput(
                               label: l10n.shortDescription,
                               hintText: l10n.describeIssueAndWork,
-                              textInputType: TextInputType.multiline,
+                              type: CommonTextInputType.text,
+                              isMultiline: true,
                               controller: _descriptionController,
                               maxLines: 4,
                               validator: _required(l10n.enterShortDescription),
@@ -229,22 +230,22 @@ class _CreateIncidentScreenState extends ConsumerState<CreateIncidentScreen> {
                               const SizedBox(height: 12),
                               _ResponsiveFields(
                                 children: [
-                                  CustomFormField(
+                                  CommonTextInput(
                                     label: l10n.location,
                                     hintText: l10n.locationHint,
-                                    textInputType: TextInputType.text,
+                                    type: CommonTextInputType.text,
                                     controller: _locationController,
                                   ),
-                                  CustomFormField(
+                                  CommonTextInput(
                                     label: l10n.deviceType,
                                     hintText: l10n.deviceTypeHint,
-                                    textInputType: TextInputType.text,
+                                    type: CommonTextInputType.text,
                                     controller: _deviceTypeController,
                                   ),
-                                  CustomFormField(
+                                  CommonTextInput(
                                     label: l10n.assetId,
                                     hintText: l10n.assetIdHint,
-                                    textInputType: TextInputType.text,
+                                    type: CommonTextInputType.text,
                                     controller: _assetIdController,
                                   ),
                                   _CategoryDropdown(
@@ -309,10 +310,11 @@ class _CreateIncidentScreenState extends ConsumerState<CreateIncidentScreen> {
                                 ],
                               ),
                               const SizedBox(height: 12),
-                              CustomFormField(
+                              CommonTextInput(
                                 label: l10n.impactDescription,
                                 hintText: l10n.impactDescriptionHint,
-                                textInputType: TextInputType.multiline,
+                                type: CommonTextInputType.text,
+                                isMultiline: true,
                                 controller: _impactDescriptionController,
                                 maxLines: 3,
                               ),
@@ -545,11 +547,12 @@ class _AgentSearchFieldState extends State<_AgentSearchField> {
         focusNode,
         onFieldSubmitted,
       ) {
-        return TextFormField(
+        return CommonTextInput(
+          label: l10n.affectedAgent,
+          type: CommonTextInputType.name,
           controller: controller,
           focusNode: focusNode,
           decoration: InputDecoration(
-            labelText: l10n.affectedAgent,
             hintText: l10n.searchAffectedAgentHint,
             prefixIcon: const Icon(Icons.person_search_outlined),
             border: const OutlineInputBorder(),

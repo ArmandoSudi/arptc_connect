@@ -1,7 +1,8 @@
 import 'package:arptc_connect/modules/meeting_hall/repositories/reservation_repository.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/reservation_provider.dart';
+
 import '../models/reservation.dart';
 import '../models/reservation_status.dart';
 
@@ -52,10 +53,11 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextFormField(
+              CommonTextInput(
+                label: 'Titre',
+                type: CommonTextInputType.text,
                 controller: _titleController,
                 decoration: const InputDecoration(
-                  labelText: 'Titre',
                   hintText: 'Entrez le titre de la réunion',
                 ),
                 validator: (value) {
@@ -66,10 +68,12 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              CommonTextInput(
+                label: 'Description',
+                type: CommonTextInputType.text,
+                isMultiline: true,
                 controller: _descriptionController,
                 decoration: const InputDecoration(
-                  labelText: 'Description',
                   hintText: 'Entrez la description de la réunion',
                 ),
                 maxLines: 3,
@@ -160,7 +164,6 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
         status: ReservationStatus.onHold,
         createdAt: DateTime.now(),
       );
-
 
       ref.read(reservationRepositoryProvider).addReservation(reservation);
       Navigator.of(context).pop();

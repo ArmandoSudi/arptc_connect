@@ -1,4 +1,3 @@
-
 import 'package:arptc_connect/modules/administration/data/service_provider.dart';
 import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:flutter/material.dart';
@@ -8,11 +7,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../widgets/content_view.dart';
 import '../../../../widgets/custom_filledbutton.dart';
-import '../../../../widgets/custom_form_field.dart';
+import '../../../../widgets/common_text_input.dart';
 import '../../../../widgets/page_header.dart';
 import '../../data/directions_provider.dart';
 import '../../domain/models/service.dart';
-
 
 class AddServiceScreen extends ConsumerStatefulWidget {
   const AddServiceScreen({super.key});
@@ -58,11 +56,9 @@ class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
                       ],
                     ),
                     const Gap(16),
-
                     ResponsiveCenter(
                       child: Column(
                         children: [
-
                           // DIRECTIONS DROPDOWN
                           directionsAsync.when(
                             data: (data) {
@@ -99,8 +95,8 @@ class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
                                         Icons.keyboard_arrow_down_outlined),
                                     isExpanded: true,
                                     value: data.first.id,
-                                    items: data
-                                        .map<DropdownMenuItem<String>>((direction) {
+                                    items: data.map<DropdownMenuItem<String>>(
+                                        (direction) {
                                       return DropdownMenuItem<String>(
                                         value: direction.id,
                                         child: Text(direction.name),
@@ -123,25 +119,24 @@ class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
                           const Gap(16),
 
                           // SERVICE NAME
-                          CustomFormField(
+                          CommonTextInput(
                             label: "Service",
                             hintText: "nom du service",
-                            textInputType: TextInputType.name,
+                            type: CommonTextInputType.name,
                             controller: directionNameController,
                           ),
                           const SizedBox(height: 20),
 
                           // SERVICE SHORT NAME
-                          CustomFormField(
+                          CommonTextInput(
                             label: "Abreviation",
                             hintText: "l'abréviation du service",
-                            textInputType: TextInputType.name,
+                            type: CommonTextInputType.name,
                             controller: abreviationController,
                           ),
                         ],
                       ),
                     ),
-                    
                   ],
                 ),
               ),
@@ -181,7 +176,7 @@ class _AddServiceScreenState extends ConsumerState<AddServiceScreen> {
     );
   }
 
-  void createService(){
+  void createService() {
     final service = Service(
       name: directionNameController.text,
       directionRef: directionId!,

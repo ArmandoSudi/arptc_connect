@@ -3,7 +3,7 @@ import 'package:arptc_connect/modules/news/domain/news_enums.dart';
 import 'package:arptc_connect/modules/news/presentation/controllers/news_providers.dart';
 import 'package:arptc_connect/modules/news/presentation/widgets/news_status_badge.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
@@ -133,14 +133,15 @@ class _NewsReviewScreenState extends ConsumerState<NewsReviewScreen> {
                                   ),
                         ),
                         const SizedBox(height: 12),
-                        CustomFormField(
+                        CommonTextInput(
                           label: 'Reject comment',
                           hintText: 'Required only when rejecting the post...',
-                          textInputType: TextInputType.multiline,
+                          type: CommonTextInputType.text,
+                          isMultiline: true,
                           controller: _commentController,
                           minLines: 3,
                           maxLines: 6,
-                          enable: canReview,
+                          enabled: canReview,
                         ),
                         const SizedBox(height: 14),
                         Wrap(

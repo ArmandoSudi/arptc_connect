@@ -7,7 +7,7 @@ import 'package:arptc_connect/modules/task/domain/task.dart';
 import 'package:arptc_connect/modules/task/presentation/controllers/async_tasks.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
-import 'package:arptc_connect/widgets/custom_form_field.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:arptc_connect/widgets/responsive_center.dart';
 import 'package:flutter/material.dart';
@@ -33,14 +33,11 @@ class TasksScreen extends ConsumerStatefulWidget {
 }
 
 class _TasksScreenState extends ConsumerState<TasksScreen> {
-
-
   final List<Task> _tasks = [];
   TaskState selectedFilterOption = TaskState.New;
 
   @override
   Widget build(BuildContext context) {
-
     final asyncTasks = ref.watch(asyncTasksProvider);
 
     final theme = Theme.of(context);
@@ -66,16 +63,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 ),
                 IconButton(
                   onPressed: () {
-
                     // final ActiviteReportingService ARS = ActiviteReportingService();
                     final excelReport = ActiviteExcelReportingService();
 
                     // ARS.generateReport(_tasks);
                     excelReport.generateExcelReport(_tasks, "reports.xlsx");
                   },
-                  icon: const Icon(
-                      Icons.print
-                  ),
+                  icon: const Icon(Icons.print),
                 ),
               ],
             ),
@@ -90,8 +84,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     label: Text('Nouvelle'),
                   ),
                   ButtonSegment<TaskState>(
-                      value: TaskState.Doing,
-                      label: Text('En Traitement')),
+                      value: TaskState.Doing, label: Text('En Traitement')),
                   ButtonSegment<TaskState>(
                     value: TaskState.Done,
                     label: Text('Traitée'),
@@ -112,7 +105,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             Expanded(
               child: asyncTasks.when(
                 data: (data) {
-
                   _tasks.clear();
 
                   data.sort((a, b) => a.creationDate.compareTo(b.creationDate));
@@ -125,7 +117,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       itemCount: data.length,
                       physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
-
                         log("Task ID ${data[index].id} ");
 
                         // add Inkwell
@@ -146,7 +137,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                                 children: [
                                   Text(
                                     data[index].label,
-                                    style: theme.textTheme.titleMedium?.copyWith(
+                                    style:
+                                        theme.textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.w600,
                                       color: theme.colorScheme.onSurface,
                                     ),
@@ -156,14 +148,17 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                                     children: [
                                       Text(
                                         "De : ",
-                                        style: theme.textTheme.labelMedium?.copyWith(
-                                          color: theme.colorScheme.onSurfaceVariant,
+                                        style: theme.textTheme.labelMedium
+                                            ?.copyWith(
+                                          color: theme
+                                              .colorScheme.onSurfaceVariant,
                                         ),
                                       ),
                                       const SizedBox(width: 2),
                                       Text(
                                         data[index].sender!,
-                                        style: theme.textTheme.labelLarge?.copyWith(
+                                        style: theme.textTheme.labelLarge
+                                            ?.copyWith(
                                           color: theme.colorScheme.onSurface,
                                         ),
                                       ),
@@ -172,35 +167,46 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                                   const SizedBox(height: 12),
                                   // DATE LABELS
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         "Date d'émission",
-                                        style: theme.textTheme.labelMedium?.copyWith(
-                                          color: theme.colorScheme.onSurfaceVariant,
+                                        style: theme.textTheme.labelMedium
+                                            ?.copyWith(
+                                          color: theme
+                                              .colorScheme.onSurfaceVariant,
                                         ),
                                       ),
                                       Text(
                                         "Date d'accusé réception",
-                                        style: theme.textTheme.labelMedium?.copyWith(
-                                          color: theme.colorScheme.onSurfaceVariant,
+                                        style: theme.textTheme.labelMedium
+                                            ?.copyWith(
+                                          color: theme
+                                              .colorScheme.onSurfaceVariant,
                                         ),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 4),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         data[index].emissionDate.formatedDate,
-                                        style: theme.textTheme.labelLarge?.copyWith(
+                                        style: theme.textTheme.labelLarge
+                                            ?.copyWith(
                                           color: theme.colorScheme.onSurface,
                                         ),
                                       ),
                                       Text(
-                                        data[index].receptionDate?.formatedDate ?? " - ",
-                                        style: theme.textTheme.labelLarge?.copyWith(
+                                        data[index]
+                                                .receptionDate
+                                                ?.formatedDate ??
+                                            " - ",
+                                        style: theme.textTheme.labelLarge
+                                            ?.copyWith(
                                           color: theme.colorScheme.onSurface,
                                         ),
                                       ),
@@ -209,42 +215,47 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                                 ],
                               ),
                             ),
-                          ),onLongPress: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Supprimer la tâche'),
-                                content: Text('Voulez-vous vraiment supprimer "${data[index].label}"?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).pop(),
-                                    child: const Text('Non'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      ref.read(asyncTasksProvider.notifier).deleteTask(data[index].id);
-                                      Navigator.of(context).pop();
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Tâche supprimée'),
-                                          duration: Duration(seconds: 2),
-                                        ),
-                                      );
-                                    },
-                                    style: TextButton.styleFrom(
-                                      foregroundColor: theme.colorScheme.error,
+                          ),
+                          onLongPress: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Supprimer la tâche'),
+                                  content: Text(
+                                      'Voulez-vous vraiment supprimer "${data[index].label}"?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
+                                      child: const Text('Non'),
                                     ),
-                                    child: const Text('Oui'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
+                                    TextButton(
+                                      onPressed: () {
+                                        ref
+                                            .read(asyncTasksProvider.notifier)
+                                            .deleteTask(data[index].id);
+                                        Navigator.of(context).pop();
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Tâche supprimée'),
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                      },
+                                      style: TextButton.styleFrom(
+                                        foregroundColor:
+                                            theme.colorScheme.error,
+                                      ),
+                                      child: const Text('Oui'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
                         );
-
-
                       },
                       separatorBuilder: (BuildContext context, int index) {
                         return const SizedBox.shrink();
@@ -262,7 +273,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 ),
               ),
             )
-
           ],
         ),
       ),
@@ -278,12 +288,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             ),
             builder: (context) => const TaskBottomSheet(),
           );
-        } ,
+        },
       ),
     );
   }
-
-
 }
 
 class TaskBottomSheet extends ConsumerStatefulWidget {
@@ -298,7 +306,8 @@ class _TaskBottomSheetState extends ConsumerState<TaskBottomSheet> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _observationController = TextEditingController();
   final TextEditingController _emissionDateController = TextEditingController();
-  final TextEditingController _receptionDateController = TextEditingController();
+  final TextEditingController _receptionDateController =
+      TextEditingController();
   final TextEditingController _senderController = TextEditingController();
   final TextEditingController _receiverController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -321,8 +330,9 @@ class _TaskBottomSheetState extends ConsumerState<TaskBottomSheet> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Créer une activité', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height:20),
+              const Text('Créer une activité',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
 
               // TYPE OF THE TASK
               Container(
@@ -333,11 +343,15 @@ class _TaskBottomSheetState extends ConsumerState<TaskBottomSheet> {
                 ),
                 child: DropdownButtonFormField<String>(
                   // underline: const SizedBox.shrink(),
-                  decoration: const InputDecoration(labelText: 'Type', border: InputBorder.none),
+                  decoration: const InputDecoration(
+                      labelText: 'Type', border: InputBorder.none),
                   value: _type,
                   items: const [
-                    DropdownMenuItem(value: 'task', child: Text('Projets / Autre Traitement')),
-                    DropdownMenuItem(value: 'mail', child: Text('Courrier / NSI')),
+                    DropdownMenuItem(
+                        value: 'task',
+                        child: Text('Projets / Autre Traitement')),
+                    DropdownMenuItem(
+                        value: 'mail', child: Text('Courrier / NSI')),
                   ],
                   onChanged: (val) => setState(() => _type = val ?? 'task'),
                 ),
@@ -348,10 +362,10 @@ class _TaskBottomSheetState extends ConsumerState<TaskBottomSheet> {
               Row(
                 children: [
                   Expanded(
-                    child: CustomFormField(
+                    child: CommonTextInput(
                       label: "Date d'émission",
                       hintText: "Date d'émission",
-                      textInputType: TextInputType.datetime,
+                      type: CommonTextInputType.dateTime,
                       controller: _emissionDateController,
                       onTap: () => showDatePicker(
                         context: context,
@@ -365,85 +379,89 @@ class _TaskBottomSheetState extends ConsumerState<TaskBottomSheet> {
                             _emissionDateController.text = date.formatedDate;
                           });
                         }
-                      }
+                      }),
                     ),
-                  ),),
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: CustomFormField(
+                    child: CommonTextInput(
                       label: "Date d'accusé de réception",
                       hintText: "Date d'accusé de réception",
-                      textInputType: TextInputType.datetime,
+                      type: CommonTextInputType.dateTime,
                       controller: _receptionDateController,
-                      enable: _type == 'mail',
-                      onTap: _type == 'mail' ? () => showDatePicker(
-                        context: context,
-                        initialDate: _receptionDate ?? DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      ).then((date) {
-                        if (date != null) {
-                          setState(() {
-                            _receptionDate = date;
-                            _receptionDateController.text = date.formatedDate;
-                          });
-                        }
-                      }
-                    ) : null,
-                  ),)
+                      enabled: _type == 'mail',
+                      onTap: _type == 'mail'
+                          ? () => showDatePicker(
+                                context: context,
+                                initialDate: _receptionDate ?? DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              ).then((date) {
+                                if (date != null) {
+                                  setState(() {
+                                    _receptionDate = date;
+                                    _receptionDateController.text =
+                                        date.formatedDate;
+                                  });
+                                }
+                              })
+                          : null,
+                    ),
+                  )
                 ],
               ),
               const SizedBox(height: 10),
 
               // DATE D'EMISSION ET DATE D'ACCUSE RECEPTION
-              if (_type == 'mail') ... [
+              if (_type == 'mail') ...[
                 Row(
-                children: [
-                  Expanded(
-                    child: // NAME OF THE SENDER
-                    CustomFormField(
-                      label: "Emetteur",
-                      hintText: "Entrer l'émetteur du courrier",
-                      textInputType: TextInputType.text,
-                      controller: _senderController,
-                    ),),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: CustomFormField(
-                      label: "Destinataire",
-                      hintText: "Entrer le destinataire",
-                      textInputType: TextInputType.text,
-                      controller: _receiverController,
-                    ),)
-                ],
-              ),
+                  children: [
+                    Expanded(
+                      child: // NAME OF THE SENDER
+                          CommonTextInput(
+                        label: "Emetteur",
+                        hintText: "Entrer l'émetteur du courrier",
+                        type: CommonTextInputType.text,
+                        controller: _senderController,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: CommonTextInput(
+                        label: "Destinataire",
+                        hintText: "Entrer le destinataire",
+                        type: CommonTextInputType.text,
+                        controller: _receiverController,
+                      ),
+                    )
+                  ],
+                ),
                 const SizedBox(height: 10),
-              ]
-              else ... [
+              ] else ...[
                 // NOM DU RESPONSABLE
-                CustomFormField(
+                CommonTextInput(
                   label: "Responsable / Initiateur",
                   hintText: "Entrer le responable du projet",
-                  textInputType: TextInputType.text,
+                  type: CommonTextInputType.text,
                   controller: _senderController,
                 ),
                 const SizedBox(height: 10),
               ],
 
               // OBJET DE L'ACTIVITE
-              CustomFormField(
+              CommonTextInput(
                 label: "Objet",
                 hintText: "Entrez l'objet de l'activité",
-                textInputType: TextInputType.text,
+                type: CommonTextInputType.text,
                 controller: _titleController,
               ),
               const SizedBox(height: 10),
 
               // DESCRIPTION OF THE TASK
-              CustomFormField(
+              CommonTextInput(
                 label: "Remarques",
                 hintText: "Entrer la remarque du projet/courrier",
-                textInputType: TextInputType.text,
+                type: CommonTextInputType.text,
                 controller: _observationController,
               ),
               const SizedBox(height: 10),
@@ -453,49 +471,46 @@ class _TaskBottomSheetState extends ConsumerState<TaskBottomSheet> {
                 children: [
                   Expanded(
                       child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(50),
-                          side: const BorderSide(color: Colors.grey),
-                          foregroundColor: Colors.grey,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                        ),
-                        onPressed: () {
-                          context.pop();
-                        },
-                        child: const Text(
-                          "Annuler",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      )),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(50),
+                      side: const BorderSide(color: Colors.grey),
+                      foregroundColor: Colors.grey,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                    ),
+                    onPressed: () {
+                      context.pop();
+                    },
+                    child: const Text(
+                      "Annuler",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  )),
                   const SizedBox(width: 10),
                   Expanded(
                     child: CustomFilledButton(
                       text: "Enregistrer",
-                      onPressed: ()  {
-                          final task = Task(
-                            id: "",
-                            label: _titleController.text,
-                            observation: _observationController.text,
-                            creationDate: DateTime.now(),
-                            emissionDate: _emissionDate ?? DateTime.now(),
-                            receptionDate: _receptionDate,
-                            status: "new",
-                            type: _type,
-                            sender: _senderController.text,
-                            receiver: _receiverController.text,
-                            mailScanUrl: "",
-                            reportFileUrl: "",
-                            department: "IT",
-                          );
+                      onPressed: () {
+                        final task = Task(
+                          id: "",
+                          label: _titleController.text,
+                          observation: _observationController.text,
+                          creationDate: DateTime.now(),
+                          emissionDate: _emissionDate ?? DateTime.now(),
+                          receptionDate: _receptionDate,
+                          status: "new",
+                          type: _type,
+                          sender: _senderController.text,
+                          receiver: _receiverController.text,
+                          mailScanUrl: "",
+                          reportFileUrl: "",
+                          department: "IT",
+                        );
 
-                          ref
-                              .read(asyncTasksProvider.notifier)
-                              .addTask(task);
+                        ref.read(asyncTasksProvider.notifier).addTask(task);
 
-                          Navigator.of(context).pop();
-
+                        Navigator.of(context).pop();
                       },
                     ),
                   ),
@@ -509,4 +524,3 @@ class _TaskBottomSheetState extends ConsumerState<TaskBottomSheet> {
     );
   }
 }
-
