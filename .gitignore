@@ -47,3 +47,4 @@ app.*.map.json
 # Web related
 /public
 /.firebase/
+firepit-log.txt
