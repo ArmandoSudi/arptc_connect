@@ -1,3 +1,4 @@
+import 'package:arptc_connect/core/theme.dart';
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_enums.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/incident_localizations.dart';
@@ -32,17 +33,18 @@ class IncidentPriorityBadge extends StatelessWidget {
 
   Color _colorFor(BuildContext context, IncidentPriority priority) {
     final scheme = Theme.of(context).colorScheme;
+    final tokens = context.corporateTheme;
     switch (priority) {
       case IncidentPriority.none:
         return scheme.onSurfaceVariant;
       case IncidentPriority.p1:
         return scheme.error;
       case IncidentPriority.p2:
-        return Colors.deepOrange;
+        return tokens.warning;
       case IncidentPriority.p3:
-        return Colors.orange;
+        return scheme.tertiary;
       case IncidentPriority.p4:
-        return Colors.green;
+        return tokens.success;
     }
   }
 }

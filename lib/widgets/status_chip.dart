@@ -1,3 +1,4 @@
+import 'package:arptc_connect/core/theme.dart';
 import 'package:flutter/material.dart';
 
 /// Material Design 3 Status Chip
@@ -27,8 +28,9 @@ class StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final tokens = context.corporateTheme;
 
-    final (bgColor, textColor) = _getColors(colorScheme);
+    final (bgColor, textColor) = _getColors(colorScheme, tokens);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -56,28 +58,22 @@ class StatusChip extends StatelessWidget {
     );
   }
 
-  (Color, Color) _getColors(ColorScheme colorScheme) {
+  (Color, Color) _getColors(
+    ColorScheme colorScheme,
+    CorporateThemeTokens tokens,
+  ) {
     switch (type) {
       case StatusType.success:
-        return (
-          Colors.green.withOpacity(0.15),
-          Colors.green.shade700,
-        );
+        return (tokens.successContainer, tokens.onSuccessContainer);
       case StatusType.warning:
-        return (
-          Colors.orange.withOpacity(0.15),
-          Colors.orange.shade800,
-        );
+        return (tokens.warningContainer, tokens.onWarningContainer);
       case StatusType.error:
         return (
           colorScheme.errorContainer,
           colorScheme.onErrorContainer,
         );
       case StatusType.info:
-        return (
-          colorScheme.primaryContainer,
-          colorScheme.onPrimaryContainer,
-        );
+        return (tokens.infoContainer, tokens.onInfoContainer);
       case StatusType.neutral:
         return (
           colorScheme.surfaceContainerHighest,

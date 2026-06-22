@@ -1,3 +1,4 @@
+import 'package:arptc_connect/core/theme.dart';
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_dashboard_stats.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_ticket.dart';
@@ -54,6 +55,7 @@ class _ManagerDashboardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final tokens = context.corporateTheme;
     final l10n = S.of(context);
 
     return Column(
@@ -93,14 +95,14 @@ class _ManagerDashboardContent extends StatelessWidget {
               value: stats.unassignedCount.toString(),
               subtitle: l10n.unassignedTicketsSubtitle,
               icon: Icons.person_off_outlined,
-              color: Colors.deepOrange,
+              color: tokens.warning,
               onTap: () => context.go(_queuePath('unassigned')),
             ),
             IncidentKpiCard(
               title: l10n.assignedToMe,
               value: stats.assignedToMeCount.toString(),
               icon: Icons.assignment_ind_outlined,
-              color: Colors.teal,
+              color: scheme.secondary,
               onTap: () => context.go(_queuePath('assigned-to-me')),
             ),
             IncidentKpiCard(
@@ -108,7 +110,7 @@ class _ManagerDashboardContent extends StatelessWidget {
               value: stats.solvedCount.toString(),
               subtitle: l10n.solvedTicketsSubtitle,
               icon: Icons.task_alt_outlined,
-              color: Colors.green,
+              color: tokens.success,
               onTap: () => context.go(_queuePath('solved')),
             ),
           ],

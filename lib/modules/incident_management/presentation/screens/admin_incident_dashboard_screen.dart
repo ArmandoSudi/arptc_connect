@@ -1,3 +1,4 @@
+import 'package:arptc_connect/core/theme.dart';
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_dashboard_stats.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_ticket.dart';
@@ -51,6 +52,7 @@ class _AdminDashboardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final tokens = context.corporateTheme;
     final l10n = S.of(context);
 
     return Column(
@@ -75,25 +77,25 @@ class _AdminDashboardContent extends StatelessWidget {
               title: l10n.openTickets,
               value: stats.openCount.toString(),
               icon: Icons.inbox_outlined,
-              color: Colors.deepOrange,
+              color: tokens.warning,
             ),
             IncidentKpiCard(
               title: l10n.incidentStatusClosed,
               value: stats.closedCount.toString(),
               icon: Icons.check_circle_outline,
-              color: Colors.green,
+              color: tokens.success,
             ),
             IncidentKpiCard(
               title: l10n.incidentStatusArchived,
               value: stats.archivedCount.toString(),
               icon: Icons.archive_outlined,
-              color: Colors.blueGrey,
+              color: scheme.onSurfaceVariant,
             ),
             IncidentKpiCard(
               title: l10n.averageResolutionTime,
               value: _formatResolutionTime(stats.averageResolutionTimeMinutes),
               icon: Icons.timer_outlined,
-              color: Colors.teal,
+              color: scheme.secondary,
             ),
           ],
         ),

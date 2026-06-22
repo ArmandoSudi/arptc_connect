@@ -1,3 +1,4 @@
+import 'package:arptc_connect/core/theme.dart';
 import 'package:flutter/material.dart';
 
 enum AppModule {
@@ -83,56 +84,56 @@ class ModulesConfig {
       name: 'Tâches',
       description: 'Gestion des activités',
       icon: Icons.task_alt,
-      color: Color(0xFFFF5722), // Deep Orange
+      color: CorporateBluePalette.tasks,
     ),
     ModuleInfo(
       module: AppModule.courriers,
       name: 'Mails Management',
       description: 'Mail management',
       icon: Icons.mail_outline_rounded,
-      color: Color(0xFF2196F3), // Blue
+      color: CorporateBluePalette.courrier,
     ),
     ModuleInfo(
       module: AppModule.social,
       name: 'Social',
       description: 'Social and HR management',
       icon: Icons.local_shipping_outlined,
-      color: Color(0xFF4CAF50), // Green
+      color: CorporateBluePalette.social,
     ),
     ModuleInfo(
       module: AppModule.news,
       name: 'Actualités',
       description: 'Gestion des communiqués et de l\'information interne',
       icon: Icons.campaign_outlined,
-      color: Color(0xFF3F51B5), // Indigo
+      color: CorporateBluePalette.news,
     ),
     ModuleInfo(
       module: AppModule.inventory,
       name: 'Inventory',
       description: 'Inventory & Store operations',
       icon: Icons.inventory_2_outlined,
-      color: Color(0xFF9C27B0), // Purple
+      color: CorporateBluePalette.inventory,
     ),
     ModuleInfo(
       module: AppModule.ticketing,
       name: 'Support',
       description: 'Gestion des incidents IT',
       icon: Icons.support_agent_rounded,
-      color: Color(0xFFFF9800), // Orange
+      color: CorporateBluePalette.incidents,
     ),
     ModuleInfo(
       module: AppModule.meetinghall,
       name: 'Meeting Hall',
       description: 'Meeting room booking & management',
       icon: Icons.meeting_room_outlined,
-      color: Color(0xFF00BCD4), // Cyan
+      color: CorporateBluePalette.meeting,
     ),
     ModuleInfo(
       module: AppModule.usermanagement,
       name: 'Utilisateurs',
       description: 'Gestions des utilisateurs',
       icon: Icons.supervised_user_circle_outlined,
-      color: Color(0xFF8BC34A), // Light Green
+      color: CorporateBluePalette.userManagement,
     ),
     // ModuleInfo(
     //   module: AppModule.production,

@@ -1,4 +1,5 @@
 import 'package:arptc_connect/core/fallback_framework_localizations.dart';
+import 'package:arptc_connect/core/theme.dart';
 import 'package:arptc_connect/core/theme_provider.dart';
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/notifications/data/notification_messaging_service.dart';
@@ -12,7 +13,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'core/constants.dart';
 import 'core/shared_preferences_provider.dart';
 import 'firebase_options.dart';
 
@@ -76,20 +76,8 @@ class MyApp extends ConsumerWidget {
           FallbackCupertinoLocalizationsDelegate(),
         ],
         supportedLocales: S.delegate.supportedLocales,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AppColors.primary,
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-        ),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AppColors.primary,
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
-        ),
+        theme: CorporateBlueTheme.light,
+        darkTheme: CorporateBlueTheme.dark,
         themeMode: themeMode,
       ),
     );

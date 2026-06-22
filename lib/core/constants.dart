@@ -33,40 +33,31 @@ class Constants {
   };
 }
 
-/// Material Design 3 Color Scheme for Construction Theme
+/// Backward-compatible aliases for the Corporate Blue design system.
 class AppColors {
-  // Primary Colors (Construction Orange)
-  static const Color primary = Color(0xFFFF6B35);
+  static const Color primary = Color(0xFF155EEF);
   static const Color onPrimary = Color(0xFFFFFFFF);
-  static const Color primaryContainer = Color(0xFFFFDAD1);
-  static const Color onPrimaryContainer = Color(0xFF3A0A00);
+  static const Color primaryContainer = Color(0xFFDDE7FF);
+  static const Color onPrimaryContainer = Color(0xFF102A56);
 
-  // Secondary Colors (Steel Blue)
-  static const Color secondary = Color(0xFF004E89);
+  static const Color secondary = Color(0xFF00A6A6);
   static const Color onSecondary = Color(0xFFFFFFFF);
-  static const Color secondaryContainer = Color(0xFFCFE5FF);
-  static const Color onSecondaryContainer = Color(0xFF001D35);
+  static const Color secondaryContainer = Color(0xFFCCFBEF);
+  static const Color onSecondaryContainer = Color(0xFF134E48);
 
-  // Tertiary (Safety Yellow)
-  static Color tertiary = Colors.amber.shade700;
-  static const Color onTertiary = Color(0xFF000000);
+  static const Color tertiary = Color(0xFFF79009);
+  static const Color onTertiary = Color(0xFF3B2400);
 
-  // Error
-  static const Color error = Color(0xFFBA1A1A);
+  static const Color error = Color(0xFFD92D20);
   static const Color onError = Color(0xFFFFFFFF);
 
-  // Background
-  static const Color background = Color(0xFFFFFBFF);
-  static const Color onBackground = Color(0xFF201B16);
-
-  // Surface
-  static const Color surface = Color(0xFFFFFBFF);
-  static const Color onSurface = Color(0xFF201B16);
-
-  // Status Colors
-  static const Color success = Color(0xFF2E7D32);
-  static const Color warning = Color(0xFFF57C00);
-  static const Color info = Color(0xFF0288D1);
+  static const Color background = Color(0xFFF6F8FC);
+  static const Color onBackground = Color(0xFF101828);
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color onSurface = Color(0xFF101828);
+  static const Color success = Color(0xFF12B76A);
+  static const Color warning = Color(0xFFF79009);
+  static const Color info = Color(0xFF1570EF);
 }
 
 /// Text Styles

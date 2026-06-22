@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:arptc_connect/core/theme.dart';
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_dashboard_layout.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -262,20 +263,7 @@ class _ChartEmptyState extends StatelessWidget {
 }
 
 Color _chartColor(BuildContext context, int index) {
-  final scheme = Theme.of(context).colorScheme;
-  final colors = [
-    scheme.primary,
-    Colors.teal,
-    Colors.orange,
-    Colors.deepOrange,
-    scheme.error,
-    Colors.indigo,
-    Colors.green,
-    Colors.blueGrey,
-    Colors.cyan,
-    Colors.brown,
-    Colors.pink,
-  ];
+  final colors = context.corporateTheme.chartPalette;
   return colors[index % colors.length];
 }
 

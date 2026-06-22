@@ -1,3 +1,4 @@
+import 'package:arptc_connect/core/theme.dart';
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_enums.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/incident_localizations.dart';
@@ -32,21 +33,22 @@ class IncidentStatusBadge extends StatelessWidget {
 
   Color _colorFor(BuildContext context, IncidentStatus status) {
     final scheme = Theme.of(context).colorScheme;
+    final tokens = context.corporateTheme;
     switch (status) {
       case IncidentStatus.open:
         return scheme.primary;
       case IncidentStatus.categorized:
-        return Colors.indigo;
+        return tokens.info;
       case IncidentStatus.assigned:
-        return Colors.teal;
+        return scheme.secondary;
       case IncidentStatus.inProgress:
-        return Colors.blue;
+        return tokens.info;
       case IncidentStatus.resolved:
-        return Colors.green;
+        return tokens.success;
       case IncidentStatus.closed:
-        return Colors.blueGrey;
+        return scheme.onSurfaceVariant;
       case IncidentStatus.archived:
-        return Colors.grey;
+        return scheme.outline;
       case IncidentStatus.cancelled:
         return scheme.error;
     }

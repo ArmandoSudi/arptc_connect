@@ -1,846 +1,752 @@
-import "package:flutter/material.dart";
+import 'dart:ui' show lerpDouble;
 
-/// Material Design 3 Theme Configuration
-///
-/// This theme follows M3 design guidelines with:
-/// - Dynamic color scheme with proper contrast ratios
-/// - Consistent component theming
-/// - Proper typography scale
-/// - Elevated surfaces with tonal colors
-class MaterialTheme {
-  final TextTheme textTheme;
+import 'package:flutter/material.dart';
 
-  const MaterialTheme(this.textTheme);
+/// Corporate Blue brand palette shared by the application and its modules.
+abstract final class CorporateBluePalette {
+  static const primary = Color(0xFF155EEF);
+  static const primaryDark = Color(0xFF0B4BD4);
+  static const primarySoft = Color(0xFFDDE7FF);
+  static const secondary = Color(0xFF00A6A6);
+  static const success = Color(0xFF12B76A);
+  static const warning = Color(0xFFF79009);
+  static const error = Color(0xFFD92D20);
+  static const info = Color(0xFF1570EF);
 
-  static MaterialScheme lightScheme() {
-    return const MaterialScheme(
-      brightness: Brightness.light,
-      primary: Color(0xff415f91),
-      surfaceTint: Color(0xff415f91),
-      onPrimary: Color(0xffffffff),
-      primaryContainer: Color(0xffd6e3ff),
-      onPrimaryContainer: Color(0xff001b3e),
-      secondary: Color(0xff565f71),
-      onSecondary: Color(0xffffffff),
-      secondaryContainer: Color(0xffdae2f9),
-      onSecondaryContainer: Color(0xff131c2b),
-      tertiary: Color(0xff705575),
-      onTertiary: Color(0xffffffff),
-      tertiaryContainer: Color(0xfffad8fd),
-      onTertiaryContainer: Color(0xff28132e),
-      error: Color(0xffba1a1a),
-      onError: Color(0xffffffff),
-      errorContainer: Color(0xffffdad6),
-      onErrorContainer: Color(0xff410002),
-      background: Color(0xfff9f9ff),
-      onBackground: Color(0xff191c20),
-      surface: Color(0xfff9f9ff),
-      onSurface: Color(0xff191c20),
-      surfaceVariant: Color(0xffe0e2ec),
-      onSurfaceVariant: Color(0xff44474e),
-      outline: Color(0xff74777f),
-      outlineVariant: Color(0xffc4c6d0),
-      shadow: Color(0xff000000),
-      scrim: Color(0xff000000),
-      inverseSurface: Color(0xff2e3036),
-      inverseOnSurface: Color(0xfff0f0f7),
-      inversePrimary: Color(0xffaac7ff),
-      primaryFixed: Color(0xffd6e3ff),
-      onPrimaryFixed: Color(0xff001b3e),
-      primaryFixedDim: Color(0xffaac7ff),
-      onPrimaryFixedVariant: Color(0xff284777),
-      secondaryFixed: Color(0xffdae2f9),
-      onSecondaryFixed: Color(0xff131c2b),
-      secondaryFixedDim: Color(0xffbec6dc),
-      onSecondaryFixedVariant: Color(0xff3e4759),
-      tertiaryFixed: Color(0xfffad8fd),
-      onTertiaryFixed: Color(0xff28132e),
-      tertiaryFixedDim: Color(0xffddbce0),
-      onTertiaryFixedVariant: Color(0xff573e5c),
-      surfaceDim: Color(0xffd9d9e0),
-      surfaceBright: Color(0xfff9f9ff),
-      surfaceContainerLowest: Color(0xffffffff),
-      surfaceContainerLow: Color(0xfff3f3fa),
-      surfaceContainer: Color(0xffededf4),
-      surfaceContainerHigh: Color(0xffe7e8ee),
-      surfaceContainerHighest: Color(0xffe2e2e9),
-    );
-  }
+  static const textPrimary = Color(0xFF101828);
+  static const textSecondary = Color(0xFF475467);
+  static const border = Color(0xFFD0D5DD);
+  static const page = Color(0xFFF6F8FC);
+  static const surface = Color(0xFFFFFFFF);
 
-  ThemeData light() {
-    return theme(lightScheme().toColorScheme());
-  }
+  static const darkPage = Color(0xFF0B1220);
+  static const darkSurface = Color(0xFF182230);
+  static const darkSurfaceHigh = Color(0xFF202C3D);
+  static const darkBorder = Color(0xFF344054);
+  static const darkText = Color(0xFFF2F4F7);
+  static const darkTextSecondary = Color(0xFFB9C2D0);
 
-  static MaterialScheme lightMediumContrastScheme() {
-    return const MaterialScheme(
-      brightness: Brightness.light,
-      primary: Color(0xff234373),
-      surfaceTint: Color(0xff415f91),
-      onPrimary: Color(0xffffffff),
-      primaryContainer: Color(0xff5875a8),
-      onPrimaryContainer: Color(0xffffffff),
-      secondary: Color(0xff3a4354),
-      onSecondary: Color(0xffffffff),
-      secondaryContainer: Color(0xff6c7588),
-      onSecondaryContainer: Color(0xffffffff),
-      tertiary: Color(0xff523a58),
-      onTertiary: Color(0xffffffff),
-      tertiaryContainer: Color(0xff876b8c),
-      onTertiaryContainer: Color(0xffffffff),
-      error: Color(0xff8c0009),
-      onError: Color(0xffffffff),
-      errorContainer: Color(0xffda342e),
-      onErrorContainer: Color(0xffffffff),
-      background: Color(0xfff9f9ff),
-      onBackground: Color(0xff191c20),
-      surface: Color(0xfff9f9ff),
-      onSurface: Color(0xff191c20),
-      surfaceVariant: Color(0xffe0e2ec),
-      onSurfaceVariant: Color(0xff40434a),
-      outline: Color(0xff5c5f67),
-      outlineVariant: Color(0xff787a83),
-      shadow: Color(0xff000000),
-      scrim: Color(0xff000000),
-      inverseSurface: Color(0xff2e3036),
-      inverseOnSurface: Color(0xfff0f0f7),
-      inversePrimary: Color(0xffaac7ff),
-      primaryFixed: Color(0xff5875a8),
-      onPrimaryFixed: Color(0xffffffff),
-      primaryFixedDim: Color(0xff3e5c8e),
-      onPrimaryFixedVariant: Color(0xffffffff),
-      secondaryFixed: Color(0xff6c7588),
-      onSecondaryFixed: Color(0xffffffff),
-      secondaryFixedDim: Color(0xff535c6f),
-      onSecondaryFixedVariant: Color(0xffffffff),
-      tertiaryFixed: Color(0xff876b8c),
-      onTertiaryFixed: Color(0xffffffff),
-      tertiaryFixedDim: Color(0xff6d5372),
-      onTertiaryFixedVariant: Color(0xffffffff),
-      surfaceDim: Color(0xffd9d9e0),
-      surfaceBright: Color(0xfff9f9ff),
-      surfaceContainerLowest: Color(0xffffffff),
-      surfaceContainerLow: Color(0xfff3f3fa),
-      surfaceContainer: Color(0xffededf4),
-      surfaceContainerHigh: Color(0xffe7e8ee),
-      surfaceContainerHighest: Color(0xffe2e2e9),
-    );
-  }
+  static const tasks = Color(0xFF7C3AED);
+  static const inventory = Color(0xFF059669);
+  static const incidents = Color(0xFF155EEF);
+  static const userManagement = Color(0xFF2563EB);
+  static const news = Color(0xFFF59E0B);
+  static const courrier = Color(0xFF0891B2);
+  static const social = Color(0xFFDB2777);
+  static const meeting = Color(0xFF0D9488);
+}
 
-  ThemeData lightMediumContrast() {
-    return theme(lightMediumContrastScheme().toColorScheme());
-  }
+/// Semantic design tokens for custom ERP components and future modules.
+@immutable
+class CorporateThemeTokens extends ThemeExtension<CorporateThemeTokens> {
+  const CorporateThemeTokens({
+    required this.success,
+    required this.onSuccess,
+    required this.successContainer,
+    required this.onSuccessContainer,
+    required this.warning,
+    required this.onWarning,
+    required this.warningContainer,
+    required this.onWarningContainer,
+    required this.info,
+    required this.onInfo,
+    required this.infoContainer,
+    required this.onInfoContainer,
+    required this.cardBorder,
+    required this.cardShadow,
+    required this.chartPalette,
+    required this.tasks,
+    required this.inventory,
+    required this.incidents,
+    required this.userManagement,
+    required this.news,
+    required this.courrier,
+    required this.social,
+    required this.meeting,
+    this.controlRadius = 12,
+    this.cardRadius = 16,
+    this.panelRadius = 20,
+  });
 
-  static MaterialScheme lightHighContrastScheme() {
-    return const MaterialScheme(
-      brightness: Brightness.light,
-      primary: Color(0xff00214a),
-      surfaceTint: Color(0xff415f91),
-      onPrimary: Color(0xffffffff),
-      primaryContainer: Color(0xff234373),
-      onPrimaryContainer: Color(0xffffffff),
-      secondary: Color(0xff192232),
-      onSecondary: Color(0xffffffff),
-      secondaryContainer: Color(0xff3a4354),
-      onSecondaryContainer: Color(0xffffffff),
-      tertiary: Color(0xff301a35),
-      onTertiary: Color(0xffffffff),
-      tertiaryContainer: Color(0xff523a58),
-      onTertiaryContainer: Color(0xffffffff),
-      error: Color(0xff4e0002),
-      onError: Color(0xffffffff),
-      errorContainer: Color(0xff8c0009),
-      onErrorContainer: Color(0xffffffff),
-      background: Color(0xfff9f9ff),
-      onBackground: Color(0xff191c20),
-      surface: Color(0xfff9f9ff),
-      onSurface: Color(0xff000000),
-      surfaceVariant: Color(0xffe0e2ec),
-      onSurfaceVariant: Color(0xff21242b),
-      outline: Color(0xff40434a),
-      outlineVariant: Color(0xff40434a),
-      shadow: Color(0xff000000),
-      scrim: Color(0xff000000),
-      inverseSurface: Color(0xff2e3036),
-      inverseOnSurface: Color(0xffffffff),
-      inversePrimary: Color(0xffe5ecff),
-      primaryFixed: Color(0xff234373),
-      onPrimaryFixed: Color(0xffffffff),
-      primaryFixedDim: Color(0xff042c5b),
-      onPrimaryFixedVariant: Color(0xffffffff),
-      secondaryFixed: Color(0xff3a4354),
-      onSecondaryFixed: Color(0xffffffff),
-      secondaryFixedDim: Color(0xff242d3d),
-      onSecondaryFixedVariant: Color(0xffffffff),
-      tertiaryFixed: Color(0xff523a58),
-      onTertiaryFixed: Color(0xffffffff),
-      tertiaryFixedDim: Color(0xff3b2440),
-      onTertiaryFixedVariant: Color(0xffffffff),
-      surfaceDim: Color(0xffd9d9e0),
-      surfaceBright: Color(0xfff9f9ff),
-      surfaceContainerLowest: Color(0xffffffff),
-      surfaceContainerLow: Color(0xfff3f3fa),
-      surfaceContainer: Color(0xffededf4),
-      surfaceContainerHigh: Color(0xffe7e8ee),
-      surfaceContainerHighest: Color(0xffe2e2e9),
-    );
-  }
+  final Color success;
+  final Color onSuccess;
+  final Color successContainer;
+  final Color onSuccessContainer;
+  final Color warning;
+  final Color onWarning;
+  final Color warningContainer;
+  final Color onWarningContainer;
+  final Color info;
+  final Color onInfo;
+  final Color infoContainer;
+  final Color onInfoContainer;
+  final Color cardBorder;
+  final Color cardShadow;
+  final List<Color> chartPalette;
+  final Color tasks;
+  final Color inventory;
+  final Color incidents;
+  final Color userManagement;
+  final Color news;
+  final Color courrier;
+  final Color social;
+  final Color meeting;
+  final double controlRadius;
+  final double cardRadius;
+  final double panelRadius;
 
-  ThemeData lightHighContrast() {
-    return theme(lightHighContrastScheme().toColorScheme());
-  }
-
-  static MaterialScheme darkScheme() {
-    return const MaterialScheme(
-      brightness: Brightness.dark,
-      primary: Color(0xffaac7ff),
-      surfaceTint: Color(0xffaac7ff),
-      onPrimary: Color(0xff0a305f),
-      primaryContainer: Color(0xff284777),
-      onPrimaryContainer: Color(0xffd6e3ff),
-      secondary: Color(0xffbec6dc),
-      onSecondary: Color(0xff283141),
-      secondaryContainer: Color(0xff3e4759),
-      onSecondaryContainer: Color(0xffdae2f9),
-      tertiary: Color(0xffddbce0),
-      onTertiary: Color(0xff3f2844),
-      tertiaryContainer: Color(0xff573e5c),
-      onTertiaryContainer: Color(0xfffad8fd),
-      error: Color(0xffffb4ab),
-      onError: Color(0xff690005),
-      errorContainer: Color(0xff93000a),
-      onErrorContainer: Color(0xffffdad6),
-      background: Color(0xff111318),
-      onBackground: Color(0xffe2e2e9),
-      surface: Color(0xff111318),
-      onSurface: Color(0xffe2e2e9),
-      surfaceVariant: Color(0xff44474e),
-      onSurfaceVariant: Color(0xffc4c6d0),
-      outline: Color(0xff8e9099),
-      outlineVariant: Color(0xff44474e),
-      shadow: Color(0xff000000),
-      scrim: Color(0xff000000),
-      inverseSurface: Color(0xffe2e2e9),
-      inverseOnSurface: Color(0xff2e3036),
-      inversePrimary: Color(0xff415f91),
-      primaryFixed: Color(0xffd6e3ff),
-      onPrimaryFixed: Color(0xff001b3e),
-      primaryFixedDim: Color(0xffaac7ff),
-      onPrimaryFixedVariant: Color(0xff284777),
-      secondaryFixed: Color(0xffdae2f9),
-      onSecondaryFixed: Color(0xff131c2b),
-      secondaryFixedDim: Color(0xffbec6dc),
-      onSecondaryFixedVariant: Color(0xff3e4759),
-      tertiaryFixed: Color(0xfffad8fd),
-      onTertiaryFixed: Color(0xff28132e),
-      tertiaryFixedDim: Color(0xffddbce0),
-      onTertiaryFixedVariant: Color(0xff573e5c),
-      surfaceDim: Color(0xff111318),
-      surfaceBright: Color(0xff37393e),
-      surfaceContainerLowest: Color(0xff0c0e13),
-      surfaceContainerLow: Color(0xff191c20),
-      surfaceContainer: Color(0xff1d2024),
-      surfaceContainerHigh: Color(0xff282a2f),
-      surfaceContainerHighest: Color(0xff33353a),
-    );
-  }
-
-  ThemeData dark() {
-    return theme(darkScheme().toColorScheme());
-  }
-
-  static MaterialScheme darkMediumContrastScheme() {
-    return const MaterialScheme(
-      brightness: Brightness.dark,
-      primary: Color(0xffb1cbff),
-      surfaceTint: Color(0xffaac7ff),
-      onPrimary: Color(0xff001634),
-      primaryContainer: Color(0xff7491c7),
-      onPrimaryContainer: Color(0xff000000),
-      secondary: Color(0xffc2cbe0),
-      onSecondary: Color(0xff0d1626),
-      secondaryContainer: Color(0xff8891a5),
-      onSecondaryContainer: Color(0xff000000),
-      tertiary: Color(0xffe1c0e5),
-      onTertiary: Color(0xff230e29),
-      tertiaryContainer: Color(0xffa487a9),
-      onTertiaryContainer: Color(0xff000000),
-      error: Color(0xffffbab1),
-      onError: Color(0xff370001),
-      errorContainer: Color(0xffff5449),
-      onErrorContainer: Color(0xff000000),
-      background: Color(0xff111318),
-      onBackground: Color(0xffe2e2e9),
-      surface: Color(0xff111318),
-      onSurface: Color(0xfffbfaff),
-      surfaceVariant: Color(0xff44474e),
-      onSurfaceVariant: Color(0xffc8cad4),
-      outline: Color(0xffa0a3ac),
-      outlineVariant: Color(0xff80838c),
-      shadow: Color(0xff000000),
-      scrim: Color(0xff000000),
-      inverseSurface: Color(0xffe2e2e9),
-      inverseOnSurface: Color(0xff282a2f),
-      inversePrimary: Color(0xff294878),
-      primaryFixed: Color(0xffd6e3ff),
-      onPrimaryFixed: Color(0xff00112b),
-      primaryFixedDim: Color(0xffaac7ff),
-      onPrimaryFixedVariant: Color(0xff133665),
-      secondaryFixed: Color(0xffdae2f9),
-      onSecondaryFixed: Color(0xff081121),
-      secondaryFixedDim: Color(0xffbec6dc),
-      onSecondaryFixedVariant: Color(0xff2e3647),
-      tertiaryFixed: Color(0xfffad8fd),
-      onTertiaryFixed: Color(0xff1d0823),
-      tertiaryFixedDim: Color(0xffddbce0),
-      onTertiaryFixedVariant: Color(0xff452e4a),
-      surfaceDim: Color(0xff111318),
-      surfaceBright: Color(0xff37393e),
-      surfaceContainerLowest: Color(0xff0c0e13),
-      surfaceContainerLow: Color(0xff191c20),
-      surfaceContainer: Color(0xff1d2024),
-      surfaceContainerHigh: Color(0xff282a2f),
-      surfaceContainerHighest: Color(0xff33353a),
-    );
-  }
-
-  ThemeData darkMediumContrast() {
-    return theme(darkMediumContrastScheme().toColorScheme());
-  }
-
-  static MaterialScheme darkHighContrastScheme() {
-    return const MaterialScheme(
-      brightness: Brightness.dark,
-      primary: Color(0xfffbfaff),
-      surfaceTint: Color(0xffaac7ff),
-      onPrimary: Color(0xff000000),
-      primaryContainer: Color(0xffb1cbff),
-      onPrimaryContainer: Color(0xff000000),
-      secondary: Color(0xfffbfaff),
-      onSecondary: Color(0xff000000),
-      secondaryContainer: Color(0xffc2cbe0),
-      onSecondaryContainer: Color(0xff000000),
-      tertiary: Color(0xfffff9fa),
-      onTertiary: Color(0xff000000),
-      tertiaryContainer: Color(0xffe1c0e5),
-      onTertiaryContainer: Color(0xff000000),
-      error: Color(0xfffff9f9),
-      onError: Color(0xff000000),
-      errorContainer: Color(0xffffbab1),
-      onErrorContainer: Color(0xff000000),
-      background: Color(0xff111318),
-      onBackground: Color(0xffe2e2e9),
-      surface: Color(0xff111318),
-      onSurface: Color(0xffffffff),
-      surfaceVariant: Color(0xff44474e),
-      onSurfaceVariant: Color(0xfffbfaff),
-      outline: Color(0xffc8cad4),
-      outlineVariant: Color(0xffc8cad4),
-      shadow: Color(0xff000000),
-      scrim: Color(0xff000000),
-      inverseSurface: Color(0xffe2e2e9),
-      inverseOnSurface: Color(0xff000000),
-      inversePrimary: Color(0xff002959),
-      primaryFixed: Color(0xffdde7ff),
-      onPrimaryFixed: Color(0xff000000),
-      primaryFixedDim: Color(0xffb1cbff),
-      onPrimaryFixedVariant: Color(0xff001634),
-      secondaryFixed: Color(0xffdee7fd),
-      onSecondaryFixed: Color(0xff000000),
-      secondaryFixedDim: Color(0xffc2cbe0),
-      onSecondaryFixedVariant: Color(0xff0d1626),
-      tertiaryFixed: Color(0xfffcddff),
-      onTertiaryFixed: Color(0xff000000),
-      tertiaryFixedDim: Color(0xffe1c0e5),
-      onTertiaryFixedVariant: Color(0xff230e29),
-      surfaceDim: Color(0xff111318),
-      surfaceBright: Color(0xff37393e),
-      surfaceContainerLowest: Color(0xff0c0e13),
-      surfaceContainerLow: Color(0xff191c20),
-      surfaceContainer: Color(0xff1d2024),
-      surfaceContainerHigh: Color(0xff282a2f),
-      surfaceContainerHighest: Color(0xff33353a),
-    );
-  }
-
-  ThemeData darkHighContrast() {
-    return theme(darkHighContrastScheme().toColorScheme());
-  }
-
-
-  ThemeData theme(ColorScheme colorScheme) => ThemeData(
-     useMaterial3: true,
-     brightness: colorScheme.brightness,
-     colorScheme: colorScheme,
-     textTheme: textTheme.apply(
-       bodyColor: colorScheme.onSurface,
-       displayColor: colorScheme.onSurface,
-     ),
-     scaffoldBackgroundColor: colorScheme.surface,
-     canvasColor: colorScheme.surface,
-
-     // AppBar Theme - M3 uses surface color with scroll under elevation
-     appBarTheme: AppBarTheme(
-       centerTitle: false,
-       elevation: 0,
-       scrolledUnderElevation: 2,
-       backgroundColor: colorScheme.surface,
-       foregroundColor: colorScheme.onSurface,
-       surfaceTintColor: colorScheme.surfaceTint,
-       titleTextStyle: textTheme.titleLarge?.copyWith(
-         color: colorScheme.onSurface,
-         fontWeight: FontWeight.w600,
-       ),
-     ),
-
-     // Card Theme - M3 cards use surfaceContainerLow with elevation tint
-     cardTheme: CardTheme(
-       elevation: 0,
-       shape: RoundedRectangleBorder(
-         borderRadius: BorderRadius.circular(12),
-       ),
-       color: colorScheme.surfaceContainerLow,
-       surfaceTintColor: colorScheme.surfaceTint,
-       clipBehavior: Clip.antiAlias,
-     ),
-
-     // Navigation Bar Theme - M3 bottom navigation
-     navigationBarTheme: NavigationBarThemeData(
-       elevation: 0,
-       backgroundColor: colorScheme.surfaceContainer,
-       indicatorColor: colorScheme.secondaryContainer,
-       iconTheme: WidgetStateProperty.resolveWith((states) {
-         if (states.contains(WidgetState.selected)) {
-           return IconThemeData(color: colorScheme.onSecondaryContainer);
-         }
-         return IconThemeData(color: colorScheme.onSurfaceVariant);
-       }),
-       labelTextStyle: WidgetStateProperty.resolveWith((states) {
-         if (states.contains(WidgetState.selected)) {
-           return textTheme.labelMedium?.copyWith(
-             color: colorScheme.onSurface,
-             fontWeight: FontWeight.w600,
-           );
-         }
-         return textTheme.labelMedium?.copyWith(
-           color: colorScheme.onSurfaceVariant,
-         );
-       }),
-     ),
-
-     // Tab Bar Theme - M3 tabs
-     tabBarTheme: TabBarTheme(
-       labelColor: colorScheme.primary,
-       unselectedLabelColor: colorScheme.onSurfaceVariant,
-       indicatorColor: colorScheme.primary,
-       indicatorSize: TabBarIndicatorSize.label,
-       dividerColor: colorScheme.surfaceContainerHighest,
-     ),
-
-     // Filled Button Theme
-     filledButtonTheme: FilledButtonThemeData(
-       style: FilledButton.styleFrom(
-         minimumSize: const Size(64, 48),
-         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-         shape: RoundedRectangleBorder(
-           borderRadius: BorderRadius.circular(12),
-         ),
-         textStyle: textTheme.labelLarge?.copyWith(
-           fontWeight: FontWeight.w600,
-         ),
-       ),
-     ),
-
-     // Elevated Button Theme
-     elevatedButtonTheme: ElevatedButtonThemeData(
-       style: ElevatedButton.styleFrom(
-         minimumSize: const Size(64, 48),
-         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-         shape: RoundedRectangleBorder(
-           borderRadius: BorderRadius.circular(12),
-         ),
-         elevation: 1,
-       ),
-     ),
-
-     // Outlined Button Theme
-     outlinedButtonTheme: OutlinedButtonThemeData(
-       style: OutlinedButton.styleFrom(
-         minimumSize: const Size(64, 48),
-         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-         shape: RoundedRectangleBorder(
-           borderRadius: BorderRadius.circular(12),
-         ),
-         side: BorderSide(color: colorScheme.outline),
-       ),
-     ),
-
-     // Text Button Theme
-     textButtonTheme: TextButtonThemeData(
-       style: TextButton.styleFrom(
-         minimumSize: const Size(64, 40),
-         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-         shape: RoundedRectangleBorder(
-           borderRadius: BorderRadius.circular(12),
-         ),
-       ),
-     ),
-
-     // Input Decoration Theme - M3 text fields
-     inputDecorationTheme: InputDecorationTheme(
-       filled: true,
-       fillColor: colorScheme.surfaceContainerHighest,
-       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-       border: OutlineInputBorder(
-         borderRadius: BorderRadius.circular(12),
-         borderSide: BorderSide.none,
-       ),
-       enabledBorder: OutlineInputBorder(
-         borderRadius: BorderRadius.circular(12),
-         borderSide: BorderSide.none,
-       ),
-       focusedBorder: OutlineInputBorder(
-         borderRadius: BorderRadius.circular(12),
-         borderSide: BorderSide(color: colorScheme.primary, width: 2),
-       ),
-       errorBorder: OutlineInputBorder(
-         borderRadius: BorderRadius.circular(12),
-         borderSide: BorderSide(color: colorScheme.error),
-       ),
-       focusedErrorBorder: OutlineInputBorder(
-         borderRadius: BorderRadius.circular(12),
-         borderSide: BorderSide(color: colorScheme.error, width: 2),
-       ),
-       labelStyle: textTheme.bodyLarge?.copyWith(
-         color: colorScheme.onSurfaceVariant,
-       ),
-       hintStyle: textTheme.bodyLarge?.copyWith(
-         color: colorScheme.onSurfaceVariant,
-       ),
-       prefixIconColor: colorScheme.onSurfaceVariant,
-       suffixIconColor: colorScheme.onSurfaceVariant,
-     ),
-
-     // Dropdown Menu Theme
-     dropdownMenuTheme: DropdownMenuThemeData(
-       inputDecorationTheme: InputDecorationTheme(
-         filled: true,
-         fillColor: colorScheme.surfaceContainerHighest,
-         border: OutlineInputBorder(
-           borderRadius: BorderRadius.circular(12),
-           borderSide: BorderSide.none,
-         ),
-       ),
-     ),
-
-     // Dialog Theme
-     dialogTheme: DialogTheme(
-       elevation: 3,
-       backgroundColor: colorScheme.surfaceContainerHigh,
-       surfaceTintColor: colorScheme.surfaceTint,
-       shape: RoundedRectangleBorder(
-         borderRadius: BorderRadius.circular(28),
-       ),
-       titleTextStyle: textTheme.headlineSmall?.copyWith(
-         color: colorScheme.onSurface,
-       ),
-       contentTextStyle: textTheme.bodyMedium?.copyWith(
-         color: colorScheme.onSurfaceVariant,
-       ),
-     ),
-
-     // Bottom Sheet Theme
-     bottomSheetTheme: BottomSheetThemeData(
-       backgroundColor: colorScheme.surfaceContainerLow,
-       surfaceTintColor: colorScheme.surfaceTint,
-       shape: const RoundedRectangleBorder(
-         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-       ),
-       dragHandleColor: colorScheme.onSurfaceVariant,
-       dragHandleSize: const Size(32, 4),
-       showDragHandle: true,
-     ),
-
-     // Chip Theme
-     chipTheme: ChipThemeData(
-       backgroundColor: colorScheme.surfaceContainerLow,
-       selectedColor: colorScheme.secondaryContainer,
-       labelStyle: textTheme.labelLarge,
-       shape: RoundedRectangleBorder(
-         borderRadius: BorderRadius.circular(8),
-       ),
-       side: BorderSide(color: colorScheme.outline),
-     ),
-
-     // List Tile Theme
-     listTileTheme: ListTileThemeData(
-       iconColor: colorScheme.onSurfaceVariant,
-       textColor: colorScheme.onSurface,
-       shape: RoundedRectangleBorder(
-         borderRadius: BorderRadius.circular(12),
-       ),
-       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-     ),
-
-     // Divider Theme
-     dividerTheme: DividerThemeData(
-       color: colorScheme.outlineVariant,
-       thickness: 1,
-       space: 1,
-     ),
-
-     // Floating Action Button Theme
-     floatingActionButtonTheme: FloatingActionButtonThemeData(
-       backgroundColor: colorScheme.primaryContainer,
-       foregroundColor: colorScheme.onPrimaryContainer,
-       elevation: 3,
-       shape: RoundedRectangleBorder(
-         borderRadius: BorderRadius.circular(16),
-       ),
-     ),
-
-     // Snackbar Theme
-     snackBarTheme: SnackBarThemeData(
-       backgroundColor: colorScheme.inverseSurface,
-       contentTextStyle: textTheme.bodyMedium?.copyWith(
-         color: colorScheme.onInverseSurface,
-       ),
-       shape: RoundedRectangleBorder(
-         borderRadius: BorderRadius.circular(8),
-       ),
-       behavior: SnackBarBehavior.floating,
-     ),
-
-     // Progress Indicator Theme
-     progressIndicatorTheme: ProgressIndicatorThemeData(
-       color: colorScheme.primary,
-       linearTrackColor: colorScheme.surfaceContainerHighest,
-       circularTrackColor: colorScheme.surfaceContainerHighest,
-     ),
-
-     // Icon Theme
-     iconTheme: IconThemeData(
-       color: colorScheme.onSurface,
-     ),
-
-     // Switch Theme
-     switchTheme: SwitchThemeData(
-       thumbColor: WidgetStateProperty.resolveWith((states) {
-         if (states.contains(WidgetState.selected)) {
-           return colorScheme.onPrimary;
-         }
-         return colorScheme.outline;
-       }),
-       trackColor: WidgetStateProperty.resolveWith((states) {
-         if (states.contains(WidgetState.selected)) {
-           return colorScheme.primary;
-         }
-         return colorScheme.surfaceContainerHighest;
-       }),
-     ),
-
-     // Checkbox Theme
-     checkboxTheme: CheckboxThemeData(
-       fillColor: WidgetStateProperty.resolveWith((states) {
-         if (states.contains(WidgetState.selected)) {
-           return colorScheme.primary;
-         }
-         return Colors.transparent;
-       }),
-       checkColor: WidgetStateProperty.all(colorScheme.onPrimary),
-       shape: RoundedRectangleBorder(
-         borderRadius: BorderRadius.circular(2),
-       ),
-       side: BorderSide(color: colorScheme.onSurfaceVariant, width: 2),
-     ),
-
-     // Radio Theme
-     radioTheme: RadioThemeData(
-       fillColor: WidgetStateProperty.resolveWith((states) {
-         if (states.contains(WidgetState.selected)) {
-           return colorScheme.primary;
-         }
-         return colorScheme.onSurfaceVariant;
-       }),
-     ),
+  static const light = CorporateThemeTokens(
+    success: CorporateBluePalette.success,
+    onSuccess: Colors.white,
+    successContainer: Color(0xFFD1FADF),
+    onSuccessContainer: Color(0xFF05603A),
+    warning: CorporateBluePalette.warning,
+    onWarning: Color(0xFF3B2400),
+    warningContainer: Color(0xFFFEF0C7),
+    onWarningContainer: Color(0xFF7A2E0E),
+    info: CorporateBluePalette.info,
+    onInfo: Colors.white,
+    infoContainer: Color(0xFFD1E9FF),
+    onInfoContainer: Color(0xFF1849A9),
+    cardBorder: Color(0xFFD8E1EE),
+    cardShadow: Color(0x140F2A4F),
+    chartPalette: <Color>[
+      CorporateBluePalette.primary,
+      CorporateBluePalette.secondary,
+      CorporateBluePalette.warning,
+      CorporateBluePalette.error,
+      CorporateBluePalette.success,
+      Color(0xFF6172F3),
+      Color(0xFF0E9384),
+      Color(0xFF667085),
+    ],
+    tasks: CorporateBluePalette.tasks,
+    inventory: CorporateBluePalette.inventory,
+    incidents: CorporateBluePalette.incidents,
+    userManagement: CorporateBluePalette.userManagement,
+    news: CorporateBluePalette.news,
+    courrier: CorporateBluePalette.courrier,
+    social: CorporateBluePalette.social,
+    meeting: CorporateBluePalette.meeting,
   );
 
+  static const dark = CorporateThemeTokens(
+    success: Color(0xFF32D583),
+    onSuccess: Color(0xFF032B1D),
+    successContainer: Color(0xFF074D35),
+    onSuccessContainer: Color(0xFFA6F4C5),
+    warning: Color(0xFFFDB022),
+    onWarning: Color(0xFF3B2400),
+    warningContainer: Color(0xFF5F3A05),
+    onWarningContainer: Color(0xFFFEF0C7),
+    info: Color(0xFF84ADFF),
+    onInfo: Color(0xFF102A56),
+    infoContainer: Color(0xFF163C78),
+    onInfoContainer: Color(0xFFDDE7FF),
+    cardBorder: CorporateBluePalette.darkBorder,
+    cardShadow: Color(0x66000000),
+    chartPalette: <Color>[
+      Color(0xFF84ADFF),
+      Color(0xFF2ED3B7),
+      Color(0xFFFDB022),
+      Color(0xFFF97066),
+      Color(0xFF32D583),
+      Color(0xFF9B8AFB),
+      Color(0xFF15B79E),
+      Color(0xFF98A2B3),
+    ],
+    tasks: Color(0xFFA48AFB),
+    inventory: Color(0xFF32D583),
+    incidents: Color(0xFF84ADFF),
+    userManagement: Color(0xFF75A5FF),
+    news: Color(0xFFFDB022),
+    courrier: Color(0xFF22CCEE),
+    social: Color(0xFFEE70A9),
+    meeting: Color(0xFF2ED3B7),
+  );
 
-  List<ExtendedColor> get extendedColors => [
-  ];
-}
+  @override
+  CorporateThemeTokens copyWith({
+    Color? success,
+    Color? onSuccess,
+    Color? successContainer,
+    Color? onSuccessContainer,
+    Color? warning,
+    Color? onWarning,
+    Color? warningContainer,
+    Color? onWarningContainer,
+    Color? info,
+    Color? onInfo,
+    Color? infoContainer,
+    Color? onInfoContainer,
+    Color? cardBorder,
+    Color? cardShadow,
+    List<Color>? chartPalette,
+    Color? tasks,
+    Color? inventory,
+    Color? incidents,
+    Color? userManagement,
+    Color? news,
+    Color? courrier,
+    Color? social,
+    Color? meeting,
+    double? controlRadius,
+    double? cardRadius,
+    double? panelRadius,
+  }) {
+    return CorporateThemeTokens(
+      success: success ?? this.success,
+      onSuccess: onSuccess ?? this.onSuccess,
+      successContainer: successContainer ?? this.successContainer,
+      onSuccessContainer: onSuccessContainer ?? this.onSuccessContainer,
+      warning: warning ?? this.warning,
+      onWarning: onWarning ?? this.onWarning,
+      warningContainer: warningContainer ?? this.warningContainer,
+      onWarningContainer: onWarningContainer ?? this.onWarningContainer,
+      info: info ?? this.info,
+      onInfo: onInfo ?? this.onInfo,
+      infoContainer: infoContainer ?? this.infoContainer,
+      onInfoContainer: onInfoContainer ?? this.onInfoContainer,
+      cardBorder: cardBorder ?? this.cardBorder,
+      cardShadow: cardShadow ?? this.cardShadow,
+      chartPalette: chartPalette ?? this.chartPalette,
+      tasks: tasks ?? this.tasks,
+      inventory: inventory ?? this.inventory,
+      incidents: incidents ?? this.incidents,
+      userManagement: userManagement ?? this.userManagement,
+      news: news ?? this.news,
+      courrier: courrier ?? this.courrier,
+      social: social ?? this.social,
+      meeting: meeting ?? this.meeting,
+      controlRadius: controlRadius ?? this.controlRadius,
+      cardRadius: cardRadius ?? this.cardRadius,
+      panelRadius: panelRadius ?? this.panelRadius,
+    );
+  }
 
-class MaterialScheme {
-  const MaterialScheme({
-    required this.brightness,
-    required this.primary, 
-    required this.surfaceTint, 
-    required this.onPrimary, 
-    required this.primaryContainer, 
-    required this.onPrimaryContainer, 
-    required this.secondary, 
-    required this.onSecondary, 
-    required this.secondaryContainer, 
-    required this.onSecondaryContainer, 
-    required this.tertiary, 
-    required this.onTertiary, 
-    required this.tertiaryContainer, 
-    required this.onTertiaryContainer, 
-    required this.error, 
-    required this.onError, 
-    required this.errorContainer, 
-    required this.onErrorContainer, 
-    required this.background, 
-    required this.onBackground, 
-    required this.surface, 
-    required this.onSurface, 
-    required this.surfaceVariant, 
-    required this.onSurfaceVariant, 
-    required this.outline, 
-    required this.outlineVariant, 
-    required this.shadow, 
-    required this.scrim, 
-    required this.inverseSurface, 
-    required this.inverseOnSurface, 
-    required this.inversePrimary, 
-    required this.primaryFixed, 
-    required this.onPrimaryFixed, 
-    required this.primaryFixedDim, 
-    required this.onPrimaryFixedVariant, 
-    required this.secondaryFixed, 
-    required this.onSecondaryFixed, 
-    required this.secondaryFixedDim, 
-    required this.onSecondaryFixedVariant, 
-    required this.tertiaryFixed, 
-    required this.onTertiaryFixed, 
-    required this.tertiaryFixedDim, 
-    required this.onTertiaryFixedVariant, 
-    required this.surfaceDim, 
-    required this.surfaceBright, 
-    required this.surfaceContainerLowest, 
-    required this.surfaceContainerLow, 
-    required this.surfaceContainer, 
-    required this.surfaceContainerHigh, 
-    required this.surfaceContainerHighest, 
-  });
-
-  final Brightness brightness;
-  final Color primary;
-  final Color surfaceTint;
-  final Color onPrimary;
-  final Color primaryContainer;
-  final Color onPrimaryContainer;
-  final Color secondary;
-  final Color onSecondary;
-  final Color secondaryContainer;
-  final Color onSecondaryContainer;
-  final Color tertiary;
-  final Color onTertiary;
-  final Color tertiaryContainer;
-  final Color onTertiaryContainer;
-  final Color error;
-  final Color onError;
-  final Color errorContainer;
-  final Color onErrorContainer;
-  final Color background;
-  final Color onBackground;
-  final Color surface;
-  final Color onSurface;
-  final Color surfaceVariant;
-  final Color onSurfaceVariant;
-  final Color outline;
-  final Color outlineVariant;
-  final Color shadow;
-  final Color scrim;
-  final Color inverseSurface;
-  final Color inverseOnSurface;
-  final Color inversePrimary;
-  final Color primaryFixed;
-  final Color onPrimaryFixed;
-  final Color primaryFixedDim;
-  final Color onPrimaryFixedVariant;
-  final Color secondaryFixed;
-  final Color onSecondaryFixed;
-  final Color secondaryFixedDim;
-  final Color onSecondaryFixedVariant;
-  final Color tertiaryFixed;
-  final Color onTertiaryFixed;
-  final Color tertiaryFixedDim;
-  final Color onTertiaryFixedVariant;
-  final Color surfaceDim;
-  final Color surfaceBright;
-  final Color surfaceContainerLowest;
-  final Color surfaceContainerLow;
-  final Color surfaceContainer;
-  final Color surfaceContainerHigh;
-  final Color surfaceContainerHighest;
-}
-
-extension MaterialSchemeUtils on MaterialScheme {
-  ColorScheme toColorScheme() {
-    return ColorScheme(
-      brightness: brightness,
-      primary: primary,
-      onPrimary: onPrimary,
-      primaryContainer: primaryContainer,
-      onPrimaryContainer: onPrimaryContainer,
-      secondary: secondary,
-      onSecondary: onSecondary,
-      secondaryContainer: secondaryContainer,
-      onSecondaryContainer: onSecondaryContainer,
-      tertiary: tertiary,
-      onTertiary: onTertiary,
-      tertiaryContainer: tertiaryContainer,
-      onTertiaryContainer: onTertiaryContainer,
-      error: error,
-      onError: onError,
-      errorContainer: errorContainer,
-      onErrorContainer: onErrorContainer,
-      surface: surface,
-      onSurface: onSurface,
-      surfaceContainerHighest: surfaceVariant,
-      onSurfaceVariant: onSurfaceVariant,
-      outline: outline,
-      outlineVariant: outlineVariant,
-      shadow: shadow,
-      scrim: scrim,
-      inverseSurface: inverseSurface,
-      onInverseSurface: inverseOnSurface,
-      inversePrimary: inversePrimary,
+  @override
+  CorporateThemeTokens lerp(
+    covariant CorporateThemeTokens? other,
+    double t,
+  ) {
+    if (other == null) return this;
+    return CorporateThemeTokens(
+      success: Color.lerp(success, other.success, t)!,
+      onSuccess: Color.lerp(onSuccess, other.onSuccess, t)!,
+      successContainer:
+          Color.lerp(successContainer, other.successContainer, t)!,
+      onSuccessContainer:
+          Color.lerp(onSuccessContainer, other.onSuccessContainer, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      onWarning: Color.lerp(onWarning, other.onWarning, t)!,
+      warningContainer:
+          Color.lerp(warningContainer, other.warningContainer, t)!,
+      onWarningContainer:
+          Color.lerp(onWarningContainer, other.onWarningContainer, t)!,
+      info: Color.lerp(info, other.info, t)!,
+      onInfo: Color.lerp(onInfo, other.onInfo, t)!,
+      infoContainer: Color.lerp(infoContainer, other.infoContainer, t)!,
+      onInfoContainer: Color.lerp(onInfoContainer, other.onInfoContainer, t)!,
+      cardBorder: Color.lerp(cardBorder, other.cardBorder, t)!,
+      cardShadow: Color.lerp(cardShadow, other.cardShadow, t)!,
+      chartPalette: List<Color>.generate(
+        chartPalette.length,
+        (index) => Color.lerp(
+          chartPalette[index],
+          other.chartPalette[index % other.chartPalette.length],
+          t,
+        )!,
+      ),
+      tasks: Color.lerp(tasks, other.tasks, t)!,
+      inventory: Color.lerp(inventory, other.inventory, t)!,
+      incidents: Color.lerp(incidents, other.incidents, t)!,
+      userManagement: Color.lerp(userManagement, other.userManagement, t)!,
+      news: Color.lerp(news, other.news, t)!,
+      courrier: Color.lerp(courrier, other.courrier, t)!,
+      social: Color.lerp(social, other.social, t)!,
+      meeting: Color.lerp(meeting, other.meeting, t)!,
+      controlRadius: lerpDouble(controlRadius, other.controlRadius, t)!,
+      cardRadius: lerpDouble(cardRadius, other.cardRadius, t)!,
+      panelRadius: lerpDouble(panelRadius, other.panelRadius, t)!,
     );
   }
 }
 
-class ExtendedColor {
-  final Color seed, value;
-  final ColorFamily light;
-  final ColorFamily lightHighContrast;
-  final ColorFamily lightMediumContrast;
-  final ColorFamily dark;
-  final ColorFamily darkHighContrast;
-  final ColorFamily darkMediumContrast;
-
-  const ExtendedColor({
-    required this.seed,
-    required this.value,
-    required this.light,
-    required this.lightHighContrast,
-    required this.lightMediumContrast,
-    required this.dark,
-    required this.darkHighContrast,
-    required this.darkMediumContrast,
-  });
+extension CorporateThemeContext on BuildContext {
+  CorporateThemeTokens get corporateTheme =>
+      Theme.of(this).extension<CorporateThemeTokens>() ??
+      CorporateThemeTokens.light;
 }
 
-class ColorFamily {
-  const ColorFamily({
-    required this.color,
-    required this.onColor,
-    required this.colorContainer,
-    required this.onColorContainer,
-  });
+abstract final class CorporateBlueTheme {
+  static ThemeData get light => _build(
+        brightness: Brightness.light,
+        scheme: ColorScheme.fromSeed(
+          seedColor: CorporateBluePalette.primary,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: CorporateBluePalette.primary,
+          onPrimary: Colors.white,
+          primaryContainer: CorporateBluePalette.primarySoft,
+          onPrimaryContainer: const Color(0xFF102A56),
+          secondary: CorporateBluePalette.secondary,
+          onSecondary: Colors.white,
+          secondaryContainer: const Color(0xFFCCFBEF),
+          onSecondaryContainer: const Color(0xFF134E48),
+          tertiary: CorporateBluePalette.warning,
+          onTertiary: const Color(0xFF3B2400),
+          tertiaryContainer: const Color(0xFFFEF0C7),
+          onTertiaryContainer: const Color(0xFF7A2E0E),
+          error: CorporateBluePalette.error,
+          onError: Colors.white,
+          errorContainer: const Color(0xFFFEE4E2),
+          onErrorContainer: const Color(0xFF912018),
+          surface: CorporateBluePalette.surface,
+          onSurface: CorporateBluePalette.textPrimary,
+          onSurfaceVariant: CorporateBluePalette.textSecondary,
+          outline: const Color(0xFF98A2B3),
+          outlineVariant: CorporateBluePalette.border,
+          surfaceContainerLowest: Colors.white,
+          surfaceContainerLow: CorporateBluePalette.page,
+          surfaceContainer: const Color(0xFFF2F4F7),
+          surfaceContainerHigh: const Color(0xFFEAECF0),
+          surfaceContainerHighest: const Color(0xFFE4E7EC),
+          inverseSurface: CorporateBluePalette.textPrimary,
+          onInverseSurface: Colors.white,
+        ),
+        tokens: CorporateThemeTokens.light,
+      );
 
-  final Color color;
-  final Color onColor;
-  final Color colorContainer;
-  final Color onColorContainer;
+  static ThemeData get dark => _build(
+        brightness: Brightness.dark,
+        scheme: ColorScheme.fromSeed(
+          seedColor: CorporateBluePalette.primary,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: const Color(0xFF84ADFF),
+          onPrimary: const Color(0xFF102A56),
+          primaryContainer: const Color(0xFF163C78),
+          onPrimaryContainer: const Color(0xFFDDE7FF),
+          secondary: const Color(0xFF2ED3B7),
+          onSecondary: const Color(0xFF073A35),
+          secondaryContainer: const Color(0xFF125D56),
+          onSecondaryContainer: const Color(0xFFCCFBEF),
+          tertiary: const Color(0xFFFDB022),
+          onTertiary: const Color(0xFF3B2400),
+          tertiaryContainer: const Color(0xFF5F3A05),
+          onTertiaryContainer: const Color(0xFFFEF0C7),
+          error: const Color(0xFFF97066),
+          onError: const Color(0xFF55160C),
+          errorContainer: const Color(0xFF7A271A),
+          onErrorContainer: const Color(0xFFFEE4E2),
+          surface: CorporateBluePalette.darkSurface,
+          onSurface: CorporateBluePalette.darkText,
+          onSurfaceVariant: CorporateBluePalette.darkTextSecondary,
+          outline: const Color(0xFF667085),
+          outlineVariant: CorporateBluePalette.darkBorder,
+          surfaceContainerLowest: CorporateBluePalette.darkPage,
+          surfaceContainerLow: const Color(0xFF101828),
+          surfaceContainer: CorporateBluePalette.darkSurface,
+          surfaceContainerHigh: CorporateBluePalette.darkSurfaceHigh,
+          surfaceContainerHighest: const Color(0xFF29384D),
+          inverseSurface: CorporateBluePalette.darkText,
+          onInverseSurface: CorporateBluePalette.darkPage,
+        ),
+        tokens: CorporateThemeTokens.dark,
+      );
+
+  static ThemeData _build({
+    required Brightness brightness,
+    required ColorScheme scheme,
+    required CorporateThemeTokens tokens,
+  }) {
+    final base = ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      colorScheme: scheme,
+    );
+    final textTheme = base.textTheme
+        .apply(
+          fontFamily: 'Avenir Next',
+          fontFamilyFallback: const <String>['Segoe UI', 'Roboto'],
+          bodyColor: scheme.onSurface,
+          displayColor: scheme.onSurface,
+        )
+        .copyWith(
+          headlineLarge: base.textTheme.headlineLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.8,
+          ),
+          headlineMedium: base.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+          ),
+          titleLarge: base.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+          titleMedium: base.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+          labelLarge: base.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        );
+    final controlShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(tokens.controlRadius),
+    );
+    final cardShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(tokens.cardRadius),
+      side: BorderSide(color: tokens.cardBorder),
+    );
+
+    return base.copyWith(
+      textTheme: textTheme,
+      scaffoldBackgroundColor: scheme.surfaceContainerLow,
+      canvasColor: scheme.surfaceContainerLow,
+      shadowColor: tokens.cardShadow,
+      splashFactory: InkSparkle.splashFactory,
+      extensions: <ThemeExtension<dynamic>>[tokens],
+      appBarTheme: AppBarTheme(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        backgroundColor: scheme.surface,
+        foregroundColor: scheme.onSurface,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        shape: Border(bottom: BorderSide(color: tokens.cardBorder)),
+        titleTextStyle: textTheme.titleLarge?.copyWith(
+          color: scheme.onSurface,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+      cardTheme: CardTheme(
+        elevation: 1,
+        color: scheme.surface,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: tokens.cardShadow,
+        shape: cardShape,
+        clipBehavior: Clip.antiAlias,
+        margin: EdgeInsets.zero,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        height: 72,
+        elevation: 0,
+        backgroundColor: scheme.surface,
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: scheme.primaryContainer,
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(
+              color: states.contains(WidgetState.selected)
+                  ? scheme.primary
+                  : scheme.onSurfaceVariant,
+            )),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => textTheme.labelMedium?.copyWith(
+            color: states.contains(WidgetState.selected)
+                ? scheme.primary
+                : scheme.onSurfaceVariant,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w800
+                : FontWeight.w600,
+          ),
+        ),
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        elevation: 0,
+        backgroundColor: scheme.surface,
+        useIndicator: true,
+        indicatorColor: scheme.primaryContainer,
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        selectedIconTheme: IconThemeData(color: scheme.primary, size: 25),
+        unselectedIconTheme: IconThemeData(
+          color: scheme.onSurfaceVariant,
+          size: 23,
+        ),
+        selectedLabelTextStyle: textTheme.labelMedium?.copyWith(
+          color: scheme.primary,
+          fontWeight: FontWeight.w800,
+        ),
+        unselectedLabelTextStyle: textTheme.labelMedium?.copyWith(
+          color: scheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(64, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
+          disabledBackgroundColor: scheme.onSurface.withOpacity(0.08),
+          disabledForegroundColor: scheme.onSurface.withOpacity(0.38),
+          elevation: 0,
+          shape: controlShape,
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(64, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
+          elevation: 1,
+          shadowColor: tokens.cardShadow,
+          shape: controlShape,
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(64, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+          foregroundColor: scheme.primary,
+          side: BorderSide(color: scheme.primary.withOpacity(0.55)),
+          shape: controlShape,
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: scheme.primary,
+          minimumSize: const Size(48, 40),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          shape: controlShape,
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: scheme.onSurfaceVariant,
+          highlightColor: scheme.primaryContainer,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(tokens.controlRadius),
+          ),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        elevation: 2,
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(tokens.cardRadius),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: scheme.surface,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(tokens.controlRadius),
+          borderSide: BorderSide(color: scheme.primary.withOpacity(0.32)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(tokens.controlRadius),
+          borderSide: BorderSide(color: scheme.primary.withOpacity(0.32)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(tokens.controlRadius),
+          borderSide: BorderSide(color: scheme.primary, width: 2),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(tokens.controlRadius),
+          borderSide: BorderSide(color: scheme.outlineVariant),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(tokens.controlRadius),
+          borderSide: BorderSide(color: scheme.error),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(tokens.controlRadius),
+          borderSide: BorderSide(color: scheme.error, width: 2),
+        ),
+        labelStyle: textTheme.bodyMedium?.copyWith(
+          color: scheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+        ),
+        hintStyle: textTheme.bodyMedium?.copyWith(
+          color: scheme.onSurfaceVariant.withOpacity(0.75),
+        ),
+        prefixIconColor: scheme.onSurfaceVariant,
+        suffixIconColor: scheme.onSurfaceVariant,
+      ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: textTheme.bodyMedium,
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: scheme.surface,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(tokens.controlRadius),
+            borderSide: BorderSide(color: scheme.primary.withOpacity(0.32)),
+          ),
+        ),
+        menuStyle: MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(scheme.surface),
+          surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+          shape: WidgetStatePropertyAll(controlShape),
+          elevation: const WidgetStatePropertyAll(4),
+        ),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: scheme.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 4,
+        shape: controlShape,
+        textStyle: textTheme.bodyMedium,
+      ),
+      menuTheme: MenuThemeData(
+        style: MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(scheme.surface),
+          surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+          shape: WidgetStatePropertyAll(controlShape),
+          elevation: const WidgetStatePropertyAll(4),
+        ),
+      ),
+      dialogTheme: DialogTheme(
+        elevation: 8,
+        backgroundColor: scheme.surface,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: tokens.cardShadow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(tokens.panelRadius),
+        ),
+        titleTextStyle: textTheme.titleLarge?.copyWith(color: scheme.onSurface),
+        contentTextStyle: textTheme.bodyMedium?.copyWith(
+          color: scheme.onSurfaceVariant,
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        elevation: 8,
+        backgroundColor: scheme.surface,
+        modalBackgroundColor: scheme.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(tokens.panelRadius),
+          ),
+        ),
+        showDragHandle: true,
+        dragHandleColor: scheme.outline,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: scheme.surfaceContainer,
+        selectedColor: scheme.primaryContainer,
+        disabledColor: scheme.surfaceContainerLow,
+        labelStyle:
+            textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+        side: BorderSide(color: tokens.cardBorder),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(999),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      ),
+      tabBarTheme: TabBarTheme(
+        labelColor: scheme.primary,
+        unselectedLabelColor: scheme.onSurfaceVariant,
+        labelStyle: textTheme.labelLarge,
+        unselectedLabelStyle: textTheme.labelLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+        indicatorColor: scheme.primary,
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: tokens.cardBorder,
+      ),
+      dividerTheme: DividerThemeData(
+        color: tokens.cardBorder,
+        thickness: 1,
+        space: 1,
+      ),
+      listTileTheme: ListTileThemeData(
+        textColor: scheme.onSurface,
+        iconColor: scheme.onSurfaceVariant,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        shape: controlShape,
+      ),
+      dataTableTheme: DataTableThemeData(
+        headingRowColor: WidgetStatePropertyAll(scheme.surfaceContainerLow),
+        dataRowColor: WidgetStatePropertyAll(scheme.surface),
+        headingTextStyle: textTheme.labelMedium?.copyWith(
+          color: scheme.onSurfaceVariant,
+          fontWeight: FontWeight.w800,
+        ),
+        dataTextStyle: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
+        dividerThickness: 1,
+        decoration: BoxDecoration(
+          border: Border.all(color: tokens.cardBorder),
+          borderRadius: BorderRadius.circular(tokens.cardRadius),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: scheme.inverseSurface,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(
+          color: scheme.onInverseSurface,
+        ),
+        actionTextColor: scheme.inversePrimary,
+        shape: controlShape,
+        elevation: 6,
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: scheme.inverseSurface,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        textStyle: textTheme.labelMedium?.copyWith(
+          color: scheme.onInverseSurface,
+        ),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: scheme.primary,
+        linearTrackColor: scheme.primaryContainer,
+        circularTrackColor: scheme.primaryContainer,
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? scheme.onPrimary
+              : scheme.outline,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? scheme.primary
+              : scheme.surfaceContainerHighest,
+        ),
+        trackOutlineColor: WidgetStatePropertyAll(scheme.outlineVariant),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? scheme.primary
+              : Colors.transparent,
+        ),
+        checkColor: WidgetStatePropertyAll(scheme.onPrimary),
+        side: BorderSide(color: scheme.outline, width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? scheme.primary
+              : scheme.outline,
+        ),
+      ),
+      badgeTheme: BadgeThemeData(
+        backgroundColor: scheme.error,
+        textColor: scheme.onError,
+        textStyle: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w800),
+      ),
+      scrollbarTheme: ScrollbarThemeData(
+        thumbColor: WidgetStatePropertyAll(scheme.primary.withOpacity(0.42)),
+        trackColor: WidgetStatePropertyAll(scheme.surfaceContainer),
+        radius: const Radius.circular(999),
+        thickness: const WidgetStatePropertyAll(6),
+      ),
+    );
+  }
 }

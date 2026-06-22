@@ -36,9 +36,9 @@ class PageHeader extends StatelessWidget {
               child: Text(
                 title,
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w800,
                   color: colorScheme.onSurface,
-                ),/**/
+                ),
               ),
             ),
             if (actions != null) ...[

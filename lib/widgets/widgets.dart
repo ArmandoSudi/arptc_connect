@@ -12,6 +12,7 @@ export 'content_view.dart';
 export 'custom_dropdown_field.dart';
 export 'custom_filledbutton.dart';
 export 'common_text_input.dart';
+export 'corporate_components.dart';
 export 'custom_nav_bar.dart';
 export 'empty_state_view.dart';
 export 'error_state_view.dart';

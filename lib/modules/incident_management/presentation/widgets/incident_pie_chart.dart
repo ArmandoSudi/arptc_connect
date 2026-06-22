@@ -1,3 +1,4 @@
+import 'package:arptc_connect/core/theme.dart';
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_dashboard_layout.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -153,16 +154,6 @@ class _ChartEmptyState extends StatelessWidget {
 }
 
 Color _chartColor(BuildContext context, int index) {
-  final scheme = Theme.of(context).colorScheme;
-  final colors = [
-    scheme.error,
-    Colors.deepOrange,
-    Colors.amber.shade700,
-    Colors.green,
-    scheme.primary,
-    Colors.teal,
-    Colors.indigo,
-    Colors.blueGrey,
-  ];
+  final colors = context.corporateTheme.chartPalette;
   return colors[index % colors.length];
 }

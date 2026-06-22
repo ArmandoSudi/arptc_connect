@@ -18,7 +18,6 @@ class NavigationAppBar extends ConsumerWidget implements PreferredSizeWidget {
     return AppBar(
       title: const NavigationTitle(),
       centerTitle: false,
-      elevation: 4,
       actions: [
         const NotificationBell(),
         FutureBuilder(

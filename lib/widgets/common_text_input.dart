@@ -1,3 +1,4 @@
+import 'package:arptc_connect/core/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -68,11 +69,14 @@ class CommonTextInput extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final tokens = context.corporateTheme;
     final resolvedMaxLines = isPassword ? 1 : maxLines ?? (isMultiline ? 5 : 1);
     final resolvedMinLines = isPassword ? 1 : minLines ?? (isMultiline ? 3 : 1);
     final baseDecoration = decoration ?? const InputDecoration();
     final resolvedBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(borderRadius ?? 12),
+      borderRadius: BorderRadius.circular(
+        borderRadius ?? tokens.controlRadius,
+      ),
       borderSide: BorderSide(
         color: colorScheme.primary.withOpacity(0.45),
       ),
