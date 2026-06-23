@@ -40,7 +40,19 @@ class PublishedNewsFeed extends ConsumerWidget {
           backButton: showBackButton,
           backRoute: backRoute,
         ),
-        const Gap(8),
+        if (description?.trim().isNotEmpty ?? false) ...[
+          const Gap(6),
+          Padding(
+            padding: EdgeInsets.only(left: showBackButton ? 48 : 0),
+            child: Text(
+              description!,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+        ],
+        const Gap(24),
         postsAsync.when(
           data: (posts) {
             if (posts.isEmpty) {
@@ -53,20 +65,35 @@ class PublishedNewsFeed extends ConsumerWidget {
                 ),
               );
             }
-            return Column(
-              children: [
-                for (var index = 0; index < posts.length; index++) ...[
-                  NewsPostCard(
-                    post: posts[index],
-                    showStatus: false,
-                    onTap: () => context.go(
-                      detailPathBuilder?.call(posts[index]) ??
-                          '/home/news/${posts[index].id}',
-                    ),
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final columnCount = _columnCountFor(constraints.maxWidth);
+                final cardHeight = columnCount == 1 ? 400.0 : 420.0;
+
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: posts.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columnCount,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
+                    mainAxisExtent: cardHeight,
                   ),
-                  if (index != posts.length - 1) const SizedBox(height: 12),
-                ],
-              ],
+                  itemBuilder: (context, index) {
+                    final post = posts[index];
+                    return NewsPostCard(
+                      post: post,
+                      showStatus: false,
+                      layout: NewsPostCardLayout.grid,
+                      onTap: () => context.go(
+                        detailPathBuilder?.call(post) ??
+                            '/home/news/${post.id}',
+                      ),
+                    );
+                  },
+                );
+              },
             );
           },
           loading: () => SizedBox(
@@ -84,5 +111,11 @@ class PublishedNewsFeed extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  int _columnCountFor(double width) {
+    if (width >= 1180) return 3;
+    if (width >= 700) return 2;
+    return 1;
   }
 }

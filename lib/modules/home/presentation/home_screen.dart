@@ -11,20 +11,22 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
 
-    return ResponsiveCenter(
-      maxContentWidth: 980,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const Gap(24),
-          PublishedNewsFeed(
-            title: l10n.homeNewsTitle,
-            description: l10n.homeNewsDescription,
-          ),
-          const Gap(24),
-        ],
+    return SingleChildScrollView(
+      child: ResponsiveCenter(
+        maxContentWidth: 1440,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const Gap(32),
+            PublishedNewsFeed(
+              title: l10n.homeNewsTitle,
+              description: l10n.homeNewsDescription,
+            ),
+            const Gap(32),
+          ],
+        ),
       ),
     );
   }

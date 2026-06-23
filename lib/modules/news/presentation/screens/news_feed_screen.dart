@@ -12,7 +12,7 @@ class NewsFeedScreen extends StatelessWidget {
 
     return Scaffold(
       body: ContentView(
-        maxWidth: 980,
+        maxWidth: 1440,
         scrollable: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
