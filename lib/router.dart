@@ -297,7 +297,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
                 // Meeting Halls
                 GoRoute(
-                  path: 'meetinghall',
+                  path: 'meeting-hall',
                   pageBuilder: (context, state) => const NoTransitionPage(
                     child: MeetingHallsScreen(),
                   ),
@@ -311,6 +311,24 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                         //       .firstWhere((hall) => hall.id == hallId),
                         // );
                         return HallDetailsScreen(hallId: hallId);
+                      },
+                    ),
+                  ],
+                ),
+                GoRoute(
+                  path: 'meetinghall',
+                  redirect: (context, state) {
+                    return state.location.replaceFirst(
+                      '/service/meetinghall',
+                      '/service/meeting-hall',
+                    );
+                  },
+                  routes: [
+                    GoRoute(
+                      path: ':id',
+                      redirect: (context, state) {
+                        final hallId = state.pathParameters['id']!;
+                        return '/service/meeting-hall/$hallId';
                       },
                     ),
                   ],

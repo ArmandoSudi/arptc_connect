@@ -7,14 +7,12 @@ import 'package:gap/gap.dart';
 import '../../../widgets/content_view.dart';
 import '../../../widgets/page_header.dart';
 import '../widgets/create_meeting_hall_form.dart';
-import 'hall_details_screen.dart';
 
 class MeetingHallsScreen extends ConsumerWidget {
   const MeetingHallsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     final meetingHalls = ref.watch(meetingHallsProvider);
 
     return Scaffold(
@@ -45,9 +43,10 @@ class MeetingHallsScreen extends ConsumerWidget {
                 return Expanded(
                   child: GridView.builder(
                     padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
-                      childAspectRatio: 4/3,
+                      childAspectRatio: 4 / 3,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
                     ),

@@ -32,7 +32,7 @@ extension AppModuleX on AppModule {
       case AppModule.ticketing:
         return 'incidents';
       case AppModule.meetinghall:
-        return 'meetinghall';
+        return 'meeting-hall';
       case AppModule.usermanagement:
         return 'usermanagement';
     }
