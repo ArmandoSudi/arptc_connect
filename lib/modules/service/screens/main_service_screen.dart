@@ -92,7 +92,7 @@ class MainServiceScreen extends ConsumerWidget {
                 crossAxisCount: _getCrossAxisCount(context),
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
-                childAspectRatio: 0.75,
+                childAspectRatio: 1.2,
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
@@ -111,8 +111,8 @@ class MainServiceScreen extends ConsumerWidget {
 
   int _getCrossAxisCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    if (width > 1200) return 4;
-    if (width > 800) return 3;
+    if (width > 1200) return 5;
+    if (width > 800) return 4;
     if (width > 600) return 2;
     return 2;
   }

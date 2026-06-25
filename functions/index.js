@@ -196,6 +196,16 @@ function modulePermissionAliases(moduleKey) {
       'tickets',
     ];
   }
+  if (
+    [
+      'meeting',
+      'meetinghall',
+      'meeting_hall',
+      'meeting-hall',
+    ].includes(normalized)
+  ) {
+    return ['meetinghall', 'meeting_hall', 'meeting', 'meeting-hall'];
+  }
   return [normalized];
 }
 

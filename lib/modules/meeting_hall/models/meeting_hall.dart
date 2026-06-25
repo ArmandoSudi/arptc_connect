@@ -21,15 +21,14 @@ class MeetingHall {
 
   factory MeetingHall.fromJson(Map<String, dynamic> json) {
     return MeetingHall(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      location: json['location'] as String,
-      capacity: json['capacity'] as int,
-      description: json['description'] as String,
-      createdAt: json['createdAt'] != null
-          ? (json['createdAt'] as Timestamp).toDate()
-          : null,
-      createdBy: json['createdBy'] as String?,
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      location: json['location']?.toString() ?? '',
+      capacity: _intFromJson(json['capacity']),
+      description: json['description']?.toString() ?? '',
+      createdAt:
+          json['createdAt'] != null ? _dateFromJson(json['createdAt']) : null,
+      createdBy: json['createdBy']?.toString(),
     );
   }
 
@@ -63,4 +62,27 @@ class MeetingHall {
       createdBy: createdBy ?? this.createdBy,
     );
   }
+}
+
+int _intFromJson(dynamic value) {
+  if (value is int) {
+    return value;
+  }
+  if (value is num) {
+    return value.toInt();
+  }
+  return int.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+DateTime? _dateFromJson(dynamic value) {
+  if (value is Timestamp) {
+    return value.toDate();
+  }
+  if (value is DateTime) {
+    return value;
+  }
+  if (value is String) {
+    return DateTime.tryParse(value);
+  }
+  return null;
 }

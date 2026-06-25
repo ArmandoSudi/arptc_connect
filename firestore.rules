@@ -170,6 +170,108 @@ service cloud.firestore {
       return userManagementRole() == 'MANAGER';
     }
 
+    function meetingHallRole() {
+      let data = principalData();
+      let permissions = data.keys().hasAny(['modulePermissions'])
+        ? data.modulePermissions
+        : {};
+      return permissions.keys().hasAny(['meetinghall'])
+        ? permissions.meetinghall
+        : (
+          permissions.keys().hasAny(['meeting_hall'])
+            ? permissions.meeting_hall
+            : (
+              permissions.keys().hasAny(['meeting-hall'])
+                ? permissions['meeting-hall']
+                : (
+                  permissions.keys().hasAny(['meeting'])
+                    ? permissions.meeting
+                    : 'NONE'
+                )
+            )
+        );
+    }
+
+    function isMeetingHallUser() {
+      return meetingHallRole() == 'USER';
+    }
+
+    function isMeetingHallManager() {
+      return meetingHallRole() == 'MANAGER';
+    }
+
+    function isMeetingHallAdmin() {
+      return meetingHallRole() == 'ADMIN';
+    }
+
+    function hasMeetingHallAccess() {
+      return isMeetingHallUser() || isMeetingHallManager() || isMeetingHallAdmin();
+    }
+
+    function isMeetingHallReservationOwner(reservation) {
+      return signedIn() &&
+        (
+          reservation.userId == request.auth.uid ||
+          reservation.userEmail == request.auth.token.email ||
+          (
+            reservation.userId is string &&
+            reservation.userId.size() > 0 &&
+            agentEmailMatches(reservation.userId)
+          )
+        );
+    }
+
+    function validMeetingHallReservationCreate() {
+      return signedIn() &&
+        (isMeetingHallUser() || isMeetingHallManager()) &&
+        request.resource.data.hallId is string &&
+        request.resource.data.hallId.size() > 0 &&
+        request.resource.data.userId is string &&
+        request.resource.data.userId.size() > 0 &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() > 0 &&
+        (
+          (
+            request.resource.data.status == 'ON_HOLD' &&
+            isMeetingHallReservationOwner(request.resource.data)
+          ) ||
+          (
+            request.resource.data.status == 'BLOCKED' &&
+            isMeetingHallManager()
+          )
+        ) &&
+        request.resource.data.startTime is timestamp &&
+        request.resource.data.endTime is timestamp &&
+        request.resource.data.endTime > request.resource.data.startTime &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time;
+    }
+
+    function validMeetingHallReservationStatusUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return signedIn() &&
+        isMeetingHallManager() &&
+        changed.hasOnly(['status', 'updatedAt', 'rejectionReason', 'cancelReason']) &&
+        request.resource.data.status in ['ON_HOLD', 'ACCEPTED', 'REJECTED', 'CANCELLED', 'BLOCKED'] &&
+        request.resource.data.updatedAt == request.time &&
+        (
+          request.resource.data.status != 'REJECTED' ||
+          (
+            request.resource.data.rejectionReason is string &&
+            request.resource.data.rejectionReason.size() > 0
+          )
+        );
+    }
+
+    function validMeetingHallData() {
+      return request.resource.data.name is string &&
+        request.resource.data.name.size() > 0 &&
+        request.resource.data.location is string &&
+        request.resource.data.location.size() > 0 &&
+        request.resource.data.capacity is int &&
+        request.resource.data.capacity > 0;
+    }
+
     function validNotificationEventCreate() {
       return signedIn() &&
         request.resource.data.keys().hasAll([
@@ -375,6 +477,27 @@ service cloud.firestore {
     match /itServices/{serviceId} {
       allow get, list: if signedIn() && hasIncidentAccess();
       allow create, update: if signedIn() && isManager();
+      allow delete: if false;
+    }
+
+    match /meeting_halls/{hallId} {
+      allow get, list: if signedIn() && hasMeetingHallAccess();
+      allow create: if signedIn() &&
+        isMeetingHallManager() &&
+        validMeetingHallData() &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time;
+      allow update: if signedIn() &&
+        isMeetingHallManager() &&
+        validMeetingHallData() &&
+        request.resource.data.updatedAt == request.time;
+      allow delete: if signedIn() && isMeetingHallManager();
+    }
+
+    match /meeting_hall_reservations/{reservationId} {
+      allow get, list: if signedIn() && hasMeetingHallAccess();
+      allow create: if validMeetingHallReservationCreate();
+      allow update: if validMeetingHallReservationStatusUpdate();
       allow delete: if false;
     }
 

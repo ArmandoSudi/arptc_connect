@@ -5,7 +5,12 @@ import '../providers/meeting_hall_provider.dart';
 import '../../../widgets/common_text_input.dart';
 
 class CreateMeetingHallForm extends ConsumerStatefulWidget {
-  const CreateMeetingHallForm({super.key});
+  const CreateMeetingHallForm({
+    super.key,
+    this.existingHall,
+  });
+
+  final MeetingHall? existingHall;
 
   @override
   ConsumerState<CreateMeetingHallForm> createState() =>
@@ -18,6 +23,7 @@ class _CreateMeetingHallFormState extends ConsumerState<CreateMeetingHallForm> {
   final _locationController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _capacityController = TextEditingController();
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -26,6 +32,19 @@ class _CreateMeetingHallFormState extends ConsumerState<CreateMeetingHallForm> {
     _descriptionController.dispose();
     _capacityController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final hall = widget.existingHall;
+    if (hall == null) {
+      return;
+    }
+    _nameController.text = hall.name;
+    _locationController.text = hall.location;
+    _capacityController.text = hall.capacity.toString();
+    _descriptionController.text = hall.description;
   }
 
   @override
@@ -50,13 +69,16 @@ class _CreateMeetingHallFormState extends ConsumerState<CreateMeetingHallForm> {
                 Row(
                   children: [
                     Text(
-                      'Créer une nouvelle salle',
+                      widget.existingHall == null
+                          ? 'Créer une nouvelle salle'
+                          : 'Modifier la salle',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const Spacer(),
                     IconButton(
                       icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed:
+                          _isSubmitting ? null : () => Navigator.pop(context),
                     ),
                   ],
                 ),
@@ -66,6 +88,7 @@ class _CreateMeetingHallFormState extends ConsumerState<CreateMeetingHallForm> {
                   label: 'Nom de la salle',
                   hintText: 'Ex: Salle de Réunion 6ème',
                   type: CommonTextInputType.text,
+                  enabled: !_isSubmitting,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer un nom';
@@ -79,6 +102,7 @@ class _CreateMeetingHallFormState extends ConsumerState<CreateMeetingHallForm> {
                   label: 'Emplacement',
                   hintText: 'Ex: 6ème étage',
                   type: CommonTextInputType.text,
+                  enabled: !_isSubmitting,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer l\'emplacement';
@@ -92,6 +116,7 @@ class _CreateMeetingHallFormState extends ConsumerState<CreateMeetingHallForm> {
                   label: 'Capacité',
                   hintText: 'Nombre de personnes',
                   type: CommonTextInputType.number,
+                  enabled: !_isSubmitting,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer la capacité';
@@ -109,11 +134,21 @@ class _CreateMeetingHallFormState extends ConsumerState<CreateMeetingHallForm> {
                   hintText: 'Description de la salle',
                   // maxLines: 3,
                   type: CommonTextInputType.text,
+                  enabled: !_isSubmitting,
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: _submitForm,
-                  child: const Text('Créer la salle'),
+                  onPressed: _isSubmitting ? null : _submitForm,
+                  child: _isSubmitting
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(
+                          widget.existingHall == null
+                              ? 'Créer la salle'
+                              : 'Enregistrer les modifications',
+                        ),
                 ),
                 const SizedBox(height: 16),
               ],
@@ -124,20 +159,59 @@ class _CreateMeetingHallFormState extends ConsumerState<CreateMeetingHallForm> {
     );
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final newHall = MeetingHall(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _nameController.text,
-        location: _locationController.text,
-        capacity: int.parse(_capacityController.text),
-        description: _descriptionController.text,
-      );
+      final existingHall = widget.existingHall;
+      final hall = existingHall == null
+          ? MeetingHall(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              name: _nameController.text.trim(),
+              location: _locationController.text.trim(),
+              capacity: int.parse(_capacityController.text),
+              description: _descriptionController.text.trim(),
+            )
+          : existingHall.copyWith(
+              name: _nameController.text.trim(),
+              location: _locationController.text.trim(),
+              capacity: int.parse(_capacityController.text),
+              description: _descriptionController.text.trim(),
+            );
 
-      //TODO Hook up the provider to add the new hall to firestore
-      // ref.read(meetingHallsProvider.notifier).addHall(newHall);
-      ref.read(meetingHallActionsProvider).createHall(newHall);
-      Navigator.pop(context);
+      setState(() {
+        _isSubmitting = true;
+      });
+
+      try {
+        if (existingHall == null) {
+          await ref.read(meetingHallActionsProvider).createHall(hall);
+        } else {
+          await ref.read(meetingHallActionsProvider).updateHall(hall);
+        }
+        if (!mounted) {
+          return;
+        }
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              existingHall == null ? 'Salle créée.' : 'Salle mise à jour.',
+            ),
+          ),
+        );
+      } catch (error) {
+        if (!mounted) {
+          return;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur: $error')),
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isSubmitting = false;
+          });
+        }
+      }
     }
   }
 }

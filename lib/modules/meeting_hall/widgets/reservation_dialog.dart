@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/reservation.dart';
 import '../models/reservation_status.dart';
+import '../providers/meeting_hall_access_provider.dart';
 
 class ReservationDialog extends ConsumerStatefulWidget {
   final String hallId;
@@ -26,6 +27,7 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
   late TimeOfDay _endTime;
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -45,6 +47,10 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final userAsync = ref.watch(currentMeetingHallUserProvider);
+    final currentUser = userAsync.valueOrNull;
+    final canCreate = currentUser?.role.canCreateReservation ?? false;
+
     return AlertDialog(
       title: const Text('Nouvelle réservation'),
       content: Form(
@@ -53,10 +59,17 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (!canCreate) ...[
+                const Text(
+                  'Votre rôle actuel ne permet pas de créer une réservation.',
+                ),
+                const SizedBox(height: 16),
+              ],
               CommonTextInput(
                 label: 'Titre',
                 type: CommonTextInputType.text,
                 controller: _titleController,
+                enabled: canCreate && !_isSubmitting,
                 decoration: const InputDecoration(
                   hintText: 'Entrez le titre de la réunion',
                 ),
@@ -73,6 +86,7 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
                 type: CommonTextInputType.text,
                 isMultiline: true,
                 controller: _descriptionController,
+                enabled: canCreate && !_isSubmitting,
                 decoration: const InputDecoration(
                   hintText: 'Entrez la description de la réunion',
                 ),
@@ -85,14 +99,20 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
                     child: ListTile(
                       title: const Text('Heure de début'),
                       subtitle: Text(_startTime.format(context)),
-                      onTap: () => _selectTime(context, true),
+                      enabled: canCreate && !_isSubmitting,
+                      onTap: canCreate && !_isSubmitting
+                          ? () => _selectTime(context, true)
+                          : null,
                     ),
                   ),
                   Expanded(
                     child: ListTile(
                       title: const Text('Heure de fin'),
                       subtitle: Text(_endTime.format(context)),
-                      onTap: () => _selectTime(context, false),
+                      enabled: canCreate && !_isSubmitting,
+                      onTap: canCreate && !_isSubmitting
+                          ? () => _selectTime(context, false)
+                          : null,
                     ),
                   ),
                 ],
@@ -103,12 +123,19 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
           child: const Text('Annuler'),
         ),
         ElevatedButton(
-          onPressed: _submitReservation,
-          child: const Text('Soumettre'),
+          onPressed: canCreate && !_isSubmitting && currentUser != null
+              ? () => _submitReservation(currentUser)
+              : null,
+          child: _isSubmitting
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Soumettre'),
         ),
       ],
     );
@@ -125,7 +152,7 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
           _startTime = picked;
           // Automatically set end time to 1 hour after start time
           _endTime = TimeOfDay(
-            hour: picked.hour + 1,
+            hour: (picked.hour + 1).clamp(0, 23),
             minute: picked.minute,
           );
         } else {
@@ -135,7 +162,7 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
     }
   }
 
-  void _submitReservation() {
+  Future<void> _submitReservation(MeetingHallUser currentUser) async {
     if (_formKey.currentState!.validate()) {
       final startDateTime = DateTime(
         widget.selectedDate.year,
@@ -153,10 +180,21 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
         _endTime.minute,
       );
 
+      if (!endDateTime.isAfter(startDateTime)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('L’heure de fin doit être après l’heure de début.'),
+          ),
+        );
+        return;
+      }
+
       final reservation = MeetingHallReservation(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         hallId: widget.hallId,
-        userId: 'current_user_id', // This should come from auth service
+        userId: currentUser.id,
+        userName: currentUser.displayName,
+        userEmail: currentUser.email,
         title: _titleController.text,
         description: _descriptionController.text,
         startTime: startDateTime,
@@ -165,8 +203,37 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
         createdAt: DateTime.now(),
       );
 
-      ref.read(reservationRepositoryProvider).addReservation(reservation);
-      Navigator.of(context).pop();
+      setState(() {
+        _isSubmitting = true;
+      });
+
+      try {
+        await ref
+            .read(meetingHallReservationActionsProvider)
+            .createReservation(reservation);
+        if (!mounted) {
+          return;
+        }
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Réservation soumise pour validation.'),
+          ),
+        );
+      } catch (error) {
+        if (!mounted) {
+          return;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur: $error')),
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isSubmitting = false;
+          });
+        }
+      }
     }
   }
 }

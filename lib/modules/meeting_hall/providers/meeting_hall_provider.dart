@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../repositories/meeting_hall_repository.dart';
 import '../models/meeting_hall.dart';
+import 'meeting_hall_access_provider.dart';
 
 // Provider for streaming all meeting halls
 final meetingHallsProvider = StreamProvider<List<MeetingHall>>((ref) {
@@ -11,11 +12,22 @@ final meetingHallsProvider = StreamProvider<List<MeetingHall>>((ref) {
 // Provider for managing meeting hall operations
 final meetingHallActionsProvider = Provider((ref) {
   final repository = ref.watch(meetingHallRepositoryProvider);
+  final role = ref.watch(currentMeetingHallRoleProvider).valueOrNull ??
+      MeetingHallRole.none;
 
   return MeetingHallActions(
-    createHall: (hall) => repository.addMeetingHall(hall),
-    updateHall: (hall) => repository.updateMeetingHall(hall),
-    deleteHall: (id) => repository.deleteMeetingHall(id),
+    createHall: (hall) {
+      _assertCanManageHalls(role);
+      return repository.addMeetingHall(hall);
+    },
+    updateHall: (hall) {
+      _assertCanManageHalls(role);
+      return repository.updateMeetingHall(hall);
+    },
+    deleteHall: (id) {
+      _assertCanManageHalls(role);
+      return repository.deleteMeetingHall(id);
+    },
     getHallById: (id) => repository.getMeetingHallById(id),
   );
 });
@@ -36,7 +48,14 @@ class MeetingHallActions {
 }
 
 // Provider for a specific meeting hall
-final selectedMeetingHallProvider = StreamProvider.family<MeetingHall?, String>((ref, id) async* {
-  final hall = await ref.watch(meetingHallActionsProvider).getHallById(id);
-  yield hall;
+final selectedMeetingHallProvider =
+    StreamProvider.family<MeetingHall?, String>((ref, id) {
+  final repository = ref.watch(meetingHallRepositoryProvider);
+  return repository.watchMeetingHallById(id);
 });
+
+void _assertCanManageHalls(MeetingHallRole role) {
+  if (!role.canManageHalls) {
+    throw StateError('Only Meeting Hall managers can manage rooms.');
+  }
+}

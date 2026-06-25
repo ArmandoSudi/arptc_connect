@@ -1,19 +1,28 @@
 import 'dart:developer';
 
 import 'package:arptc_connect/core/theme.dart';
+import 'package:arptc_connect/modules/meeting_hall/models/meeting_hall.dart';
 import 'package:arptc_connect/modules/meeting_hall/models/reservation.dart';
 import 'package:arptc_connect/modules/meeting_hall/models/reservation_status.dart';
+import 'package:arptc_connect/modules/meeting_hall/providers/meeting_hall_access_provider.dart';
+import 'package:arptc_connect/modules/meeting_hall/providers/meeting_hall_provider.dart';
 import 'package:arptc_connect/modules/meeting_hall/repositories/reservation_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:gap/gap.dart';
+import 'package:arptc_connect/widgets/common_text_input.dart';
 import '../widgets/reservation_dialog.dart';
 
 class HallDetailsScreen extends ConsumerStatefulWidget {
   final String hallId;
+  final DateTime? initialSelectedDate;
 
-  const HallDetailsScreen({super.key, required this.hallId});
+  const HallDetailsScreen({
+    super.key,
+    required this.hallId,
+    this.initialSelectedDate,
+  });
 
   @override
   ConsumerState<HallDetailsScreen> createState() => _HallDetailsScreenState();
@@ -25,24 +34,62 @@ class _HallDetailsScreenState extends ConsumerState<HallDetailsScreen> {
   CalendarFormat _calendarFormat = CalendarFormat.twoWeeks;
 
   @override
+  void initState() {
+    super.initState();
+    final initialSelectedDate = widget.initialSelectedDate;
+    if (initialSelectedDate == null) {
+      return;
+    }
+    _selectedDay = initialSelectedDate;
+    _focusedDay = initialSelectedDate;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final roleAsync = ref.watch(currentMeetingHallRoleProvider);
+    final role = roleAsync.valueOrNull ?? MeetingHallRole.none;
+    final hallAsync = ref.watch(selectedMeetingHallProvider(widget.hallId));
     final reservationsAsync = ref.watch(hallDateReservationsProvider((
       hallId: widget.hallId,
       date: _selectedDay,
     )));
 
+    if (roleAsync.isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (!role.canRead) {
+      return const Scaffold(
+        body: Center(
+          child: Text('Vous n’avez pas accès au module Salles de réunion.'),
+        ),
+      );
+    }
+
     return Scaffold(
+      // TITLE
       appBar: AppBar(
-        title: const Text("Hall Name"),
+        title: Text(hallAsync.valueOrNull?.name ?? 'Salle de réunion'),
         actions: [
+          if (role.canManageReservations)
+            IconButton(
+              tooltip: 'Bloquer la salle',
+              icon: const Icon(Icons.construction_rounded),
+              onPressed: () => _showBlockRoomDialog(context),
+            ),
           IconButton(
             icon: const Icon(Icons.info_outline),
-            onPressed: () => _showHallInfo(context),
+            onPressed: hallAsync.valueOrNull == null
+                ? null
+                : () => _showHallInfo(context, hallAsync.valueOrNull!),
           ),
         ],
       ),
       body: Column(
         children: [
+          // CALENDRIER
           TableCalendar(
             firstDay: DateTime.now().subtract(const Duration(days: 30)),
             lastDay: DateTime.now().add(const Duration(days: 365)),
@@ -64,7 +111,10 @@ class _HallDetailsScreenState extends ConsumerState<HallDetailsScreen> {
               return reservationsAsync.when(
                 data: (reservations) => reservations
                     .where(
-                        (reservation) => isSameDay(reservation.startTime, day))
+                      (reservation) =>
+                          reservation.status.isVisibleInAgenda &&
+                          isSameDay(reservation.startTime, day),
+                    )
                     .toList(),
                 loading: () => [],
                 error: (_, __) => [],
@@ -84,14 +134,29 @@ class _HallDetailsScreenState extends ConsumerState<HallDetailsScreen> {
             child: _ReservedAgendaPanel(
               hallId: widget.hallId,
               selectedDate: _selectedDay,
-              onCreateReservation: () => _showReservationDialog(context),
+              canManageReservations: role.canManageReservations,
+              onCreateReservation: role.canCreateReservation
+                  ? () => _showReservationDialog(context)
+                  : null,
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showReservationDialog(context),
-        child: const Icon(Icons.add),
+      // floatingActionButton: role.canCreateReservation
+      //     ? FloatingActionButton(
+      //         onPressed: () => _showReservationDialog(context),
+      //         child: const Icon(Icons.add),
+      //       )
+      //     : null,
+    );
+  }
+
+  void _showBlockRoomDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => _BlockRoomDialog(
+        hallId: widget.hallId,
+        selectedDate: _selectedDay,
       ),
     );
   }
@@ -108,20 +173,20 @@ class _HallDetailsScreenState extends ConsumerState<HallDetailsScreen> {
     );
   }
 
-  void _showHallInfo(BuildContext context) {
+  void _showHallInfo(BuildContext context, MeetingHall hall) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("widget.hall.name"),
-        content: const Column(
+        title: Text(hall.name),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Emplacement: widget.hall.location '),
-            Gap(8),
-            Text('Capacité: widget.hall.capacity personnes'),
-            Gap(8),
-            Text("widget.hall.description"),
+            Text('Emplacement: ${hall.location}'),
+            const Gap(8),
+            Text('Capacité: ${hall.capacity} personnes'),
+            const Gap(8),
+            Text(hall.description),
           ],
         ),
         actions: [
@@ -138,11 +203,13 @@ class _HallDetailsScreenState extends ConsumerState<HallDetailsScreen> {
 class _ReservedAgendaPanel extends ConsumerWidget {
   final String hallId;
   final DateTime selectedDate;
-  final VoidCallback onCreateReservation;
+  final VoidCallback? onCreateReservation;
+  final bool canManageReservations;
 
   const _ReservedAgendaPanel({
     required this.hallId,
     required this.selectedDate,
+    required this.canManageReservations,
     required this.onCreateReservation,
   });
 
@@ -156,8 +223,7 @@ class _ReservedAgendaPanel extends ConsumerWidget {
     return reservationsAsync.when(
       data: (reservations) {
         final reservedSlots = reservations
-            .where((reservation) =>
-                reservation.status != ReservationStatus.rejected)
+            .where((reservation) => reservation.status.isVisibleInAgenda)
             .toList()
           ..sort((a, b) => a.startTime.compareTo(b.startTime));
 
@@ -184,6 +250,25 @@ class _ReservedAgendaPanel extends ConsumerWidget {
                           return _ReservedAgendaItem(
                             reservation: reservation,
                             isLast: index == reservedSlots.length - 1,
+                            canManageReservations: canManageReservations,
+                            onApprove: () => _confirmReservationStatusChange(
+                              context,
+                              ref,
+                              reservation,
+                              ReservationStatus.accepted,
+                            ),
+                            onReject: () => _confirmReservationStatusChange(
+                              context,
+                              ref,
+                              reservation,
+                              ReservationStatus.rejected,
+                            ),
+                            onCancel: () => _confirmReservationStatusChange(
+                              context,
+                              ref,
+                              reservation,
+                              ReservationStatus.cancelled,
+                            ),
                           );
                         },
                         separatorBuilder: (context, index) => const Gap(12),
@@ -202,12 +287,188 @@ class _ReservedAgendaPanel extends ConsumerWidget {
       },
     );
   }
+
+  Future<void> _confirmReservationStatusChange(
+    BuildContext context,
+    WidgetRef ref,
+    MeetingHallReservation reservation,
+    ReservationStatus targetStatus,
+  ) async {
+    final isApproval = targetStatus == ReservationStatus.accepted;
+    final isRejection = targetStatus == ReservationStatus.rejected;
+    final isCancellation = targetStatus == ReservationStatus.cancelled;
+    final comment = await _requestManagerDecision(
+      context: context,
+      reservation: reservation,
+      targetStatus: targetStatus,
+    );
+
+    if (comment == null) {
+      return;
+    }
+
+    try {
+      await ref
+          .read(meetingHallReservationActionsProvider)
+          .updateReservationStatus(reservation, targetStatus, comment);
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isApproval
+                ? 'Réservation approuvée.'
+                : isRejection
+                    ? 'Réservation rejetée.'
+                    : isCancellation
+                        ? 'Réservation annulée.'
+                        : 'Réservation mise à jour.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur: $error')),
+      );
+    }
+  }
+
+  Future<String?> _requestManagerDecision({
+    required BuildContext context,
+    required MeetingHallReservation reservation,
+    required ReservationStatus targetStatus,
+  }) async {
+    return showDialog<String?>(
+      context: context,
+      builder: (dialogContext) => _ManagerDecisionDialog(
+        reservation: reservation,
+        targetStatus: targetStatus,
+      ),
+    );
+  }
+}
+
+class _ManagerDecisionDialog extends StatefulWidget {
+  const _ManagerDecisionDialog({
+    required this.reservation,
+    required this.targetStatus,
+  });
+
+  final MeetingHallReservation reservation;
+  final ReservationStatus targetStatus;
+
+  @override
+  State<_ManagerDecisionDialog> createState() => _ManagerDecisionDialogState();
+}
+
+class _ManagerDecisionDialogState extends State<_ManagerDecisionDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _commentController = TextEditingController();
+
+  bool get _isApproval => widget.targetStatus == ReservationStatus.accepted;
+  bool get _isRejection => widget.targetStatus == ReservationStatus.rejected;
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(_title),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(_message),
+              if (!_isApproval) ...[
+                const Gap(16),
+                CommonTextInput(
+                  controller: _commentController,
+                  label: _isRejection ? 'Motif du rejet' : 'Motif',
+                  isMultiline: true,
+                  hintText: _isRejection
+                      ? 'Expliquez pourquoi la demande est rejetée'
+                      : 'Motif de l’annulation',
+                  validator: _isRejection
+                      ? (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Veuillez renseigner le motif du rejet';
+                          }
+                          return null;
+                        }
+                      : null,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(null),
+          child: const Text('Annuler'),
+        ),
+        FilledButton(
+          onPressed: () {
+            if (!_isApproval && !(_formKey.currentState?.validate() ?? false)) {
+              return;
+            }
+            Navigator.of(context).pop(_commentController.text.trim());
+          },
+          child: Text(_actionLabel),
+        ),
+      ],
+    );
+  }
+
+  String get _title {
+    if (_isApproval) {
+      return 'Approuver la réservation ?';
+    }
+    if (_isRejection) {
+      return 'Rejeter la réservation ?';
+    }
+    if (widget.reservation.status == ReservationStatus.blocked) {
+      return 'Annuler le blocage ?';
+    }
+    return 'Annuler la réservation ?';
+  }
+
+  String get _message {
+    if (_isApproval) {
+      return 'La réservation "${widget.reservation.title}" sera marquée comme réservée.';
+    }
+    if (_isRejection) {
+      return 'La réservation "${widget.reservation.title}" sera rejetée et retirée de l’agenda des réservations.';
+    }
+    return 'Cette période sera libérée dans l’agenda.';
+  }
+
+  String get _actionLabel {
+    if (_isApproval) {
+      return 'Approuver';
+    }
+    if (_isRejection) {
+      return 'Rejeter';
+    }
+    return 'Confirmer';
+  }
 }
 
 class _ReservedAgendaHeader extends StatelessWidget {
   final DateTime selectedDate;
   final int reservationCount;
-  final VoidCallback onCreateReservation;
+  final VoidCallback? onCreateReservation;
 
   const _ReservedAgendaHeader({
     required this.selectedDate,
@@ -252,23 +513,27 @@ class _ReservedAgendaHeader extends StatelessWidget {
           ],
         );
 
-        final action = FilledButton.icon(
-          onPressed: onCreateReservation,
-          icon: const Icon(Icons.add_rounded),
-          label: const Text('Réserver un créneau'),
-          style: FilledButton.styleFrom(
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
-          ),
-        );
+        final action = onCreateReservation == null
+            ? null
+            : FilledButton.icon(
+                onPressed: onCreateReservation,
+                icon: const Icon(Icons.add_rounded),
+                label: const Text('Réserver un créneau'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                ),
+              );
 
         if (isCompact) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               titleGroup,
-              const Gap(12),
-              action,
+              if (action != null) ...[
+                const Gap(12),
+                action,
+              ],
             ],
           );
         }
@@ -277,7 +542,7 @@ class _ReservedAgendaHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(child: titleGroup),
-            action,
+            if (action != null) action,
           ],
         );
       },
@@ -332,10 +597,18 @@ class _AgendaMetaChip extends StatelessWidget {
 class _ReservedAgendaItem extends StatelessWidget {
   final MeetingHallReservation reservation;
   final bool isLast;
+  final bool canManageReservations;
+  final VoidCallback onApprove;
+  final VoidCallback onReject;
+  final VoidCallback onCancel;
 
   const _ReservedAgendaItem({
     required this.reservation,
     required this.isLast,
+    required this.canManageReservations,
+    required this.onApprove,
+    required this.onReject,
+    required this.onCancel,
   });
 
   @override
@@ -376,6 +649,10 @@ class _ReservedAgendaItem extends StatelessWidget {
             child: _ReservedReservationCard(
               reservation: reservation,
               statusStyle: statusStyle,
+              canManageReservations: canManageReservations,
+              onApprove: onApprove,
+              onReject: onReject,
+              onCancel: onCancel,
             ),
           ),
         ],
@@ -441,10 +718,18 @@ class _AgendaTimeChip extends StatelessWidget {
 class _ReservedReservationCard extends StatelessWidget {
   final MeetingHallReservation reservation;
   final _ReservationStatusStyle statusStyle;
+  final bool canManageReservations;
+  final VoidCallback onApprove;
+  final VoidCallback onReject;
+  final VoidCallback onCancel;
 
   const _ReservedReservationCard({
     required this.reservation,
     required this.statusStyle,
+    required this.canManageReservations,
+    required this.onApprove,
+    required this.onReject,
+    required this.onCancel,
   });
 
   @override
@@ -453,6 +738,16 @@ class _ReservedReservationCard extends StatelessWidget {
     final tokens = context.corporateTheme;
     final duration = reservation.endTime.difference(reservation.startTime);
     final hasDescription = reservation.description.trim().isNotEmpty;
+    final requesterLabel = reservation.userName.trim().isNotEmpty
+        ? reservation.userName.trim()
+        : reservation.userEmail.trim().isNotEmpty
+            ? reservation.userEmail.trim()
+            : reservation.userId.trim();
+    final showManagerActions =
+        canManageReservations && reservation.status == ReservationStatus.onHold;
+    final showCancelAction = canManageReservations &&
+        (reservation.status == ReservationStatus.accepted ||
+            reservation.status == ReservationStatus.blocked);
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -471,18 +766,18 @@ class _ReservedReservationCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: statusStyle.accent.withOpacity(0.14),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              statusStyle.icon,
-              color: statusStyle.accent,
-            ),
-          ),
+          // Container(
+          //   width: 44,
+          //   height: 44,
+          //   decoration: BoxDecoration(
+          //     color: statusStyle.accent.withOpacity(0.14),
+          //     borderRadius: BorderRadius.circular(14),
+          //   ),
+          //   child: Icon(
+          //     statusStyle.icon,
+          //     color: statusStyle.accent,
+          //   ),
+          // ),
           const Gap(14),
           Expanded(
             child: Column(
@@ -529,13 +824,44 @@ class _ReservedReservationCard extends StatelessWidget {
                       icon: Icons.timelapse_outlined,
                       label: _formatDuration(duration),
                     ),
-                    if (reservation.userId.trim().isNotEmpty)
+                    if (requesterLabel.isNotEmpty)
                       _ReservationInfoChip(
                         icon: Icons.person_outline,
-                        label: reservation.userId,
+                        label: requesterLabel,
                       ),
                   ],
                 ),
+                if (showManagerActions) ...[
+                  const Gap(16),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 8,
+                    children: [
+                      FilledButton.icon(
+                        onPressed: onApprove,
+                        icon: const Icon(Icons.check_rounded),
+                        label: const Text('Approuver'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: onReject,
+                        icon: const Icon(Icons.close_rounded),
+                        label: const Text('Rejeter'),
+                      ),
+                    ],
+                  ),
+                ],
+                if (showCancelAction) ...[
+                  const Gap(16),
+                  OutlinedButton.icon(
+                    onPressed: onCancel,
+                    icon: const Icon(Icons.event_busy_rounded),
+                    label: Text(
+                      reservation.status == ReservationStatus.blocked
+                          ? 'Annuler le blocage'
+                          : 'Annuler la réservation',
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -627,7 +953,7 @@ class _ReservationInfoChip extends StatelessWidget {
 }
 
 class _ReservedAgendaEmptyState extends StatelessWidget {
-  final VoidCallback onCreateReservation;
+  final VoidCallback? onCreateReservation;
 
   const _ReservedAgendaEmptyState({
     required this.onCreateReservation,
@@ -680,16 +1006,225 @@ class _ReservedAgendaEmptyState extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            const Gap(18),
-            FilledButton.icon(
-              onPressed: onCreateReservation,
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Réserver un créneau'),
-            ),
+            if (onCreateReservation != null) ...[
+              const Gap(18),
+              FilledButton.icon(
+                onPressed: onCreateReservation,
+                icon: const Icon(Icons.add_rounded),
+                label: const Text('Réserver un créneau'),
+              ),
+            ],
           ],
         ),
       ),
     );
+  }
+}
+
+class _BlockRoomDialog extends ConsumerStatefulWidget {
+  const _BlockRoomDialog({
+    required this.hallId,
+    required this.selectedDate,
+  });
+
+  final String hallId;
+  final DateTime selectedDate;
+
+  @override
+  ConsumerState<_BlockRoomDialog> createState() => _BlockRoomDialogState();
+}
+
+class _BlockRoomDialogState extends ConsumerState<_BlockRoomDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _reasonController = TextEditingController();
+  late TimeOfDay _startTime;
+  late TimeOfDay _endTime;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTime = TimeOfDay.now();
+    _endTime = TimeOfDay(
+      hour: (_startTime.hour + 1).clamp(0, 23),
+      minute: _startTime.minute,
+    );
+  }
+
+  @override
+  void dispose() {
+    _reasonController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentUser = ref.watch(currentMeetingHallUserProvider).valueOrNull;
+
+    return AlertDialog(
+      title: const Text('Bloquer la salle'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CommonTextInput(
+              controller: _reasonController,
+              label: 'Motif du blocage',
+              hintText: 'Maintenance, nettoyage, évènement interne...',
+              isMultiline: true,
+              enabled: !_isSubmitting,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Veuillez indiquer le motif du blocage';
+                }
+                return null;
+              },
+            ),
+            const Gap(16),
+            Row(
+              children: [
+                Expanded(
+                  child: ListTile(
+                    title: const Text('Début'),
+                    subtitle: Text(_startTime.format(context)),
+                    enabled: !_isSubmitting,
+                    onTap: _isSubmitting
+                        ? null
+                        : () => _selectTime(context, isStartTime: true),
+                  ),
+                ),
+                Expanded(
+                  child: ListTile(
+                    title: const Text('Fin'),
+                    subtitle: Text(_endTime.format(context)),
+                    enabled: !_isSubmitting,
+                    onTap: _isSubmitting
+                        ? null
+                        : () => _selectTime(context, isStartTime: false),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+          child: const Text('Annuler'),
+        ),
+        FilledButton.icon(
+          onPressed: _isSubmitting || currentUser == null
+              ? null
+              : () => _submit(currentUser),
+          icon: _isSubmitting
+              ? const SizedBox.square(
+                  dimension: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.construction_rounded),
+          label: const Text('Bloquer'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _selectTime(
+    BuildContext context, {
+    required bool isStartTime,
+  }) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: isStartTime ? _startTime : _endTime,
+    );
+    if (picked == null) {
+      return;
+    }
+    setState(() {
+      if (isStartTime) {
+        _startTime = picked;
+        _endTime = TimeOfDay(
+          hour: (picked.hour + 1).clamp(0, 23),
+          minute: picked.minute,
+        );
+      } else {
+        _endTime = picked;
+      }
+    });
+  }
+
+  Future<void> _submit(MeetingHallUser currentUser) async {
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    final startDateTime = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      _startTime.hour,
+      _startTime.minute,
+    );
+    final endDateTime = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      _endTime.hour,
+      _endTime.minute,
+    );
+
+    if (!endDateTime.isAfter(startDateTime)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('L’heure de fin doit être après l’heure de début.'),
+        ),
+      );
+      return;
+    }
+
+    final reason = _reasonController.text.trim();
+    final block = MeetingHallReservation(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      hallId: widget.hallId,
+      userId: currentUser.id,
+      userName: currentUser.displayName,
+      userEmail: currentUser.email,
+      title: 'Salle bloquée',
+      description: reason,
+      startTime: startDateTime,
+      endTime: endDateTime,
+      status: ReservationStatus.blocked,
+      createdAt: DateTime.now(),
+    );
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      await ref.read(meetingHallReservationActionsProvider).blockRoom(block);
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Salle bloquée pour cette période.')),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur: $error')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
   }
 }
 
@@ -758,6 +1293,28 @@ class _ReservationStatusStyle {
             isDark ? 0.16 : 0.08,
           )!,
           borderColor: scheme.error.withOpacity(isDark ? 0.36 : 0.22),
+        );
+      case ReservationStatus.cancelled:
+        return _ReservationStatusStyle(
+          label: 'Annulé',
+          icon: Icons.event_busy_rounded,
+          accent: scheme.outline,
+          onAccent: scheme.onSurface,
+          background: scheme.surfaceContainerLow,
+          borderColor: scheme.outlineVariant,
+        );
+      case ReservationStatus.blocked:
+        return _ReservationStatusStyle(
+          label: 'Bloqué',
+          icon: Icons.construction_rounded,
+          accent: scheme.error,
+          onAccent: scheme.onError,
+          background: Color.lerp(
+            scheme.surfaceContainerLow,
+            scheme.error,
+            isDark ? 0.18 : 0.10,
+          )!,
+          borderColor: scheme.error.withOpacity(isDark ? 0.42 : 0.28),
         );
     }
   }

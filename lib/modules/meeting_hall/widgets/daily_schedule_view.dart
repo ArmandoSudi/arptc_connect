@@ -3,11 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/reservation_status.dart';
 import '../repositories/reservation_repository.dart';
 
-class _DailyScheduleView extends ConsumerWidget {
+class DailyScheduleView extends ConsumerWidget {
   final String hallId;
   final DateTime selectedDate;
 
-  const _DailyScheduleView({
+  const DailyScheduleView({
+    super.key,
     required this.hallId,
     required this.selectedDate,
   });
@@ -62,6 +63,10 @@ class _DailyScheduleView extends ConsumerWidget {
         return Colors.red.shade100;
       case ReservationStatus.rejected:
         return Colors.grey.shade100;
+      case ReservationStatus.cancelled:
+        return Colors.grey.shade100;
+      case ReservationStatus.blocked:
+        return Colors.red.shade100;
     }
   }
 }

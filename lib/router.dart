@@ -306,11 +306,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                       path: ':id',
                       builder: (context, state) {
                         final hallId = state.pathParameters['id']!;
+                        final selectedDate = DateTime.tryParse(
+                          state.queryParameters['date'] ?? '',
+                        );
                         // return HallDetailsScreen(
                         //   hall: ref.read(meetingHallsProvider)
                         //       .firstWhere((hall) => hall.id == hallId),
                         // );
-                        return HallDetailsScreen(hallId: hallId);
+                        return HallDetailsScreen(
+                          hallId: hallId,
+                          initialSelectedDate: selectedDate,
+                        );
                       },
                     ),
                   ],
