@@ -616,47 +616,59 @@ class _ReservedAgendaItem extends StatelessWidget {
     final statusStyle =
         _ReservationStatusStyle.from(context, reservation.status);
 
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            width: 92,
-            child: Column(
-              children: [
-                _AgendaTimeChip(
-                  startTime: reservation.startTime,
-                  endTime: reservation.endTime,
-                  color: statusStyle.accent,
-                  foregroundColor: statusStyle.onAccent,
-                ),
-                const Gap(8),
-                if (!isLast)
-                  Expanded(
-                    child: Container(
-                      width: 2,
-                      decoration: BoxDecoration(
-                        color: statusStyle.accent.withOpacity(0.35),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 560;
+        final card = _ReservedReservationCard(
+          reservation: reservation,
+          statusStyle: statusStyle,
+          canManageReservations: canManageReservations,
+          onApprove: onApprove,
+          onReject: onReject,
+          onCancel: onCancel,
+        );
+
+        // FOR MOBILE PHONE, WE ARE HIDING THE TIMELINE FOR BETTER UX
+        if (isCompact) {
+          return card;
+        }
+
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: 92,
+                child: Column(
+                  children: [
+                    _AgendaTimeChip(
+                      startTime: reservation.startTime,
+                      endTime: reservation.endTime,
+                      color: statusStyle.accent,
+                      foregroundColor: statusStyle.onAccent,
                     ),
-                  ),
-              ],
-            ),
+                    const Gap(8),
+
+                    // THE LINE BETWEEN THE AGENDA TIME CHIP AND THE CARD, THE LAST CARD DOENST NEED IT
+                    if (!isLast)
+                      Expanded(
+                        child: Container(
+                          width: 2,
+                          decoration: BoxDecoration(
+                            color: statusStyle.accent.withOpacity(0.35),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const Gap(12),
+              Expanded(child: card),
+            ],
           ),
-          const Gap(12),
-          Expanded(
-            child: _ReservedReservationCard(
-              reservation: reservation,
-              statusStyle: statusStyle,
-              canManageReservations: canManageReservations,
-              onApprove: onApprove,
-              onReject: onReject,
-              onCancel: onCancel,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
