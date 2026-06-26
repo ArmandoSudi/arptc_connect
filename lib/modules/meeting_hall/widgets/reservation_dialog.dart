@@ -2,6 +2,7 @@ import 'package:arptc_connect/modules/meeting_hall/repositories/reservation_repo
 import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 
 import '../models/reservation.dart';
 import '../models/reservation_status.dart';
@@ -47,10 +48,15 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
     final userAsync = ref.watch(currentMeetingHallUserProvider);
     final currentUser = userAsync.valueOrNull;
     final canCreate = currentUser?.role.canCreateReservation ?? false;
+    final theme = Theme.of(context);
 
     return AlertDialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      title: const Text('Nouvelle réservation'),
+      title: Text('Nouvelle réservation',
+        style: theme.textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.w800,
+      ),),
+
       content: SizedBox(
         width: 560,
         child: Form(
@@ -84,23 +90,42 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
                 Row(
                   children: [
                     Expanded(
-                      child: ListTile(
-                        title: const Text('Heure de début'),
-                        subtitle: Text(_startTime.format(context)),
-                        enabled: canCreate && !_isSubmitting,
-                        onTap: canCreate && !_isSubmitting
-                            ? () => _selectTime(context, true)
-                            : null,
+
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.45),
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListTile(
+                          title: const Text('Heure de début'),
+                          subtitle: Text(_startTime.format(context)),
+                          enabled: canCreate && !_isSubmitting,
+                          onTap: canCreate && !_isSubmitting
+                              ? () => _selectTime(context, true)
+                              : null,
+                        ),
                       ),
                     ),
+                    Gap(16.0),
                     Expanded(
-                      child: ListTile(
-                        title: const Text('Heure de fin'),
-                        subtitle: Text(_endTime.format(context)),
-                        enabled: canCreate && !_isSubmitting,
-                        onTap: canCreate && !_isSubmitting
-                            ? () => _selectTime(context, false)
-                            : null,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.45),
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListTile(
+                          title: const Text('Heure de fin'),
+                          subtitle: Text(_endTime.format(context)),
+                          enabled: canCreate && !_isSubmitting,
+                          onTap: canCreate && !_isSubmitting
+                              ? () => _selectTime(context, false)
+                              : null,
+                        ),
+
                       ),
                     ),
                   ],
