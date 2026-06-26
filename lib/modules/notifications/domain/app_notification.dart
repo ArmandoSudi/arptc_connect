@@ -11,6 +11,7 @@ class AppNotification {
     required this.entityId,
     required this.route,
     required this.isRead,
+    required this.isCleared,
     required this.isGlobal,
     required this.createdAt,
   });
@@ -24,6 +25,7 @@ class AppNotification {
   final String entityId;
   final String route;
   final bool isRead;
+  final bool isCleared;
   final bool isGlobal;
   final DateTime? createdAt;
 
@@ -43,12 +45,13 @@ class AppNotification {
       entityId: _string(data['entityId']),
       route: _string(data['route']),
       isRead: overrideReadState ?? (data['isRead'] as bool? ?? false),
+      isCleared: data['isCleared'] as bool? ?? false,
       isGlobal: isGlobal,
       createdAt: _toDateTime(data['createdAt']),
     );
   }
 
-  AppNotification copyWith({bool? isRead}) {
+  AppNotification copyWith({bool? isRead, bool? isCleared}) {
     return AppNotification(
       id: id,
       title: title,
@@ -59,8 +62,29 @@ class AppNotification {
       entityId: entityId,
       route: route,
       isRead: isRead ?? this.isRead,
+      isCleared: isCleared ?? this.isCleared,
       isGlobal: isGlobal,
       createdAt: createdAt,
+    );
+  }
+}
+
+class AppNotificationReadState {
+  const AppNotificationReadState({
+    required this.isRead,
+    required this.isCleared,
+  });
+
+  final bool isRead;
+  final bool isCleared;
+
+  factory AppNotificationReadState.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+  ) {
+    final data = snapshot.data() ?? <String, dynamic>{};
+    return AppNotificationReadState(
+      isRead: data['isRead'] as bool? ?? false,
+      isCleared: data['isCleared'] as bool? ?? false,
     );
   }
 }

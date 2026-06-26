@@ -31,45 +31,53 @@ final globalNotificationsProvider =
   return ref.read(notificationRepositoryProvider).watchGlobalNotifications();
 });
 
-final globalNotificationReadIdsProvider = StreamProvider<Set<String>>((ref) {
+final globalNotificationReadStatesProvider =
+    StreamProvider<Map<String, AppNotificationReadState>>((ref) {
   final agentId = ref.watch(currentNotificationAgentIdProvider).valueOrNull;
   if (agentId == null || agentId.isEmpty) {
-    return Stream.value(const <String>{});
+    return Stream.value(const <String, AppNotificationReadState>{});
   }
   return ref
       .read(notificationRepositoryProvider)
-      .watchGlobalNotificationReadIds(agentId);
+      .watchGlobalNotificationReadStates(agentId);
 });
 
 final notificationInboxProvider = Provider<AsyncValue<List<AppNotification>>>(
   (ref) {
     final personalAsync = ref.watch(personalNotificationsProvider);
     final globalAsync = ref.watch(globalNotificationsProvider);
-    final readIdsAsync = ref.watch(globalNotificationReadIdsProvider);
+    final readStatesAsync = ref.watch(globalNotificationReadStatesProvider);
 
-    final error = _firstError([personalAsync, globalAsync, readIdsAsync]);
+    final error = _firstError([personalAsync, globalAsync, readStatesAsync]);
     if (error != null) {
       return AsyncValue.error(error.error, error.stackTrace);
     }
 
     final isLoading = personalAsync.isLoading ||
         globalAsync.isLoading ||
-        readIdsAsync.isLoading;
+        readStatesAsync.isLoading;
     final personal = personalAsync.valueOrNull;
     final global = globalAsync.valueOrNull;
-    final readIds = readIdsAsync.valueOrNull;
+    final readStates = readStatesAsync.valueOrNull;
 
-    if (isLoading && (personal == null || global == null || readIds == null)) {
+    if (isLoading &&
+        (personal == null || global == null || readStates == null)) {
       return const AsyncValue.loading();
     }
 
     final notifications = <AppNotification>[
-      ...(personal ?? const <AppNotification>[]),
-      ...(global ?? const <AppNotification>[]).map(
-        (notification) => notification.copyWith(
-          isRead: readIds?.contains(notification.id) ?? false,
-        ),
+      ...(personal ?? const <AppNotification>[]).where(
+        (notification) => !notification.isCleared,
       ),
+      ...(global ?? const <AppNotification>[]).map(
+        (notification) {
+          final state = readStates?[notification.id];
+          return notification.copyWith(
+            isRead: state?.isRead ?? false,
+            isCleared: state?.isCleared ?? false,
+          );
+        },
+      ).where((notification) => !notification.isCleared),
     ]..sort(_compareNotifications);
 
     return AsyncValue.data(notifications);

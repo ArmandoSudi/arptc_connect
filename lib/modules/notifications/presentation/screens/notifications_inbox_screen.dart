@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/notifications/data/firestore_notification_repository.dart';
 import 'package:arptc_connect/modules/notifications/domain/app_notification.dart';
@@ -11,17 +13,42 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-class NotificationsInboxScreen extends ConsumerWidget {
+class NotificationsInboxScreen extends ConsumerStatefulWidget {
   const NotificationsInboxScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NotificationsInboxScreen> createState() =>
+      _NotificationsInboxScreenState();
+}
+
+class _NotificationsInboxScreenState
+    extends ConsumerState<NotificationsInboxScreen> {
+  bool _isClearing = false;
+
+  @override
+  Widget build(BuildContext context) {
     final inboxAsync = ref.watch(notificationInboxProvider);
     final l10n = S.of(context);
+    final notifications = inboxAsync.valueOrNull ?? const <AppNotification>[];
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.notifications),
+        actions: [
+          if (notifications.isNotEmpty)
+            IconButton(
+              tooltip: l10n.clearAllNotifications,
+              onPressed: _isClearing
+                  ? null
+                  : () => _clearAllNotifications(notifications),
+              icon: _isClearing
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.delete_sweep_outlined),
+            ),
+        ],
       ),
       body: inboxAsync.when(
         data: (notifications) {
@@ -55,11 +82,52 @@ class NotificationsInboxScreen extends ConsumerWidget {
           onRetry: () {
             ref.invalidate(personalNotificationsProvider);
             ref.invalidate(globalNotificationsProvider);
-            ref.invalidate(globalNotificationReadIdsProvider);
+            ref.invalidate(globalNotificationReadStatesProvider);
           },
         ),
       ),
     );
+  }
+
+  Future<void> _clearAllNotifications(
+    List<AppNotification> notifications,
+  ) async {
+    final agentId = ref.read(currentNotificationAgentIdProvider).valueOrNull;
+    if (agentId == null || agentId.isEmpty || notifications.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      _isClearing = true;
+    });
+
+    try {
+      await ref.read(notificationRepositoryProvider).clearNotifications(
+            agentId: agentId,
+            notifications: notifications,
+          );
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.of(context).notificationsCleared)),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${S.of(context).unableToClearNotifications}: $error'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isClearing = false;
+        });
+      }
+    }
   }
 }
 
@@ -184,25 +252,26 @@ class _NotificationTile extends ConsumerWidget {
 
   Future<void> _openNotification(BuildContext context, WidgetRef ref) async {
     final agentId = ref.read(currentNotificationAgentIdProvider).valueOrNull;
-    if (agentId != null && agentId.isNotEmpty && !notification.isRead) {
-      final repository = ref.read(notificationRepositoryProvider);
-      if (notification.isGlobal) {
-        await repository.markGlobalNotificationRead(
-          agentId: agentId,
-          notificationId: notification.id,
-        );
-      } else {
-        await repository.markPersonalNotificationRead(
-          agentId: agentId,
-          notificationId: notification.id,
-        );
-      }
+    if (context.mounted && notification.route.isNotEmpty) {
+      context.go(notification.route);
     }
 
-    if (!context.mounted || notification.route.isEmpty) {
+    if (agentId == null || agentId.isEmpty) {
       return;
     }
-    context.go(notification.route);
+
+    unawaited(
+      ref
+          .read(notificationRepositoryProvider)
+          .clearNotification(
+            agentId: agentId,
+            notification: notification,
+          )
+          .catchError((Object error, StackTrace stackTrace) {
+        debugPrint('Unable to clear notification ${notification.id}: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      }),
+    );
   }
 }
 

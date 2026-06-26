@@ -8,7 +8,8 @@ abstract class NotificationRepository {
 
   Stream<List<AppNotification>> watchGlobalNotifications();
 
-  Stream<Set<String>> watchGlobalNotificationReadIds(String agentId);
+  Stream<Map<String, AppNotificationReadState>>
+      watchGlobalNotificationReadStates(String agentId);
 
   Future<void> markPersonalNotificationRead({
     required String agentId,
@@ -18,6 +19,16 @@ abstract class NotificationRepository {
   Future<void> markGlobalNotificationRead({
     required String agentId,
     required String notificationId,
+  });
+
+  Future<void> clearNotification({
+    required String agentId,
+    required AppNotification notification,
+  });
+
+  Future<void> clearNotifications({
+    required String agentId,
+    required Iterable<AppNotification> notifications,
   });
 
   Future<void> registerDeviceToken({

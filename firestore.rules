@@ -606,19 +606,45 @@ service cloud.firestore {
         allow get, list: if isSelfAgent(agentId);
         allow create: if false;
         allow update: if isSelfAgent(agentId) &&
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['isRead', 'readAt']) &&
-          request.resource.data.isRead == true &&
-          request.resource.data.readAt == request.time;
+          (
+            (
+              request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['isRead', 'readAt']) &&
+              request.resource.data.isRead == true &&
+              request.resource.data.readAt == request.time
+            ) ||
+            (
+              request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['isRead', 'readAt', 'isCleared', 'clearedAt']) &&
+              request.resource.data.isRead == true &&
+              request.resource.data.readAt == request.time &&
+              request.resource.data.isCleared == true &&
+              request.resource.data.clearedAt == request.time
+            )
+          );
         allow delete: if false;
       }
 
       match /notificationReads/{notificationId} {
         allow get, list: if isSelfAgent(agentId);
         allow create, update: if isSelfAgent(agentId) &&
+          request.resource.data.keys().hasOnly([
+            'notificationId',
+            'isRead',
+            'readAt',
+            'isCleared',
+            'clearedAt'
+          ]) &&
           request.resource.data.notificationId == notificationId &&
           request.resource.data.isRead == true &&
-          request.resource.data.readAt == request.time;
+          request.resource.data.readAt == request.time &&
+          (
+            !request.resource.data.keys().hasAny(['isCleared', 'clearedAt']) ||
+            (
+              request.resource.data.isCleared == true &&
+              request.resource.data.clearedAt == request.time
+            )
+          );
         allow delete: if false;
       }
     }

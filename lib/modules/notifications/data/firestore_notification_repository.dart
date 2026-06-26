@@ -72,16 +72,22 @@ class FirestoreNotificationRepository implements NotificationRepository {
   }
 
   @override
-  Stream<Set<String>> watchGlobalNotificationReadIds(String agentId) {
+  Stream<Map<String, AppNotificationReadState>>
+      watchGlobalNotificationReadStates(String agentId) {
     if (agentId.trim().isEmpty) {
-      return Stream.value(const <String>{});
+      return Stream.value(const <String, AppNotificationReadState>{});
     }
 
     return _agents
         .doc(agentId.trim())
         .collection('notificationReads')
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => doc.id).toSet());
+        .map(
+          (snapshot) => {
+            for (final doc in snapshot.docs)
+              doc.id: AppNotificationReadState.fromFirestore(doc),
+          },
+        );
   }
 
   @override
@@ -98,12 +104,9 @@ class FirestoreNotificationRepository implements NotificationRepository {
         .collection('notifications')
         .doc(notificationId.trim())
         .set(
-      {
-        'isRead': true,
-        'readAt': FieldValue.serverTimestamp(),
-      },
-      SetOptions(merge: true),
-    );
+          _readData(),
+          SetOptions(merge: true),
+        );
   }
 
   @override
@@ -120,13 +123,77 @@ class FirestoreNotificationRepository implements NotificationRepository {
         .collection('notificationReads')
         .doc(notificationId.trim())
         .set(
-      {
-        'notificationId': notificationId.trim(),
-        'isRead': true,
-        'readAt': FieldValue.serverTimestamp(),
-      },
-      SetOptions(merge: true),
+          _readData(notificationId: notificationId.trim()),
+          SetOptions(merge: true),
+        );
+  }
+
+  @override
+  Future<void> clearNotification({
+    required String agentId,
+    required AppNotification notification,
+  }) async {
+    await clearNotifications(
+      agentId: agentId,
+      notifications: [notification],
     );
+  }
+
+  @override
+  Future<void> clearNotifications({
+    required String agentId,
+    required Iterable<AppNotification> notifications,
+  }) async {
+    final safeAgentId = agentId.trim();
+    if (safeAgentId.isEmpty) {
+      return;
+    }
+
+    final notificationList = notifications
+        .where((notification) => notification.id.trim().isNotEmpty)
+        .toList();
+    if (notificationList.isEmpty) {
+      return;
+    }
+
+    var batch = firestore.batch();
+    var operationCount = 0;
+
+    Future<void> commitCurrentBatchIfNeeded({bool force = false}) async {
+      if (operationCount == 0 || (!force && operationCount < 450)) {
+        return;
+      }
+      await batch.commit();
+      batch = firestore.batch();
+      operationCount = 0;
+    }
+
+    for (final notification in notificationList) {
+      final notificationId = notification.id.trim();
+      if (notification.isGlobal) {
+        batch.set(
+          _agents
+              .doc(safeAgentId)
+              .collection('notificationReads')
+              .doc(notificationId),
+          _clearData(notificationId: notificationId),
+          SetOptions(merge: true),
+        );
+      } else {
+        batch.set(
+          _agents
+              .doc(safeAgentId)
+              .collection('notifications')
+              .doc(notificationId),
+          _clearData(),
+          SetOptions(merge: true),
+        );
+      }
+      operationCount += 1;
+      await commitCurrentBatchIfNeeded();
+    }
+
+    await commitCurrentBatchIfNeeded(force: true);
   }
 
   @override
@@ -177,4 +244,20 @@ class FirestoreNotificationRepository implements NotificationRepository {
         .doc(Uri.encodeComponent(safeToken))
         .delete();
   }
+}
+
+Map<String, dynamic> _readData({String? notificationId}) {
+  return {
+    if (notificationId != null) 'notificationId': notificationId,
+    'isRead': true,
+    'readAt': FieldValue.serverTimestamp(),
+  };
+}
+
+Map<String, dynamic> _clearData({String? notificationId}) {
+  return {
+    ..._readData(notificationId: notificationId),
+    'isCleared': true,
+    'clearedAt': FieldValue.serverTimestamp(),
+  };
 }

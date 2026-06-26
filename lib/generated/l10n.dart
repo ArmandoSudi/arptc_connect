@@ -222,6 +222,9 @@ class S {
   String get noNotificationsDescription => _text('noNotificationsDescription');
   String get loadingNotifications => _text('loadingNotifications');
   String get unableToLoadNotifications => _text('unableToLoadNotifications');
+  String get clearAllNotifications => _text('clearAllNotifications');
+  String get notificationsCleared => _text('notificationsCleared');
+  String get unableToClearNotifications => _text('unableToClearNotifications');
   String get everyone => _text('everyone');
   String get forYou => _text('forYou');
   String get erp => _text('erp');
@@ -811,6 +814,9 @@ const _localizedValues = <String, Map<String, String>>{
     'noNotificationsDescription': "Notifications about incidents, news, and workflows will appear here.",
     'loadingNotifications': "Loading notifications...",
     'unableToLoadNotifications': "Unable to load notifications",
+    'clearAllNotifications': "Clear all notifications",
+    'notificationsCleared': "Notifications cleared.",
+    'unableToClearNotifications': "Unable to clear notifications",
     'everyone': "Everyone",
     'forYou': "For you",
     'erp': "ERP",
@@ -1373,6 +1379,9 @@ const _localizedValues = <String, Map<String, String>>{
     'noNotificationsDescription': "Les notifications concernant les incidents, les actualités et les workflows apparaîtront ici.",
     'loadingNotifications': "Chargement des notifications...",
     'unableToLoadNotifications': "Impossible de charger les notifications",
+    'clearAllNotifications': "Effacer toutes les notifications",
+    'notificationsCleared': "Notifications effacées.",
+    'unableToClearNotifications': "Impossible d'effacer les notifications",
     'everyone': "Tout le monde",
     'forYou': "Pour vous",
     'erp': "ERP",
