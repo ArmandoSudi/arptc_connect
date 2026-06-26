@@ -749,7 +749,6 @@ class _ReservedReservationCard extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = context.corporateTheme;
     final duration = reservation.endTime.difference(reservation.startTime);
-    final hasDescription = reservation.description.trim().isNotEmpty;
     final requesterLabel = reservation.userName.trim().isNotEmpty
         ? reservation.userName.trim()
         : reservation.userEmail.trim().isNotEmpty
@@ -810,18 +809,6 @@ class _ReservedReservationCard extends StatelessWidget {
                     _ReservationStatusPill(statusStyle: statusStyle),
                   ],
                 ),
-                if (hasDescription) ...[
-                  const Gap(8),
-                  Text(
-                    reservation.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      height: 1.35,
-                    ),
-                  ),
-                ],
                 const Gap(14),
                 Wrap(
                   spacing: 10,

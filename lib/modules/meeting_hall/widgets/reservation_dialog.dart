@@ -26,7 +26,6 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
   late TextEditingController _titleController;
-  late TextEditingController _descriptionController;
   bool _isSubmitting = false;
 
   @override
@@ -35,13 +34,11 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
     _startTime = TimeOfDay.now();
     _endTime = TimeOfDay(hour: _startTime.hour + 1, minute: _startTime.minute);
     _titleController = TextEditingController();
-    _descriptionController = TextEditingController();
   }
 
   @override
   void dispose() {
     _titleController.dispose();
-    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -52,72 +49,64 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
     final canCreate = currentUser?.role.canCreateReservation ?? false;
 
     return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       title: const Text('Nouvelle réservation'),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (!canCreate) ...[
-                const Text(
-                  'Votre rôle actuel ne permet pas de créer une réservation.',
+      content: SizedBox(
+        width: 560,
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (!canCreate) ...[
+                  const Text(
+                    'Votre rôle actuel ne permet pas de créer une réservation.',
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                CommonTextInput(
+                  label: 'Titre',
+                  type: CommonTextInputType.text,
+                  controller: _titleController,
+                  enabled: canCreate && !_isSubmitting,
+                  decoration: const InputDecoration(
+                    hintText: 'Entrez le titre de la réunion',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer un titre';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ListTile(
+                        title: const Text('Heure de début'),
+                        subtitle: Text(_startTime.format(context)),
+                        enabled: canCreate && !_isSubmitting,
+                        onTap: canCreate && !_isSubmitting
+                            ? () => _selectTime(context, true)
+                            : null,
+                      ),
+                    ),
+                    Expanded(
+                      child: ListTile(
+                        title: const Text('Heure de fin'),
+                        subtitle: Text(_endTime.format(context)),
+                        enabled: canCreate && !_isSubmitting,
+                        onTap: canCreate && !_isSubmitting
+                            ? () => _selectTime(context, false)
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
               ],
-              CommonTextInput(
-                label: 'Titre',
-                type: CommonTextInputType.text,
-                controller: _titleController,
-                enabled: canCreate && !_isSubmitting,
-                decoration: const InputDecoration(
-                  hintText: 'Entrez le titre de la réunion',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un titre';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              CommonTextInput(
-                label: 'Description',
-                type: CommonTextInputType.text,
-                isMultiline: true,
-                controller: _descriptionController,
-                enabled: canCreate && !_isSubmitting,
-                decoration: const InputDecoration(
-                  hintText: 'Entrez la description de la réunion',
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: ListTile(
-                      title: const Text('Heure de début'),
-                      subtitle: Text(_startTime.format(context)),
-                      enabled: canCreate && !_isSubmitting,
-                      onTap: canCreate && !_isSubmitting
-                          ? () => _selectTime(context, true)
-                          : null,
-                    ),
-                  ),
-                  Expanded(
-                    child: ListTile(
-                      title: const Text('Heure de fin'),
-                      subtitle: Text(_endTime.format(context)),
-                      enabled: canCreate && !_isSubmitting,
-                      onTap: canCreate && !_isSubmitting
-                          ? () => _selectTime(context, false)
-                          : null,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -196,7 +185,7 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
         userName: currentUser.displayName,
         userEmail: currentUser.email,
         title: _titleController.text,
-        description: _descriptionController.text,
+        description: '',
         startTime: startDateTime,
         endTime: endDateTime,
         status: ReservationStatus.onHold,
