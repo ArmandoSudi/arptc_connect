@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:arptc_connect/core/theme.dart';
@@ -17,11 +18,13 @@ import '../widgets/reservation_dialog.dart';
 class HallDetailsScreen extends ConsumerStatefulWidget {
   final String hallId;
   final DateTime? initialSelectedDate;
+  final String? initialReservationId;
 
   const HallDetailsScreen({
     super.key,
     required this.hallId,
     this.initialSelectedDate,
+    this.initialReservationId,
   });
 
   @override
@@ -31,17 +34,90 @@ class HallDetailsScreen extends ConsumerStatefulWidget {
 class _HallDetailsScreenState extends ConsumerState<HallDetailsScreen> {
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
-  CalendarFormat _calendarFormat = CalendarFormat.twoWeeks;
+  CalendarFormat _calendarFormat = CalendarFormat.week;
+  String _resolvedReservationId = '';
+  String _loadingReservationId = '';
 
   @override
   void initState() {
     super.initState();
-    final initialSelectedDate = widget.initialSelectedDate;
-    if (initialSelectedDate == null) {
+    _applyInitialSelectedDate(widget.initialSelectedDate, notify: false);
+    _resolveReservationDate(widget.initialReservationId);
+  }
+
+  @override
+  void didUpdateWidget(covariant HallDetailsScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.hallId != widget.hallId ||
+        !isSameDay(oldWidget.initialSelectedDate, widget.initialSelectedDate)) {
+      _applyInitialSelectedDate(widget.initialSelectedDate);
+    }
+    if (oldWidget.hallId != widget.hallId ||
+        oldWidget.initialReservationId != widget.initialReservationId) {
+      _resolveReservationDate(widget.initialReservationId);
+    }
+  }
+
+  void _resolveReservationDate(String? rawReservationId) {
+    final reservationId = rawReservationId?.trim() ?? '';
+    if (reservationId.isEmpty ||
+        reservationId == _resolvedReservationId ||
+        reservationId == _loadingReservationId) {
       return;
     }
-    _selectedDay = initialSelectedDate;
-    _focusedDay = initialSelectedDate;
+
+    _loadingReservationId = reservationId;
+    unawaited(_applyReservationDateFromId(reservationId));
+  }
+
+  Future<void> _applyReservationDateFromId(String reservationId) async {
+    try {
+      final reservation = await ref
+          .read(reservationRepositoryProvider)
+          .getReservationById(reservationId);
+      if (!mounted || _loadingReservationId != reservationId) {
+        return;
+      }
+
+      final reservationHallId = reservation.hallId.trim();
+      if (reservationHallId.isNotEmpty && reservationHallId != widget.hallId) {
+        return;
+      }
+
+      _resolvedReservationId = reservationId;
+      _applyInitialSelectedDate(reservation.startTime);
+    } catch (error, stackTrace) {
+      log(
+        'Unable to resolve meeting hall reservation date.',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    } finally {
+      if (_loadingReservationId == reservationId) {
+        _loadingReservationId = '';
+      }
+    }
+  }
+
+  void _applyInitialSelectedDate(
+    DateTime? initialSelectedDate, {
+    bool notify = true,
+  }) {
+    if (initialSelectedDate == null ||
+        isSameDay(_selectedDay, initialSelectedDate)) {
+      return;
+    }
+    void updateSelectedDate() {
+      _selectedDay = initialSelectedDate;
+      _focusedDay = initialSelectedDate;
+    }
+
+    if (!notify) {
+      updateSelectedDate();
+      return;
+    }
+
+    setState(updateSelectedDate);
   }
 
   @override

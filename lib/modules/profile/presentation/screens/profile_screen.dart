@@ -20,7 +20,7 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profileAsync = ref.watch(cachedAgentProfileProvider);
+    final profileAsync = ref.watch(liveAgentProfileProvider);
     final theme = Theme.of(context);
     final l10n = S.of(context);
 
@@ -31,7 +31,7 @@ class ProfileScreen extends ConsumerWidget {
             return ErrorStateView(
               title: l10n.profileUnavailable,
               description: l10n.profileUnavailableDescription,
-              onRetry: () => ref.invalidate(cachedAgentProfileProvider),
+              onRetry: () => ref.invalidate(liveAgentProfileProvider),
             );
           }
 
@@ -150,7 +150,7 @@ class ProfileScreen extends ConsumerWidget {
                       child: CustomFilledButton(
                         text: l10n.refreshProfile,
                         onPressed: () {
-                          ref.invalidate(cachedAgentProfileProvider);
+                          ref.invalidate(liveAgentProfileProvider);
                         },
                       ),
                     ),
@@ -173,7 +173,7 @@ class ProfileScreen extends ConsumerWidget {
         error: (error, _) => ErrorStateView(
           title: l10n.unableToLoadProfile,
           description: error.toString(),
-          onRetry: () => ref.invalidate(cachedAgentProfileProvider),
+          onRetry: () => ref.invalidate(liveAgentProfileProvider),
         ),
         loading: () => LoadingStateView(message: l10n.loadingProfile),
       ),

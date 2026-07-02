@@ -306,16 +306,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                       path: ':id',
                       builder: (context, state) {
                         final hallId = state.pathParameters['id']!;
-                        final selectedDate = DateTime.tryParse(
-                          state.queryParameters['date'] ?? '',
+                        final selectedDate = _parseMeetingHallSelectedDate(
+                          state.queryParameters['date'],
+                        );
+                        final reservationId = _parseMeetingHallReservationId(
+                          state.queryParameters,
                         );
                         // return HallDetailsScreen(
                         //   hall: ref.read(meetingHallsProvider)
                         //       .firstWhere((hall) => hall.id == hallId),
                         // );
                         return HallDetailsScreen(
+                          key: ValueKey(
+                            'meeting-hall-$hallId-${_meetingHallDateKey(selectedDate)}-${reservationId ?? 'no-reservation'}',
+                          ),
                           hallId: hallId,
                           initialSelectedDate: selectedDate,
+                          initialReservationId: reservationId,
                         );
                       },
                     ),
@@ -334,7 +341,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                       path: ':id',
                       redirect: (context, state) {
                         final hallId = state.pathParameters['id']!;
-                        return '/service/meeting-hall/$hallId';
+                        return Uri(
+                          path: '/service/meeting-hall/$hallId',
+                          queryParameters: state.queryParameters.isEmpty
+                              ? null
+                              : state.queryParameters,
+                        ).toString();
                       },
                     ),
                   ],
@@ -539,4 +551,42 @@ String _postLoginRedirectLocation(GoRouterState state) {
   }
 
   return from;
+}
+
+DateTime? _parseMeetingHallSelectedDate(String? rawDate) {
+  final value = rawDate?.trim() ?? '';
+  if (value.isEmpty) {
+    return null;
+  }
+
+  final dateOnlyMatch = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(value);
+  if (dateOnlyMatch != null) {
+    return DateTime(
+      int.parse(dateOnlyMatch.group(1)!),
+      int.parse(dateOnlyMatch.group(2)!),
+      int.parse(dateOnlyMatch.group(3)!),
+    );
+  }
+
+  return DateTime.tryParse(value);
+}
+
+String? _parseMeetingHallReservationId(Map<String, String> queryParameters) {
+  final value =
+      (queryParameters['reservationId'] ?? queryParameters['reservation'] ?? '')
+          .trim();
+  if (value.isEmpty) {
+    return null;
+  }
+  return value;
+}
+
+String _meetingHallDateKey(DateTime? date) {
+  if (date == null) {
+    return 'today';
+  }
+  final year = date.year.toString().padLeft(4, '0');
+  final month = date.month.toString().padLeft(2, '0');
+  final day = date.day.toString().padLeft(2, '0');
+  return '$year-$month-$day';
 }

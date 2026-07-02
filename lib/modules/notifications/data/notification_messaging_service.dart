@@ -264,7 +264,10 @@ class NotificationMessagingService {
     RemoteMessage message,
     void Function(String route) onRoute,
   ) {
-    final route = _normalizeNotificationRoute(message.data['route']);
+    final route = _withMeetingHallReservationId(
+      _normalizeNotificationRoute(message.data['route']),
+      message.data,
+    );
     if (route.isEmpty) {
       return;
     }
@@ -305,7 +308,8 @@ String _normalizeNotificationRoute(dynamic value) {
 
   final parsed = Uri.tryParse(route);
   if (parsed != null && parsed.hasScheme) {
-    route = parsed.fragment.isNotEmpty ? parsed.fragment : parsed.path;
+    route =
+        parsed.fragment.isNotEmpty ? parsed.fragment : _pathWithQuery(parsed);
   }
 
   if (route.startsWith('/#/')) {
@@ -319,6 +323,59 @@ String _normalizeNotificationRoute(dynamic value) {
   }
 
   return route;
+}
+
+String _pathWithQuery(Uri uri) {
+  final query = uri.query.trim();
+  if (query.isEmpty) {
+    return uri.path;
+  }
+  return '${uri.path}?$query';
+}
+
+String _withMeetingHallReservationId(
+  String route,
+  Map<String, dynamic> data,
+) {
+  final safeRoute = route.trim();
+  if (safeRoute.isEmpty || !_isMeetingHallReservationData(data)) {
+    return safeRoute;
+  }
+
+  final reservationId = _string(data['entityId'] ?? data['reservationId']);
+  if (reservationId.isEmpty) {
+    return safeRoute;
+  }
+
+  return _withQueryParams(safeRoute, {'reservationId': reservationId});
+}
+
+bool _isMeetingHallReservationData(Map<String, dynamic> data) {
+  final moduleKey = _normalizedNotificationKey(_string(data['moduleKey']));
+  final entityType = _normalizedNotificationKey(_string(data['entityType']));
+  final eventType = _normalizedNotificationKey(_string(data['eventType']));
+  return moduleKey == 'meetinghall' &&
+      (entityType == 'meetinghallreservation' ||
+          entityType == 'reservation' ||
+          eventType.startsWith('meetinghallreservation'));
+}
+
+String _normalizedNotificationKey(String value) {
+  return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+}
+
+String _withQueryParams(String route, Map<String, String> params) {
+  final parsedRoute = Uri.tryParse(route);
+  if (parsedRoute == null) {
+    return route;
+  }
+
+  return parsedRoute.replace(
+    queryParameters: {
+      ...parsedRoute.queryParameters,
+      ...params,
+    },
+  ).toString();
 }
 
 class NotificationClientPlatform {

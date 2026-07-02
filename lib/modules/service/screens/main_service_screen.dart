@@ -132,10 +132,10 @@ String _buildAgentDisplayName(
     return pieces.join(' ');
   }
 
-  final fallback =
+  final emailFallback =
       (data['email'] ?? data['emailLower'] ?? '').toString().trim();
-  if (fallback.isNotEmpty) {
-    return fallback;
+  if (emailFallback.isNotEmpty) {
+    return emailFallback;
   }
 
   return fallback;

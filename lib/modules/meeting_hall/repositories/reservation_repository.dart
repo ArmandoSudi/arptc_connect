@@ -337,7 +337,10 @@ class ReservationRepository {
     required String reservationId,
     required MeetingHallReservation reservation,
   }) {
-    final route = _hallDetailsRoute(reservation);
+    final route = _hallDetailsRoute(
+      reservation,
+      reservationId: reservationId,
+    );
     batch.set(
       firestoreClient.firestore.collection(_notificationPath).doc(),
       NotificationEvent(
@@ -368,7 +371,10 @@ class ReservationRepository {
     required MeetingHallUser actor,
     required String comment,
   }) {
-    final route = _hallDetailsRoute(reservation);
+    final route = _hallDetailsRoute(
+      reservation,
+      reservationId: reservation.id,
+    );
     final statusCopy = _statusNotificationCopy(
       reservation: reservation,
       status: status,
@@ -397,9 +403,19 @@ class ReservationRepository {
     );
   }
 
-  String _hallDetailsRoute(MeetingHallReservation reservation) {
+  String _hallDetailsRoute(
+    MeetingHallReservation reservation, {
+    String? reservationId,
+  }) {
     final date = _formatIsoDate(reservation.startTime);
-    return '/service/meeting-hall/${reservation.hallId}?date=$date';
+    final safeReservationId = (reservationId ?? reservation.id).trim();
+    return Uri(
+      path: '/service/meeting-hall/${reservation.hallId}',
+      queryParameters: {
+        'date': date,
+        if (safeReservationId.isNotEmpty) 'reservationId': safeReservationId,
+      },
+    ).toString();
   }
 
   String _formatIsoDate(DateTime date) {

@@ -1,17 +1,21 @@
-import 'package:arptc_connect/core/firebase_providers.dart';
 import 'package:arptc_connect/modules/notifications/data/firestore_notification_repository.dart';
 import 'package:arptc_connect/modules/notifications/domain/app_notification.dart';
+import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
 import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final currentNotificationAgentIdProvider = Provider<AsyncValue<String>>((ref) {
+  final authState = ref.watch(authStateProvider);
+  if (authState.isLoading) {
+    return const AsyncValue.loading();
+  }
+  if (authState.valueOrNull == null) {
+    return const AsyncValue.data('');
+  }
+
   final profileAsync = ref.watch(liveAgentProfileProvider);
   return profileAsync.whenData((profile) {
-    final profileId = _string(profile['id']);
-    if (profileId.isNotEmpty) {
-      return profileId;
-    }
-    return ref.read(firebaseAuthProvider).currentUser?.uid ?? '';
+    return _string(profile['id']);
   });
 });
 
@@ -28,6 +32,11 @@ final personalNotificationsProvider =
 
 final globalNotificationsProvider =
     StreamProvider<List<AppNotification>>((ref) {
+  final authState = ref.watch(authStateProvider);
+  if (authState.isLoading || authState.valueOrNull == null) {
+    return Stream.value(const <AppNotification>[]);
+  }
+
   return ref.read(notificationRepositoryProvider).watchGlobalNotifications();
 });
 

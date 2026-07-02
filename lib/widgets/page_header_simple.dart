@@ -47,6 +47,7 @@ class PageHeaderSimple extends StatelessWidget {
             ), /**/
           ),
         ),
+        Expanded(child: Container()),
         if (actions != null) ...[
           const SizedBox(width: 16),
           ...actions!,

@@ -1,5 +1,5 @@
-import 'package:arptc_connect/core/shared_preferences_provider.dart';
 import 'package:arptc_connect/generated/l10n.dart';
+import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
 import 'package:arptc_connect/modules/notifications/presentation/widgets/notification_bell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,20 +14,33 @@ class NavigationAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
+    final authEmail =
+        ref.watch(authStateProvider).valueOrNull?.email?.trim() ?? '';
+    final profileAsync = ref.watch(liveAgentProfileProvider);
+    final userLabel = profileAsync.maybeWhen(
+      data: (profile) {
+        final displayName = _buildDisplayName(profile);
+        if (displayName.isNotEmpty) {
+          return displayName;
+        }
+        final profileEmail = _string(profile['email']);
+        return profileEmail.isNotEmpty ? profileEmail : authEmail;
+      },
+      orElse: () => authEmail,
+    );
 
     return AppBar(
       title: const NavigationTitle(),
       centerTitle: false,
       actions: [
         const NotificationBell(),
-        FutureBuilder(
-          future: ref.watch(sharedPrefUtilityProvider).getEmail(),
-          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-            if (snapshot.hasData) {
-              return Text(snapshot.data!);
-            }
-            return Text(l10n.notAvailable);
-          },
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 240),
+          child: Text(
+            userLabel.isEmpty ? l10n.notAvailable : userLabel,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -52,3 +65,18 @@ class NavigationAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => AppBar().preferredSize;
 }
+
+String _buildDisplayName(Map<String, dynamic> profile) {
+  final parts = [
+    _string(profile['firstName']),
+    _string(profile['name']),
+    _string(profile['postName']),
+  ].where((part) => part.isNotEmpty).toList();
+
+  if (parts.isNotEmpty) {
+    return parts.join(' ');
+  }
+  return _string(profile['fullName']);
+}
+
+String _string(dynamic value) => value?.toString().trim() ?? '';

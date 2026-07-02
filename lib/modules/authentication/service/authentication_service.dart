@@ -181,8 +181,9 @@ class AuthService {
 
   /// Log the user out of the app and return to the login screen
   Future<void> signOut() async {
-    await _auth.signOut();
+    _hydratedEmail = null;
     await _providerRef.read(sharedPrefUtilityProvider).clearSession();
+    await _auth.signOut();
   }
 
   /// Will send the user an email with a link to reset their password

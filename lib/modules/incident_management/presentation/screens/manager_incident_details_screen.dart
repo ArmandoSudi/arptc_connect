@@ -919,7 +919,7 @@ class _RequesterSummary extends StatelessWidget {
             const SizedBox(height: 12),
             Wrap(
               spacing: 18,
-              runSpacing: 10,
+              runSpacing: 40,
               children: [
                 _Info(label: l10n.requester, value: ticket.createdByName),
                 _Info(label: l10n.email, value: ticket.createdByEmail),

@@ -14,6 +14,7 @@ import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
 import 'package:arptc_connect/widgets/page_header.dart';
+import 'package:arptc_connect/widgets/page_header_simple.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -65,6 +66,7 @@ class _ManagerDashboardContent extends StatelessWidget {
           title: l10n.incidentOperations,
           description: l10n.incidentOperationsDescription,
           actions: [
+            OutlinedButton(child: Text('Archive'), onPressed: () {},),
             OutlinedButton.icon(
               onPressed: () => context.go('/service/incidents/parameters'),
               icon: const Icon(Icons.tune_outlined),
@@ -85,7 +87,6 @@ class _ManagerDashboardContent extends StatelessWidget {
             IncidentKpiCard(
               title: l10n.openTickets,
               value: stats.totalOpenCount.toString(),
-              subtitle: l10n.openTicketsSubtitle,
               icon: Icons.inbox_outlined,
               color: scheme.primary,
               onTap: () => context.go(_queuePath('open')),
@@ -93,7 +94,6 @@ class _ManagerDashboardContent extends StatelessWidget {
             IncidentKpiCard(
               title: l10n.unassignedTickets,
               value: stats.unassignedCount.toString(),
-              subtitle: l10n.unassignedTicketsSubtitle,
               icon: Icons.person_off_outlined,
               color: tokens.warning,
               onTap: () => context.go(_queuePath('unassigned')),
@@ -108,7 +108,6 @@ class _ManagerDashboardContent extends StatelessWidget {
             IncidentKpiCard(
               title: l10n.solvedTickets,
               value: stats.solvedCount.toString(),
-              subtitle: l10n.solvedTicketsSubtitle,
               icon: Icons.task_alt_outlined,
               color: tokens.success,
               onTap: () => context.go(_queuePath('solved')),
@@ -166,7 +165,7 @@ class _Header extends StatelessWidget {
             context.pop();
           },
         );
-        final header = PageHeader(title: title, description: description);
+        final header = PageHeaderSimple(title: title);
         final actionBar = Wrap(
           spacing: 12,
           runSpacing: 8,
@@ -178,14 +177,7 @@ class _Header extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  backButton,
-                  const SizedBox(width: 8),
-                  Expanded(child: header),
-                ],
-              ),
+              header,
               const SizedBox(height: 12),
               actionBar,
             ],
@@ -195,7 +187,6 @@ class _Header extends StatelessWidget {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            backButton,
             Expanded(child: header),
             const SizedBox(width: 16),
             actionBar,
@@ -213,6 +204,7 @@ class _OperationalQueue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final l10n = S.of(context);
 
     return IncidentDashboardPanel(

@@ -2,6 +2,7 @@ import 'package:arptc_connect/core/fallback_framework_localizations.dart';
 import 'package:arptc_connect/core/theme.dart';
 import 'package:arptc_connect/core/theme_provider.dart';
 import 'package:arptc_connect/generated/l10n.dart';
+import 'package:arptc_connect/modules/authentication/widgets/session_bootstrapper.dart';
 import 'package:arptc_connect/modules/notifications/data/notification_messaging_service.dart';
 import 'package:arptc_connect/modules/notifications/presentation/widgets/notification_bootstrapper.dart';
 import 'package:arptc_connect/router.dart';
@@ -43,8 +44,10 @@ Future<void> main() async {
       overrides: [
         sharedPrefProvider.overrideWithValue(sharedPreferences),
       ],
-      child: const NotificationBootstrapper(
-        child: MyApp(),
+      child: const SessionBootstrapper(
+        child: NotificationBootstrapper(
+          child: MyApp(),
+        ),
       ),
     ),
   );

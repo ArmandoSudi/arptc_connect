@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:arptc_connect/generated/l10n.dart';
+import 'package:arptc_connect/modules/meeting_hall/repositories/reservation_repository.dart';
 import 'package:arptc_connect/modules/notifications/data/firestore_notification_repository.dart';
 import 'package:arptc_connect/modules/notifications/domain/app_notification.dart';
 import 'package:arptc_connect/modules/notifications/presentation/controllers/notification_providers.dart';
@@ -252,8 +253,13 @@ class _NotificationTile extends ConsumerWidget {
 
   Future<void> _openNotification(BuildContext context, WidgetRef ref) async {
     final agentId = ref.read(currentNotificationAgentIdProvider).valueOrNull;
-    if (context.mounted && notification.route.isNotEmpty) {
-      context.go(notification.route);
+    final route = await _resolvedNotificationRoute(ref);
+    if (!context.mounted) {
+      return;
+    }
+
+    if (route.isNotEmpty) {
+      context.go(route);
     }
 
     if (agentId == null || agentId.isEmpty) {
@@ -272,6 +278,42 @@ class _NotificationTile extends ConsumerWidget {
         debugPrintStack(stackTrace: stackTrace);
       }),
     );
+  }
+
+  Future<String> _resolvedNotificationRoute(WidgetRef ref) async {
+    final route = notification.route.trim();
+    if (!_isMeetingHallReservationNotification(notification)) {
+      return route;
+    }
+
+    final reservationId = notification.entityId.trim();
+    if (reservationId.isEmpty) {
+      return route;
+    }
+
+    try {
+      final reservation = await ref
+          .read(reservationRepositoryProvider)
+          .getReservationById(reservationId);
+      final hallId = reservation.hallId.trim();
+      if (hallId.isEmpty) {
+        return _withQueryParams(route, {'reservationId': reservationId});
+      }
+
+      return _withQueryParams(
+        '/service/meeting-hall/$hallId',
+        {
+          'date': _formatIsoDate(reservation.startTime),
+          'reservationId': reservationId,
+        },
+      );
+    } catch (error, stackTrace) {
+      debugPrint(
+        'Unable to resolve meeting hall reservation $reservationId: $error',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+      return _withQueryParams(route, {'reservationId': reservationId});
+    }
   }
 }
 
@@ -322,6 +364,46 @@ IconData _iconForModule(String moduleKey) {
     default:
       return Icons.notifications_none_outlined;
   }
+}
+
+bool _isMeetingHallReservationNotification(AppNotification notification) {
+  final moduleKey = _normalizedNotificationKey(notification.moduleKey);
+  final entityType = _normalizedNotificationKey(notification.entityType);
+  final eventType = _normalizedNotificationKey(notification.eventType);
+  return moduleKey == 'meetinghall' &&
+      (entityType == 'meetinghallreservation' ||
+          entityType == 'reservation' ||
+          eventType.startsWith('meetinghallreservation'));
+}
+
+String _normalizedNotificationKey(String value) {
+  return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+}
+
+String _withQueryParams(String route, Map<String, String> params) {
+  final trimmedRoute = route.trim();
+  if (trimmedRoute.isEmpty) {
+    return trimmedRoute;
+  }
+
+  final parsedRoute = Uri.tryParse(trimmedRoute);
+  if (parsedRoute == null) {
+    return trimmedRoute;
+  }
+
+  return parsedRoute.replace(
+    queryParameters: {
+      ...parsedRoute.queryParameters,
+      ...params,
+    },
+  ).toString();
+}
+
+String _formatIsoDate(DateTime date) {
+  final year = date.year.toString().padLeft(4, '0');
+  final month = date.month.toString().padLeft(2, '0');
+  final day = date.day.toString().padLeft(2, '0');
+  return '$year-$month-$day';
 }
 
 String _moduleLabel(String moduleKey, S l10n) {

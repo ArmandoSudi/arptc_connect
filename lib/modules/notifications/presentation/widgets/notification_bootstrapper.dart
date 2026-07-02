@@ -89,7 +89,7 @@ String _normalizeNotificationRoute(String route) {
   final parsed = Uri.tryParse(normalizedRoute);
   if (parsed != null && parsed.hasScheme) {
     normalizedRoute =
-        parsed.fragment.isNotEmpty ? parsed.fragment : parsed.path;
+        parsed.fragment.isNotEmpty ? parsed.fragment : _pathWithQuery(parsed);
   }
 
   if (normalizedRoute.startsWith('/#/')) {
@@ -103,4 +103,12 @@ String _normalizeNotificationRoute(String route) {
   }
 
   return normalizedRoute;
+}
+
+String _pathWithQuery(Uri uri) {
+  final query = uri.query.trim();
+  if (query.isEmpty) {
+    return uri.path;
+  }
+  return '${uri.path}?$query';
 }
