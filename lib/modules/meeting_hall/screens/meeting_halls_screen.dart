@@ -49,29 +49,43 @@ class MeetingHallsScreen extends ConsumerWidget {
                     child: Text('Aucune salle de réunion disponible.'),
                   );
                 }
+                final isPhoneLayout = MediaQuery.sizeOf(context).width < 600;
                 return Expanded(
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: _getCrossAxisCount(context),
-                      childAspectRatio: _getChildAspectRatio(context),
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
-                    itemCount: halls.length,
-                    itemBuilder: (context, index) {
-                      final hall = halls[index];
-                      return _MeetingHallCard(
-                        hall: hall,
-                        canManage: role.canManageHalls,
-                        onEdit: () => _showCreateHallModal(
-                          context,
-                          existingHall: hall,
+                  child: isPhoneLayout
+                      ? _MeetingHallsList(
+                          halls: halls,
+                          canManage: role.canManageHalls,
+                          onEdit: (hall) => _showCreateHallModal(
+                            context,
+                            existingHall: hall,
+                          ),
+                          onDelete: (hall) =>
+                              _confirmDeleteHall(context, ref, hall),
+                        )
+                      : GridView.builder(
+                          padding: const EdgeInsets.all(16),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: _getCrossAxisCount(context),
+                            childAspectRatio: _getChildAspectRatio(context),
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
+                          itemCount: halls.length,
+                          itemBuilder: (context, index) {
+                            final hall = halls[index];
+                            return _MeetingHallCard(
+                              hall: hall,
+                              canManage: role.canManageHalls,
+                              onEdit: () => _showCreateHallModal(
+                                context,
+                                existingHall: hall,
+                              ),
+                              onDelete: () =>
+                                  _confirmDeleteHall(context, ref, hall),
+                            );
+                          },
                         ),
-                        onDelete: () => _confirmDeleteHall(context, ref, hall),
-                      );
-                    },
-                  ),
                 );
               },
               error: (error, stack) => Center(child: Text('Erreur : $error')),
@@ -165,6 +179,57 @@ class MeetingHallsScreen extends ConsumerWidget {
   }
 }
 
+class _MeetingHallsList extends StatelessWidget {
+  final List<MeetingHall> halls;
+  final bool canManage;
+  final ValueChanged<MeetingHall> onEdit;
+  final ValueChanged<MeetingHall> onDelete;
+
+  const _MeetingHallsList({
+    required this.halls,
+    required this.canManage,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+      itemCount: halls.length,
+      separatorBuilder: (_, __) => const Gap(10),
+      itemBuilder: (context, index) {
+        final hall = halls[index];
+        return Card(
+          margin: EdgeInsets.zero,
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            leading: const CircleAvatar(
+              child: Icon(Icons.meeting_room_outlined),
+            ),
+            title: Text(
+              hall.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text('${hall.capacity} personnes'),
+            trailing: canManage
+                ? _HallActionsMenu(
+                    onEdit: () => onEdit(hall),
+                    onDelete: () => onDelete(hall),
+                  )
+                : const Icon(Icons.chevron_right),
+            onTap: () => context.go('/service/meeting-hall/${hall.id}'),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _MeetingHallCard extends StatelessWidget {
   final MeetingHall hall;
   final bool canManage;
@@ -196,28 +261,9 @@ class _MeetingHallCard extends StatelessWidget {
                 children: [
                   const Icon(Icons.meeting_room, size: 48),
                   if (canManage)
-                    PopupMenuButton<_HallAction>(
-                      tooltip: 'Actions',
-                      onSelected: (action) {
-                        switch (action) {
-                          case _HallAction.edit:
-                            onEdit();
-                            break;
-                          case _HallAction.delete:
-                            onDelete();
-                            break;
-                        }
-                      },
-                      itemBuilder: (context) => const [
-                        PopupMenuItem(
-                          value: _HallAction.edit,
-                          child: Text('Modifier'),
-                        ),
-                        PopupMenuItem(
-                          value: _HallAction.delete,
-                          child: Text('Supprimer'),
-                        ),
-                      ],
+                    _HallActionsMenu(
+                      onEdit: onEdit,
+                      onDelete: onDelete,
                     ),
                 ],
               ),
@@ -262,6 +308,43 @@ class _MeetingHallCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _HallActionsMenu extends StatelessWidget {
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const _HallActionsMenu({
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<_HallAction>(
+      tooltip: 'Actions',
+      onSelected: (action) {
+        switch (action) {
+          case _HallAction.edit:
+            onEdit();
+            break;
+          case _HallAction.delete:
+            onDelete();
+            break;
+        }
+      },
+      itemBuilder: (context) => const [
+        PopupMenuItem(
+          value: _HallAction.edit,
+          child: Text('Modifier'),
+        ),
+        PopupMenuItem(
+          value: _HallAction.delete,
+          child: Text('Supprimer'),
+        ),
+      ],
     );
   }
 }
