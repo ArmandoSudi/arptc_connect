@@ -1,5 +1,6 @@
+import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
-import 'package:arptc_connect/widgets/page_header.dart';
+import 'package:arptc_connect/widgets/page_header_simple.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,6 +9,7 @@ class UserManagementMainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = S.of(context);
     const menus = [
       _UserManagementMenu(
         title: 'Agents',
@@ -37,7 +39,6 @@ class UserManagementMainScreen extends StatelessWidget {
         color: Color(0xFF1B5E20),
         path: '/service/usermanagement/departments',
       ),
-
       _UserManagementMenu(
         title: 'Modules',
         subtitle: 'Manage modules and permission roles',
@@ -52,18 +53,8 @@ class UserManagementMainScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: () => context.pop(),
-                ),
-                const PageHeader(
-                  title: 'User Management',
-                  description:
-                      'Departments, services, bureaux, agents and modules',
-                ),
-              ],
+            PageHeaderSimple(
+              title: l10n.moduleUserManagementName,
             ),
             const SizedBox(height: 16),
             Expanded(

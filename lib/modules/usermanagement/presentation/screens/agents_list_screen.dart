@@ -10,7 +10,6 @@ import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
-import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:arptc_connect/widgets/page_header_simple.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,8 +45,6 @@ class _AgentsManagementScreenState
   Widget build(BuildContext context) {
     final agentsAsync = ref.watch(filteredUmAgentsProvider);
     final departmentsAsync = ref.watch(umDepartmentsProvider);
-    final servicesAsync = ref.watch(umServicesProvider);
-    final bureauxAsync = ref.watch(umBureauxProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -111,51 +108,37 @@ class _AgentsManagementScreenState
                     },
                     orElse: () => <String, String>{},
                   );
-                  final servicesById = servicesAsync.maybeWhen(
-                    data: (services) => {
-                      for (final service in services) service.id: service.name,
-                    },
-                    orElse: () => <String, String>{},
-                  );
-                  final bureauxById = bureauxAsync.maybeWhen(
-                    data: (bureaux) => {
-                      for (final bureau in bureaux) bureau.id: bureau.name,
-                    },
-                    orElse: () => <String, String>{},
-                  );
-
-                  return ListView.separated(
-                    itemCount: agents.length,
-                    itemBuilder: (context, index) {
-                      final agent = agents[index];
-                      final department =
-                          departmentsById[agent.departmentId] ?? '-';
-                      final service = servicesById[agent.serviceId] ?? '-';
-                      final bureau = bureauxById[agent.bureauId] ?? '-';
-
-                      return ListTile(
-                        leading: CircleAvatar(
-                          child: Text(_initials(agent)),
-                        ),
-                        title: Text(
-                          agent.displayName,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+                  return Card(
+                    child: ListView.separated(
+                      itemCount: agents.length,
+                      itemBuilder: (context, index) {
+                        final agent = agents[index];
+                        final department =
+                            departmentsById[agent.departmentId] ?? '-';
+                        return ListTile(
+                          leading: CircleAvatar(
+                            child: Text(_initials(agent)),
                           ),
-                        ),
-                        subtitle: Text(
-                          '${_formatPosition(agent.position)} • $department ',
-                          style: theme.textTheme.bodySmall,
-                        ),
-                        trailing: agent.matricule.isEmpty
-                            ? null
-                            : Text(agent.matricule),
-                        onTap: () => context.push(
-                          '/service/usermanagement/agents/${agent.id}',
-                        ),
-                      );
-                    },
-                    separatorBuilder: (_, __) => const Divider(height: 1),
+                          title: Text(
+                            agent.displayName,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '${_formatPosition(agent.position)} • $department ',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                          trailing: agent.matricule.isEmpty
+                              ? null
+                              : Text(agent.matricule),
+                          onTap: () => context.push(
+                            '/service/usermanagement/agents/${agent.id}',
+                          ),
+                        );
+                      },
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                    ),
                   );
                 },
                 error: (error, _) => ErrorStateView(
@@ -513,45 +496,52 @@ class AddAgentSheetState extends ConsumerState<AddAgentSheet> {
       _isSaving = true;
     });
 
-    Map<String, String> modulePermissions = Modules.emptyPermissions();
     try {
-      final configuredModules = await ref.read(umModulesProvider.future);
-      if (configuredModules.isNotEmpty) {
-        modulePermissions = {
-          for (final module in configuredModules)
-            if (module.isActive) module.key: ModuleAccessRole.none.value,
-        };
-        if (modulePermissions.isEmpty) {
-          modulePermissions = Modules.emptyPermissions();
-        }
-      }
-    } catch (_) {
-      modulePermissions = Modules.emptyPermissions();
-    }
+      await ref.read(userManagementRepositoryProvider).createAgentAccount(
+            UserManagementAgent(
+              id: '',
+              firstName: firstName,
+              name: name,
+              postName: postName,
+              matricule: matricule,
+              email: email,
+              emailLower: email.toLowerCase(),
+              profilePictureUrl: null,
+              position: _position,
+              departmentId: departmentId,
+              serviceId: serviceId,
+              bureauId: bureauId,
+              isActive: true,
+              modulePermissions: Modules.defaultUserPermissions(),
+            ),
+          );
 
-    await ref.read(userManagementRepositoryProvider).addAgent(
-          UserManagementAgent(
-            id: '',
-            firstName: firstName,
-            name: name,
-            postName: postName,
-            matricule: matricule,
-            email: email,
-            emailLower: email.toLowerCase(),
-            profilePictureUrl: null,
-            position: _position,
-            departmentId: departmentId,
-            serviceId: serviceId,
-            bureauId: bureauId,
-            isActive: true,
-            modulePermissions: modulePermissions,
+      ref.invalidate(umAgentsProvider);
+
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Agent créé. Le mot de passe initial est Arptc@1234.',
+            ),
           ),
         );
-
-    ref.invalidate(umAgentsProvider);
-
-    if (mounted) {
-      Navigator.of(context).pop();
+      }
+    } on AgentProvisioningException catch (error) {
+      if (!mounted) return;
+      final message = error.code == 'already-exists'
+          ? 'Un compte existe déjà avec cette adresse e-mail.'
+          : error.message;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
     }
   }
 

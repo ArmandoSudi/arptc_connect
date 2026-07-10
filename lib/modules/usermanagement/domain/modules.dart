@@ -115,6 +115,12 @@ class Modules {
     };
   }
 
+  static Map<String, String> defaultUserPermissions() {
+    return {
+      for (final module in all) module.key: ModuleAccessRole.user.value,
+    };
+  }
+
   static String normalizeModuleKey(String candidate) {
     return _normalizeModuleKey(candidate) ?? _sanitizeKey(candidate);
   }

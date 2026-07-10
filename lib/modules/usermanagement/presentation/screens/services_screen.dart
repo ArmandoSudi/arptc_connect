@@ -7,7 +7,7 @@ import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
-import 'package:arptc_connect/widgets/page_header.dart';
+import 'package:arptc_connect/widgets/page_header_simple.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,13 +27,12 @@ class ServicesManagementScreen extends ConsumerWidget {
           children: [
             Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: () => context.pop(),
-                ),
-                const PageHeader(
+                // IconButton(
+                //   icon: const Icon(Icons.arrow_back_ios),
+                //   onPressed: () => context.pop(),
+                // ),
+                const PageHeaderSimple(
                   title: 'Services',
-                  description: 'List of services by department',
                 ),
                 const Spacer(),
                 FilledButton.icon(
@@ -73,33 +72,35 @@ class ServicesManagementScreen extends ConsumerWidget {
                     orElse: () => <String, String>{},
                   );
 
-                  return ListView.separated(
-                    itemCount: services.length,
-                    itemBuilder: (context, index) {
-                      final service = services[index];
-                      final departmentName =
-                          departmentById[service.departmentId] ?? '-';
+                  return Card(
+                    child: ListView.separated(
+                      itemCount: services.length,
+                      itemBuilder: (context, index) {
+                        final service = services[index];
+                        final departmentName =
+                            departmentById[service.departmentId] ?? '-';
 
-                      return ListTile(
-                        leading: const Icon(Icons.work_outline),
-                        title: Text(
-                          service.name,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+                        return ListTile(
+                          leading: const Icon(Icons.work_outline),
+                          title: Text(
+                            service.name,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        subtitle: Text(
-                          'Department: $departmentName',
-                          style: theme.textTheme.bodySmall,
-                        ),
-                        trailing:
-                            service.code.isEmpty ? null : Text(service.code),
-                        onTap: () => context.push(
-                          '/service/usermanagement/services/${service.id}',
-                        ),
-                      );
-                    },
-                    separatorBuilder: (_, __) => const Divider(height: 1),
+                          subtitle: Text(
+                            'Department: $departmentName',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                          trailing:
+                              service.code.isEmpty ? null : Text(service.code),
+                          onTap: () => context.push(
+                            '/service/usermanagement/services/${service.id}',
+                          ),
+                        );
+                      },
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                    ),
                   );
                 },
                 error: (error, _) => ErrorStateView(

@@ -8,7 +8,7 @@ import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
-import 'package:arptc_connect/widgets/page_header.dart';
+import 'package:arptc_connect/widgets/page_header_simple.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,9 +31,8 @@ class ModulesManagementScreen extends ConsumerWidget {
                   icon: const Icon(Icons.arrow_back_ios),
                   onPressed: () => context.pop(),
                 ),
-                const PageHeader(
+                const PageHeaderSimple(
                   title: 'Modules',
-                  description: 'List of application modules',
                 ),
                 const Spacer(),
                 modulesAsync.when(

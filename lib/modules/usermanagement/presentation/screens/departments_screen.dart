@@ -7,7 +7,7 @@ import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
-import 'package:arptc_connect/widgets/page_header.dart';
+import 'package:arptc_connect/widgets/page_header_simple.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -26,13 +26,12 @@ class DepartmentsScreen extends ConsumerWidget {
           children: [
             Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: () => context.pop(),
-                ),
-                const PageHeader(
+                // IconButton(
+                //   icon: const Icon(Icons.arrow_back_ios),
+                //   onPressed: () => context.pop(),
+                // ),
+                const PageHeaderSimple(
                   title: 'Departments',
-                  description: 'List of organizational departments',
                 ),
                 const Spacer(),
                 FilledButton.icon(
@@ -64,30 +63,32 @@ class DepartmentsScreen extends ConsumerWidget {
                     );
                   }
 
-                  return ListView.separated(
-                    itemCount: departments.length,
-                    itemBuilder: (context, index) {
-                      final department = departments[index];
-                      return ListTile(
-                        leading: const Icon(Icons.apartment_outlined),
-                        title: Text(
-                          department.name,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+                  return Card(
+                    child: ListView.separated(
+                      itemCount: departments.length,
+                      itemBuilder: (context, index) {
+                        final department = departments[index];
+                        return ListTile(
+                          leading: const Icon(Icons.apartment_outlined),
+                          title: Text(
+                            department.name,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        subtitle: department.code.isEmpty
-                            ? null
-                            : Text(
-                                department.code,
-                                style: theme.textTheme.bodySmall,
-                              ),
-                        onTap: () => context.push(
-                          '/service/usermanagement/departments/${department.id}',
-                        ),
-                      );
-                    },
-                    separatorBuilder: (_, __) => const Divider(height: 1),
+                          subtitle: department.code.isEmpty
+                              ? null
+                              : Text(
+                                  department.code,
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                          onTap: () => context.push(
+                            '/service/usermanagement/departments/${department.id}',
+                          ),
+                        );
+                      },
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                    ),
                   );
                 },
                 error: (error, _) => ErrorStateView(

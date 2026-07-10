@@ -6,14 +6,17 @@ import 'package:arptc_connect/modules/usermanagement/domain/user_management_depa
 import 'package:arptc_connect/modules/usermanagement/domain/user_management_module.dart';
 import 'package:arptc_connect/modules/usermanagement/domain/user_management_service.dart';
 import 'package:arptc_connect/modules/usermanagement/domain/user_management_user.dart';
+import 'package:arptc_connect/core/firebase_providers.dart';
 import 'package:arptc_connect/utils/firestore_client.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class UserManagementRepository {
-  UserManagementRepository(this.firestoreClient);
+  UserManagementRepository(this.firestoreClient, this.firebaseFunctions);
 
   final FirestoreClient firestoreClient;
+  final FirebaseFunctions firebaseFunctions;
   static const String _usersPath = 'users';
   static const String _departmentsPath = 'departments';
   static const String _servicesPath = 'services';
@@ -324,6 +327,41 @@ class UserManagementRepository {
     }
   }
 
+  Future<String> createAgentAccount(UserManagementAgent agent) async {
+    try {
+      final callable = firebaseFunctions.httpsCallable('createAgentAccount');
+      final result = await callable.call<Map<String, dynamic>>({
+        'firstName': agent.firstName.trim(),
+        'name': agent.name.trim(),
+        'postName': agent.postName.trim(),
+        'matricule': agent.matricule.trim(),
+        'email': agent.email.trim().toLowerCase(),
+        'profilePictureUrl': agent.profilePictureUrl,
+        'position': agent.position.trim(),
+        'departmentId': agent.departmentId.trim(),
+        'serviceId': agent.serviceId.trim(),
+        'bureauId': agent.bureauId.trim(),
+        'isActive': agent.isActive,
+        'modulePermissions': agent.modulePermissions,
+      });
+      return (result.data['uid'] ?? '').toString();
+    } on FirebaseFunctionsException catch (error, stackTrace) {
+      log('UserManagementRepository::createAgentAccount error => $error');
+      log('UserManagementRepository::createAgentAccount stackTrace => $stackTrace');
+      throw AgentProvisioningException(
+        code: error.code,
+        message: error.message ?? 'Unable to create the agent account.',
+      );
+    } catch (error, stackTrace) {
+      log('UserManagementRepository::createAgentAccount error => $error');
+      log('UserManagementRepository::createAgentAccount stackTrace => $stackTrace');
+      throw const AgentProvisioningException(
+        code: 'unknown',
+        message: 'Unable to create the agent account.',
+      );
+    }
+  }
+
   Future<UserManagementAgent> fetchAgentById(String id) async {
     try {
       final document =
@@ -490,5 +528,21 @@ class UserManagementRepository {
 
 final userManagementRepositoryProvider =
     Provider<UserManagementRepository>((ref) {
-  return UserManagementRepository(ref.read(firestoreClientProvider));
+  return UserManagementRepository(
+    ref.read(firestoreClientProvider),
+    ref.read(firebaseFunctionsProvider),
+  );
 });
+
+class AgentProvisioningException implements Exception {
+  const AgentProvisioningException({
+    required this.code,
+    required this.message,
+  });
+
+  final String code;
+  final String message;
+
+  @override
+  String toString() => message;
+}

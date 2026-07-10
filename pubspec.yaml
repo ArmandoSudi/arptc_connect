@@ -33,6 +33,7 @@ dependencies:
   firebase_core: ^3.13.0
   cloud_firestore: ^5.6.6
   firebase_auth: ^5.5.2
+  cloud_functions: ^5.5.2
   file_picker: ^10.1.2
   syncfusion_flutter_xlsio: ^21.2.3
   table_calendar: ^3.0.9
