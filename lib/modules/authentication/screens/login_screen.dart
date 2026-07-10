@@ -1,4 +1,5 @@
 import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,8 +15,16 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
 
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  String? _passwordAuthError;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +95,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         isPassword: true,
                         controller: passwordController,
                         prefixIcon: const Icon(Icons.lock),
+                        onChanged: (_) => _clearPasswordAuthError(),
                         validator: (value) {
+                          if (_passwordAuthError != null) {
+                            return _passwordAuthError;
+                          }
                           if (value == null || value.length < 6) {
                             return 'Le mot de passe doit avoir plus de 6 caractères';
                           }
@@ -99,12 +112,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
-                          onPressed: () {
+                          onPressed: () async {
+                            _clearPasswordAuthError();
                             if (!_formKey.currentState!.validate()) {
                               return;
                             }
 
-                            signinWithEmailAndPassword(
+                            await signinWithEmailAndPassword(
                               emailController.text,
                               passwordController.text,
                             );
@@ -131,9 +145,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  void signinWithEmailAndPassword(String email, String password) {
-    ref
-        .read(authServiceProvider)
-        .signInWithEmailAndPassword(email, password, context);
+  Future<void> signinWithEmailAndPassword(String email, String password) async {
+    try {
+      await ref.read(authServiceProvider).signInWithEmailAndPassword(
+            email.trim(),
+            password,
+            context,
+            showErrorDialog: false,
+          );
+    } on FirebaseAuthException catch (error) {
+      if (_isWrongPasswordError(error.code)) {
+        _showPasswordAuthError('Mot de passe incorrect. Veuillez réessayer.');
+        return;
+      }
+
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Une erreur est survenue: ${error.message}')),
+      );
+    }
+  }
+
+  void _showPasswordAuthError(String message) {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _passwordAuthError = message;
+    });
+    _formKey.currentState?.validate();
+  }
+
+  void _clearPasswordAuthError() {
+    if (_passwordAuthError == null) {
+      return;
+    }
+    setState(() {
+      _passwordAuthError = null;
+    });
+  }
+
+  bool _isWrongPasswordError(String code) {
+    return code == 'wrong-password' ||
+        code == 'invalid-credential' ||
+        code == 'invalid-login-credentials' ||
+        code == 'INVALID_LOGIN_CREDENTIALS';
   }
 }

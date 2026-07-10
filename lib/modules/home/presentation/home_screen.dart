@@ -22,7 +22,6 @@ class HomeScreen extends StatelessWidget {
             const Gap(32),
             PublishedNewsFeed(
               title: l10n.homeNewsTitle,
-              description: l10n.homeNewsDescription,
             ),
             const Gap(32),
           ],

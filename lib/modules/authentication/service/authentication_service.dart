@@ -31,7 +31,11 @@ class AuthService {
 
   ///  SignIn the user using Email and Password
   Future<void> signInWithEmailAndPassword(
-      String email, String password, BuildContext? context) async {
+    String email,
+    String password,
+    BuildContext? context, {
+    bool showErrorDialog = true,
+  }) async {
     try {
       var result = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
@@ -43,6 +47,9 @@ class AuthService {
       await saveAgent(result.user!.email!);
     } on FirebaseAuthException catch (e) {
       log("signInWithEmail:: ${e.code}");
+      if (!showErrorDialog) {
+        rethrow;
+      }
       final safeContext = context;
       if (safeContext == null || !safeContext.mounted) {
         return;
