@@ -33,8 +33,28 @@ final umBureauSearchQueryProvider = StateProvider<String>((ref) {
   return '';
 });
 
+final umServiceSearchQueryProvider = StateProvider<String>((ref) {
+  return '';
+});
+
 final umAgentSearchQueryProvider = StateProvider<String>((ref) {
   return '';
+});
+
+final filteredUmServicesProvider =
+    Provider<AsyncValue<List<UserManagementService>>>((ref) {
+  final servicesAsync = ref.watch(umServicesProvider);
+  final query = ref.watch(umServiceSearchQueryProvider).trim().toLowerCase();
+
+  return servicesAsync.whenData((services) {
+    if (query.isEmpty) {
+      return services;
+    }
+
+    return services.where((service) {
+      return service.nameLower.contains(query);
+    }).toList();
+  });
 });
 
 final filteredUmBureauxProvider =

@@ -1,6 +1,8 @@
+import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/usermanagement/data/user_management_repository.dart';
 import 'package:arptc_connect/modules/usermanagement/domain/user_management_service.dart';
 import 'package:arptc_connect/modules/usermanagement/presentation/controllers/management_providers.dart';
+import 'package:arptc_connect/widgets/app_search_bar.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
 import 'package:arptc_connect/widgets/common_text_input.dart';
@@ -12,12 +14,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class ServicesManagementScreen extends ConsumerWidget {
+class ServicesManagementScreen extends ConsumerStatefulWidget {
   const ServicesManagementScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final servicesAsync = ref.watch(umServicesProvider);
+  ConsumerState<ServicesManagementScreen> createState() =>
+      _ServicesManagementScreenState();
+}
+
+class _ServicesManagementScreenState
+    extends ConsumerState<ServicesManagementScreen> {
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+    ref.read(umServiceSearchQueryProvider.notifier).state = '';
+  }
+
+  @override
+  void dispose() {
+    ref.read(umServiceSearchQueryProvider.notifier).state = '';
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final servicesAsync = ref.watch(filteredUmServicesProvider);
     final departmentsAsync = ref.watch(umDepartmentsProvider);
     final theme = Theme.of(context);
 
@@ -53,14 +78,24 @@ class ServicesManagementScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
+            AppSearchBar(
+              controller: _searchController,
+              hintText: S.of(context).searchServices,
+              onChanged: (value) {
+                ref.read(umServiceSearchQueryProvider.notifier).state = value;
+              },
+            ),
+            const SizedBox(height: 16),
             Expanded(
               child: servicesAsync.when(
                 data: (services) {
                   if (services.isEmpty) {
-                    return const EmptyStateView(
+                    return EmptyStateView(
                       icon: Icons.workspaces_outline,
                       title: 'No service found',
-                      description: 'Add at least one service to get started.',
+                      description: _searchController.text.isEmpty
+                          ? 'Add at least one service to get started.'
+                          : 'Try another service name.',
                     );
                   }
 
