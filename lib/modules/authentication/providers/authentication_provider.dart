@@ -7,9 +7,16 @@ final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService(ref);
 });
 
-
 /// Getting the state of authentication through the provider.
 final authStateProvider = StreamProvider<User?>((ref) {
   return ref.read(authServiceProvider).authStateChange;
 });
 
+final currentAuthSessionKeyProvider = Provider<String?>((ref) {
+  final user = ref.watch(authStateProvider).valueOrNull;
+  if (user == null) {
+    return null;
+  }
+
+  return '${user.uid}|${user.email?.trim().toLowerCase() ?? ''}';
+});

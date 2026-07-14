@@ -1,4 +1,5 @@
 import 'package:arptc_connect/core/firebase_providers.dart';
+import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
 import 'package:arptc_connect/modules/news/data/news_actor.dart';
 import 'package:arptc_connect/modules/news/data/firestore_news_repository.dart';
 import 'package:arptc_connect/modules/news/domain/news_enums.dart';
@@ -41,23 +42,45 @@ final currentNewsActorProvider = Provider<AsyncValue<NewsActor>>((ref) {
 });
 
 final publishedNewsPostsProvider = StreamProvider<List<NewsPost>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  if (sessionKey == null) {
+    return Stream.value(const <NewsPost>[]);
+  }
   return ref.read(newsRepositoryProvider).watchPublishedPosts();
 });
 
 final managerNewsPostsProvider = StreamProvider<List<NewsPost>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final authUser = ref.watch(authStateProvider).valueOrNull;
+  if (sessionKey == null || authUser == null) {
+    return Stream.value(const <NewsPost>[]);
+  }
+
   final user = ref.watch(currentNewsUserProvider).valueOrNull;
-  if (user == null || user.id.isEmpty) {
+  if (user == null ||
+      user.id.isEmpty ||
+      !_newsUserMatchesAuthUser(user, authUser.uid, authUser.email)) {
     return Stream.value(const <NewsPost>[]);
   }
   return ref.read(newsRepositoryProvider).watchManagerPosts(user.id);
 });
 
 final pendingReviewNewsPostsProvider = StreamProvider<List<NewsPost>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  if (sessionKey == null) {
+    return Stream.value(const <NewsPost>[]);
+  }
   return ref.read(newsRepositoryProvider).watchPendingReviewPosts();
 });
 
 final newsPostProvider = StreamProvider.family<NewsPost?, String>(
-  (ref, postId) => ref.read(newsRepositoryProvider).watchPostById(postId),
+  (ref, postId) {
+    final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+    if (sessionKey == null) {
+      return Stream.value(null);
+    }
+    return ref.read(newsRepositoryProvider).watchPostById(postId);
+  },
 );
 
 NewsRole _roleFromProfile(Map<String, dynamic> profile) {
@@ -94,3 +117,17 @@ String _displayNameFromProfile(Map<String, dynamic> profile) {
 }
 
 String _string(dynamic value) => value?.toString().trim() ?? '';
+
+bool _newsUserMatchesAuthUser(
+  NewsUser newsUser,
+  String authUserId,
+  String? authEmail,
+) {
+  if (newsUser.id == authUserId) {
+    return true;
+  }
+
+  final normalizedAuthEmail = _string(authEmail).toLowerCase();
+  return normalizedAuthEmail.isNotEmpty &&
+      newsUser.email.toLowerCase() == normalizedAuthEmail;
+}
