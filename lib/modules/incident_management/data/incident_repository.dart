@@ -2,6 +2,7 @@ import 'package:arptc_connect/modules/incident_management/data/incident_actor.da
 import 'package:arptc_connect/modules/incident_management/domain/incident_audit_log.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_category.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_comment.dart';
+import 'package:arptc_connect/modules/incident_management/domain/incident_resolution_code.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_ticket.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_user.dart';
 import 'package:arptc_connect/modules/incident_management/domain/it_service.dart';
@@ -30,6 +31,10 @@ abstract class IncidentRepository {
 
   Stream<List<ItService>> watchAllItServicesForManagement();
 
+  Stream<List<IncidentResolutionCode>> watchResolutionCodes();
+
+  Stream<List<IncidentResolutionCode>> watchAllResolutionCodesForManagement();
+
   Stream<List<IncidentUser>> watchItStaffUsers();
 
   Stream<List<IncidentUser>> watchAgents();
@@ -43,6 +48,11 @@ abstract class IncidentRepository {
   Future<void> saveCategory(IncidentCategory category, IncidentActor actor);
 
   Future<void> saveItService(ItService service, IncidentActor actor);
+
+  Future<void> saveResolutionCode(
+    IncidentResolutionCode resolutionCode,
+    IncidentActor actor,
+  );
 
   Future<void> updateManagerFields({
     required String ticketId,

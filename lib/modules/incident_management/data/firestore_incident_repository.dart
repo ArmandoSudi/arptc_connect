@@ -5,6 +5,7 @@ import 'package:arptc_connect/modules/incident_management/domain/incident_audit_
 import 'package:arptc_connect/modules/incident_management/domain/incident_category.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_comment.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_enums.dart';
+import 'package:arptc_connect/modules/incident_management/domain/incident_resolution_code.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_ticket.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_user.dart';
 import 'package:arptc_connect/modules/incident_management/domain/it_service.dart';
@@ -30,6 +31,9 @@ class FirestoreIncidentRepository implements IncidentRepository {
 
   CollectionReference<Map<String, dynamic>> get _itServices =>
       firestore.collection('itServices');
+
+  CollectionReference<Map<String, dynamic>> get _resolutionCodes =>
+      firestore.collection('incidentResolutionCodes');
 
   CollectionReference<Map<String, dynamic>> get _agents =>
       firestore.collection('agents');
@@ -149,6 +153,32 @@ class FirestoreIncidentRepository implements IncidentRepository {
       final services = snapshot.docs.map(ItService.fromFirestore).toList()
         ..sort((left, right) => left.nameLower.compareTo(right.nameLower));
       return services;
+    });
+  }
+
+  @override
+  Stream<List<IncidentResolutionCode>> watchResolutionCodes() {
+    return watchAllResolutionCodesForManagement().map(
+      (codes) => codes.where((code) => code.isActive).toList(),
+    );
+  }
+
+  @override
+  Stream<List<IncidentResolutionCode>> watchAllResolutionCodesForManagement() {
+    return _resolutionCodes.snapshots().map((snapshot) {
+      final codesByValue = {
+        for (final code in IncidentResolutionCode.builtInDefaults)
+          code.code: code,
+      };
+      for (final document in snapshot.docs) {
+        final code = IncidentResolutionCode.fromFirestore(document);
+        if (code.code.isNotEmpty) {
+          codesByValue[code.code] = code;
+        }
+      }
+      final codes = codesByValue.values.toList()
+        ..sort((left, right) => left.code.compareTo(right.code));
+      return codes;
     });
   }
 
@@ -310,6 +340,25 @@ class FirestoreIncidentRepository implements IncidentRepository {
     final data = service.toFirestore()
       ..['updatedAt'] = FieldValue.serverTimestamp();
     if (isNew) {
+      data['createdAt'] = FieldValue.serverTimestamp();
+    }
+
+    await doc.set(data, SetOptions(merge: true));
+  }
+
+  @override
+  Future<void> saveResolutionCode(
+    IncidentResolutionCode resolutionCode,
+    IncidentActor actor,
+  ) async {
+    final code = IncidentResolutionCode.normalizeCode(resolutionCode.code);
+    final documentId = resolutionCode.id.trim().isEmpty
+        ? code.toLowerCase()
+        : resolutionCode.id.trim();
+    final doc = _resolutionCodes.doc(documentId);
+    final data = resolutionCode.toFirestore()
+      ..['updatedAt'] = FieldValue.serverTimestamp();
+    if (resolutionCode.createdAt == null) {
       data['createdAt'] = FieldValue.serverTimestamp();
     }
 

@@ -2,6 +2,7 @@ import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/incident_management/data/firestore_incident_repository.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_category.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_enums.dart';
+import 'package:arptc_connect/modules/incident_management/domain/incident_resolution_code.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_ticket.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_user.dart';
 import 'package:arptc_connect/modules/incident_management/domain/it_service.dart';
@@ -40,7 +41,6 @@ class _ManagerIncidentDetailsScreenState
   final _deviceTypeController = TextEditingController();
   final _assetIdController = TextEditingController();
   final _resolutionSummaryController = TextEditingController();
-  final _resolutionCodeController = TextEditingController();
   final _internalNoteController = TextEditingController();
 
   String _loadedTicketId = '';
@@ -50,6 +50,7 @@ class _ManagerIncidentDetailsScreenState
   String _impact = '';
   String _urgency = '';
   String _assignedToUserId = '';
+  String _resolutionCode = '';
   bool _isCategorizing = false;
   bool _isAssigning = false;
   bool _isResolving = false;
@@ -63,7 +64,6 @@ class _ManagerIncidentDetailsScreenState
     _deviceTypeController.dispose();
     _assetIdController.dispose();
     _resolutionSummaryController.dispose();
-    _resolutionCodeController.dispose();
     _internalNoteController.dispose();
     super.dispose();
   }
@@ -74,6 +74,8 @@ class _ManagerIncidentDetailsScreenState
     final categories = ref.watch(incidentCategoriesProvider).valueOrNull ?? [];
     final services = ref.watch(itServicesProvider).valueOrNull ?? [];
     final staff = ref.watch(itStaffUsersProvider).valueOrNull ?? [];
+    final resolutionCodes =
+        ref.watch(incidentResolutionCodesProvider).valueOrNull ?? [];
     final currentUser = ref.watch(currentIncidentUserProvider).valueOrNull;
     final comments = ref.watch(incidentCommentsProvider(widget.ticketId));
     final logs = ref.watch(incidentAuditLogsProvider(widget.ticketId));
@@ -164,7 +166,11 @@ class _ManagerIncidentDetailsScreenState
                       });
                     },
                     resolutionSummaryController: _resolutionSummaryController,
-                    resolutionCodeController: _resolutionCodeController,
+                    resolutionCodes: resolutionCodes,
+                    resolutionCode: _resolutionCode,
+                    onResolutionCodeChanged: (value) {
+                      setState(() => _resolutionCode = value ?? '');
+                    },
                     isCategorizing: _isCategorizing,
                     isAssigning: _isAssigning,
                     isResolving: _isResolving,
@@ -277,7 +283,8 @@ class _ManagerIncidentDetailsScreenState
     _deviceTypeController.text = ticket.deviceType;
     _assetIdController.text = ticket.assetId;
     _resolutionSummaryController.text = ticket.resolutionSummary;
-    _resolutionCodeController.text = ticket.resolutionCode;
+    _resolutionCode =
+        IncidentResolutionCode.normalizeCode(ticket.resolutionCode);
   }
 
   Future<void> _categorizeTicket(
@@ -427,13 +434,17 @@ class _ManagerIncidentDetailsScreenState
       _showMessage(l10n.enterResolutionSummaryBeforeSolved);
       return;
     }
+    if (_resolutionCode.isEmpty) {
+      _showMessage(l10n.selectResolutionCodeBeforeSolved);
+      return;
+    }
 
     setState(() => _isResolving = true);
     try {
       await ref.read(incidentRepositoryProvider).markTicketResolved(
             ticketId: ticket.id,
             resolutionSummary: summary,
-            resolutionCode: _resolutionCodeController.text.trim(),
+            resolutionCode: _resolutionCode,
             actor: actor,
           );
       _showMessage(l10n.ticketMarkedSolved);
@@ -455,13 +466,17 @@ class _ManagerIncidentDetailsScreenState
       _showMessage(l10n.enterResolutionSummaryBeforeClosing);
       return;
     }
+    if (_resolutionCode.isEmpty) {
+      _showMessage(l10n.selectResolutionCodeBeforeClosing);
+      return;
+    }
 
     setState(() => _isClosing = true);
     try {
       await ref.read(incidentRepositoryProvider).closeTicket(
             ticketId: ticket.id,
             resolutionSummary: summary,
-            resolutionCode: _resolutionCodeController.text.trim(),
+            resolutionCode: _resolutionCode,
             actor: actor,
           );
       _showMessage(l10n.ticketClosed);
@@ -546,7 +561,9 @@ class _WorkflowStepper extends StatelessWidget {
     required this.assignedToUserId,
     required this.onAssignedToChanged,
     required this.resolutionSummaryController,
-    required this.resolutionCodeController,
+    required this.resolutionCodes,
+    required this.resolutionCode,
+    required this.onResolutionCodeChanged,
     required this.isCategorizing,
     required this.isAssigning,
     required this.isResolving,
@@ -580,7 +597,9 @@ class _WorkflowStepper extends StatelessWidget {
   final String assignedToUserId;
   final ValueChanged<String?> onAssignedToChanged;
   final TextEditingController resolutionSummaryController;
-  final TextEditingController resolutionCodeController;
+  final List<IncidentResolutionCode> resolutionCodes;
+  final String resolutionCode;
+  final ValueChanged<String?> onResolutionCodeChanged;
   final bool isCategorizing;
   final bool isAssigning;
   final bool isResolving;
@@ -645,7 +664,7 @@ class _WorkflowStepper extends StatelessWidget {
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Gap(8),
+                  const Gap(8),
                   _ResponsiveFields(
                     children: [
                       _ServiceDropdown(
@@ -792,12 +811,12 @@ class _WorkflowStepper extends StatelessWidget {
                     enabled: !isClosed && !isCancelled,
                   ),
                   const SizedBox(height: 12),
-                  CommonTextInput(
-                    label: l10n.resolutionCode,
-                    hintText: l10n.resolutionCodeHint,
-                    type: CommonTextInputType.text,
-                    controller: resolutionCodeController,
-                    enabled: !isClosed && !isCancelled,
+                  _ResolutionCodeDropdown(
+                    resolutionCodes: resolutionCodes,
+                    value: resolutionCode,
+                    onChanged: !isClosed && !isCancelled
+                        ? onResolutionCodeChanged
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   Align(
@@ -1127,6 +1146,55 @@ class _StaffDropdown extends StatelessWidget {
         ),
       ],
       onChanged: onChanged,
+    );
+  }
+}
+
+class _ResolutionCodeDropdown extends StatelessWidget {
+  const _ResolutionCodeDropdown({
+    required this.resolutionCodes,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final List<IncidentResolutionCode> resolutionCodes;
+  final String value;
+  final ValueChanged<String?>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final languageCode = Localizations.localeOf(context).languageCode;
+    final effectiveValue = IncidentResolutionCode.normalizeCode(value);
+    final hasCurrentValue = resolutionCodes.any(
+      (resolutionCode) => resolutionCode.code == effectiveValue,
+    );
+
+    return DropdownButtonFormField<String>(
+      value: effectiveValue.isEmpty ? null : effectiveValue,
+      isExpanded: true,
+      decoration: InputDecoration(
+        labelText: '${l10n.resolutionCode} *',
+        hintText: l10n.selectResolutionCode,
+        border: const OutlineInputBorder(),
+      ),
+      items: [
+        ...resolutionCodes.map(
+          (resolutionCode) => DropdownMenuItem(
+            value: resolutionCode.code,
+            child: Text(
+              resolutionCode.labelForLanguageCode(languageCode),
+            ),
+          ),
+        ),
+        if (effectiveValue.isNotEmpty && !hasCurrentValue)
+          DropdownMenuItem(
+            value: effectiveValue,
+            child: Text(effectiveValue),
+          ),
+      ],
+      onChanged:
+          resolutionCodes.isEmpty && effectiveValue.isEmpty ? null : onChanged,
     );
   }
 }

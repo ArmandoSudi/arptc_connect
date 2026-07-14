@@ -7,6 +7,7 @@ import 'package:arptc_connect/modules/incident_management/domain/incident_audit_
 import 'package:arptc_connect/modules/incident_management/domain/incident_category.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_comment.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_enums.dart';
+import 'package:arptc_connect/modules/incident_management/domain/incident_resolution_code.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_ticket.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_user.dart';
 import 'package:arptc_connect/modules/incident_management/domain/it_service.dart';
@@ -116,6 +117,18 @@ final itServicesProvider = StreamProvider<List<ItService>>((ref) {
 
 final managedItServicesProvider = StreamProvider<List<ItService>>((ref) {
   return ref.read(incidentRepositoryProvider).watchAllItServicesForManagement();
+});
+
+final incidentResolutionCodesProvider =
+    StreamProvider<List<IncidentResolutionCode>>((ref) {
+  return ref.read(incidentRepositoryProvider).watchResolutionCodes();
+});
+
+final managedIncidentResolutionCodesProvider =
+    StreamProvider<List<IncidentResolutionCode>>((ref) {
+  return ref
+      .read(incidentRepositoryProvider)
+      .watchAllResolutionCodesForManagement();
 });
 
 final itStaffUsersProvider = StreamProvider<List<IncidentUser>>((ref) {

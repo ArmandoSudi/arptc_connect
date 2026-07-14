@@ -480,6 +480,12 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /incidentResolutionCodes/{resolutionCodeId} {
+      allow get, list: if signedIn() && hasIncidentAccess();
+      allow create, update: if signedIn() && isManager();
+      allow delete: if false;
+    }
+
     match /meeting_halls/{hallId} {
       allow get, list: if signedIn() && hasMeetingHallAccess();
       allow create: if signedIn() &&

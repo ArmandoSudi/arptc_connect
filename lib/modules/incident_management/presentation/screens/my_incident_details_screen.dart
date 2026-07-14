@@ -1,5 +1,6 @@
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_enums.dart';
+import 'package:arptc_connect/modules/incident_management/domain/incident_resolution_code.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_ticket.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/incident_localizations.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/controllers/incident_providers.dart';
@@ -31,6 +32,8 @@ class MyIncidentDetailsScreen extends ConsumerWidget {
     final ticketAsync = ref.watch(incidentTicketProvider(ticketId));
     final commentsAsync = ref.watch(incidentCommentsProvider(ticketId));
     final logsAsync = ref.watch(incidentAuditLogsProvider(ticketId));
+    final resolutionCodes =
+        ref.watch(incidentResolutionCodesProvider).valueOrNull ?? [];
     final l10n = S.of(context);
 
     return Scaffold(
@@ -68,7 +71,10 @@ class MyIncidentDetailsScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  _DetailsCard(ticket: ticket),
+                  _DetailsCard(
+                    ticket: ticket,
+                    resolutionCodes: resolutionCodes,
+                  ),
                   const SizedBox(height: 16),
                   Card(
                     elevation: 0,
@@ -116,9 +122,11 @@ class MyIncidentDetailsScreen extends ConsumerWidget {
 class _DetailsCard extends StatelessWidget {
   const _DetailsCard({
     required this.ticket,
+    required this.resolutionCodes,
   });
 
   final IncidentTicket ticket;
+  final List<IncidentResolutionCode> resolutionCodes;
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +170,14 @@ class _DetailsCard extends StatelessWidget {
                   _localizedUrgencyValue(l10n, ticket.urgency),
                 ),
                 _FieldValue(l10n.assignedTo, ticket.assignedToName),
-                _FieldValue(l10n.resolutionCode, ticket.resolutionCode),
+                _FieldValue(
+                  l10n.resolutionCode,
+                  _localizedResolutionCode(
+                    context,
+                    ticket.resolutionCode,
+                    resolutionCodes,
+                  ),
+                ),
                 _FieldValue(l10n.resolutionSummary, ticket.resolutionSummary),
                 _FieldValue(l10n.createdAt, _formatDate(ticket.createdAt)),
                 _FieldValue(l10n.closedAt, _formatDate(ticket.closedAt)),
@@ -282,4 +297,26 @@ String _localizedImpactValue(S l10n, String value) {
 String _localizedUrgencyValue(S l10n, String value) {
   final urgency = IncidentUrgency.fromValue(value);
   return urgency == null ? value : localizedIncidentUrgencyLabel(l10n, urgency);
+}
+
+String _localizedResolutionCode(
+  BuildContext context,
+  String value,
+  List<IncidentResolutionCode> resolutionCodes,
+) {
+  final normalized = IncidentResolutionCode.normalizeCode(value);
+  if (normalized.isEmpty) {
+    return '';
+  }
+  IncidentResolutionCode? resolutionCode;
+  for (final item in resolutionCodes) {
+    if (item.code == normalized) {
+      resolutionCode = item;
+      break;
+    }
+  }
+  return resolutionCode?.labelForLanguageCode(
+        Localizations.localeOf(context).languageCode,
+      ) ??
+      normalized;
 }

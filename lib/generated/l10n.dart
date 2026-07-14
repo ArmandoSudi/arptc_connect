@@ -316,6 +316,10 @@ class S {
   String get resolutionSummaryHint => _text('resolutionSummaryHint');
   String get resolutionCode => _text('resolutionCode');
   String get resolutionCodeHint => _text('resolutionCodeHint');
+  String get resolutionCodes => _text('resolutionCodes');
+  String get selectResolutionCode => _text('selectResolutionCode');
+  String get selectResolutionCodeBeforeSolved => _text('selectResolutionCodeBeforeSolved');
+  String get selectResolutionCodeBeforeClosing => _text('selectResolutionCodeBeforeClosing');
   String get closedAt => _text('closedAt');
   String get archiveEligible => _text('archiveEligible');
   String get internalNotes => _text('internalNotes');
@@ -376,6 +380,13 @@ class S {
   String get incidentParametersDescription => _text('incidentParametersDescription');
   String get addItService => _text('addItService');
   String get addCategory => _text('addCategory');
+  String get addResolutionCode => _text('addResolutionCode');
+  String get editResolutionCode => _text('editResolutionCode');
+  String get noResolutionCodes => _text('noResolutionCodes');
+  String get resolutionCodeIdentifier => _text('resolutionCodeIdentifier');
+  String get resolutionCodeIdentifierHint => _text('resolutionCodeIdentifierHint');
+  String get resolutionCodeLabelEnglish => _text('resolutionCodeLabelEnglish');
+  String get resolutionCodeLabelFrench => _text('resolutionCodeLabelFrench');
   String get totalIncidentsThisMonth => _text('totalIncidentsThisMonth');
   String get averageResolutionTime => _text('averageResolutionTime');
   String get monthlyIncidentTrend => _text('monthlyIncidentTrend');
@@ -907,7 +918,11 @@ const _localizedValues = <String, Map<String, String>>{
     'resolutionSummary': "Resolution summary",
     'resolutionSummaryHint': "Explain what solved the incident",
     'resolutionCode': "Resolution code",
-    'resolutionCodeHint': "Example: solved, workaround, duplicate",
+    'resolutionCodeHint': "Select how the incident was resolved",
+    'resolutionCodes': "Resolution codes",
+    'selectResolutionCode': "Select a resolution code",
+    'selectResolutionCodeBeforeSolved': "Select a resolution code before marking the ticket solved.",
+    'selectResolutionCodeBeforeClosing': "Select a resolution code before closing the ticket.",
     'closedAt': "Closed at",
     'archiveEligible': "Archive eligible",
     'internalNotes': "Internal notes",
@@ -965,9 +980,16 @@ const _localizedValues = <String, Map<String, String>>{
     'unableToLoadIncidentAccess': "Unable to load incident access",
     'unableToLoadIncidentDashboardAccess': "Unable to load incident dashboard access",
     'incidentParameters': "Incident Parameters",
-    'incidentParametersDescription': "Configure IT services and categories used by support tickets.",
+    'incidentParametersDescription': "Configure IT services, categories, and resolution codes used by support tickets.",
     'addItService': "Add IT service",
     'addCategory': "Add category",
+    'addResolutionCode': "Add resolution code",
+    'editResolutionCode': "Edit resolution code",
+    'noResolutionCodes': "No resolution codes available",
+    'resolutionCodeIdentifier': "Code identifier",
+    'resolutionCodeIdentifierHint': "Example: FIXED or WORKAROUND_PROVIDED",
+    'resolutionCodeLabelEnglish': "English label",
+    'resolutionCodeLabelFrench': "French label",
     'totalIncidentsThisMonth': "Total Incidents This Month",
     'averageResolutionTime': "Average Resolution Time",
     'monthlyIncidentTrend': "Monthly Incident Trend",
@@ -1472,7 +1494,11 @@ const _localizedValues = <String, Map<String, String>>{
     'resolutionSummary': "Résumé de résolution",
     'resolutionSummaryHint': "Expliquez ce qui a résolu l'incident",
     'resolutionCode': "Code de résolution",
-    'resolutionCodeHint': "Exemple : résolu, contournement, doublon",
+    'resolutionCodeHint': "Sélectionnez comment l'incident a été résolu",
+    'resolutionCodes': "Codes de résolution",
+    'selectResolutionCode': "Sélectionnez un code de résolution",
+    'selectResolutionCodeBeforeSolved': "Sélectionnez un code de résolution avant de marquer le ticket comme résolu.",
+    'selectResolutionCodeBeforeClosing': "Sélectionnez un code de résolution avant de fermer le ticket.",
     'closedAt': "Fermé le",
     'archiveEligible': "Archivable le",
     'internalNotes': "Notes internes",
@@ -1530,9 +1556,16 @@ const _localizedValues = <String, Map<String, String>>{
     'unableToLoadIncidentAccess': "Impossible de charger les accès aux incidents",
     'unableToLoadIncidentDashboardAccess': "Impossible de charger les accès au tableau de bord des incidents",
     'incidentParameters': "Paramètres des incidents",
-    'incidentParametersDescription': "Configurez les services IT et les catégories utilisés par les tickets support.",
+    'incidentParametersDescription': "Configurez les services IT, les catégories et les codes de résolution utilisés par les tickets support.",
     'addItService': "Ajouter un service IT",
     'addCategory': "Ajouter une catégorie",
+    'addResolutionCode': "Ajouter un code de résolution",
+    'editResolutionCode': "Modifier le code de résolution",
+    'noResolutionCodes': "Aucun code de résolution disponible",
+    'resolutionCodeIdentifier': "Identifiant du code",
+    'resolutionCodeIdentifierHint': "Exemple : FIXED ou WORKAROUND_PROVIDED",
+    'resolutionCodeLabelEnglish': "Libellé anglais",
+    'resolutionCodeLabelFrench': "Libellé français",
     'totalIncidentsThisMonth': "Total des incidents ce mois-ci",
     'averageResolutionTime': "Temps moyen de résolution",
     'monthlyIncidentTrend': "Tendance mensuelle des incidents",
