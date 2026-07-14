@@ -1,5 +1,5 @@
-import 'package:arptc_connect/core/firebase_providers.dart';
 import 'package:arptc_connect/modules/incident_management/application/incident_dashboard_aggregator.dart';
+import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
 import 'package:arptc_connect/modules/incident_management/data/incident_actor.dart';
 import 'package:arptc_connect/modules/incident_management/data/firestore_incident_repository.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_dashboard_stats.dart';
@@ -15,22 +15,30 @@ import 'package:arptc_connect/modules/profile/presentation/controllers/profile_p
 import 'package:arptc_connect/modules/usermanagement/domain/modules.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final currentUserIncidentRoleProvider =
-    Provider<AsyncValue<IncidentRole>>((ref) {
-  final profileAsync = ref.watch(liveAgentProfileProvider);
-  return profileAsync.whenData(_roleFromProfile);
-});
+final currentUserIncidentRoleProvider = Provider<AsyncValue<IncidentRole>>(
+  (ref) => ref.watch(currentIncidentUserProvider).whenData((user) => user.role),
+);
 
 final currentIncidentUserProvider = Provider<AsyncValue<IncidentUser>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final authUser = ref.watch(authStateProvider).valueOrNull;
+  if (sessionKey == null || authUser == null) {
+    return const AsyncValue.data(_emptyIncidentUser);
+  }
+
   final profileAsync = ref.watch(liveAgentProfileProvider);
   return profileAsync.whenData((profile) {
-    final authUser = ref.read(firebaseAuthProvider).currentUser;
+    if (!_profileMatchesAuthUser(profile, authUser.uid, authUser.email)) {
+      return _emptyIncidentUser;
+    }
+
     final displayName = _displayNameFromProfile(profile);
     final profileId = _string(profile['id']);
+    final profileEmail = _string(profile['email']);
     return IncidentUser(
-      id: profileId.isNotEmpty ? profileId : authUser?.uid ?? '',
+      id: profileId.isNotEmpty ? profileId : authUser.uid,
       displayName: displayName.isNotEmpty ? displayName : 'Agent',
-      email: _string(profile['email']),
+      email: profileEmail.isNotEmpty ? profileEmail : authUser.email ?? '',
       departmentId: _string(profile['departmentId']),
       departmentName: _string(profile['departmentName']),
       serviceId: _string(profile['serviceId']),
@@ -55,8 +63,12 @@ final currentIncidentActorProvider = Provider<AsyncValue<IncidentActor>>((ref) {
 
 final myOpenIncidentTicketsProvider =
     StreamProvider<List<IncidentTicket>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
   final user = ref.watch(currentIncidentUserProvider).valueOrNull;
-  if (user == null || user.email.isEmpty) {
+  if (sessionKey == null ||
+      user == null ||
+      user.role != IncidentRole.user ||
+      user.email.isEmpty) {
     return Stream.value(const <IncidentTicket>[]);
   }
   return ref.read(incidentRepositoryProvider).watchMyActiveTickets(user.email);
@@ -64,8 +76,12 @@ final myOpenIncidentTicketsProvider =
 
 final myClosedAndArchivedIncidentTicketsProvider =
     StreamProvider<List<IncidentTicket>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
   final user = ref.watch(currentIncidentUserProvider).valueOrNull;
-  if (user == null || user.email.isEmpty) {
+  if (sessionKey == null ||
+      user == null ||
+      user.role != IncidentRole.user ||
+      user.email.isEmpty) {
     return Stream.value(const <IncidentTicket>[]);
   }
   return ref
@@ -75,6 +91,11 @@ final myClosedAndArchivedIncidentTicketsProvider =
 
 final managerOpenIncidentTicketsProvider =
     StreamProvider<List<IncidentTicket>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || role != IncidentRole.manager) {
+    return Stream.value(const <IncidentTicket>[]);
+  }
   return ref
       .read(incidentRepositoryProvider)
       .watchAllActiveTicketsForManagers();
@@ -82,6 +103,11 @@ final managerOpenIncidentTicketsProvider =
 
 final managerClosedIncidentTicketsProvider =
     StreamProvider<List<IncidentTicket>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || role != IncidentRole.manager) {
+    return Stream.value(const <IncidentTicket>[]);
+  }
   return ref
       .read(incidentRepositoryProvider)
       .watchAllClosedTicketsForManagers();
@@ -89,8 +115,12 @@ final managerClosedIncidentTicketsProvider =
 
 final assignedToMeIncidentTicketsProvider =
     StreamProvider<List<IncidentTicket>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
   final user = ref.watch(currentIncidentUserProvider).valueOrNull;
-  if (user == null || user.id.isEmpty) {
+  if (sessionKey == null ||
+      user == null ||
+      user.role != IncidentRole.manager ||
+      user.id.isEmpty) {
     return Stream.value(const <IncidentTicket>[]);
   }
   return ref.read(incidentRepositoryProvider).watchAssignedToMeTickets(user.id);
@@ -98,59 +128,119 @@ final assignedToMeIncidentTicketsProvider =
 
 final adminAllIncidentTicketsProvider =
     StreamProvider<List<IncidentTicket>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || role != IncidentRole.admin) {
+    return Stream.value(const <IncidentTicket>[]);
+  }
   return ref.read(incidentRepositoryProvider).watchAllTicketsForAdmin();
 });
 
 final incidentCategoriesProvider =
     StreamProvider<List<IncidentCategory>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || !_hasIncidentAccess(role)) {
+    return Stream.value(const <IncidentCategory>[]);
+  }
   return ref.read(incidentRepositoryProvider).watchCategories();
 });
 
 final managedIncidentCategoriesProvider =
     StreamProvider<List<IncidentCategory>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || role != IncidentRole.manager) {
+    return Stream.value(const <IncidentCategory>[]);
+  }
   return ref.read(incidentRepositoryProvider).watchAllCategoriesForManagement();
 });
 
 final itServicesProvider = StreamProvider<List<ItService>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || !_hasIncidentAccess(role)) {
+    return Stream.value(const <ItService>[]);
+  }
   return ref.read(incidentRepositoryProvider).watchItServices();
 });
 
 final managedItServicesProvider = StreamProvider<List<ItService>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || role != IncidentRole.manager) {
+    return Stream.value(const <ItService>[]);
+  }
   return ref.read(incidentRepositoryProvider).watchAllItServicesForManagement();
 });
 
 final incidentResolutionCodesProvider =
     StreamProvider<List<IncidentResolutionCode>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || !_hasIncidentAccess(role)) {
+    return Stream.value(const <IncidentResolutionCode>[]);
+  }
   return ref.read(incidentRepositoryProvider).watchResolutionCodes();
 });
 
 final managedIncidentResolutionCodesProvider =
     StreamProvider<List<IncidentResolutionCode>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || role != IncidentRole.manager) {
+    return Stream.value(const <IncidentResolutionCode>[]);
+  }
   return ref
       .read(incidentRepositoryProvider)
       .watchAllResolutionCodesForManagement();
 });
 
 final itStaffUsersProvider = StreamProvider<List<IncidentUser>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || role != IncidentRole.manager) {
+    return Stream.value(const <IncidentUser>[]);
+  }
   return ref.read(incidentRepositoryProvider).watchItStaffUsers();
 });
 
 final incidentAgentsProvider = StreamProvider<List<IncidentUser>>((ref) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || role != IncidentRole.manager) {
+    return Stream.value(const <IncidentUser>[]);
+  }
   return ref.read(incidentRepositoryProvider).watchAgents();
 });
 
 final incidentTicketProvider =
     StreamProvider.family<IncidentTicket?, String>((ref, ticketId) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || !_hasIncidentAccess(role)) {
+    return Stream.value(null);
+  }
   return ref.read(incidentRepositoryProvider).watchTicketById(ticketId);
 });
 
 final incidentCommentsProvider =
     StreamProvider.family<List<IncidentComment>, String>((ref, ticketId) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || !_hasIncidentAccess(role)) {
+    return Stream.value(const <IncidentComment>[]);
+  }
   return ref.read(incidentRepositoryProvider).watchComments(ticketId);
 });
 
 final incidentAuditLogsProvider =
     StreamProvider.family<List<IncidentAuditLog>, String>((ref, ticketId) {
+  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final role = ref.watch(currentUserIncidentRoleProvider).valueOrNull;
+  if (sessionKey == null || !_hasIncidentAccess(role)) {
+    return Stream.value(const <IncidentAuditLog>[]);
+  }
   return ref.read(incidentRepositoryProvider).watchAuditLogs(ticketId);
 });
 
@@ -237,3 +327,42 @@ String _displayNameFromProfile(Map<String, dynamic> profile) {
 }
 
 String _string(dynamic value) => value?.toString().trim() ?? '';
+
+const _emptyIncidentUser = IncidentUser(
+  id: '',
+  displayName: '',
+  email: '',
+  departmentId: '',
+  departmentName: '',
+  serviceId: '',
+  serviceName: '',
+  matricule: '',
+  role: IncidentRole.none,
+);
+
+bool _hasIncidentAccess(IncidentRole? role) {
+  return role == IncidentRole.user ||
+      role == IncidentRole.manager ||
+      role == IncidentRole.admin;
+}
+
+bool _profileMatchesAuthUser(
+  Map<String, dynamic> profile,
+  String authUserId,
+  String? authEmail,
+) {
+  final profileId = _string(profile['id']);
+  if (profileId.isNotEmpty && profileId == authUserId) {
+    return true;
+  }
+
+  final normalizedAuthEmail = _string(authEmail).toLowerCase();
+  if (normalizedAuthEmail.isEmpty) {
+    return false;
+  }
+
+  final profileEmail = _string(profile['email']).toLowerCase();
+  final profileEmailLower = _string(profile['emailLower']).toLowerCase();
+  return profileEmail == normalizedAuthEmail ||
+      profileEmailLower == normalizedAuthEmail;
+}
