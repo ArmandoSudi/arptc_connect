@@ -363,7 +363,9 @@ function buildNotificationDocument(eventId, event) {
 
 async function findAgentsByModuleRole(target, fallbackModuleKey) {
   const moduleKey = normalizeString(target.moduleKey || fallbackModuleKey);
-  const roles = normalizeArray(target.roles).map((role) => role.toUpperCase());
+  const roles = [...new Set(
+    normalizeArray(target.roles).flatMap(roleStorageVariants),
+  )];
   if (!moduleKey || roles.length === 0) {
     return [];
   }
@@ -385,6 +387,18 @@ async function findAgentsByModuleRole(target, fallbackModuleKey) {
   }
 
   return Array.from(agentsById.values());
+}
+
+function roleStorageVariants(value) {
+  const upper = normalizeString(value).toUpperCase();
+  if (!upper) {
+    return [];
+  }
+  return [
+    upper,
+    upper.toLowerCase(),
+    `${upper.charAt(0)}${upper.substring(1).toLowerCase()}`,
+  ];
 }
 
 function modulePermissionAliases(moduleKey) {

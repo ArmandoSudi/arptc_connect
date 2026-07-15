@@ -13,7 +13,6 @@ import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
-import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:arptc_connect/widgets/page_header_simple.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -66,7 +65,11 @@ class _ManagerDashboardContent extends StatelessWidget {
           title: l10n.incidentOperations,
           description: l10n.incidentOperationsDescription,
           actions: [
-            OutlinedButton(child: Text('Archive'), onPressed: () {},),
+            OutlinedButton.icon(
+              onPressed: () => context.go('/service/incidents/history'),
+              icon: const Icon(Icons.archive_outlined),
+              label: Text(l10n.archive),
+            ),
             OutlinedButton.icon(
               onPressed: () => context.go('/service/incidents/parameters'),
               icon: const Icon(Icons.tune_outlined),
@@ -159,12 +162,6 @@ class _Header extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isNarrow = constraints.maxWidth < 760;
-        final backButton = IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            context.pop();
-          },
-        );
         final header = PageHeaderSimple(title: title);
         final actionBar = Wrap(
           spacing: 12,
@@ -204,7 +201,6 @@ class _OperationalQueue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final l10n = S.of(context);
 
     return IncidentDashboardPanel(

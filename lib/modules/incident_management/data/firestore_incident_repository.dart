@@ -1,4 +1,5 @@
 import 'package:arptc_connect/core/firebase_providers.dart';
+import 'package:arptc_connect/modules/incident_management/application/incident_notification_factory.dart';
 import 'package:arptc_connect/modules/incident_management/data/incident_actor.dart';
 import 'package:arptc_connect/modules/incident_management/data/incident_repository.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_audit_log.dart';
@@ -10,7 +11,6 @@ import 'package:arptc_connect/modules/incident_management/domain/incident_ticket
 import 'package:arptc_connect/modules/incident_management/domain/incident_user.dart';
 import 'package:arptc_connect/modules/incident_management/domain/it_service.dart';
 import 'package:arptc_connect/modules/notifications/domain/notification_event.dart';
-import 'package:arptc_connect/modules/notifications/domain/notification_target.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -288,26 +288,15 @@ class FirestoreIncidentRepository implements IncidentRepository {
 
     final batch = firestore.batch();
     batch.set(doc, data);
-    batch.set(
-      _notificationEvents.doc(),
-      NotificationEvent(
-        id: '',
-        eventType: 'incident.created',
-        moduleKey: 'ticketing',
-        title: 'New IT incident',
-        body: '${actor.name} submitted $ticketNumber: ${ticket.title}.',
-        entityType: 'incidentTicket',
-        entityId: doc.id,
-        route: '/service/incidents/manager/${doc.id}',
-        createdByUserId: actor.userId,
-        createdByName: actor.name,
-        createdByEmail: actor.email,
-        target: NotificationTarget.moduleRole(
-          moduleKey: 'ticketing',
-          roles: const ['MANAGER'],
-        ),
-      ).toFirestore(),
-    );
+    if (actor.role == IncidentRole.user) {
+      batch.set(
+        _notificationEvents.doc(),
+        IncidentNotificationFactory.submittedForManagers(
+          ticket: ticket.copyWith(id: doc.id, ticketNumber: ticketNumber),
+          actor: actor,
+        ).toFirestore(),
+      );
+    }
     _addAuditLogToBatch(
       batch: batch,
       ticketRef: doc,
@@ -399,6 +388,38 @@ class FirestoreIncidentRepository implements IncidentRepository {
         message: 'Incident ticket updated',
         changes: update,
       );
+
+      final assignedToUserId =
+          (update['assignedToUserId'] ?? current.assignedToUserId).toString();
+      final assignedToEmail =
+          (update['assignedToEmail'] ?? current.assignedToEmail).toString();
+      final assignmentChanged =
+          assignedToUserId.trim() != current.assignedToUserId.trim() ||
+              assignedToEmail.trim().toLowerCase() !=
+                  current.assignedToEmail.trim().toLowerCase();
+      final isAssignmentOperation = fields.keys.any(
+        const {
+          'assignedToUserId',
+          'assignedToName',
+          'assignedToEmail',
+        }.contains,
+      );
+      final notification = assignmentChanged
+          ? IncidentNotificationFactory.assignedToManager(
+              ticket: current,
+              actor: actor,
+              assignedToUserId: assignedToUserId,
+              assignedToEmail: assignedToEmail,
+            )
+          : isAssignmentOperation
+              ? null
+              : IncidentNotificationFactory.updatedForAssignee(
+                  ticket: current,
+                  actor: actor,
+                  assignedToUserId: assignedToUserId,
+                  assignedToEmail: assignedToEmail,
+                );
+      _addNotificationToTransaction(transaction, notification);
     });
   }
 
@@ -409,6 +430,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
     required IncidentActor actor,
   }) async {
     final ticketRef = _tickets.doc(ticketId);
+    final ticket = IncidentTicket.fromFirestore(await ticketRef.get());
     final commentRef = ticketRef.collection('comments').doc();
     final batch = firestore.batch();
 
@@ -433,6 +455,13 @@ class FirestoreIncidentRepository implements IncidentRepository {
       action: 'internal_note_added',
       message: 'Internal note added',
     );
+    _addNotificationToBatch(
+      batch,
+      IncidentNotificationFactory.internalNoteForAssignee(
+        ticket: ticket,
+        actor: actor,
+      ),
+    );
 
     await batch.commit();
   }
@@ -445,6 +474,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
     required IncidentActor actor,
   }) async {
     final ticketRef = _tickets.doc(ticketId);
+    final ticket = IncidentTicket.fromFirestore(await ticketRef.get());
     final batch = firestore.batch();
 
     batch.update(ticketRef, {
@@ -465,6 +495,13 @@ class FirestoreIncidentRepository implements IncidentRepository {
         'resolutionCode': resolutionCode.trim(),
       },
     );
+    _addNotificationToBatch(
+      batch,
+      IncidentNotificationFactory.resolvedForAssignee(
+        ticket: ticket,
+        actor: actor,
+      ),
+    );
 
     await batch.commit();
   }
@@ -478,6 +515,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
   }) async {
     final now = DateTime.now().toUtc();
     final ticketRef = _tickets.doc(ticketId);
+    final ticket = IncidentTicket.fromFirestore(await ticketRef.get());
     final batch = firestore.batch();
 
     batch.update(ticketRef, {
@@ -502,6 +540,13 @@ class FirestoreIncidentRepository implements IncidentRepository {
         'resolutionCode': resolutionCode.trim(),
       },
     );
+    _addNotificationToBatch(
+      batch,
+      IncidentNotificationFactory.closedForAssignee(
+        ticket: ticket,
+        actor: actor,
+      ),
+    );
 
     await batch.commit();
   }
@@ -512,6 +557,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
     required IncidentActor actor,
   }) async {
     final ticketRef = _tickets.doc(ticketId);
+    final ticket = IncidentTicket.fromFirestore(await ticketRef.get());
     final batch = firestore.batch();
 
     batch.update(ticketRef, {
@@ -526,6 +572,13 @@ class FirestoreIncidentRepository implements IncidentRepository {
       actor: actor,
       action: 'cancelled',
       message: 'Incident ticket cancelled as a false alarm',
+    );
+    _addNotificationToBatch(
+      batch,
+      IncidentNotificationFactory.cancelledForAssignee(
+        ticket: ticket,
+        actor: actor,
+      ),
     );
 
     await batch.commit();
@@ -602,6 +655,26 @@ class FirestoreIncidentRepository implements IncidentRepository {
           message: message,
           changes: changes,
         ));
+  }
+
+  void _addNotificationToBatch(
+    WriteBatch batch,
+    NotificationEvent? notification,
+  ) {
+    if (notification == null) {
+      return;
+    }
+    batch.set(_notificationEvents.doc(), notification.toFirestore());
+  }
+
+  void _addNotificationToTransaction(
+    Transaction transaction,
+    NotificationEvent? notification,
+  ) {
+    if (notification == null) {
+      return;
+    }
+    transaction.set(_notificationEvents.doc(), notification.toFirestore());
   }
 
   Map<String, dynamic> _auditLogData({

@@ -10,6 +10,7 @@ import 'package:arptc_connect/modules/incident_management/presentation/screens/c
 import 'package:arptc_connect/modules/incident_management/presentation/screens/incident_dashboard_router.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/screens/incident_role_gate_screen.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/screens/manager_incident_details_screen.dart';
+import 'package:arptc_connect/modules/incident_management/presentation/screens/manager_incident_history_screen.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/screens/manager_incident_parameters_screen.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/screens/manager_incident_queue_screen.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/screens/my_incident_details_screen.dart';
@@ -208,6 +209,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                       path: 'parameters',
                       builder: (context, state) =>
                           const ManagerIncidentParametersScreen(),
+                    ),
+                    GoRoute(
+                      path: 'history',
+                      builder: (context, state) =>
+                          const ManagerIncidentHistoryScreen(),
                     ),
                     GoRoute(
                       path: 'queue/:queueKey',

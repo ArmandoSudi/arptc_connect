@@ -299,6 +299,10 @@ class S {
   String get unassignedTicketsQueueDescription => _text('unassignedTicketsQueueDescription');
   String get assignedToMeQueueDescription => _text('assignedToMeQueueDescription');
   String get solvedTicketsQueueDescription => _text('solvedTicketsQueueDescription');
+  String get closedTicketHistory => _text('closedTicketHistory');
+  String get closedTicketHistoryDescription => _text('closedTicketHistoryDescription');
+  String get noClosedTicketsHistory => _text('noClosedTicketsHistory');
+  String get noClosedTicketsHistoryDescription => _text('noClosedTicketsHistoryDescription');
   String get noTicketsFound => _text('noTicketsFound');
   String get queueEmpty => _text('queueEmpty');
   String get tryAnotherSearchOrStatus => _text('tryAnotherSearchOrStatus');
@@ -902,6 +906,10 @@ const _localizedValues = <String, Map<String, String>>{
     'unassignedTicketsQueueDescription': "Categorized tickets waiting for an IT staff assignment.",
     'assignedToMeQueueDescription': "Active tickets assigned to the current manager.",
     'solvedTicketsQueueDescription': "Solved tickets waiting to be marked closed.",
+    'closedTicketHistory': "Closed ticket history",
+    'closedTicketHistoryDescription': "Review incidents completed and closed by IT support.",
+    'noClosedTicketsHistory': "No closed tickets",
+    'noClosedTicketsHistoryDescription': "Closed incidents will appear here.",
     'noTicketsFound': "No tickets found",
     'queueEmpty': "This queue is empty.",
     'tryAnotherSearchOrStatus': "Try another search or status filter.",
@@ -1478,6 +1486,10 @@ const _localizedValues = <String, Map<String, String>>{
     'unassignedTicketsQueueDescription': "Tickets catégorisés en attente d'assignation à un membre IT.",
     'assignedToMeQueueDescription': "Tickets actifs assignés au manager actuel.",
     'solvedTicketsQueueDescription': "Tickets résolus en attente de clôture.",
+    'closedTicketHistory': "Historique des tickets fermés",
+    'closedTicketHistoryDescription': "Consultez les incidents traités et fermés par le support IT.",
+    'noClosedTicketsHistory': "Aucun ticket fermé",
+    'noClosedTicketsHistoryDescription': "Les incidents fermés apparaîtront ici.",
     'noTicketsFound': "Aucun ticket trouvé",
     'queueEmpty': "Cette file est vide.",
     'tryAnotherSearchOrStatus': "Essayez une autre recherche ou un autre filtre de statut.",
