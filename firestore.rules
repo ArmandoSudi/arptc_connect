@@ -170,6 +170,131 @@ service cloud.firestore {
       return userManagementRole() == 'MANAGER';
     }
 
+    function taskRole() {
+      let data = principalData();
+      let permissions = data.keys().hasAny(['modulePermissions'])
+        ? data.modulePermissions
+        : {};
+      return permissions.keys().hasAny(['tasks'])
+        ? permissions.tasks
+        : (
+          permissions.keys().hasAny(['task'])
+            ? permissions.task
+            : 'NONE'
+        );
+    }
+
+    function isTaskUser() {
+      return taskRole() in ['USER', 'user', 'User'];
+    }
+
+    function isTaskManager() {
+      return taskRole() in ['MANAGER', 'manager', 'Manager'];
+    }
+
+    function isTaskAdmin() {
+      return taskRole() in ['ADMIN', 'admin', 'Admin'];
+    }
+
+    function canManageTasks() {
+      return isTaskUser() || isTaskManager();
+    }
+
+    function principalDepartmentId() {
+      let data = principalData();
+      return data.keys().hasAny(['departmentId']) &&
+        data.departmentId is string &&
+        data.departmentId != ''
+          ? data.departmentId
+          : (
+            data.keys().hasAny(['department']) &&
+            data.department is string &&
+            data.department != ''
+              ? data.department
+              : (
+                data.keys().hasAny(['direction']) &&
+                data.direction is string
+                  ? data.direction
+                  : ''
+              )
+          );
+    }
+
+    function canReadTask(task) {
+      return isTaskAdmin() ||
+        (
+          canManageTasks() &&
+          principalDepartmentId() != '' &&
+          task.department == principalDepartmentId()
+        );
+    }
+
+    function validTaskCreate() {
+      return signedIn() &&
+        canManageTasks() &&
+        principalDepartmentId() != '' &&
+        request.resource.data.keys().hasAll([
+          'label',
+          'observation',
+          'creation_date',
+          'updated_at',
+          'status',
+          'type',
+          'department',
+          'created_by_user_id',
+          'created_by_email'
+        ]) &&
+        request.resource.data.label is string &&
+        request.resource.data.label.size() > 0 &&
+        request.resource.data.observation is string &&
+        request.resource.data.status in ['new', 'doing', 'done', 'archived'] &&
+        request.resource.data.type in ['task', 'mail'] &&
+        request.resource.data.department == principalDepartmentId() &&
+        request.resource.data.creation_date == request.time &&
+        request.resource.data.updated_at == request.time &&
+        (
+          request.resource.data.created_by_user_id == request.auth.uid ||
+          request.resource.data.created_by_email == request.auth.token.email
+        ) &&
+        (
+          request.resource.data.type != 'mail' ||
+          (
+            request.resource.data.sender is string &&
+            request.resource.data.sender.size() > 0 &&
+            request.resource.data.receiver is string &&
+            request.resource.data.receiver.size() > 0
+          )
+        );
+    }
+
+    function validTaskUpdate() {
+      return signedIn() &&
+        canManageTasks() &&
+        principalDepartmentId() != '' &&
+        resource.data.department == principalDepartmentId() &&
+        request.resource.data.department == resource.data.department &&
+        request.resource.data.department_name == resource.data.department_name &&
+        request.resource.data.creation_date == resource.data.creation_date &&
+        request.resource.data.created_by_user_id == resource.data.created_by_user_id &&
+        request.resource.data.created_by_name == resource.data.created_by_name &&
+        request.resource.data.created_by_email == resource.data.created_by_email &&
+        request.resource.data.label is string &&
+        request.resource.data.label.size() > 0 &&
+        request.resource.data.observation is string &&
+        request.resource.data.status in ['new', 'doing', 'done', 'archived'] &&
+        request.resource.data.type in ['task', 'mail'] &&
+        request.resource.data.updated_at == request.time &&
+        (
+          request.resource.data.type != 'mail' ||
+          (
+            request.resource.data.sender is string &&
+            request.resource.data.sender.size() > 0 &&
+            request.resource.data.receiver is string &&
+            request.resource.data.receiver.size() > 0
+          )
+        );
+    }
+
     function meetingHallRole() {
       let data = principalData();
       let permissions = data.keys().hasAny(['modulePermissions'])
@@ -414,6 +539,16 @@ service cloud.firestore {
         request.resource.data.archivedAt == resource.data.archivedAt &&
         changed.hasOnly(managerUpdateKeys()) &&
         request.resource.data.updatedAt == request.time;
+    }
+
+    match /tasks/{taskId} {
+      allow get, list: if signedIn() && canReadTask(resource.data);
+      allow create: if validTaskCreate();
+      allow update: if validTaskUpdate();
+      allow delete: if signedIn() &&
+        canManageTasks() &&
+        principalDepartmentId() != '' &&
+        resource.data.department == principalDepartmentId();
     }
 
     match /incidentTickets/{ticketId} {

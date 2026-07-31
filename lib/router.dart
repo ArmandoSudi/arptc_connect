@@ -27,6 +27,7 @@ import 'package:arptc_connect/modules/profile/presentation/screens/profile_scree
 import 'package:arptc_connect/modules/service/screens/main_service_screen.dart';
 import 'package:arptc_connect/modules/social/screens/social_agents_page.dart';
 import 'package:arptc_connect/modules/task/presentation/screens/task_details_page.dart';
+import 'package:arptc_connect/modules/task/presentation/screens/task_form_screen.dart';
 import 'package:arptc_connect/modules/task/presentation/screens/tasks_screen.dart';
 import 'package:arptc_connect/modules/usermanagement/presentation/screens/agents_list_screen.dart';
 import 'package:arptc_connect/modules/usermanagement/presentation/screens/bureau_details_screen.dart';
@@ -294,9 +295,21 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   ),
                   routes: [
                     GoRoute(
+                      path: 'new',
+                      builder: (context, state) => const TaskFormScreen(),
+                    ),
+                    GoRoute(
                       path: ':taskId',
                       builder: (context, state) => TaskDetailsPage(
                           state.pathParameters['taskId'] as String),
+                      routes: [
+                        GoRoute(
+                          path: 'edit',
+                          builder: (context, state) => TaskFormScreen(
+                            taskId: state.pathParameters['taskId'] as String,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

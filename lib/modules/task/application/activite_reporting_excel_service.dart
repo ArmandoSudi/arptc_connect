@@ -13,7 +13,8 @@ class ActiviteExcelReportingService {
     // Create a new Excel document using Syncfusion XlsIO
     final Workbook workbook = Workbook();
     // Access the first worksheet
-    final Worksheet sheet = workbook.worksheets[0]; // xlsio uses 0-based index for worksheets
+    final Worksheet sheet =
+        workbook.worksheets[0]; // xlsio uses 0-based index for worksheets
 
     // Disable gridlines for a cleaner look (optional)
     // sheet.showGridlines = false;
@@ -22,7 +23,8 @@ class ActiviteExcelReportingService {
 
     // --- Header Section ---
     // Load the image as a byte stream
-    final ByteData imageData = await rootBundle.load('assets/icons/app_logo.jpg');
+    final ByteData imageData =
+        await rootBundle.load('assets/icons/app_logo.jpg');
     final Uint8List imageBytes = imageData.buffer.asUint8List();
 
     // Add the image to the worksheet
@@ -33,8 +35,8 @@ class ActiviteExcelReportingService {
     );
 
 // Resize the image to fit within the merged cells
-    picture.width = 180;  // Adjust width as needed
-    picture.height = 80;  // Adjust height as needed
+    picture.width = 180; // Adjust width as needed
+    picture.height = 80; // Adjust height as needed
 
 // Merge the first three columns and first two rows for the logo
     sheet.getRangeByName("A1:C2").merge();
@@ -78,8 +80,10 @@ class ActiviteExcelReportingService {
     courriersTitleCell.cellStyle.bold = true;
     currentRow++; // Move to the next row
 
-    final mailTasks = tasks.where((task) => task.type == 'mail').toList();
-    currentRow = _buildMailTableExcel(workbook, sheet, mailTasks, currentRow); // Pass workbook
+    final mailTasks =
+        tasks.where((task) => task.type == TaskType.mail).toList();
+    currentRow = _buildMailTableExcel(
+        workbook, sheet, mailTasks, currentRow); // Pass workbook
     currentRow += 2; // Add some spacing before the next table
 
     // --- Projets / Autres traitements Table ---
@@ -90,8 +94,10 @@ class ActiviteExcelReportingService {
     projetsTitleCell.cellStyle.bold = true;
     currentRow++;
 
-    final projectTasks = tasks.where((task) => task.type == 'task').toList();
-    _buildProjectTableExcel(workbook, sheet, projectTasks, currentRow); // Pass workbook
+    final projectTasks =
+        tasks.where((task) => task.type == TaskType.task).toList();
+    _buildProjectTableExcel(
+        workbook, sheet, projectTasks, currentRow); // Pass workbook
 
     // Auto-fit columns (optional) - xlsio has different auto-fit methods
     // This can be applied per column or for all columns.
@@ -103,7 +109,6 @@ class ActiviteExcelReportingService {
     // Since the original code commented this out and warned about potential width issues,
     // we'll leave it commented but show how it would be done in xlsio.
     // sheet.getRangeByName('A1:H${sheet.getLastRow()}').autoFitColumns();
-
 
     // --- Save the file ---
     final List<int> originalBytes = workbook.saveAsStream();
@@ -117,11 +122,11 @@ class ActiviteExcelReportingService {
 
     // Use PdfApi to download the Excel file
     await PdfApi.downloadExcel(originalBytes, title: fileName);
-
   }
 
   // Pass Workbook to create new styles correctly
-  int _buildMailTableExcel(Workbook workbook, Worksheet sheet, List<Task> tasks, int startRow) {
+  int _buildMailTableExcel(
+      Workbook workbook, Worksheet sheet, List<Task> tasks, int startRow) {
     const tableHeaders = [
       'No',
       'Date',
@@ -154,20 +159,36 @@ class ActiviteExcelReportingService {
     final Style cellStyle = workbook.styles.add('dataStyle1');
     cellStyle.hAlign = HAlignType.left;
     cellStyle.vAlign = VAlignType.center;
-    cellStyle.wrapText = true; // Important for multi-line content like annotations
+    cellStyle.wrapText =
+        true; // Important for multi-line content like annotations
 
     // Add data
     for (int i = 0; i < tasks.length; i++) {
       final task = tasks[i];
       int col = 1; // Start from column 1 (A)
-      sheet.getRangeByIndex(startRow + i, col++).setNumber((i + 1).toDouble()); // No
-      sheet.getRangeByIndex(startRow + i, col++).setText(task.emissionDate.formatedDate); // Date
-      sheet.getRangeByIndex(startRow + i, col++).setText(task.sender ?? " - "); // Expéditeur
+      sheet
+          .getRangeByIndex(startRow + i, col++)
+          .setNumber((i + 1).toDouble()); // No
+      sheet
+          .getRangeByIndex(startRow + i, col++)
+          .setText(task.reportingDate.formatedDate); // Date
+      sheet.getRangeByIndex(startRow + i, col++).setText(
+          task.sender.trim().isEmpty ? " - " : task.sender); // Expéditeur
       sheet.getRangeByIndex(startRow + i, col++).setText(task.label); // Objet
-      sheet.getRangeByIndex(startRow + i, col++).setText(task.receptionDate?.formatedDate ?? " - "); // A/R
-      sheet.getRangeByIndex(startRow + i, col++).setText(task.annotations?.entries.map((entry) => "${entry.key}: ${entry.value}").join("\n") ?? " - "); // Annotations
-      sheet.getRangeByIndex(startRow + i, col++).setText(task.status); // Traitement
-      sheet.getRangeByIndex(startRow + i, col++).setText(task.observation ?? " - "); // Remarque
+      sheet
+          .getRangeByIndex(startRow + i, col++)
+          .setText(task.receptionDate?.formatedDate ?? " - "); // A/R
+      sheet.getRangeByIndex(startRow + i, col++).setText(task
+              .annotations?.entries
+              .map((entry) => "${entry.key}: ${entry.value}")
+              .join("\n") ??
+          " - "); // Annotations
+      sheet
+          .getRangeByIndex(startRow + i, col++)
+          .setText(task.status.value); // Traitement
+      sheet
+          .getRangeByIndex(startRow + i, col++)
+          .setText(task.observation); // Remarque
 
       // Apply the new general cell style to all data cells in this row
       for (int j = 1; j <= tableHeaders.length; j++) {
@@ -181,21 +202,21 @@ class ActiviteExcelReportingService {
 
     // Set column widths (approximate, may need adjustment)
     // xlsio sets column width on a range (using the first row range for convenience)
-    sheet.getRangeByIndex(1, 1).columnWidth = 5;   // No (Column A)
-    sheet.getRangeByIndex(1, 2).columnWidth = 12;  // Date (Column B)
-    sheet.getRangeByIndex(1, 3).columnWidth = 20;  // Expéditeur (Column C)
-    sheet.getRangeByIndex(1, 4).columnWidth = 40;  // Objet (Column D)
-    sheet.getRangeByIndex(1, 5).columnWidth = 12;  // A/R (Column E)
-    sheet.getRangeByIndex(1, 6).columnWidth = 40;  // Annotations (Column F)
-    sheet.getRangeByIndex(1, 7).columnWidth = 15;  // Traitement (Column G)
-    sheet.getRangeByIndex(1, 8).columnWidth = 30;  // Remarque (Column H)
-
+    sheet.getRangeByIndex(1, 1).columnWidth = 5; // No (Column A)
+    sheet.getRangeByIndex(1, 2).columnWidth = 12; // Date (Column B)
+    sheet.getRangeByIndex(1, 3).columnWidth = 20; // Expéditeur (Column C)
+    sheet.getRangeByIndex(1, 4).columnWidth = 40; // Objet (Column D)
+    sheet.getRangeByIndex(1, 5).columnWidth = 12; // A/R (Column E)
+    sheet.getRangeByIndex(1, 6).columnWidth = 40; // Annotations (Column F)
+    sheet.getRangeByIndex(1, 7).columnWidth = 15; // Traitement (Column G)
+    sheet.getRangeByIndex(1, 8).columnWidth = 30; // Remarque (Column H)
 
     return startRow + tasks.length;
   }
 
   // Pass Workbook to create new styles correctly
-  int _buildProjectTableExcel(Workbook workbook, Worksheet sheet, List<Task> tasks, int startRow) {
+  int _buildProjectTableExcel(
+      Workbook workbook, Worksheet sheet, List<Task> tasks, int startRow) {
     const tableHeaders = [
       'No',
       'Date',
@@ -211,7 +232,6 @@ class ActiviteExcelReportingService {
     headerStyle.backColor = '#D3D3D3'; // Light Grey in hex format
     headerStyle.hAlign = HAlignType.center;
     headerStyle.vAlign = VAlignType.center;
-
 
     for (int i = 0; i < tableHeaders.length; i++) {
       final headerCell = sheet.getRangeByIndex(startRow, i + 1);
@@ -229,12 +249,23 @@ class ActiviteExcelReportingService {
     for (int i = 0; i < tasks.length; i++) {
       final task = tasks[i];
       int col = 1;
-      sheet.getRangeByIndex(startRow + i, col++).setNumber((i + 1).toDouble()); // No
-      sheet.getRangeByIndex(startRow + i, col++).setText(task.emissionDate.formatedDate); // Date
-      sheet.getRangeByIndex(startRow + i, col++).setText(task.sender ?? " - "); // Initiateur (Assuming 'sender' can be used)
+      sheet
+          .getRangeByIndex(startRow + i, col++)
+          .setNumber((i + 1).toDouble()); // No
+      sheet
+          .getRangeByIndex(startRow + i, col++)
+          .setText(task.reportingDate.formatedDate); // Date
+      sheet.getRangeByIndex(startRow + i, col++).setText(
+          task.sender.trim().isEmpty
+              ? " - "
+              : task.sender); // Initiateur (Assuming 'sender' can be used)
       sheet.getRangeByIndex(startRow + i, col++).setText(task.label); // Objet
-      sheet.getRangeByIndex(startRow + i, col++).setText(task.status); // Traitement
-      sheet.getRangeByIndex(startRow + i, col++).setText(task.observation ?? " - "); // Remarque
+      sheet
+          .getRangeByIndex(startRow + i, col++)
+          .setText(task.status.value); // Traitement
+      sheet
+          .getRangeByIndex(startRow + i, col++)
+          .setText(task.observation); // Remarque
 
       for (int j = 1; j <= tableHeaders.length; j++) {
         sheet.getRangeByIndex(startRow + i, j).cellStyle = cellStyle;

@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:arptc_connect/extensions/date_extension.dart';
-import 'package:arptc_connect/modules/task/presentation/controllers/async_tasks.dart';
 import 'package:arptc_connect/modules/ticketing/data/report_service.dart';
 import 'package:arptc_connect/modules/ticketing/presentation/controllers/async_ticket.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
@@ -33,18 +32,6 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
   @override
   Widget build(BuildContext context) {
     final asyncTickets = ref.watch(asyncTicketProvider);
-    final asyncTasks = ref.watch(asyncTasksProvider);
-
-    asyncTasks.when(
-      data: (data) {
-        log("Tasks data: $data");
-      },
-    loading: () {},
-      error: (error, stackTrace) {
-        log("Error loading tasks:: $error");
-      }
-    );
-
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -84,7 +71,8 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
                       Ticket(
                         id: "1",
                         author: "Armando",
-                        subject: "1. Problème de connexion internet, 2. Probleme de connexion internet, 3. problème de connection inter, 4. Probleme de connection internet",
+                        subject:
+                            "1. Problème de connexion internet, 2. Probleme de connexion internet, 3. problème de connection inter, 4. Probleme de connection internet",
                         agent: "Jean Dupont",
                         creationDate: DateTime.now(),
                         isSolved: false,
@@ -101,7 +89,6 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
                         category: 'Messagerie',
                         solution: 'Changer de port',
                       ),
-
                     ];
 
                     // ReportService().printTicketReport(tickets);
@@ -119,7 +106,6 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
             // LIST OF TICKETS
             asyncTickets.when(
               data: (data) {
-
                 // _tickets = data;
                 _tickets.clear();
 

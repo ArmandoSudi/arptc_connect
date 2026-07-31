@@ -1,1 +1,147 @@
-Error: storage:rules:get is not a Firebase command
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function authAgentPath() {
+      return /databases/(default)/documents/agents/$(request.auth.uid);
+    }
+
+    function authAgentEmailPath() {
+      return /databases/(default)/documents/agents/$(request.auth.token.email);
+    }
+
+    function userPath() {
+      return /databases/(default)/documents/users/$(request.auth.uid);
+    }
+
+    function hasAuthAgentDocument() {
+      return signedIn() && firestore.exists(authAgentPath());
+    }
+
+    function hasAuthAgentEmailDocument() {
+      return signedIn() &&
+        request.auth.token.email is string &&
+        request.auth.token.email != '' &&
+        firestore.exists(authAgentEmailPath());
+    }
+
+    function hasUserDocument() {
+      return signedIn() && firestore.exists(userPath());
+    }
+
+    function principalData() {
+      return hasAuthAgentDocument()
+        ? firestore.get(authAgentPath()).data
+        : (
+          hasAuthAgentEmailDocument()
+            ? firestore.get(authAgentEmailPath()).data
+            : (
+              hasUserDocument()
+                ? firestore.get(userPath()).data
+                : request.auth.token
+            )
+        );
+    }
+
+    function taskRole() {
+      let data = principalData();
+      let permissions = data.keys().hasAny(['modulePermissions'])
+        ? data.modulePermissions
+        : {};
+      return permissions.keys().hasAny(['tasks'])
+        ? permissions.tasks
+        : (
+          permissions.keys().hasAny(['task'])
+            ? permissions.task
+            : 'NONE'
+        );
+    }
+
+    function isTaskAdmin() {
+      return taskRole() in ['ADMIN', 'admin', 'Admin'];
+    }
+
+    function canManageTasks() {
+      return taskRole() in [
+        'USER',
+        'user',
+        'User',
+        'MANAGER',
+        'manager',
+        'Manager'
+      ];
+    }
+
+    function principalDepartmentId() {
+      let data = principalData();
+      return data.keys().hasAny(['departmentId']) &&
+        data.departmentId is string &&
+        data.departmentId != ''
+          ? data.departmentId
+          : (
+            data.keys().hasAny(['department']) &&
+            data.department is string &&
+            data.department != ''
+              ? data.department
+              : (
+                data.keys().hasAny(['direction']) &&
+                data.direction is string
+                  ? data.direction
+                  : ''
+              )
+          );
+    }
+
+    function hasSupportedContentType(contentType) {
+      return contentType.matches('image/.*') ||
+        contentType == 'application/pdf' ||
+        contentType == 'application/msword' ||
+        contentType == 'application/vnd.ms-excel' ||
+        contentType == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        contentType == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        contentType == 'text/plain';
+    }
+
+    function canReadTaskFile() {
+      return signedIn() &&
+        (
+          isTaskAdmin() ||
+          (
+            canManageTasks() &&
+            principalDepartmentId() != '' &&
+            resource.metadata.departmentId == principalDepartmentId()
+          )
+        );
+    }
+
+    function validTaskFileUpload(taskId) {
+      return signedIn() &&
+        canManageTasks() &&
+        principalDepartmentId() != '' &&
+        request.resource.size <= 20 * 1024 * 1024 &&
+        hasSupportedContentType(request.resource.contentType) &&
+        request.resource.metadata.taskId == taskId &&
+        request.resource.metadata.departmentId == principalDepartmentId() &&
+        request.resource.metadata.uploadedByUserId == request.auth.uid;
+    }
+
+    match /tasks/{taskId}/{category}/{fileName} {
+      allow read: if canReadTaskFile();
+      allow create: if validTaskFileUpload(taskId) &&
+        category in ['mail-scans', 'reports'];
+      allow update: if false;
+      allow delete: if signedIn() &&
+        canManageTasks() &&
+        principalDepartmentId() != '' &&
+        resource.metadata.departmentId == principalDepartmentId();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

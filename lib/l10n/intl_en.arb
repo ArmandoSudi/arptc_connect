@@ -451,9 +451,32 @@
   "quantity": "Quantity",
   "stock": "Stock",
   "tasks": "Tasks",
-  "tasksDescription": "Manage intervention tickets",
+  "tasksDescription": "Record and manage departmental activities",
   "newTask": "New Task",
+  "editTask": "Edit task",
   "taskDetails": "Task Details",
+  "taskInformation": "Task information",
+  "taskIdentifier": "Task ID",
+  "departmentIdentifier": "Department ID",
+  "creatorIdentifier": "Creator user ID",
+  "taskCreated": "Task created",
+  "taskUpdated": "Task updated",
+  "taskNotFound": "Task not found",
+  "taskLoadFailed": "Unable to load tasks",
+  "taskAccessDenied": "You do not have access to task management.",
+  "taskDepartmentMissingDescription": "Your profile must be linked to a department before you can access departmental tasks.",
+  "adminReadOnlyTask": "Administrator access is read-only. You can review tasks from every department.",
+  "allDepartmentTasks": "Tasks from all departments",
+  "departmentTasks": "Tasks for {department}",
+  "@departmentTasks": {
+    "placeholders": {
+      "department": {}
+    }
+  },
+  "loadingTasks": "Loading tasks...",
+  "noTasks": "No tasks found",
+  "noTasksDescription": "No task matches the selected filters.",
+  "allTypes": "All types",
   "createActivity": "Create an activity",
   "activityObject": "Activity object",
   "activityObjectHint": "Enter the activity object",
@@ -478,6 +501,21 @@
     }
   },
   "uploadedSuccessfully": "Uploaded Successfully!",
+  "document": "Document",
+  "documents": "Documents",
+  "mailScan": "Mail scan",
+  "reportFile": "Activity report",
+  "storagePath": "Storage path",
+  "metadata": "Metadata",
+  "noDocuments": "No documents have been attached.",
+  "preview": "Preview",
+  "documentPreviewFailed": "This document could not be opened.",
+  "noFileSelected": "No file selected",
+  "selectFile": "Select file",
+  "replaceFile": "Replace file",
+  "remove": "Remove",
+  "fileCouldNotBeRead": "The selected file could not be read.",
+  "fileTooLarge": "The selected file exceeds the 20 MB limit.",
   "deleteTask": "Delete task",
   "deleteTaskConfirmation": "Do you really want to delete \"{taskLabel}\"?",
   "@deleteTaskConfirmation": {
@@ -486,6 +524,13 @@
     }
   },
   "taskDeleted": "Task deleted",
+  "taskDeleteFailed": "Unable to delete the task: {error}",
+  "@taskDeleteFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "departmentRequired": "Department required",
   "mail": "Mail",
   "mails": "Mails",
   "courrier": "Mail",

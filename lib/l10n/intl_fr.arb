@@ -451,9 +451,32 @@
   "quantity": "Quantité",
   "stock": "Stock",
   "tasks": "Tâches",
-  "tasksDescription": "Gestion des tickets d'intervention",
+  "tasksDescription": "Enregistrer et gérer les activités départementales",
   "newTask": "Nouvelle tâche",
+  "editTask": "Modifier la tâche",
   "taskDetails": "Détails de la tâche",
+  "taskInformation": "Informations sur la tâche",
+  "taskIdentifier": "ID de la tâche",
+  "departmentIdentifier": "ID du département",
+  "creatorIdentifier": "ID utilisateur du créateur",
+  "taskCreated": "Tâche créée",
+  "taskUpdated": "Tâche mise à jour",
+  "taskNotFound": "Tâche introuvable",
+  "taskLoadFailed": "Impossible de charger les tâches",
+  "taskAccessDenied": "Vous n'avez pas accès à la gestion des tâches.",
+  "taskDepartmentMissingDescription": "Votre profil doit être rattaché à un département avant de pouvoir accéder aux tâches départementales.",
+  "adminReadOnlyTask": "L'accès administrateur est en lecture seule. Vous pouvez consulter les tâches de tous les départements.",
+  "allDepartmentTasks": "Tâches de tous les départements",
+  "departmentTasks": "Tâches de {department}",
+  "@departmentTasks": {
+    "placeholders": {
+      "department": {}
+    }
+  },
+  "loadingTasks": "Chargement des tâches...",
+  "noTasks": "Aucune tâche trouvée",
+  "noTasksDescription": "Aucune tâche ne correspond aux filtres sélectionnés.",
+  "allTypes": "Tous les types",
   "createActivity": "Créer une activité",
   "activityObject": "Objet de l'activité",
   "activityObjectHint": "Entrez l'objet de l'activité",
@@ -478,6 +501,21 @@
     }
   },
   "uploadedSuccessfully": "Téléversé avec succès !",
+  "document": "Document",
+  "documents": "Documents",
+  "mailScan": "Scan du courrier",
+  "reportFile": "Rapport d'activité",
+  "storagePath": "Chemin de stockage",
+  "metadata": "Métadonnées",
+  "noDocuments": "Aucun document n'est joint.",
+  "preview": "Aperçu",
+  "documentPreviewFailed": "Ce document n'a pas pu être ouvert.",
+  "noFileSelected": "Aucun fichier sélectionné",
+  "selectFile": "Sélectionner un fichier",
+  "replaceFile": "Remplacer le fichier",
+  "remove": "Retirer",
+  "fileCouldNotBeRead": "Le fichier sélectionné n'a pas pu être lu.",
+  "fileTooLarge": "Le fichier sélectionné dépasse la limite de 20 Mo.",
   "deleteTask": "Supprimer la tâche",
   "deleteTaskConfirmation": "Voulez-vous vraiment supprimer \"{taskLabel}\" ?",
   "@deleteTaskConfirmation": {
@@ -486,6 +524,13 @@
     }
   },
   "taskDeleted": "Tâche supprimée",
+  "taskDeleteFailed": "Impossible de supprimer la tâche : {error}",
+  "@taskDeleteFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "departmentRequired": "Département requis",
   "mail": "Courrier",
   "mails": "Courriers",
   "courrier": "Courrier",

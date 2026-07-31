@@ -1,4 +1,3 @@
-
 import 'package:arptc_connect/extensions/date_extension.dart';
 import 'package:arptc_connect/modules/task/domain/task.dart';
 import 'package:pdf/pdf.dart';
@@ -9,7 +8,6 @@ import 'package:flutter/services.dart';
 import '../../../utils/pdf_api.dart';
 
 class ActiviteReportingService {
-
   Future<void> generateReport(List<Task> tasks) async {
     final pdf = pw.Document();
     // var font = await PdfGoogleFonts.abelRegular();
@@ -22,23 +20,21 @@ class ActiviteReportingService {
       pw.MultiPage(
         header: (context) {
           return pw.Container(
-            alignment: pw.Alignment.center,
-            child: pw.Column(
-              children: [
+              alignment: pw.Alignment.center,
+              child: pw.Column(children: [
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                  pw.Image(
-                    pw.MemoryImage(image),
-                    width: 80,
-                    height: 50,
-                    fit: pw.BoxFit.fill,
-                  ),
-                  pw.SizedBox(width: 30),
-                  pw.Text(
-                    "Kinshasa, le ${DateTime.now().formatedDate}"
-                  )
-                ],),
+                    pw.Image(
+                      pw.MemoryImage(image),
+                      width: 80,
+                      height: 50,
+                      fit: pw.BoxFit.fill,
+                    ),
+                    pw.SizedBox(width: 30),
+                    pw.Text("Kinshasa, le ${DateTime.now().formatedDate}")
+                  ],
+                ),
                 pw.Text(
                   'Direction des Systèmes d\'Information',
                   style: const pw.TextStyle(fontSize: 16),
@@ -49,19 +45,18 @@ class ActiviteReportingService {
                   style: const pw.TextStyle(fontSize: 12),
                 ),
                 pw.SizedBox(height: 20),
-              ]
-            )
-          );
+              ]));
         },
         build: (context) => [
           pw.Text("Courriers"),
           pw.SizedBox(height: 5),
-          _mailTable(context, tasks.where((task) => task.type == 'mail').toList()),
+          _mailTable(context,
+              tasks.where((task) => task.type == TaskType.mail).toList()),
           pw.SizedBox(height: 10),
-
           pw.Text("Projets / Autres traitements"),
           pw.SizedBox(height: 5),
-          _projectTable(context, tasks.where((task) => task.type == 'task').toList()),
+          _projectTable(context,
+              tasks.where((task) => task.type == TaskType.task).toList()),
         ],
         orientation: pw.PageOrientation.landscape,
       ),
@@ -121,17 +116,22 @@ class ActiviteReportingService {
       headers: tableHeaders,
       data: List<List<String>>.generate(
         tasks.length,
-            (row) => [
+        (row) => [
           (row + 1).toString(), // No
-          tasks[row].emissionDate.formatedDate, // Date
-          tasks[row].sender ?? " - ", // Expéditeur
+          tasks[row].reportingDate.formatedDate, // Date
+          tasks[row].sender.trim().isEmpty
+              ? " - "
+              : tasks[row].sender, // Expéditeur
           tasks[row].label, // Objet
           tasks[row].receptionDate?.formatedDate ?? " - ", // A/R
-              tasks[row].annotations?.entries
+          tasks[row]
+                  .annotations
+                  ?.entries
                   .map((entry) => "${entry.key}: ${entry.value}")
-                  .join("\n") ?? " - ", // Annotations
-          tasks[row].status, // Traitement
-          tasks[row].observation ?? " - ", // Remarque
+                  .join("\n") ??
+              " - ", // Annotations
+          tasks[row].status.value, // Traitement
+          tasks[row].observation, // Remarque
         ],
       ),
       columnWidths: {
@@ -171,13 +171,15 @@ class ActiviteReportingService {
       headers: tableHeaders,
       data: List<List<String>>.generate(
         tasks.length,
-            (row) => [
+        (row) => [
           (row + 1).toString(), // No
-          tasks[row].emissionDate.formatedDate, // Date
-          tasks[row].sender ?? " - ", // Expéditeur
+          tasks[row].reportingDate.formatedDate, // Date
+          tasks[row].sender.trim().isEmpty
+              ? " - "
+              : tasks[row].sender, // Expéditeur
           tasks[row].label, // Objet // Annotations
-          tasks[row].status, // Traitement
-          tasks[row].observation ?? " - ", // Remarque
+          tasks[row].status.value, // Traitement
+          tasks[row].observation, // Remarque
         ],
       ),
       columnWidths: {
@@ -190,5 +192,4 @@ class ActiviteReportingService {
       },
     );
   }
-
 }
