@@ -52,6 +52,10 @@ class IncidentTicket {
     required this.attachmentCount,
     required this.commentCount,
     required this.isDeleted,
+    this.configurationItemId = '',
+    this.relatedServiceRequestId = '',
+    this.relatedChangeId = '',
+    this.suggestedKnowledgeArticleIds = const [],
   });
 
   final String id;
@@ -101,6 +105,10 @@ class IncidentTicket {
   final int attachmentCount;
   final int commentCount;
   final bool isDeleted;
+  final String configurationItemId;
+  final String relatedServiceRequestId;
+  final String relatedChangeId;
+  final List<String> suggestedKnowledgeArticleIds;
 
   factory IncidentTicket.empty() {
     return const IncidentTicket(
@@ -218,6 +226,12 @@ class IncidentTicket {
       attachmentCount: intFromFirestore(data, 'attachmentCount'),
       commentCount: intFromFirestore(data, 'commentCount'),
       isDeleted: boolFromFirestore(data, 'isDeleted'),
+      configurationItemId: stringFromFirestore(data, 'configurationItemId'),
+      relatedServiceRequestId:
+          stringFromFirestore(data, 'relatedServiceRequestId'),
+      relatedChangeId: stringFromFirestore(data, 'relatedChangeId'),
+      suggestedKnowledgeArticleIds:
+          stringListFromFirestore(data, 'suggestedKnowledgeArticleIds'),
     );
   }
 
@@ -269,6 +283,14 @@ class IncidentTicket {
       'attachmentCount': attachmentCount,
       'commentCount': commentCount,
       'isDeleted': isDeleted,
+      'configurationItemId': configurationItemId.trim(),
+      'relatedServiceRequestId': relatedServiceRequestId.trim(),
+      'relatedChangeId': relatedChangeId.trim(),
+      'suggestedKnowledgeArticleIds': suggestedKnowledgeArticleIds
+          .map((articleId) => articleId.trim())
+          .where((articleId) => articleId.isNotEmpty)
+          .toSet()
+          .toList(growable: false),
     };
   }
 
@@ -320,6 +342,10 @@ class IncidentTicket {
     int? attachmentCount,
     int? commentCount,
     bool? isDeleted,
+    String? configurationItemId,
+    String? relatedServiceRequestId,
+    String? relatedChangeId,
+    List<String>? suggestedKnowledgeArticleIds,
   }) {
     return IncidentTicket(
       id: id ?? this.id,
@@ -372,6 +398,12 @@ class IncidentTicket {
       attachmentCount: attachmentCount ?? this.attachmentCount,
       commentCount: commentCount ?? this.commentCount,
       isDeleted: isDeleted ?? this.isDeleted,
+      configurationItemId: configurationItemId ?? this.configurationItemId,
+      relatedServiceRequestId:
+          relatedServiceRequestId ?? this.relatedServiceRequestId,
+      relatedChangeId: relatedChangeId ?? this.relatedChangeId,
+      suggestedKnowledgeArticleIds:
+          suggestedKnowledgeArticleIds ?? this.suggestedKnowledgeArticleIds,
     );
   }
 }

@@ -1,7 +1,11 @@
 const { logger } = require('firebase-functions');
-const { onDocumentCreated } = require('firebase-functions/v2/firestore');
+const {
+  onDocumentCreated,
+  onDocumentWritten,
+} = require('firebase-functions/v2/firestore');
 const { HttpsError, onCall } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
+const { onObjectFinalized } = require('firebase-functions/v2/storage');
 const admin = require('firebase-admin');
 const {
   archiveEligibleIncidents,
@@ -12,6 +16,25 @@ const {
 const {
   createItsmCallableHandler,
 } = require('./src/itsm_callable_handlers');
+const {
+  createItsmSupportCallableHandler,
+} = require('./src/itsm_support_handlers');
+const {
+  ITSM_SUPPORT_COMMANDS,
+} = require('./src/itsm_support_validation');
+const {
+  processServiceRequestSlaBatch,
+  processServiceRequestSlaChange,
+} = require('./src/itsm_support_sla');
+const {
+  maintainSupportWorkItemIndex,
+  notificationEventsForSupportChange,
+  registerKnowledgeAttachment,
+  registerServiceRequestAttachment,
+  synchronizeServiceRequestApproval,
+  synchronizeServiceRequestTask,
+  writeSupportNotificationEvents,
+} = require('./src/itsm_support_triggers');
 
 admin.initializeApp();
 
@@ -63,6 +86,156 @@ exports.itsmMaintainWorkItemIndex = registerItsmCallable(
 exports.itsmProcessSla = registerItsmCallable(ITSM_COMMANDS.processSla);
 exports.itsmCreateNotificationEvent = registerItsmCallable(
   ITSM_COMMANDS.createNotificationEvent,
+);
+
+function registerItsmSupportCallable(command) {
+  return onCall(
+    createItsmSupportCallableHandler({
+      expectedCommand: command,
+      db,
+      fieldValue: admin.firestore.FieldValue,
+      timestamp: admin.firestore.Timestamp,
+      findAgent: findCallerAgent,
+      HttpsError,
+      logger,
+    }),
+  );
+}
+
+exports.itsmInitializeServiceRequestDraft = registerItsmSupportCallable(
+  ITSM_SUPPORT_COMMANDS.initializeServiceRequestDraft,
+);
+exports.itsmSubmitServiceRequest = registerItsmSupportCallable(
+  ITSM_SUPPORT_COMMANDS.submitServiceRequest,
+);
+exports.itsmUpdateServiceRequestTask = registerItsmSupportCallable(
+  ITSM_SUPPORT_COMMANDS.updateServiceRequestTask,
+);
+exports.itsmRecordKnowledgeView = registerItsmSupportCallable(
+  ITSM_SUPPORT_COMMANDS.recordKnowledgeView,
+);
+exports.itsmRecordKnowledgeFeedback = registerItsmSupportCallable(
+  ITSM_SUPPORT_COMMANDS.recordKnowledgeFeedback,
+);
+exports.itsmSaveKnowledgeDraft = registerItsmSupportCallable(
+  ITSM_SUPPORT_COMMANDS.saveKnowledgeDraft,
+);
+exports.itsmSubmitKnowledgeReview = registerItsmSupportCallable(
+  ITSM_SUPPORT_COMMANDS.submitKnowledgeReview,
+);
+exports.itsmRejectKnowledgeReview = registerItsmSupportCallable(
+  ITSM_SUPPORT_COMMANDS.rejectKnowledgeReview,
+);
+exports.itsmPublishKnowledgeArticle = registerItsmSupportCallable(
+  ITSM_SUPPORT_COMMANDS.publishKnowledgeArticle,
+);
+exports.itsmRetireKnowledgeArticle = registerItsmSupportCallable(
+  ITSM_SUPPORT_COMMANDS.retireKnowledgeArticle,
+);
+exports.itsmArchiveKnowledgeArticle = registerItsmSupportCallable(
+  ITSM_SUPPORT_COMMANDS.archiveKnowledgeArticle,
+);
+
+exports.itsmRegisterServiceRequestAttachment = onObjectFinalized(
+  async (event) => registerServiceRequestAttachment({
+    db,
+    fieldValue: admin.firestore.FieldValue,
+    object: event.data,
+  }),
+);
+
+exports.itsmRegisterKnowledgeAttachment = onObjectFinalized(
+  async (event) => registerKnowledgeAttachment({
+    db,
+    fieldValue: admin.firestore.FieldValue,
+    object: event.data,
+  }),
+);
+
+exports.itsmIndexIncidentWorkItem = onDocumentWritten(
+  'incidentTickets/{workItemId}',
+  async (event) => maintainSupportWorkItemIndex({
+    db,
+    collectionName: 'incidentTickets',
+    workItemId: event.params.workItemId,
+    after: event.data && event.data.after,
+  }),
+);
+
+exports.itsmIndexServiceRequestWorkItem = onDocumentWritten(
+  'serviceRequests/{workItemId}',
+  async (event) => maintainSupportWorkItemIndex({
+    db,
+    collectionName: 'serviceRequests',
+    workItemId: event.params.workItemId,
+    after: event.data && event.data.after,
+  }),
+);
+
+exports.itsmNotifyServiceRequestChanges = onDocumentWritten(
+  'serviceRequests/{workItemId}',
+  async (event) => {
+    const events = notificationEventsForSupportChange({
+      collectionName: 'serviceRequests',
+      workItemId: event.params.workItemId,
+      before: event.data && event.data.before,
+      after: event.data && event.data.after,
+      sourceEventId: event.id,
+      fieldValue: admin.firestore.FieldValue,
+    });
+    return writeSupportNotificationEvents({ db, events });
+  },
+);
+
+exports.itsmProcessServiceRequestSlaChange = onDocumentWritten(
+  'serviceRequests/{workItemId}',
+  async (event) => processServiceRequestSlaChange({
+    db,
+    fieldValue: admin.firestore.FieldValue,
+    timestamp: admin.firestore.Timestamp,
+    after: event.data && event.data.after,
+  }),
+);
+
+exports.itsmProcessServiceRequestSlas = onSchedule(
+  {
+    schedule: 'every 5 minutes',
+    timeZone: 'Africa/Kinshasa',
+    region: 'us-central1',
+    retryCount: 3,
+  },
+  async () => processServiceRequestSlaBatch({
+    db,
+    fieldValue: admin.firestore.FieldValue,
+    timestamp: admin.firestore.Timestamp,
+    logger,
+  }),
+);
+
+exports.itsmSynchronizeServiceRequestApproval = onDocumentWritten(
+  'serviceRequests/{requestId}/approvals/{approvalId}',
+  async (event) => synchronizeServiceRequestApproval({
+    db,
+    fieldValue: admin.firestore.FieldValue,
+    requestId: event.params.requestId,
+    approvalId: event.params.approvalId,
+    before: event.data && event.data.before,
+    after: event.data && event.data.after,
+    sourceEventId: event.id,
+  }),
+);
+
+exports.itsmSynchronizeServiceRequestTask = onDocumentWritten(
+  'serviceRequests/{requestId}/tasks/{taskId}',
+  async (event) => synchronizeServiceRequestTask({
+    db,
+    fieldValue: admin.firestore.FieldValue,
+    requestId: event.params.requestId,
+    taskId: event.params.taskId,
+    before: event.data && event.data.before,
+    after: event.data && event.data.after,
+    sourceEventId: event.id,
+  }),
 );
 
 exports.archiveEligibleIncidents = onSchedule(
@@ -444,7 +617,26 @@ async function findAgentsByModuleRole(target, fallbackModuleKey) {
     }
   }
 
-  return Array.from(agentsById.values());
+  const approvalGroupId = normalizeString(target.approvalGroupId);
+  return Array.from(agentsById.values()).filter(
+    (agentDoc) => !approvalGroupId ||
+      agentHasItsmGroup(agentDoc.data() || {}, approvalGroupId),
+  );
+}
+
+function agentHasItsmGroup(agent, groupId) {
+  const values = [
+    agent.itsmGroupIds,
+    agent.assignmentGroupIds,
+    agent.approvalGroupIds,
+    agent.groupIds,
+  ].flatMap((value) => Array.isArray(value) ? value : []);
+  values.push(
+    agent.itsmGroupId,
+    agent.assignmentGroupId,
+    agent.approvalGroupId,
+  );
+  return values.map(normalizeString).includes(groupId);
 }
 
 function roleStorageVariants(value) {

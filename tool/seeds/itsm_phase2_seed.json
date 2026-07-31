@@ -1,0 +1,2468 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": {
+    "@timestamp": "2026-07-31T00:00:00.000Z"
+  },
+  "documents": [
+    {
+      "path": "workflowDefinitions/access-correction",
+      "data": {
+        "name": "Access Correction",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/access-correction/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "identity-access",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/access-request",
+      "data": {
+        "name": "Access Request",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/access-request/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [
+          {
+            "id": "line-manager-approval",
+            "name": "Line Manager Approval",
+            "approverGroupId": "line-managers",
+            "sequence": 1,
+            "required": true
+          }
+        ],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "identity-access",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/asset-configuration",
+      "data": {
+        "name": "Asset Configuration",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/asset-configuration/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "technical-support",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/asset-repair",
+      "data": {
+        "name": "Asset Repair",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/asset-repair/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "technical-support",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/asset-replacement",
+      "data": {
+        "name": "Asset Replacement",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/asset-replacement/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [
+          {
+            "id": "manager-and-asset-approval",
+            "name": "Manager And Asset Approval",
+            "approverGroupId": "asset-management",
+            "sequence": 1,
+            "required": true
+          }
+        ],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "asset-management",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/asset-request",
+      "data": {
+        "name": "Asset Request",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/asset-request/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [
+          {
+            "id": "manager-and-asset-approval",
+            "name": "Manager And Asset Approval",
+            "approverGroupId": "asset-management",
+            "sequence": 1,
+            "required": true
+          }
+        ],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "asset-management",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/asset-return-transfer",
+      "data": {
+        "name": "Asset Return Transfer",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/asset-return-transfer/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "asset-management",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/change-intake",
+      "data": {
+        "name": "Change Intake",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/change-intake/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [
+          {
+            "id": "change-approval",
+            "name": "Change Approval",
+            "approverGroupId": "change-management",
+            "sequence": 1,
+            "required": true
+          }
+        ],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "change-management",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/incident-intake",
+      "data": {
+        "name": "Incident Intake",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/incident-intake/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "service-desk",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/network-access",
+      "data": {
+        "name": "Network Access",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/network-access/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [
+          {
+            "id": "line-manager-and-security-approval",
+            "name": "Line Manager And Security Approval",
+            "approverGroupId": "cybersecurity",
+            "sequence": 1,
+            "required": true
+          }
+        ],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "network-operations",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/security-exception",
+      "data": {
+        "name": "Security Exception",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/security-exception/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [
+          {
+            "id": "security-exception-approval",
+            "name": "Security Exception Approval",
+            "approverGroupId": "cybersecurity",
+            "sequence": 1,
+            "required": true
+          }
+        ],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "cybersecurity",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/software-installation",
+      "data": {
+        "name": "Software Installation",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/software-installation/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "technical-support",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/software-licence",
+      "data": {
+        "name": "Software Licence",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/software-licence/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [
+          {
+            "id": "manager-and-licence-approval",
+            "name": "Manager And Licence Approval",
+            "approverGroupId": "licence-management",
+            "sequence": 1,
+            "required": true
+          }
+        ],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "licence-management",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/standard-request",
+      "data": {
+        "name": "Standard Request",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "workflowDefinitions/standard-request/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "startState": "submitted",
+        "states": [
+          "submitted",
+          "awaiting_approval",
+          "approved",
+          "assigned",
+          "in_fulfilment",
+          "awaiting_user",
+          "fulfilled",
+          "closed",
+          "rejected",
+          "cancelled"
+        ],
+        "approvalSteps": [],
+        "fulfilmentTasks": [
+          {
+            "id": "fulfil-request",
+            "title": {
+              "en": "Fulfil request",
+              "fr": "Executer la demande"
+            },
+            "assignedGroupId": "service-desk",
+            "isInternal": false,
+            "required": true
+          }
+        ],
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/access-request",
+      "data": {
+        "name": "Access Request",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/access-request/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "responseTargetMinutes": 240,
+        "fulfilmentTargetMinutes": 1440,
+        "warningThresholdPercent": 75,
+        "pauseStatuses": [
+          "awaiting_user"
+        ],
+        "businessHoursPolicyId": "arptc-standard-hours",
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/asset-repair",
+      "data": {
+        "name": "Asset Repair",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/asset-repair/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "responseTargetMinutes": 240,
+        "fulfilmentTargetMinutes": 4320,
+        "warningThresholdPercent": 75,
+        "pauseStatuses": [
+          "awaiting_user"
+        ],
+        "businessHoursPolicyId": "arptc-standard-hours",
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/asset-request",
+      "data": {
+        "name": "Asset Request",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/asset-request/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "responseTargetMinutes": 240,
+        "fulfilmentTargetMinutes": 4320,
+        "warningThresholdPercent": 75,
+        "pauseStatuses": [
+          "awaiting_user"
+        ],
+        "businessHoursPolicyId": "arptc-standard-hours",
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/change-assessment",
+      "data": {
+        "name": "Change Assessment",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/change-assessment/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "responseTargetMinutes": 240,
+        "fulfilmentTargetMinutes": 2880,
+        "warningThresholdPercent": 75,
+        "pauseStatuses": [
+          "awaiting_user"
+        ],
+        "businessHoursPolicyId": "arptc-standard-hours",
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/incident-standard",
+      "data": {
+        "name": "Incident Standard",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/incident-standard/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "responseTargetMinutes": 30,
+        "fulfilmentTargetMinutes": 480,
+        "warningThresholdPercent": 75,
+        "pauseStatuses": [
+          "awaiting_user"
+        ],
+        "businessHoursPolicyId": "arptc-standard-hours",
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/request-standard",
+      "data": {
+        "name": "Request Standard",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/request-standard/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "responseTargetMinutes": 240,
+        "fulfilmentTargetMinutes": 1440,
+        "warningThresholdPercent": 75,
+        "pauseStatuses": [
+          "awaiting_user"
+        ],
+        "businessHoursPolicyId": "arptc-standard-hours",
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/security-assessment",
+      "data": {
+        "name": "Security Assessment",
+        "status": "published",
+        "publishedVersion": 1,
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "slaPolicies/security-assessment/versions/000001",
+      "data": {
+        "version": 1,
+        "status": "published",
+        "responseTargetMinutes": 60,
+        "fulfilmentTargetMinutes": 1440,
+        "warningThresholdPercent": 75,
+        "pauseStatuses": [
+          "awaiting_user"
+        ],
+        "businessHoursPolicyId": "arptc-standard-hours",
+        "seedSource": "itsm-phase2-seed",
+        "seedVersion": 1,
+        "publishedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        }
+      }
+    },
+    {
+      "path": "serviceCatalogItems/report_it_incident",
+      "data": {
+        "code": "report_it_incident",
+        "version": 1,
+        "name": {
+          "en": "Report an IT incident",
+          "fr": "Signaler un incident informatique"
+        },
+        "description": {
+          "en": "Report an unexpected interruption or degradation of an IT service.",
+          "fr": "Signaler une interruption ou une degradation inattendue d'un service informatique."
+        },
+        "categoryId": "support",
+        "categoryName": {
+          "en": "Support",
+          "fr": "Assistance"
+        },
+        "iconKey": "report_problem",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "title",
+            "type": "short_text",
+            "label": {
+              "en": "Title",
+              "fr": "Titre"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 5,
+            "maximumLength": 160,
+            "options": []
+          },
+          {
+            "key": "description",
+            "type": "long_text",
+            "label": {
+              "en": "Description",
+              "fr": "Description"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 4000,
+            "options": []
+          },
+          {
+            "key": "isBlocking",
+            "type": "boolean",
+            "label": {
+              "en": "Is your work blocked?",
+              "fr": "Votre travail est-il bloque ?"
+            },
+            "required": true,
+            "sensitive": false,
+            "defaultValue": false,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [],
+        "workflow": {
+          "id": "incident-intake",
+          "version": 1
+        },
+        "fulfilmentGroupId": "service-desk",
+        "slaPolicy": {
+          "id": "incident-standard",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 10,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    },
+    {
+      "path": "serviceCatalogItems/technical_assistance",
+      "data": {
+        "code": "technical_assistance",
+        "version": 1,
+        "name": {
+          "en": "Request technical assistance",
+          "fr": "Demander une assistance technique"
+        },
+        "description": {
+          "en": "Ask the service desk for help with an IT question or task.",
+          "fr": "Demander l'aide du centre de services pour une question ou une tache informatique."
+        },
+        "categoryId": "support",
+        "categoryName": {
+          "en": "Support",
+          "fr": "Assistance"
+        },
+        "iconKey": "support_agent",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "title",
+            "type": "short_text",
+            "label": {
+              "en": "Title",
+              "fr": "Titre"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 5,
+            "maximumLength": 160,
+            "options": []
+          },
+          {
+            "key": "description",
+            "type": "long_text",
+            "label": {
+              "en": "Description",
+              "fr": "Description"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 4000,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [],
+        "workflow": {
+          "id": "standard-request",
+          "version": 1
+        },
+        "fulfilmentGroupId": "service-desk",
+        "slaPolicy": {
+          "id": "request-standard",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 20,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    },
+    {
+      "path": "serviceCatalogItems/computer_request",
+      "data": {
+        "code": "computer_request",
+        "version": 1,
+        "name": {
+          "en": "Request a computer",
+          "fr": "Demander un ordinateur"
+        },
+        "description": {
+          "en": "Request a laptop or desktop computer for an eligible employee.",
+          "fr": "Demander un ordinateur portable ou fixe pour un agent eligible."
+        },
+        "categoryId": "equipment",
+        "categoryName": {
+          "en": "Equipment",
+          "fr": "Equipement"
+        },
+        "iconKey": "computer",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "computerType",
+            "type": "single_select",
+            "label": {
+              "en": "Computer type",
+              "fr": "Type d'ordinateur"
+            },
+            "required": true,
+            "sensitive": false,
+            "options": [
+              {
+                "value": "laptop",
+                "label": {
+                  "en": "Laptop",
+                  "fr": "Ordinateur portable"
+                }
+              },
+              {
+                "value": "desktop",
+                "label": {
+                  "en": "Desktop",
+                  "fr": "Ordinateur fixe"
+                }
+              }
+            ]
+          },
+          {
+            "key": "businessJustification",
+            "type": "long_text",
+            "label": {
+              "en": "Business justification",
+              "fr": "Justification professionnelle"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 2000,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [],
+        "workflow": {
+          "id": "asset-request",
+          "version": 1
+        },
+        "approvalPolicyId": "manager-and-asset-approval",
+        "fulfilmentGroupId": "asset-management",
+        "slaPolicy": {
+          "id": "asset-request",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 30,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    },
+    {
+      "path": "serviceCatalogItems/equipment_replacement",
+      "data": {
+        "code": "equipment_replacement",
+        "version": 1,
+        "name": {
+          "en": "Request equipment replacement",
+          "fr": "Demander le remplacement d'un equipement"
+        },
+        "description": {
+          "en": "Request replacement of assigned equipment that is unsuitable.",
+          "fr": "Demander le remplacement d'un equipement affecte devenu inadapte."
+        },
+        "categoryId": "equipment",
+        "categoryName": {
+          "en": "Equipment",
+          "fr": "Equipement"
+        },
+        "iconKey": "swap_horiz",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "assetId",
+            "type": "asset",
+            "label": {
+              "en": "Affected equipment",
+              "fr": "Equipement concerne"
+            },
+            "required": true,
+            "sensitive": false,
+            "options": []
+          },
+          {
+            "key": "businessJustification",
+            "type": "long_text",
+            "label": {
+              "en": "Business justification",
+              "fr": "Justification professionnelle"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 2000,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [
+          {
+            "key": "supportingEvidence",
+            "label": {
+              "en": "Supporting evidence",
+              "fr": "Piece justificative"
+            },
+            "required": true,
+            "maximumFiles": 5,
+            "allowedContentTypes": [
+              "application/pdf",
+              "image/jpeg",
+              "image/png"
+            ]
+          }
+        ],
+        "workflow": {
+          "id": "asset-replacement",
+          "version": 1
+        },
+        "approvalPolicyId": "manager-and-asset-approval",
+        "fulfilmentGroupId": "asset-management",
+        "slaPolicy": {
+          "id": "asset-request",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 40,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    },
+    {
+      "path": "serviceCatalogItems/equipment_repair",
+      "data": {
+        "code": "equipment_repair",
+        "version": 1,
+        "name": {
+          "en": "Request repair",
+          "fr": "Demander une reparation"
+        },
+        "description": {
+          "en": "Request diagnosis and repair of assigned equipment.",
+          "fr": "Demander le diagnostic et la reparation d'un equipement affecte."
+        },
+        "categoryId": "equipment",
+        "categoryName": {
+          "en": "Equipment",
+          "fr": "Equipement"
+        },
+        "iconKey": "build",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "assetId",
+            "type": "asset",
+            "label": {
+              "en": "Affected equipment",
+              "fr": "Equipement concerne"
+            },
+            "required": true,
+            "sensitive": false,
+            "options": []
+          },
+          {
+            "key": "description",
+            "type": "long_text",
+            "label": {
+              "en": "Description",
+              "fr": "Description"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 4000,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [
+          {
+            "key": "supportingEvidence",
+            "label": {
+              "en": "Supporting evidence",
+              "fr": "Piece justificative"
+            },
+            "required": false,
+            "maximumFiles": 5,
+            "allowedContentTypes": [
+              "application/pdf",
+              "image/jpeg",
+              "image/png"
+            ]
+          }
+        ],
+        "workflow": {
+          "id": "asset-repair",
+          "version": 1
+        },
+        "fulfilmentGroupId": "technical-support",
+        "slaPolicy": {
+          "id": "asset-repair",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 50,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    },
+    {
+      "path": "serviceCatalogItems/asset_configuration",
+      "data": {
+        "code": "asset_configuration",
+        "version": 1,
+        "name": {
+          "en": "Request asset configuration",
+          "fr": "Demander la configuration d'un equipement"
+        },
+        "description": {
+          "en": "Request an approved configuration change on assigned equipment.",
+          "fr": "Demander une modification de configuration approuvee sur un equipement affecte."
+        },
+        "categoryId": "equipment",
+        "categoryName": {
+          "en": "Equipment",
+          "fr": "Equipement"
+        },
+        "iconKey": "settings_suggest",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "assetId",
+            "type": "asset",
+            "label": {
+              "en": "Affected equipment",
+              "fr": "Equipement concerne"
+            },
+            "required": true,
+            "sensitive": false,
+            "options": []
+          },
+          {
+            "key": "description",
+            "type": "long_text",
+            "label": {
+              "en": "Description",
+              "fr": "Description"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 4000,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [],
+        "workflow": {
+          "id": "asset-configuration",
+          "version": 1
+        },
+        "fulfilmentGroupId": "technical-support",
+        "slaPolicy": {
+          "id": "request-standard",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 60,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    },
+    {
+      "path": "serviceCatalogItems/software_installation",
+      "data": {
+        "code": "software_installation",
+        "version": 1,
+        "name": {
+          "en": "Request software installation",
+          "fr": "Demander l'installation d'un logiciel"
+        },
+        "description": {
+          "en": "Request installation of approved software on an assigned device.",
+          "fr": "Demander l'installation d'un logiciel approuve sur un appareil affecte."
+        },
+        "categoryId": "software",
+        "categoryName": {
+          "en": "Software",
+          "fr": "Logiciels"
+        },
+        "iconKey": "install_desktop",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "assetId",
+            "type": "asset",
+            "label": {
+              "en": "Affected equipment",
+              "fr": "Equipement concerne"
+            },
+            "required": true,
+            "sensitive": false,
+            "options": []
+          },
+          {
+            "key": "softwareName",
+            "type": "short_text",
+            "label": {
+              "en": "Software name",
+              "fr": "Nom du logiciel"
+            },
+            "required": true,
+            "sensitive": false,
+            "maximumLength": 120,
+            "options": []
+          },
+          {
+            "key": "businessJustification",
+            "type": "long_text",
+            "label": {
+              "en": "Business justification",
+              "fr": "Justification professionnelle"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 2000,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [],
+        "workflow": {
+          "id": "software-installation",
+          "version": 1
+        },
+        "fulfilmentGroupId": "technical-support",
+        "slaPolicy": {
+          "id": "request-standard",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 70,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    },
+    {
+      "path": "serviceCatalogItems/software_licence",
+      "data": {
+        "code": "software_licence",
+        "version": 1,
+        "name": {
+          "en": "Request software licence",
+          "fr": "Demander une licence logicielle"
+        },
+        "description": {
+          "en": "Request allocation or purchase of a business software licence.",
+          "fr": "Demander l'attribution ou l'achat d'une licence logicielle."
+        },
+        "categoryId": "software",
+        "categoryName": {
+          "en": "Software",
+          "fr": "Logiciels"
+        },
+        "iconKey": "key",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "softwareName",
+            "type": "short_text",
+            "label": {
+              "en": "Software name",
+              "fr": "Nom du logiciel"
+            },
+            "required": true,
+            "sensitive": false,
+            "maximumLength": 120,
+            "options": []
+          },
+          {
+            "key": "businessJustification",
+            "type": "long_text",
+            "label": {
+              "en": "Business justification",
+              "fr": "Justification professionnelle"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 2000,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [],
+        "workflow": {
+          "id": "software-licence",
+          "version": 1
+        },
+        "approvalPolicyId": "manager-and-licence-approval",
+        "fulfilmentGroupId": "licence-management",
+        "slaPolicy": {
+          "id": "request-standard",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 80,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    },
+    {
+      "path": "serviceCatalogItems/account_access",
+      "data": {
+        "code": "account_access",
+        "version": 1,
+        "name": {
+          "en": "Request account or access",
+          "fr": "Demander un compte ou un acces"
+        },
+        "description": {
+          "en": "Request creation, restoration, or modification of system access.",
+          "fr": "Demander la creation, la restauration ou la modification d'un acces systeme."
+        },
+        "categoryId": "access",
+        "categoryName": {
+          "en": "Identity and access",
+          "fr": "Identite et acces"
+        },
+        "iconKey": "manage_accounts",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "systemName",
+            "type": "short_text",
+            "label": {
+              "en": "System or application",
+              "fr": "Systeme ou application"
+            },
+            "required": true,
+            "sensitive": false,
+            "maximumLength": 160,
+            "options": []
+          },
+          {
+            "key": "accessAction",
+            "type": "single_select",
+            "label": {
+              "en": "Requested action",
+              "fr": "Action demandee"
+            },
+            "required": true,
+            "sensitive": false,
+            "options": [
+              {
+                "value": "create",
+                "label": {
+                  "en": "Create",
+                  "fr": "Creer"
+                }
+              },
+              {
+                "value": "modify",
+                "label": {
+                  "en": "Modify",
+                  "fr": "Modifier"
+                }
+              },
+              {
+                "value": "restore",
+                "label": {
+                  "en": "Restore",
+                  "fr": "Restaurer"
+                }
+              },
+              {
+                "value": "revoke",
+                "label": {
+                  "en": "Revoke",
+                  "fr": "Revoquer"
+                }
+              }
+            ]
+          },
+          {
+            "key": "businessJustification",
+            "type": "long_text",
+            "label": {
+              "en": "Business justification",
+              "fr": "Justification professionnelle"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 2000,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [],
+        "workflow": {
+          "id": "access-request",
+          "version": 1
+        },
+        "approvalPolicyId": "line-manager-approval",
+        "fulfilmentGroupId": "identity-access",
+        "slaPolicy": {
+          "id": "access-request",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 90,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    },
+    {
+      "path": "serviceCatalogItems/vpn_network_access",
+      "data": {
+        "code": "vpn_network_access",
+        "version": 1,
+        "name": {
+          "en": "Request VPN or network access",
+          "fr": "Demander un acces VPN ou reseau"
+        },
+        "description": {
+          "en": "Request remote-access or controlled network connectivity.",
+          "fr": "Demander un acces distant ou une connectivite reseau controlee."
+        },
+        "categoryId": "access",
+        "categoryName": {
+          "en": "Identity and access",
+          "fr": "Identite et acces"
+        },
+        "iconKey": "vpn_key",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "accessType",
+            "type": "single_select",
+            "label": {
+              "en": "Access type",
+              "fr": "Type d'acces"
+            },
+            "required": true,
+            "sensitive": false,
+            "options": [
+              {
+                "value": "vpn",
+                "label": {
+                  "en": "VPN",
+                  "fr": "VPN"
+                }
+              },
+              {
+                "value": "network",
+                "label": {
+                  "en": "Network segment",
+                  "fr": "Segment reseau"
+                }
+              }
+            ]
+          },
+          {
+            "key": "businessJustification",
+            "type": "long_text",
+            "label": {
+              "en": "Business justification",
+              "fr": "Justification professionnelle"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 2000,
+            "options": []
+          },
+          {
+            "key": "requiredUntil",
+            "type": "date",
+            "label": {
+              "en": "Required until",
+              "fr": "Necessaire jusqu'au"
+            },
+            "required": false,
+            "sensitive": false,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [],
+        "workflow": {
+          "id": "network-access",
+          "version": 1
+        },
+        "approvalPolicyId": "line-manager-and-security-approval",
+        "fulfilmentGroupId": "network-operations",
+        "slaPolicy": {
+          "id": "access-request",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 100,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    },
+    {
+      "path": "serviceCatalogItems/equipment_return_transfer",
+      "data": {
+        "code": "equipment_return_transfer",
+        "version": 1,
+        "name": {
+          "en": "Request equipment return or transfer",
+          "fr": "Demander le retour ou le transfert d'un equipement"
+        },
+        "description": {
+          "en": "Arrange the governed return or transfer of assigned equipment.",
+          "fr": "Organiser le retour ou le transfert controle d'un equipement."
+        },
+        "categoryId": "equipment",
+        "categoryName": {
+          "en": "Equipment",
+          "fr": "Equipement"
+        },
+        "iconKey": "assignment_return",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "assetId",
+            "type": "asset",
+            "label": {
+              "en": "Affected equipment",
+              "fr": "Equipement concerne"
+            },
+            "required": true,
+            "sensitive": false,
+            "options": []
+          },
+          {
+            "key": "movementType",
+            "type": "single_select",
+            "label": {
+              "en": "Movement",
+              "fr": "Mouvement"
+            },
+            "required": true,
+            "sensitive": false,
+            "options": [
+              {
+                "value": "return",
+                "label": {
+                  "en": "Return",
+                  "fr": "Retour"
+                }
+              },
+              {
+                "value": "transfer",
+                "label": {
+                  "en": "Transfer",
+                  "fr": "Transfert"
+                }
+              }
+            ]
+          },
+          {
+            "key": "description",
+            "type": "long_text",
+            "label": {
+              "en": "Description",
+              "fr": "Description"
+            },
+            "required": false,
+            "sensitive": false,
+            "maximumLength": 4000,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [],
+        "workflow": {
+          "id": "asset-return-transfer",
+          "version": 1
+        },
+        "fulfilmentGroupId": "asset-management",
+        "slaPolicy": {
+          "id": "asset-request",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 110,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    },
+    {
+      "path": "serviceCatalogItems/change_request",
+      "data": {
+        "code": "change_request",
+        "version": 1,
+        "name": {
+          "en": "Submit a change request",
+          "fr": "Soumettre une demande de changement"
+        },
+        "description": {
+          "en": "Propose a governed change to an IT service or configuration.",
+          "fr": "Proposer un changement controle sur un service ou une configuration informatique."
+        },
+        "categoryId": "governance",
+        "categoryName": {
+          "en": "Governance",
+          "fr": "Gouvernance"
+        },
+        "iconKey": "published_with_changes",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "title",
+            "type": "short_text",
+            "label": {
+              "en": "Title",
+              "fr": "Titre"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 5,
+            "maximumLength": 160,
+            "options": []
+          },
+          {
+            "key": "description",
+            "type": "long_text",
+            "label": {
+              "en": "Description",
+              "fr": "Description"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 4000,
+            "options": []
+          },
+          {
+            "key": "businessJustification",
+            "type": "long_text",
+            "label": {
+              "en": "Business justification",
+              "fr": "Justification professionnelle"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 2000,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [],
+        "workflow": {
+          "id": "change-intake",
+          "version": 1
+        },
+        "approvalPolicyId": "change-approval",
+        "fulfilmentGroupId": "change-management",
+        "slaPolicy": {
+          "id": "change-assessment",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 120,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    },
+    {
+      "path": "serviceCatalogItems/security_exception",
+      "data": {
+        "code": "security_exception",
+        "version": 1,
+        "name": {
+          "en": "Submit a security exception",
+          "fr": "Soumettre une exception de securite"
+        },
+        "description": {
+          "en": "Request a time-bound exception with compensating controls.",
+          "fr": "Demander une exception limitee dans le temps avec des mesures compensatoires."
+        },
+        "categoryId": "security",
+        "categoryName": {
+          "en": "Security",
+          "fr": "Securite"
+        },
+        "iconKey": "gpp_maybe",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "systemName",
+            "type": "short_text",
+            "label": {
+              "en": "System or application",
+              "fr": "Systeme ou application"
+            },
+            "required": true,
+            "sensitive": false,
+            "maximumLength": 160,
+            "options": []
+          },
+          {
+            "key": "businessJustification",
+            "type": "long_text",
+            "label": {
+              "en": "Business justification",
+              "fr": "Justification professionnelle"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 2000,
+            "options": []
+          },
+          {
+            "key": "compensatingControls",
+            "type": "long_text",
+            "label": {
+              "en": "Compensating controls",
+              "fr": "Mesures compensatoires"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 20,
+            "maximumLength": 3000,
+            "options": []
+          },
+          {
+            "key": "expiryDate",
+            "type": "date",
+            "label": {
+              "en": "Requested expiry date",
+              "fr": "Date d'expiration demandee"
+            },
+            "required": true,
+            "sensitive": false,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [
+          {
+            "key": "supportingEvidence",
+            "label": {
+              "en": "Supporting evidence",
+              "fr": "Piece justificative"
+            },
+            "required": true,
+            "maximumFiles": 5,
+            "allowedContentTypes": [
+              "application/pdf",
+              "image/jpeg",
+              "image/png"
+            ]
+          }
+        ],
+        "workflow": {
+          "id": "security-exception",
+          "version": 1
+        },
+        "approvalPolicyId": "security-exception-approval",
+        "fulfilmentGroupId": "cybersecurity",
+        "slaPolicy": {
+          "id": "security-assessment",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 130,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    },
+    {
+      "path": "serviceCatalogItems/access_correction_revocation",
+      "data": {
+        "code": "access_correction_revocation",
+        "version": 1,
+        "name": {
+          "en": "Request access correction or revocation",
+          "fr": "Demander la correction ou la revocation d'un acces"
+        },
+        "description": {
+          "en": "Report inappropriate access and request correction or revocation.",
+          "fr": "Signaler un acces inapproprie et demander sa correction ou sa revocation."
+        },
+        "categoryId": "access",
+        "categoryName": {
+          "en": "Identity and access",
+          "fr": "Identite et acces"
+        },
+        "iconKey": "person_off",
+        "eligibility": {
+          "allEmployees": true,
+          "userIds": [],
+          "departmentIds": [],
+          "serviceIds": [],
+          "excludedUserIds": []
+        },
+        "visibleRoles": [
+          "USER",
+          "MANAGER",
+          "ADMIN"
+        ],
+        "formFields": [
+          {
+            "key": "systemName",
+            "type": "short_text",
+            "label": {
+              "en": "System or application",
+              "fr": "Systeme ou application"
+            },
+            "required": true,
+            "sensitive": false,
+            "maximumLength": 160,
+            "options": []
+          },
+          {
+            "key": "accessAction",
+            "type": "single_select",
+            "label": {
+              "en": "Requested action",
+              "fr": "Action demandee"
+            },
+            "required": true,
+            "sensitive": false,
+            "options": [
+              {
+                "value": "create",
+                "label": {
+                  "en": "Create",
+                  "fr": "Creer"
+                }
+              },
+              {
+                "value": "modify",
+                "label": {
+                  "en": "Modify",
+                  "fr": "Modifier"
+                }
+              },
+              {
+                "value": "restore",
+                "label": {
+                  "en": "Restore",
+                  "fr": "Restaurer"
+                }
+              },
+              {
+                "value": "revoke",
+                "label": {
+                  "en": "Revoke",
+                  "fr": "Revoquer"
+                }
+              }
+            ]
+          },
+          {
+            "key": "description",
+            "type": "long_text",
+            "label": {
+              "en": "Description",
+              "fr": "Description"
+            },
+            "required": true,
+            "sensitive": false,
+            "minimumLength": 10,
+            "maximumLength": 4000,
+            "options": []
+          }
+        ],
+        "requiredDocuments": [],
+        "workflow": {
+          "id": "access-correction",
+          "version": 1
+        },
+        "fulfilmentGroupId": "identity-access",
+        "slaPolicy": {
+          "id": "access-request",
+          "version": 1
+        },
+        "status": "published",
+        "allowManagerRequestOnBehalf": true,
+        "workflowAllowsCancellation": true,
+        "sortOrder": 140,
+        "createdAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "createdBy": "itsm-phase2-seed",
+        "updatedAt": {
+          "@timestamp": "2026-07-31T00:00:00.000Z"
+        },
+        "updatedBy": "itsm-phase2-seed"
+      }
+    }
+  ]
+}

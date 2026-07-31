@@ -1,6 +1,7 @@
 import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
 import 'package:arptc_connect/modules/incident_management/data/firestore_incident_repository.dart';
 import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/itsm_shared_data.dart';
@@ -57,7 +58,7 @@ final legacyIncidentItsmWorkItemRepositoryProvider =
 });
 
 final itsmWorkItemRepositoryProvider = Provider<ItsmWorkItemRepository>((ref) {
-  return ref.watch(legacyIncidentItsmWorkItemRepositoryProvider);
+  return FirestoreItsmWorkItemRepository(FirebaseFirestore.instance);
 });
 
 final itsmAccessPolicyProvider = Provider<ItsmAccessPolicy>(
@@ -95,14 +96,17 @@ class ItsmWorkItemPageRequest {
 final itsmWorkItemPageProvider = FutureProvider.autoDispose
     .family<PageResult<ItsmWorkItemSummary>, ItsmWorkItemPageRequest>(
   (ref, request) async {
+    _invalidateWhenAuthSessionChanges(ref);
+    final accessPolicy = ref.read(itsmAccessPolicyProvider);
+    final repository = ref.watch(itsmWorkItemRepositoryProvider);
     final session = await ref.watch(itsmSessionProvider.future);
     if (session == null) throw const ItsmSessionRequiredException();
-    ref.read(itsmAccessPolicyProvider).authorize(session, request.query.scope);
-    return ref.watch(itsmWorkItemRepositoryProvider).fetchPage(
-          principal: session.queryPrincipal,
-          query: request.query,
-          page: request.page,
-        );
+    accessPolicy.authorize(session, request.query.scope);
+    return repository.fetchPage(
+      principal: session.queryPrincipal,
+      query: request.query,
+      page: request.page,
+    );
   },
 );
 
@@ -144,15 +148,25 @@ class ItsmFirstPageRequest {
 
 final itsmWorkItemFirstPageProvider = StreamProvider.autoDispose
     .family<List<ItsmWorkItemSummary>, ItsmFirstPageRequest>(
-  (ref, request) async* {
-    final session = await ref.watch(itsmSessionProvider.future);
-    if (session == null) throw const ItsmSessionRequiredException();
-    ref.read(itsmAccessPolicyProvider).authorize(session, request.query.scope);
-    yield* ref.watch(itsmWorkItemRepositoryProvider).watchFirstPage(
+  (ref, request) {
+    final accessPolicy = ref.read(itsmAccessPolicyProvider);
+    final repository = ref.watch(itsmWorkItemRepositoryProvider);
+    final sessionState = ref.watch(itsmSessionProvider);
+    return sessionState.when(
+      loading: _pendingStream,
+      error: (error, stackTrace) => Stream.error(error, stackTrace),
+      data: (session) {
+        if (session == null) {
+          return Stream.error(const ItsmSessionRequiredException());
+        }
+        accessPolicy.authorize(session, request.query.scope);
+        return repository.watchFirstPage(
           principal: session.queryPrincipal,
           query: request.query,
           limit: request.limit,
         );
+      },
+    );
   },
 );
 
@@ -188,16 +202,35 @@ class ItsmWorkItemIdentity {
 
 final itsmWorkItemProvider = StreamProvider.autoDispose
     .family<ItsmWorkItemSummary?, ItsmWorkItemIdentity>(
-  (ref, identity) async* {
-    final session = await ref.watch(itsmSessionProvider.future);
-    if (session == null) throw const ItsmSessionRequiredException();
-    yield* ref.watch(itsmWorkItemRepositoryProvider).watchById(
+  (ref, identity) {
+    final repository = ref.watch(itsmWorkItemRepositoryProvider);
+    final sessionState = ref.watch(itsmSessionProvider);
+    return sessionState.when(
+      loading: _pendingStream,
+      error: (error, stackTrace) => Stream.error(error, stackTrace),
+      data: (session) {
+        if (session == null) {
+          return Stream.error(const ItsmSessionRequiredException());
+        }
+        return repository.watchById(
           principal: session.queryPrincipal,
           type: identity.type,
           id: identity.id,
         );
+      },
+    );
   },
 );
+
+void _invalidateWhenAuthSessionChanges(Ref ref) {
+  ref.listen<String?>(currentAuthSessionKeyProvider, (previous, next) {
+    if (previous != null && previous != next) {
+      ref.invalidateSelf();
+    }
+  });
+}
+
+Stream<T> _pendingStream<T>() => Stream<T>.multi((_) {});
 
 final itsmCommandExecutorProvider = Provider<ItsmCommandExecutor>(
   (ref) => ItsmCommandExecutor(),

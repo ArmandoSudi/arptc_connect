@@ -16,10 +16,12 @@ class InventoryMainScreen extends StatelessWidget {
   ];
 
   final List<Service> _inventoryServices = [
-    Service("Gestion des articles", "management", Icons.inventory_2_outlined,
+    const Service(
+        "Gestion des articles", "management", Icons.inventory_2_outlined,
         color: Colors.green),
-    Service("Approvisionnement", "appro", Icons.download, color: Colors.blue),
-    Service("Livraison", "livraison", Icons.upload, color: Colors.amber),
+    const Service("Approvisionnement", "appro", Icons.download,
+        color: Colors.blue),
+    const Service("Livraison", "livraison", Icons.upload, color: Colors.amber),
   ];
 
   @override

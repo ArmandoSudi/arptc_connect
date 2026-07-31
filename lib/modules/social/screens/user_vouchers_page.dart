@@ -7,8 +7,8 @@ class UserVoucherPage extends StatelessWidget {
 
   final db = FirebaseFirestore.instance;
 
-  final CollectionReference vouchersRef =
-  FirebaseFirestore.instance.collection('agents/PyKV8iGiDzcTdQSaRzWD/vouchers');
+  final CollectionReference vouchersRef = FirebaseFirestore.instance
+      .collection('agents/PyKV8iGiDzcTdQSaRzWD/vouchers');
 
   @override
   Widget build(BuildContext context) {
@@ -17,25 +17,23 @@ class UserVoucherPage extends StatelessWidget {
           child: StreamBuilder<QuerySnapshot>(
               stream: vouchersRef.snapshots(),
               builder: (context, snapshot) {
-
                 if (snapshot.hasError) {
-                  return _ErrorView(message: "Something went wrong");
+                  return const _ErrorView(message: "Something went wrong");
                 }
 
-                if (snapshot.data == null || snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.data == null ||
+                    snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return _EmptyView(message: "No vouchers yet");
+                  return const _EmptyView(message: "No vouchers yet");
                 }
                 return _buildVoucherList(context, snapshot.data?.docs ?? []);
-              }
-
-          )
-      ),
+              })),
     );
   }
 
-  Widget _buildVoucherList(BuildContext context, List<DocumentSnapshot> snapshot) {
+  Widget _buildVoucherList(
+      BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: snapshot.length,
@@ -94,9 +92,8 @@ class _StatusChip extends StatelessWidget {
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: isApproved
-              ? Colors.green.shade700
-              : colorScheme.onErrorContainer,
+          color:
+              isApproved ? Colors.green.shade700 : colorScheme.onErrorContainer,
         ),
       ),
     );
@@ -166,4 +163,3 @@ class _ErrorView extends StatelessWidget {
     );
   }
 }
-

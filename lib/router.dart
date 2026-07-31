@@ -18,12 +18,25 @@ import 'package:arptc_connect/modules/inventory/presentation/appro_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/inventory_main_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/livraison_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
+import 'package:arptc_connect/modules/itsm/knowledge/presentation/screens/knowledge_article_screen.dart';
+import 'package:arptc_connect/modules/itsm/knowledge/presentation/screens/knowledge_base_screen.dart';
+import 'package:arptc_connect/modules/itsm/knowledge/presentation/screens/knowledge_editor_screen.dart';
+import 'package:arptc_connect/modules/itsm/knowledge/presentation/screens/knowledge_editor_loader_screen.dart';
+import 'package:arptc_connect/modules/itsm/knowledge/presentation/screens/knowledge_manager_queue_screen.dart';
+import 'package:arptc_connect/modules/itsm/knowledge/presentation/screens/knowledge_manager_review_screen.dart';
 import 'package:arptc_connect/modules/itsm/presentation/navigation/itsm_navigation.dart';
 import 'package:arptc_connect/modules/itsm/presentation/navigation/itsm_route_access.dart';
 import 'package:arptc_connect/modules/itsm/presentation/screens/itsm_feature_access_screen.dart';
 import 'package:arptc_connect/modules/itsm/presentation/screens/itsm_landing_screen.dart';
 import 'package:arptc_connect/modules/itsm/presentation/screens/itsm_section_overview_screen.dart';
 import 'package:arptc_connect/modules/itsm/presentation/widgets/itsm_route_guard.dart';
+import 'package:arptc_connect/modules/itsm/shared/domain/itsm_common.dart';
+import 'package:arptc_connect/modules/itsm/support/presentation/screens/create_service_request_screen.dart';
+import 'package:arptc_connect/modules/itsm/support/presentation/screens/my_requests_screen.dart';
+import 'package:arptc_connect/modules/itsm/support/presentation/screens/service_catalogue_item_screen.dart';
+import 'package:arptc_connect/modules/itsm/support/presentation/screens/service_catalogue_screen.dart';
+import 'package:arptc_connect/modules/itsm/support/presentation/screens/service_request_detail_screen.dart';
+import 'package:arptc_connect/modules/itsm/support/presentation/screens/service_request_queue_screen.dart';
 import 'package:arptc_connect/modules/news/presentation/screens/news_editor_screen.dart';
 import 'package:arptc_connect/modules/news/presentation/screens/news_module_screen.dart';
 import 'package:arptc_connect/modules/news/presentation/screens/news_post_details_screen.dart';
@@ -519,18 +532,9 @@ GoRoute _buildItsmRoute() {
         ),
         routes: [
           _buildCanonicalIncidentRoute(),
-          _buildItsmFeatureRoute(
-            ItsmSection.support,
-            ItsmFeature.serviceRequests,
-          ),
-          _buildItsmFeatureRoute(
-            ItsmSection.support,
-            ItsmFeature.myRequests,
-          ),
-          _buildItsmFeatureRoute(
-            ItsmSection.support,
-            ItsmFeature.knowledgeBase,
-          ),
+          _buildServiceRequestsRoute(),
+          _buildMyRequestsRoute(),
+          _buildKnowledgeBaseRoute(),
         ],
       ),
       _buildItsmSectionRoute(
@@ -569,6 +573,219 @@ GoRoute _buildItsmRoute() {
           ItsmFeature.workflowConfiguration,
           ItsmFeature.auditLogs,
         ],
+      ),
+    ],
+  );
+}
+
+GoRoute _buildServiceRequestsRoute() {
+  return GoRoute(
+    path: ItsmFeature.serviceRequests.routeSegment,
+    builder: (context, state) => ItsmRouteGuard(
+      section: ItsmSection.support,
+      feature: ItsmFeature.serviceRequests,
+      requirement: ItsmRouteRequirement.selfService,
+      child: ServiceCatalogueScreen(
+        onItemSelected: (item) => context.push(
+          '${ItsmRoutes.serviceRequests}/catalogue/'
+          '${Uri.encodeComponent(item.id)}',
+        ),
+      ),
+    ),
+    routes: [
+      GoRoute(
+        path: 'catalogue/:catalogueItemId',
+        builder: (context, state) {
+          final catalogueItemId =
+              state.pathParameters['catalogueItemId'] as String;
+          return ItsmRouteGuard(
+            section: ItsmSection.support,
+            feature: ItsmFeature.serviceRequests,
+            requirement: ItsmRouteRequirement.selfService,
+            child: ServiceCatalogueItemScreen(
+              catalogueItemId: catalogueItemId,
+              onCreateRequest: (_) => context.push(
+                '${ItsmRoutes.serviceRequests}/catalogue/'
+                '${Uri.encodeComponent(catalogueItemId)}/create',
+              ),
+            ),
+          );
+        },
+        routes: [
+          GoRoute(
+            path: 'create',
+            builder: (context, state) => ItsmRouteGuard(
+              section: ItsmSection.support,
+              feature: ItsmFeature.serviceRequests,
+              requirement: ItsmRouteRequirement.selfService,
+              child: CreateServiceRequestScreen(
+                catalogueItemId:
+                    state.pathParameters['catalogueItemId'] as String,
+                onSubmitted: (receipt) => context.go(
+                  '${ItsmRoutes.myRequests}/'
+                  '${Uri.encodeComponent(receipt.requestId)}',
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: 'queue',
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.serviceRequests,
+          requirement: ItsmRouteRequirement.operational,
+          child: ServiceRequestQueueScreen(
+            onRequestSelected: (request) => context.push(
+              '${ItsmRoutes.serviceRequests}/'
+              '${Uri.encodeComponent(request.id)}',
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: ':requestId',
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.serviceRequests,
+          requirement: ItsmRouteRequirement.operational,
+          child: ServiceRequestDetailScreen(
+            requestId: state.pathParameters['requestId'] as String,
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+GoRoute _buildMyRequestsRoute() {
+  return GoRoute(
+    path: ItsmFeature.myRequests.routeSegment,
+    builder: (context, state) => ItsmRouteGuard(
+      section: ItsmSection.support,
+      feature: ItsmFeature.myRequests,
+      requirement: ItsmRouteRequirement.selfService,
+      child: MyRequestsScreen(
+        onRequestSelected: (request) => context.push(
+          '${ItsmRoutes.myRequests}/${request.type.value}/'
+          '${Uri.encodeComponent(request.id)}',
+        ),
+      ),
+    ),
+    routes: [
+      GoRoute(
+        path: ':type/:workItemId',
+        builder: (context, state) {
+          final type = ItsmWorkItemType.tryParse(state.pathParameters['type']);
+          final id = state.pathParameters['workItemId'] as String;
+          final child = switch (type) {
+            ItsmWorkItemType.incident => MyIncidentDetailsScreen(ticketId: id),
+            ItsmWorkItemType.serviceRequest =>
+              MyRequestDetailScreen(requestId: id),
+            ItsmWorkItemType.changeRequest => const ItsmFeatureAccessScreen(
+                section: ItsmSection.changes,
+                feature: ItsmFeature.changeRequests,
+              ),
+            ItsmWorkItemType.securityFinding => const ItsmFeatureAccessScreen(
+                section: ItsmSection.securityCompliance,
+                feature: ItsmFeature.securityFindings,
+              ),
+            ItsmWorkItemType.securityException => const ItsmFeatureAccessScreen(
+                section: ItsmSection.securityCompliance,
+                feature: ItsmFeature.securityExceptions,
+              ),
+            null => const ItsmFeatureAccessScreen(
+                section: ItsmSection.support,
+                feature: ItsmFeature.myRequests,
+              ),
+          };
+          return ItsmRouteGuard(
+            section: ItsmSection.support,
+            feature: ItsmFeature.myRequests,
+            requirement: ItsmRouteRequirement.selfService,
+            child: child,
+          );
+        },
+      ),
+      // Keep pre-index service-request links valid.
+      GoRoute(
+        path: ':requestId',
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.myRequests,
+          requirement: ItsmRouteRequirement.selfService,
+          child: MyRequestDetailScreen(
+            requestId: state.pathParameters['requestId'] as String,
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+GoRoute _buildKnowledgeBaseRoute() {
+  return GoRoute(
+    path: ItsmFeature.knowledgeBase.routeSegment,
+    builder: (context, state) => const ItsmRouteGuard(
+      section: ItsmSection.support,
+      feature: ItsmFeature.knowledgeBase,
+      requirement: ItsmRouteRequirement.selfService,
+      child: KnowledgeBaseScreen(),
+    ),
+    routes: [
+      GoRoute(
+        path: 'manage',
+        builder: (context, state) => const ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.knowledgeBase,
+          requirement: ItsmRouteRequirement.operational,
+          child: KnowledgeManagerQueueScreen(),
+        ),
+        routes: [
+          GoRoute(
+            path: 'new',
+            builder: (context, state) => const ItsmRouteGuard(
+              section: ItsmSection.support,
+              feature: ItsmFeature.knowledgeBase,
+              requirement: ItsmRouteRequirement.operational,
+              child: KnowledgeEditorScreen(),
+            ),
+          ),
+          GoRoute(
+            path: ':articleId/review',
+            builder: (context, state) => ItsmRouteGuard(
+              section: ItsmSection.support,
+              feature: ItsmFeature.knowledgeBase,
+              requirement: ItsmRouteRequirement.operational,
+              child: KnowledgeManagerReviewScreen(
+                articleId: state.pathParameters['articleId'] as String,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: ':articleId/edit',
+            builder: (context, state) => ItsmRouteGuard(
+              section: ItsmSection.support,
+              feature: ItsmFeature.knowledgeBase,
+              requirement: ItsmRouteRequirement.operational,
+              child: KnowledgeEditorLoaderScreen(
+                articleId: state.pathParameters['articleId'] as String,
+              ),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: ':articleId',
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.knowledgeBase,
+          requirement: ItsmRouteRequirement.selfService,
+          child: KnowledgeArticleScreen(
+            articleId: state.pathParameters['articleId'] as String,
+          ),
+        ),
       ),
     ],
   );

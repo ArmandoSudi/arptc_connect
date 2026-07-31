@@ -1,3 +1,6 @@
+// This conditional-import implementation is compiled only for Flutter web.
+// ignore_for_file: avoid_web_libraries_in_flutter
+
 import 'dart:convert';
 import 'dart:html' as html;
 

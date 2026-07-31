@@ -24,6 +24,21 @@ String stringFromFirestore(Map<String, dynamic> data, String key) {
   return data[key]?.toString().trim() ?? '';
 }
 
+List<String> stringListFromFirestore(
+  Map<String, dynamic> data,
+  String key,
+) {
+  final value = data[key];
+  if (value is! Iterable) {
+    return const [];
+  }
+  return List<String>.unmodifiable(
+    value
+        .map((item) => item?.toString().trim() ?? '')
+        .where((item) => item.isNotEmpty),
+  );
+}
+
 int intFromFirestore(Map<String, dynamic> data, String key) {
   final value = data[key];
   if (value is int) {

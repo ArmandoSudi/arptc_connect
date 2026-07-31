@@ -1,8 +1,12 @@
+// Freezed applies JsonKey metadata to generated fields.
+// ignore_for_file: invalid_annotation_target
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'bureau.freezed.dart';
 part 'bureau.g.dart';
+
 @freezed
 class Bureau with _$Bureau {
   const Bureau._();
@@ -14,17 +18,17 @@ class Bureau with _$Bureau {
   }) = _Bureau;
 
   factory Bureau.newEmpty({required String userId}) => const Bureau(
-    id: null,
-    name: '',
-    directionRef: '',
-  );
+        id: null,
+        name: '',
+        directionRef: '',
+      );
 
-  factory Bureau.fromJson(Map<String, dynamic> json) =>
-      _$BureauFromJson(json);
+  factory Bureau.fromJson(Map<String, dynamic> json) => _$BureauFromJson(json);
 
   factory Bureau.fromDocument(DocumentSnapshot doc) {
     if (doc.data() == null) throw Exception("Service document was null");
 
-    return Bureau.fromJson(doc.data() as Map<String, Object?>).copyWith(id: doc.id);
+    return Bureau.fromJson(doc.data() as Map<String, Object?>)
+        .copyWith(id: doc.id);
   }
 }

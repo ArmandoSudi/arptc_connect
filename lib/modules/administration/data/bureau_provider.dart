@@ -9,28 +9,24 @@ part 'bureau_provider.g.dart';
 
 @riverpod
 class BureauController extends _$BureauController {
-
   List<Service> bureaux = [];
 
   @override
   FutureOr<List<Service>> build() async {
-
     String selectedServiceId = ref.watch(selectedServiceProvider);
 
     bureaux = await fetchBureaux();
 
     if (selectedServiceId == "") {
-      print("returning all Bureaux");
       return bureaux;
     } else {
-      print("returning filtered services");
       return bureaux
           .where((element) => element.directionRef == selectedServiceId)
           .toList();
     }
   }
 
-  Future<List<Service>> fetchBureaux(){
+  Future<List<Service>> fetchBureaux() {
     return ref.read(administrationAPIProvider).fetchBureaux();
   }
 

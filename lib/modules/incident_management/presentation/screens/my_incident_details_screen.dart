@@ -5,6 +5,7 @@ import 'package:arptc_connect/modules/incident_management/domain/incident_ticket
 import 'package:arptc_connect/modules/incident_management/presentation/incident_localizations.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/controllers/incident_providers.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_priority_badge.dart';
+import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_linked_records_card.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_status_badge.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_timeline.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
@@ -75,6 +76,16 @@ class MyIncidentDetailsScreen extends ConsumerWidget {
                     ticket: ticket,
                     resolutionCodes: resolutionCodes,
                   ),
+                  if (IncidentLinkedRecordsCard.recordsForTicket(ticket)
+                      .isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    IncidentLinkedRecordsCard.fromTicket(
+                      ticket: ticket,
+                      onRecordPressed: (record) => context.push(
+                        incidentLinkedRecordLocation(record),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   Card(
                     elevation: 0,

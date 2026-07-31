@@ -27,7 +27,6 @@ class _ManageItemScreenState extends ConsumerState<ManageItemScreen> {
   Widget build(BuildContext context) {
     final asyncProducts = ref.watch(asyncProductProvider);
     final theme = Theme.of(context);
-    final cartController = ref.watch(cartControllerProvider);
 
     return Scaffold(
       body: ContentView(

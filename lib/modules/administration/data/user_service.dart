@@ -12,9 +12,11 @@ class UserService {
   Future<List<User>> fetchAllUsers() async {
     try {
       final results = await firestoreClient.fetchAll(collection: "users");
-      return results.map((item) => User.fromMap(item.data, id: item.id)).toList();
+      return results
+          .map((item) => User.fromMap(item.data, id: item.id))
+          .toList();
     } catch (err) {
-      log("fetchAllUsers => Error : ${err}");
+      log("fetchAllUsers => Error : $err");
       throw (Exception(err));
     }
   }
@@ -30,9 +32,8 @@ class UserService {
       throw (Exception(err));
     }
   }
-
 }
 
-final userServiceProvider = Provider<UserService>((ref){
+final userServiceProvider = Provider<UserService>((ref) {
   return UserService(ref.read(firestoreClientProvider));
 });

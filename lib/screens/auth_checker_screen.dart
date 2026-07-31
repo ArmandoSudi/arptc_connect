@@ -12,9 +12,8 @@ class AuthCheckerScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     // Constantly checking the authentication state
-    final authState = ref.watch(authStateProvider);
+    ref.watch(authStateProvider);
 
     // return _authState.when(
     //     data: (data) {
@@ -36,7 +35,7 @@ class AuthCheckerScreen extends ConsumerWidget {
           if (snapshot.hasData && snapshot.data != null) {
             // return const ListCourriersScreen();
             return const CourrierMainScreen();
-          } else if(snapshot.connectionState == ConnectionState.waiting){
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
             return const CupertinoActivityIndicator();
           }
           return const LoginScreen();
@@ -45,6 +44,3 @@ class AuthCheckerScreen extends ConsumerWidget {
     );
   }
 }
-
-
-

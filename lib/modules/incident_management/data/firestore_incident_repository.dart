@@ -334,10 +334,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
       query = query.where('isInternal', isEqualTo: false);
     }
 
-    return query
-        .limit(childResourceLimit)
-        .snapshots()
-        .map((snapshot) {
+    return query.limit(childResourceLimit).snapshots().map((snapshot) {
       final comments = snapshot.docs
           .map((doc) => IncidentComment.fromFirestore(doc, ticketId: ticketId))
           .toList()
@@ -588,6 +585,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
     required String resolutionSummary,
     required String resolutionCode,
     required IncidentActor actor,
+    Iterable<String> suggestedKnowledgeArticleIds = const [],
   }) async {
     final ticketRef = _tickets.doc(ticketId);
     final ticket = IncidentTicket.fromFirestore(await ticketRef.get());
@@ -598,6 +596,11 @@ class FirestoreIncidentRepository implements IncidentRepository {
       'lifecycleState': IncidentLifecycleState.active.value,
       'resolutionSummary': resolutionSummary.trim(),
       'resolutionCode': resolutionCode.trim(),
+      'suggestedKnowledgeArticleIds': suggestedKnowledgeArticleIds
+          .map((id) => id.trim())
+          .where((id) => id.isNotEmpty)
+          .toSet()
+          .toList(growable: false),
       'updatedAt': FieldValue.serverTimestamp(),
       'lastStatusChangedAt': FieldValue.serverTimestamp(),
     });
@@ -609,6 +612,10 @@ class FirestoreIncidentRepository implements IncidentRepository {
       message: 'Incident ticket marked as resolved',
       changes: {
         'resolutionCode': resolutionCode.trim(),
+        'suggestedKnowledgeArticleIds': suggestedKnowledgeArticleIds
+            .map((id) => id.trim())
+            .where((id) => id.isNotEmpty)
+            .toList(growable: false),
       },
     );
     _addNotificationToBatch(

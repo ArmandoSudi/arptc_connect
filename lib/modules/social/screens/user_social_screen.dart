@@ -21,8 +21,8 @@ class _UserSocialScreenState extends State<UserSocialScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Social'),
-          bottom: TabBar(
-            tabs: const [
+          bottom: const TabBar(
+            tabs: [
               Tab(
                 icon: Icon(Icons.people_outline),
                 text: "Dépendants",
@@ -49,5 +49,3 @@ class _UserSocialScreenState extends State<UserSocialScreen> {
     );
   }
 }
-
-

@@ -11,9 +11,9 @@ import '../../../widgets/page_header.dart';
 import '../providers/courrier_service_provider.dart';
 
 class AddAnnotationScreen extends ConsumerStatefulWidget {
-  String courrierId;
+  final String courrierId;
 
-  AddAnnotationScreen({required this.courrierId, super.key});
+  const AddAnnotationScreen({required this.courrierId, super.key});
 
   @override
   ConsumerState createState() => _AddAnnotationScreenState();

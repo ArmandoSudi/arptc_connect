@@ -1,4 +1,3 @@
-
 import 'package:arptc_connect/extensions/date_extension.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -40,7 +39,7 @@ class Ticket {
           solution == other.solution &&
           isSolved == other.isSolved &&
           creationDate == other.creationDate &&
-          closureDate == other.closureDate );
+          closureDate == other.closureDate);
 
   @override
   int get hashCode =>
@@ -51,8 +50,8 @@ class Ticket {
       agent.hashCode ^
       solution.hashCode ^
       isSolved.hashCode ^
-      creationDate.hashCode^
-    closureDate.hashCode;
+      creationDate.hashCode ^
+      closureDate.hashCode;
 
   @override
   String toString() {
@@ -72,16 +71,14 @@ class Ticket {
       id: id ?? this.id,
       author: author ?? this.author,
       subject: subject ?? this.subject,
-      category: category ?? category,
+      category: category,
       agent: agent ?? this.agent,
       solution: solution ?? this.solution,
       isSolved: isSolved ?? this.isSolved,
       creationDate: creationDate ?? this.creationDate,
-      closureDate: closureDate ?? closureDate,
+      closureDate: closureDate,
     );
   }
-
-
 
   Map<String, dynamic> toMap() {
     return {
@@ -98,14 +95,14 @@ class Ticket {
   }
 
   factory Ticket.fromMap(Map<String, dynamic> map, {String? id}) {
-
     final timestampCreationDate = map['creationDate'] as Timestamp;
     DateTime? closureDate;
 
     if (map['closureDate'] == null) {
       closureDate = null;
     } else {
-      closureDate = (map['closureDate'] as Timestamp).toDate(); // Convert to DateTime
+      closureDate =
+          (map['closureDate'] as Timestamp).toDate(); // Convert to DateTime
     }
 
     return Ticket(
@@ -126,7 +123,7 @@ class Ticket {
   String getField(int row, int col) {
     switch (col) {
       case 0:
-        return (row+1).toString();
+        return (row + 1).toString();
       case 1:
         return creationDate.formatedDate;
       case 2:

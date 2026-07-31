@@ -48,8 +48,6 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("BUILDING THE ENTIRE WIDGET");
-
     final directionsAsync = ref.watch(directionsControllerProvider);
     final serviceAsync = ref.watch(asyncServiceProvider);
     final bureauAsync = ref.watch(bureauControllerProvider);
@@ -225,7 +223,6 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                               value: genres.first,
                               items:
                                   genres.map<DropdownMenuItem<String>>((genre) {
-                                print("Dropdown menuitem value $genre");
                                 return DropdownMenuItem<String>(
                                   value: genre,
                                   child: Text(genre),
@@ -279,7 +276,6 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
                                     );
                                   }).toList(),
                                   onChanged: (value) {
-                                    print("Selected direction is : $value");
                                     ref
                                         .read(
                                             selectedDirectionProvider.notifier)

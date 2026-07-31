@@ -10,11 +10,11 @@ class InventoryServ {
 
   InventoryServ(this.firestoreClient);
 
-  Future<void> addProduct(Product product) async{
-    try{
-      String id = await firestoreClient.add(collection: "products", data: product.toMap());
+  Future<void> addProduct(Product product) async {
+    try {
+      await firestoreClient.add(collection: "products", data: product.toMap());
       log("addProduct: ID of created product");
-    } catch(err) {
+    } catch (err) {
       log("addProduct => Error : $err");
     }
   }
@@ -24,7 +24,8 @@ class InventoryServ {
       // log("2. InventorySer::updateProduct => PRODUCT ID : ${product.id}");
       // log("3. InventorySer::updateProduct => PRODUCT ID : ${product.toMap().toString()}");
       // log("4. InventorySer::updateProduct => PRODUCT ID : ${product.toString()}");
-      await firestoreClient.update(collection: 'products', data: product.toMap());
+      await firestoreClient.update(
+          collection: 'products', data: product.toMap());
     } catch (err) {
       log("InventorySer::updateProduct => Error : $err");
     }
@@ -34,15 +35,16 @@ class InventoryServ {
     try {
       final results = await firestoreClient.fetchAll(collection: "products");
       log("InventoryServ::fetchAllProducts : Fetching all products");
-      return results.map((item) => Product.fromMap(item.data, id: item.id)).toList();
-    } catch(err){
+      return results
+          .map((item) => Product.fromMap(item.data, id: item.id))
+          .toList();
+    } catch (err) {
       log("InventoryServ: fetchAllProducts couldn't fetch");
-      throw(Exception(err));
+      throw (Exception(err));
     }
   }
-
 }
 
-final inventoryServProvider = Provider<InventoryServ>((ref){
+final inventoryServProvider = Provider<InventoryServ>((ref) {
   return InventoryServ(ref.read(firestoreClientProvider));
 });

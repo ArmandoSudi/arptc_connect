@@ -10,16 +10,13 @@ class AsyncService extends _$AsyncService {
 
   @override
   FutureOr<List<Service>> build() async {
-
     String selectedDirRef = ref.watch(selectedDirectionProvider);
 
     services = await fetchServices();
 
     if (selectedDirRef == "") {
-      print("returning all services");
       return services;
     } else {
-      print("returning filtered services");
       return services
           .where((element) => element.directionRef == selectedDirRef)
           .toList();

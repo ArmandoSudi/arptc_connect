@@ -5,7 +5,6 @@ const {
 const {
   ITSM_ROLES,
   ItsmCommandError,
-  isOwnedByActor,
   normalizeRole,
   normalizeString,
 } = require('./itsm_permissions');
@@ -113,10 +112,25 @@ async function transitionWorkItem({
   requireExisting(workItemSnapshot, envelope);
   const workItem = workItemSnapshot.data() || {};
 
-  if (actor.role === ITSM_ROLES.user && !isOwnedByActor(workItem, actor)) {
+  if (
+    actor.role === ITSM_ROLES.user &&
+    !isSelfServiceOwner(workItem, actor)
+  ) {
     throw new ItsmCommandError(
       'permission-denied',
       'A USER can transition only their own ITSM work item.',
+    );
+  }
+  if (
+    actor.role === ITSM_ROLES.admin &&
+    (
+      envelope.entityType !== 'service_request' ||
+      !isSelfServiceOwner(workItem, actor)
+    )
+  ) {
+    throw new ItsmCommandError(
+      'permission-denied',
+      'An ADMIN can transition only their own self-service request.',
     );
   }
 
@@ -136,7 +150,7 @@ async function transitionWorkItem({
     'workflowDefinitionId',
   );
   const workflowVersion = safeStoredIdentifier(
-    workItem.workflowVersion,
+    workItem.workflowVersionDocumentId || workItem.workflowVersion,
     'workflowVersion',
   );
   const workflowRef = db
@@ -164,15 +178,63 @@ async function transitionWorkItem({
     actorRole: actor.role,
     workItem,
   });
+  if (actor.role === ITSM_ROLES.admin && !transition.selfServiceAllowed) {
+    throw new ItsmCommandError(
+      'permission-denied',
+      'This transition is not available through self-service.',
+    );
+  }
+  if (
+    ['rejected', 'cancelled'].includes(
+      normalizeString(transition.toState).toLowerCase(),
+    ) &&
+    !normalizeString(envelope.payload.reason)
+  ) {
+    throw new ItsmCommandError(
+      'failed-precondition',
+      'A reason is required for this terminal transition.',
+    );
+  }
 
   const timestamp = fieldValue.serverTimestamp();
-  transaction.update(workItemRef, {
-    workflowState: transition.toState,
-    status: transition.toState,
-    workflowRevision: currentRevision + 1,
-    updatedAt: timestamp,
-    lastStatusChangedAt: timestamp,
+  const nextRevision = currentRevision + 1;
+  const patch = buildTransitionPatch({
+    toState: transition.toState,
+    reason: envelope.payload.reason,
+    actor,
+    timestamp,
+    nextRevision,
   });
+  transaction.update(workItemRef, patch);
+  transaction.set(
+    workItemRef.collection('workflowInstances').doc(
+      normalizeString(workItem.workflowInstanceId) || 'current',
+    ),
+    {
+      definitionId: workflowId,
+      version: workItem.workflowVersion || null,
+      versionDocumentId: workflowVersion,
+      state: transition.toState,
+      revision: nextRevision,
+      updatedAt: timestamp,
+      updatedByUserId: actor.uid,
+    },
+    { merge: true },
+  );
+  const updatedWorkItem = { ...workItem, ...patch };
+  transaction.set(
+    db.collection('itsmWorkItemIndex').doc(
+      `${envelope.entityType}:${envelope.entityId}`,
+    ),
+    buildTrustedWorkItemSummary({
+      actor,
+      envelope,
+      workItem: updatedWorkItem,
+      sourcePath: workItemRef.path,
+      updatedAt: timestamp,
+    }),
+    { merge: false },
+  );
 
   const auditEvent = buildImmutableAuditEvent({
     actor,
@@ -185,7 +247,7 @@ async function transitionWorkItem({
     before: { status: currentState, workflowRevision: currentRevision },
     after: {
       status: transition.toState,
-      workflowRevision: currentRevision + 1,
+      workflowRevision: nextRevision,
     },
     createdAt: timestamp,
   });
@@ -201,7 +263,7 @@ async function transitionWorkItem({
     entityType: envelope.entityType,
     entityId: envelope.entityId,
     status: transition.toState,
-    workflowRevision: currentRevision + 1,
+    workflowRevision: nextRevision,
   };
 }
 
@@ -232,10 +294,15 @@ async function decideApproval({
     );
   }
 
+  const workItem = workItemSnapshot.data() || {};
   const requesterId = normalizeString(
     approval.requestedByUserId ||
       approval.requesterUserId ||
-      (workItemSnapshot.data() || {}).createdByUserId,
+      workItem.requesterId ||
+      workItem.requesterUserId ||
+      workItem.requestedByUserId ||
+      workItem.createdBy ||
+      workItem.createdByUserId,
   );
   if (requesterId && requesterId === actor.uid) {
     throw new ItsmCommandError(
@@ -244,17 +311,39 @@ async function decideApproval({
     );
   }
 
+  const approverUserId = normalizeString(approval.approverUserId);
   const assignedApproverIds = Array.isArray(approval.approverUserIds)
     ? approval.approverUserIds.map(normalizeString)
     : [];
   if (
-    assignedApproverIds.length > 0 &&
-    !assignedApproverIds.includes(actor.uid)
+    (approverUserId && approverUserId !== actor.uid) ||
+    (!approverUserId && assignedApproverIds.length > 0 &&
+      !assignedApproverIds.includes(actor.uid))
   ) {
     throw new ItsmCommandError(
       'permission-denied',
       'This approval is assigned to another approver.',
     );
+  }
+  const approverGroupId = normalizeString(approval.approverGroupId);
+  if (!approverUserId && assignedApproverIds.length === 0) {
+    if (!approverGroupId) {
+      throw new ItsmCommandError(
+        'failed-precondition',
+        'The approval has no configured approver.',
+      );
+    }
+    const actorGroupIds = await readActorGroupIds({
+      db,
+      transaction,
+      actor,
+    });
+    if (!actorGroupIds.has(approverGroupId)) {
+      throw new ItsmCommandError(
+        'permission-denied',
+        'This approval is assigned to another approval group.',
+      );
+    }
   }
 
   const timestamp = fieldValue.serverTimestamp();
@@ -515,6 +604,10 @@ function findTransition(workflow, transitionId) {
       ? transition.mandatoryFields.map(normalizeString).filter(Boolean)
       : [],
     isAuditable: transition.isAuditable !== false,
+    selfServiceAllowed:
+      transition.selfServiceAllowed === true ||
+      transition.isSelfService === true ||
+      transition.selfService === true,
   };
 }
 
@@ -602,6 +695,99 @@ function validateNotificationRecipients(target, workItem) {
       'Notifications may target only users linked to the work item.',
     );
   }
+}
+
+function isSelfServiceOwner(record, actor) {
+  const identifiers = [
+    record.requesterId,
+    record.requesterUserId,
+    record.requestedByUserId,
+    record.requestedForUserId,
+    record.createdBy,
+    record.createdByUserId,
+    record.affectedUserId,
+    record.ownerUserId,
+  ].map(normalizeString).filter(Boolean);
+  if (identifiers.includes(actor.uid)) return true;
+  const emails = [
+    record.requesterEmail,
+    record.requestedByEmail,
+    record.requestedForEmail,
+    record.createdByEmail,
+    record.affectedUserEmail,
+    record.ownerEmail,
+  ].map((value) => normalizeString(value).toLowerCase()).filter(Boolean);
+  return Boolean(actor.email) && emails.includes(actor.email);
+}
+
+function buildTransitionPatch({
+  toState,
+  reason,
+  actor,
+  timestamp,
+  nextRevision,
+}) {
+  const normalizedState = normalizeString(toState).toLowerCase();
+  const patch = {
+    workflowState: toState,
+    status: toState,
+    workflowRevision: nextRevision,
+    updatedAt: timestamp,
+    updatedBy: actor.uid,
+    lastStatusChangedAt: timestamp,
+  };
+  const normalizedReason = normalizeString(reason);
+  if (normalizedReason) patch.transitionReason = normalizedReason;
+  if (normalizedState === 'fulfilled') {
+    patch.fulfilledAt = timestamp;
+  } else if (normalizedState === 'archived') {
+    patch.lifecycleState = 'archived';
+    patch.archivedAt = timestamp;
+    if (normalizedReason) patch.archiveReason = normalizedReason;
+  } else if (['closed', 'rejected', 'cancelled'].includes(normalizedState)) {
+    patch.lifecycleState = 'closed';
+    patch.closedAt = timestamp;
+    if (normalizedState === 'rejected' && normalizedReason) {
+      patch.rejectionReason = normalizedReason;
+    } else if (normalizedState === 'cancelled' && normalizedReason) {
+      patch.cancellationReason = normalizedReason;
+    } else if (normalizedReason) {
+      patch.closureReason = normalizedReason;
+    }
+  } else {
+    patch.lifecycleState = 'active';
+  }
+  return patch;
+}
+
+async function readActorGroupIds({ db, transaction, actor }) {
+  const paths = [
+    db.collection('agents').doc(actor.uid),
+    ...(actor.email ? [db.collection('agents').doc(actor.email)] : []),
+    db.collection('users').doc(actor.uid),
+  ];
+  const groups = new Set();
+  for (const reference of paths) {
+    const snapshot = await transaction.get(reference);
+    if (!snapshot.exists) continue;
+    const data = snapshot.data() || {};
+    for (const field of [
+      'itsmGroupIds',
+      'assignmentGroupIds',
+      'approvalGroupIds',
+      'groupIds',
+    ]) {
+      if (!Array.isArray(data[field])) continue;
+      data[field].map(normalizeString).filter(Boolean).forEach(
+        (groupId) => groups.add(groupId),
+      );
+    }
+    for (const field of ['itsmGroupId', 'assignmentGroupId', 'approvalGroupId']) {
+      const groupId = normalizeString(data[field]);
+      if (groupId) groups.add(groupId);
+    }
+  }
+  return groups;
 }
 
 function hasStoredValue(record, fieldPath) {

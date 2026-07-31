@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:arptc_connect/modules/itsm/shared/application/itsm_providers.dart';
 import 'package:arptc_connect/modules/itsm/shared/application/itsm_session.dart';
 import 'package:arptc_connect/modules/itsm/shared/data/itsm_work_item_repository.dart';
 import 'package:arptc_connect/modules/itsm/shared/domain/itsm_shared_domain.dart';
+import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,6 +41,9 @@ void main() {
     final repository = _RecordingRepository();
     final container = ProviderContainer(
       overrides: [
+        currentAuthSessionKeyProvider.overrideWithValue(
+          'user-1|agent@example.com',
+        ),
         itsmSessionProvider.overrideWith(
           (ref) => Stream.value(_session(ItsmRole.user)),
         ),
@@ -64,6 +70,9 @@ void main() {
     final repository = _RecordingRepository();
     final container = ProviderContainer(
       overrides: [
+        currentAuthSessionKeyProvider.overrideWithValue(
+          'user-1|agent@example.com',
+        ),
         itsmSessionProvider.overrideWith(
           (ref) => Stream.value(_session(ItsmRole.user)),
         ),
@@ -89,6 +98,9 @@ void main() {
     final repository = _RecordingRepository();
     final container = ProviderContainer(
       overrides: [
+        currentAuthSessionKeyProvider.overrideWithValue(
+          'user-1|agent@example.com',
+        ),
         itsmSessionProvider.overrideWith(
           (ref) => Stream.value(_session(ItsmRole.manager)),
         ),
@@ -101,6 +113,12 @@ void main() {
       query: ItsmWorkItemQuery(scope: ItsmWorkItemScope.assignedToMe),
       limit: 10,
     );
+    final subscription = container.listen(
+      itsmWorkItemFirstPageProvider(request),
+      (_, __) {},
+      fireImmediately: true,
+    );
+    addTearDown(subscription.close);
     final result = await container.read(
       itsmWorkItemFirstPageProvider(request).future,
     );
@@ -109,9 +127,69 @@ void main() {
     expect(repository.lastPrincipal?.role, ItsmRole.manager);
     expect(repository.lastLimit, 10);
   });
+
+  test(
+      'live work-item provider resubscribes when the authenticated user changes',
+      () async {
+    final sessions = StreamController<ItsmSession?>();
+    final sessionKeys = StateProvider<String?>((ref) => 'user-1');
+    final repository = _RecordingRepository();
+    final container = ProviderContainer(
+      overrides: [
+        currentAuthSessionKeyProvider.overrideWith(
+          (ref) => ref.watch(sessionKeys),
+        ),
+        itsmSessionProvider.overrideWith((ref) => sessions.stream),
+        itsmWorkItemRepositoryProvider.overrideWithValue(repository),
+      ],
+    );
+    addTearDown(() async {
+      container.dispose();
+      await sessions.close();
+    });
+
+    final request = ItsmFirstPageRequest(
+      query: ItsmWorkItemQuery(scope: ItsmWorkItemScope.myActive),
+      limit: 10,
+    );
+    final subscription = container.listen(
+      itsmWorkItemFirstPageProvider(request),
+      (_, __) {},
+      fireImmediately: true,
+    );
+    addTearDown(subscription.close);
+    final keySubscription = container.listen<String?>(
+      currentAuthSessionKeyProvider,
+      (_, __) {},
+      fireImmediately: true,
+    );
+    addTearDown(keySubscription.close);
+
+    sessions.add(_session(ItsmRole.user));
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    sessions.add(
+      const ItsmSession(
+        sessionKey: 'user-2|second@example.com',
+        userId: 'user-2',
+        email: 'second@example.com',
+        displayName: 'Second Agent',
+        role: ItsmRole.user,
+      ),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    container.read(sessionKeys.notifier).state = 'user-2';
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    expect(container.read(currentAuthSessionKeyProvider), 'user-2');
+
+    expect(
+      repository.principals.map((principal) => principal.userId),
+      containsAllInOrder(['user-1', 'user-2']),
+    );
+  });
 }
 
 class _RecordingRepository implements ItsmWorkItemRepository {
+  final List<ItsmQueryPrincipal> principals = [];
   ItsmQueryPrincipal? lastPrincipal;
   PageRequest? lastPage;
   int? lastLimit;
@@ -125,6 +203,7 @@ class _RecordingRepository implements ItsmWorkItemRepository {
   }) async {
     fetchCount++;
     lastPrincipal = principal;
+    principals.add(principal);
     lastPage = page;
     return PageResult(items: const [], hasMore: false);
   }
@@ -136,6 +215,7 @@ class _RecordingRepository implements ItsmWorkItemRepository {
     required String id,
   }) {
     lastPrincipal = principal;
+    principals.add(principal);
     return Stream.value(null);
   }
 
@@ -146,8 +226,11 @@ class _RecordingRepository implements ItsmWorkItemRepository {
     required int limit,
   }) {
     lastPrincipal = principal;
+    principals.add(principal);
     lastLimit = limit;
-    return Stream.value(const []);
+    return Stream<List<ItsmWorkItemSummary>>.multi(
+      (controller) => controller.add(const []),
+    );
   }
 }
 

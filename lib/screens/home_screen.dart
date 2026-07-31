@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 
 import '../widgets/custom_nav_bar.dart';
 
-enum _SelectedTab { dahsboard, home, account }
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -15,10 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   late TabController tabController;
 
-  final _selectedTab = _SelectedTab.home;
   int curTabIndex = 0;
 
   List<Map<String, Widget>> pages = [
@@ -30,25 +26,25 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        // appBar :AppBar(
-        //     // elevation: 0,
-        //     backgroundColor: Colors.white,
-        //     title: Image.asset(
-        //       'assets/icons/app_logo.png',
-        //       height: 45,
-        //     ),
-        //   automaticallyImplyLeading: false,
-        // ),
-        body: pages[curTabIndex]['widget']!,
-        bottomNavigationBar: CustomNavBar(
-          null,
-              (index) {
-            setState(() {
-              curTabIndex = index;
-            });
-          },
-          curTabIndex,
-        ),
+      // appBar :AppBar(
+      //     // elevation: 0,
+      //     backgroundColor: Colors.white,
+      //     title: Image.asset(
+      //       'assets/icons/app_logo.png',
+      //       height: 45,
+      //     ),
+      //   automaticallyImplyLeading: false,
+      // ),
+      body: pages[curTabIndex]['widget']!,
+      bottomNavigationBar: CustomNavBar(
+        null,
+        (index) {
+          setState(() {
+            curTabIndex = index;
+          });
+        },
+        curTabIndex,
+      ),
     );
   }
 }

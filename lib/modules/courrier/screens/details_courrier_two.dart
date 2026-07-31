@@ -6,14 +6,12 @@ import '../providers/courrier_service_provider.dart';
 import 'add_annotation_screen.dart';
 
 class DetailsCourrierTwo extends ConsumerWidget {
+  final Courrier courrier;
 
-  Courrier courrier;
-
-  DetailsCourrierTwo(this.courrier, {super.key});
+  const DetailsCourrierTwo(this.courrier, {super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     return Scaffold(
         backgroundColor: const Color(0x00f6f9fc),
         body: Padding(
@@ -23,14 +21,14 @@ class DetailsCourrierTwo extends ConsumerWidget {
               padding: const EdgeInsets.all(24.0),
               width: 800,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.grey)
-              ),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey)),
               child: StreamBuilder<Courrier>(
-                  stream: ref.watch(courrierServiceProvider).getCourrier(courrier.id!),
+                  stream: ref
+                      .watch(courrierServiceProvider)
+                      .getCourrier(courrier.id!),
                   builder: (context, snapshot) {
-
                     if (snapshot.hasError) {
                       return const Center(child: Text('Erreur de connection'));
                     }
@@ -120,7 +118,8 @@ class DetailsCourrierTwo extends ConsumerWidget {
                                 icon: const Icon(Icons.add),
                                 onPressed: () {
                                   Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (context) => AddAnnotationScreen(courrierId: courrier.id!)));
+                                      builder: (context) => AddAnnotationScreen(
+                                          courrierId: courrier.id!)));
                                 },
                                 label: const Text("Ajouter Annotation"),
                               )
@@ -132,8 +131,8 @@ class DetailsCourrierTwo extends ConsumerWidget {
                                 return ListTile(
                                     title: Text(
                                         "${courrier.annotations[index]["entity"]}",
-                                        style:
-                                        const TextStyle(fontWeight: FontWeight.bold)),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold)),
                                     subtitle: Text(
                                         "${courrier.annotations[index]["object"]}"),
                                     trailing: IconButton(
@@ -143,20 +142,22 @@ class DetailsCourrierTwo extends ConsumerWidget {
                                         debugPrint("delete");
                                         ref
                                             .read(courrierServiceProvider)
-                                            .deleteAnnotationAtIndex(courrier, index);
+                                            .deleteAnnotationAtIndex(
+                                                courrier, index);
 
-                                        ref.read(courrierServiceProvider).getCourrier(courrier.id!);
-
+                                        ref
+                                            .read(courrierServiceProvider)
+                                            .getCourrier(courrier.id!);
                                       },
                                     ));
                               },
-                              separatorBuilder: (context, index) => const Divider(),
+                              separatorBuilder: (context, index) =>
+                                  const Divider(),
                               itemCount: courrier.annotations.length,
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics()),
                         ]);
-                  }
-              ),
+                  }),
             ),
           ),
         ));

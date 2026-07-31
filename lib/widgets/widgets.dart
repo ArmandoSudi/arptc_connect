@@ -1,11 +1,4 @@
-/// Material Design 3 Widget Library
-///
-/// This file exports all reusable widgets for easy imports
-///
-/// Usage:
-/// ```dart
-/// import 'package:arptc_connect/widgets/widgets.dart';
-/// ```
+// Material Design 3 widget library that exports reusable widgets.
 
 export 'app_search_bar.dart';
 export 'content_view.dart';

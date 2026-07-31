@@ -13,7 +13,7 @@ import '../../administration/domain/models/agent.dart';
 
 class SocialAgentDetailsScreen extends ConsumerStatefulWidget {
   final String agentId;
-  late CollectionReference agentsRef;
+  late final CollectionReference agentsRef;
 
   SocialAgentDetailsScreen({required this.agentId, super.key}) {
     agentsRef =
@@ -108,8 +108,8 @@ class _SocialAgentDetailsScreenState
                               OutlinedButton.icon(
                                 style: OutlinedButton.styleFrom(
                                   // primary: theme.primaryColor
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 32),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 32),
                                   side: BorderSide(color: theme.primaryColor),
                                 ),
                                 onPressed: () async {
@@ -123,8 +123,8 @@ class _SocialAgentDetailsScreenState
                               OutlinedButton.icon(
                                 style: OutlinedButton.styleFrom(
                                   // primary: theme.primaryColor
-                                  padding:
-                                  const EdgeInsets.symmetric(horizontal: 32),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 32),
                                   side: BorderSide(color: theme.primaryColor),
                                 ),
                                 onPressed: () async {
@@ -136,7 +136,6 @@ class _SocialAgentDetailsScreenState
                               ),
                             ],
                           ),
-
                         ],
                       ),
                     ),
@@ -187,50 +186,6 @@ class _SocialAgentDetailsScreenState
           );
         },
       ),
-    );
-  }
-
-  Widget _buildDependantList(
-      BuildContext context,
-      List<Map<String, dynamic>> dependants) {
-    if (dependants.isEmpty) {
-      return const Text("Cet agent n'a aucun dépendant");
-    }
-    return ListView.separated(
-      shrinkWrap: true,
-      itemBuilder: (BuildContext context, int index) {
-        return _buildDependant(context, {"name": "John Doe"});
-      },
-      separatorBuilder: (BuildContext context, int index) {
-        return const Divider();
-      },
-      itemCount: dependants.length,
-    );
-  }
-
-  Widget _buildDependant(BuildContext context, Map<String, dynamic> data) {
-    // final entity = Dependant(
-    //   name: "John",
-    //   relationship: "Fils",
-    //   id: "ads",
-    //   imageURL: "Sdf",
-    // );
-    return ListTile(
-      leading: const Icon(Icons.person),
-      title: Text(data["name"]),
-      subtitle: Text(data["relation"]),
-      trailing: IconButton(
-        icon: const Icon(Icons.file_copy_outlined),
-        onPressed: () => log("Generer bon"),
-      ),
-      onTap: () {
-        debugPrint("Doc ID: $data");
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(
-        //     builder: (context) => DirectionDetailsScreen(),
-        //   ),
-        // );
-      },
     );
   }
 }

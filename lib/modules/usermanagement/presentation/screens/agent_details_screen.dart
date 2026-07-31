@@ -10,7 +10,6 @@ import 'package:arptc_connect/widgets/custom_filledbutton.dart';
 import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:arptc_connect/widgets/loading_state_view.dart';
-import 'package:arptc_connect/widgets/page_header.dart';
 import 'package:arptc_connect/widgets/page_header_simple.dart';
 import 'package:arptc_connect/widgets/yes_or_no_dialog.dart';
 import 'package:flutter/material.dart';

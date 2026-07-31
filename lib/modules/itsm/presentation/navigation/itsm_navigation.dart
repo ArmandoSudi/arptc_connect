@@ -6,8 +6,14 @@ abstract final class ItsmRoutes {
   static const root = '/services/itsm';
   static const support = '$root/support';
   static const incidents = '$support/incidents';
+  static const serviceRequests = '$support/service-requests';
+  static const myRequests = '$support/my-requests';
+  static const knowledge = '$support/knowledge';
   static const assetsConfiguration = '$root/assets-configuration';
+  static const assets = '$assetsConfiguration/assets';
+  static const cmdb = '$assetsConfiguration/cmdb';
   static const changes = '$root/changes';
+  static const changeRequests = '$changes/requests';
   static const securityCompliance = '$root/security-compliance';
   static const reportingAdministration = '$root/reporting-administration';
 

@@ -187,6 +187,14 @@ service cloud.firestore {
             data.requesterEmail == request.auth.token.email
           ) ||
           (
+            data.keys().hasAny(['requestedForUserId']) &&
+            data.requestedForUserId == request.auth.uid
+          ) ||
+          (
+            data.keys().hasAny(['requestedForEmail']) &&
+            data.requestedForEmail == request.auth.token.email
+          ) ||
+          (
             data.keys().hasAny(['createdByUserId']) &&
             data.createdByUserId == request.auth.uid
           ) ||
@@ -271,14 +279,104 @@ service cloud.firestore {
     }
 
     function isPublishedConfiguration(data) {
-      return data.keys().hasAny(['status']) &&
-        data.status in ['PUBLISHED', 'published'];
+      return (
+          data.keys().hasAny(['status']) &&
+          data.status in ['PUBLISHED', 'published']
+        ) ||
+        (
+          data.keys().hasAny(['state']) &&
+          data.state in ['PUBLISHED', 'published']
+        );
     }
 
     function canReadItsmConfiguration(data) {
       return isManager() ||
-        isAdmin() ||
-        (isUser() && isPublishedConfiguration(data));
+        ((isAdmin() || isUser()) && isPublishedConfiguration(data));
+    }
+
+    function canReadItsmCatalogueItem(data) {
+      return isManager() ||
+        (
+          (isUser() || isAdmin()) &&
+          isPublishedConfiguration(data) &&
+          (
+            !data.keys().hasAny(['isActive']) ||
+            data.isActive == true
+          )
+        );
+    }
+
+    function isEmployeeKnowledge(data) {
+      return isPublishedConfiguration(data) &&
+        (
+          !data.keys().hasAny(['visibility']) ||
+          data.visibility in [
+            'EMPLOYEE',
+            'employee',
+            'EMPLOYEES',
+            'employees',
+            'ALL',
+            'all'
+          ]
+        );
+    }
+
+    function canReadKnowledgeArticle(data) {
+      return isManager() ||
+        ((isUser() || isAdmin()) && isEmployeeKnowledge(data));
+    }
+
+    function protectedKnowledgeFieldsUnchanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'feedbackCount',
+        'helpfulCount',
+        'notHelpfulCount',
+        'lastFeedbackAt',
+        'lastViewedAt',
+        'usageCount',
+        'viewCount'
+      ]);
+    }
+
+    function validManagerKnowledgeCreate() {
+      return isManager() &&
+        request.resource.data.state in [
+          'DRAFT',
+          'draft',
+          'REVIEW',
+          'review',
+          'PUBLISHED',
+          'published'
+        ] &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time &&
+        (
+          !request.resource.data.keys().hasAny(['viewCount']) ||
+          request.resource.data.viewCount == 0
+        ) &&
+        (
+          !request.resource.data.keys().hasAny(['feedbackCount']) ||
+          request.resource.data.feedbackCount == 0
+        );
+    }
+
+    function validManagerKnowledgeUpdate() {
+      return isManager() &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.updatedAt == request.time &&
+        request.resource.data.state in [
+          'DRAFT',
+          'draft',
+          'REVIEW',
+          'review',
+          'PUBLISHED',
+          'published',
+          'RETIRED',
+          'retired',
+          'ARCHIVED',
+          'archived'
+        ] &&
+        protectedKnowledgeFieldsUnchanged();
     }
 
     function validManagerDraftCreate() {
@@ -703,6 +801,10 @@ service cloud.firestore {
         'location',
         'deviceType',
         'assetId',
+        'configurationItemId',
+        'relatedServiceRequestId',
+        'relatedChangeId',
+        'suggestedKnowledgeArticleIds',
         'userImpactDescription',
         'impact',
         'urgency',
@@ -839,41 +941,121 @@ service cloud.firestore {
 
     match /serviceCatalogItems/{catalogItemId} {
       allow get, list: if signedIn() &&
-        canReadItsmConfiguration(resource.data);
-      allow create: if validManagerDraftCreate();
-      allow update: if validManagerDraftUpdate();
-      allow delete: if false;
+        canReadItsmCatalogueItem(resource.data);
+      allow create, update, delete: if false;
+    }
+
+    match /knowledgeCategories/{categoryId} {
+      allow get, list: if signedIn() &&
+        (
+          isManager() ||
+          (
+            (isUser() || isAdmin()) &&
+            resource.data.isActive == true
+          )
+        );
+      allow create, update, delete: if false;
+    }
+
+    match /knowledgeArticles/{articleId} {
+      allow get, list: if signedIn() &&
+        canReadKnowledgeArticle(resource.data);
+      allow create, update, delete: if false;
+
+      match /versions/{versionId} {
+        allow get, list: if signedIn() &&
+          canReadKnowledgeArticle(
+            get(
+              /databases/$(database)/documents/knowledgeArticles/$(articleId)
+            ).data
+          ) &&
+          (
+            isManager() ||
+            resource.data.state in ['PUBLISHED', 'published']
+          );
+        allow create, update, delete: if false;
+
+        match /attachments/{attachmentId} {
+          allow get, list: if signedIn() &&
+            canReadKnowledgeArticle(
+              get(
+                /databases/$(database)/documents/knowledgeArticles/$(articleId)
+              ).data
+            ) &&
+            (
+              isManager() ||
+              (
+                resource.data.isInternal == false &&
+                isPublishedConfiguration(
+                  get(
+                    /databases/$(database)/documents/knowledgeArticles/$(articleId)/versions/$(versionId)
+                  ).data
+                )
+              )
+            );
+          allow create, update, delete: if false;
+        }
+      }
+
+      match /feedback/{feedbackId} {
+        allow get: if signedIn() &&
+          (
+            isManager() ||
+            (
+              feedbackId == request.auth.uid &&
+              canReadKnowledgeArticle(
+                get(
+                  /databases/$(database)/documents/knowledgeArticles/$(articleId)
+                ).data
+              )
+            )
+          );
+        allow list: if isManager();
+        allow create, update, delete: if false;
+      }
+
+      match /views/{viewId} {
+        allow get, list: if isManager();
+        allow create, update, delete: if false;
+      }
+
+      match /attachments/{attachmentId} {
+        allow get, list: if signedIn() &&
+          canReadKnowledgeArticle(
+            get(
+              /databases/$(database)/documents/knowledgeArticles/$(articleId)
+            ).data
+          ) &&
+          (
+            !resource.data.keys().hasAny(['isInternal']) ||
+            resource.data.isInternal == false ||
+            isManager()
+          );
+        allow create, update, delete: if false;
+      }
     }
 
     match /workflowDefinitions/{workflowDefinitionId} {
       allow get, list: if signedIn() &&
         canReadItsmConfiguration(resource.data);
-      allow create: if validManagerDraftCreate();
-      allow update: if validManagerDraftUpdate();
-      allow delete: if false;
+      allow create, update, delete: if false;
 
       match /versions/{versionId} {
         allow get, list: if signedIn() &&
           canReadItsmConfiguration(resource.data);
-        allow create: if validManagerDraftCreate();
-        allow update: if validManagerDraftUpdate();
-        allow delete: if false;
+        allow create, update, delete: if false;
       }
     }
 
     match /slaPolicies/{slaPolicyId} {
       allow get, list: if signedIn() &&
         canReadItsmConfiguration(resource.data);
-      allow create: if validManagerDraftCreate();
-      allow update: if validManagerDraftUpdate();
-      allow delete: if false;
+      allow create, update, delete: if false;
 
       match /versions/{versionId} {
         allow get, list: if signedIn() &&
           canReadItsmConfiguration(resource.data);
-        allow create: if validManagerDraftCreate();
-        allow update: if validManagerDraftUpdate();
-        allow delete: if false;
+        allow create, update, delete: if false;
       }
     }
 
@@ -881,9 +1063,7 @@ service cloud.firestore {
       allow get, list: if signedIn() &&
         isSharedItsmWorkItemCollection(workItemCollection) &&
         canReadItsmOperationalRecord(resource.data);
-      allow create: if workItemCollection == 'serviceRequests' &&
-        validSelfServiceRequestCreate();
-      allow update, delete: if false;
+      allow create, update, delete: if false;
 
       match /comments/{commentId} {
         allow get, list: if signedIn() &&
@@ -895,6 +1075,7 @@ service cloud.firestore {
           );
 
         allow create: if signedIn() &&
+          !isAdmin() &&
           canReadItsmSubresourceParent(workItemCollection, workItemId) &&
           request.resource.data.createdByUserId == request.auth.uid &&
           request.resource.data.createdAt == request.time &&
@@ -924,29 +1105,7 @@ service cloud.firestore {
             isManager()
           );
 
-        allow create: if signedIn() &&
-          canReadItsmSubresourceParent(workItemCollection, workItemId) &&
-          request.resource.data.workItemCollection == workItemCollection &&
-          request.resource.data.workItemId == workItemId &&
-          request.resource.data.uploadedByUserId == request.auth.uid &&
-          request.resource.data.storagePath is string &&
-          request.resource.data.storagePath.size() > 0 &&
-          request.resource.data.isInternal is bool &&
-          request.resource.data.createdAt == request.time &&
-          (
-            isManager() ||
-            (
-              isItsmSelfServiceRole() &&
-              isPrincipalWorkItemOwner(
-                get(
-                  /databases/$(database)/documents/$(workItemCollection)/$(workItemId)
-                ).data
-              ) &&
-              request.resource.data.isInternal == false
-            )
-          );
-
-        allow update, delete: if false;
+        allow create, update, delete: if false;
       }
 
       match /auditLogs/{auditLogId} {

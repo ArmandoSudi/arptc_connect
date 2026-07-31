@@ -1,3 +1,6 @@
+// Freezed applies JsonKey metadata to generated fields.
+// ignore_for_file: invalid_annotation_target
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -15,14 +18,18 @@ class Courrier with _$Courrier {
     required List<Map<String, String>> annotations,
     String? url,
     @TimestampSerializer() required DateTime date,
-    @TimestampSerializer() @JsonKey(name: "reception_date")required DateTime receptionDate,
-}) = _Courrier;
+    @TimestampSerializer()
+    @JsonKey(name: "reception_date")
+    required DateTime receptionDate,
+  }) = _Courrier;
 
-  factory Courrier.fromJson(Map<String, dynamic> json) => _$CourrierFromJson(json);
+  factory Courrier.fromJson(Map<String, dynamic> json) =>
+      _$CourrierFromJson(json);
 
   factory Courrier.fromDocument(DocumentSnapshot doc) {
     if (doc.data() == null) throw Exception("Document data was null");
 
-    return Courrier.fromJson(doc.data() as Map<String, Object?>).copyWith(id: doc.id);
+    return Courrier.fromJson(doc.data() as Map<String, Object?>)
+        .copyWith(id: doc.id);
   }
 }

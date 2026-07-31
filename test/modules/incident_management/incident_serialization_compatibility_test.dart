@@ -34,6 +34,14 @@ void main() {
           'location': 'Head office',
           'deviceType': 'Laptop',
           'assetId': 'asset-1',
+          'configurationItemId': 'ci-1',
+          'relatedServiceRequestId': 'request-1',
+          'relatedChangeId': 'change-1',
+          'suggestedKnowledgeArticleIds': [
+            'article-1',
+            '',
+            'article-2',
+          ],
           'userImpactDescription': 'Work is blocked',
           'isBlocking': 'true',
           'categoryId': 'messaging',
@@ -69,6 +77,13 @@ void main() {
       expect(ticket.updatedAt?.toUtc(), createdAt);
       expect(ticket.attachmentCount, 2);
       expect(ticket.commentCount, 3);
+      expect(ticket.configurationItemId, 'ci-1');
+      expect(ticket.relatedServiceRequestId, 'request-1');
+      expect(ticket.relatedChangeId, 'change-1');
+      expect(
+        ticket.suggestedKnowledgeArticleIds,
+        ['article-1', 'article-2'],
+      );
     });
 
     test('missing additive fields retain safe defaults for legacy documents',
@@ -90,6 +105,10 @@ void main() {
       expect(ticket.attachmentCount, 0);
       expect(ticket.commentCount, 0);
       expect(ticket.isDeleted, isFalse);
+      expect(ticket.configurationItemId, isEmpty);
+      expect(ticket.relatedServiceRequestId, isEmpty);
+      expect(ticket.relatedChangeId, isEmpty);
+      expect(ticket.suggestedKnowledgeArticleIds, isEmpty);
     });
 
     test('serialization keeps the established authoritative field names', () {
@@ -128,6 +147,10 @@ void main() {
           'attachmentCount',
           'commentCount',
           'isDeleted',
+          'configurationItemId',
+          'relatedServiceRequestId',
+          'relatedChangeId',
+          'suggestedKnowledgeArticleIds',
         }),
       );
       expect(fields['ticketNumber'], 'INC-002');

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/incident_management/data/firestore_incident_repository.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_category.dart';
@@ -7,6 +9,8 @@ import 'package:arptc_connect/modules/incident_management/domain/incident_user.d
 import 'package:arptc_connect/modules/incident_management/domain/it_service.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/incident_localizations.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/controllers/incident_providers.dart';
+import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_knowledge_suggestions.dart';
+import 'package:arptc_connect/modules/itsm/knowledge/domain/knowledge_domain.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
@@ -41,9 +45,19 @@ class _CreateIncidentScreenState extends ConsumerState<CreateIncidentScreen> {
   IncidentUser? _selectedAffectedAgent;
   bool _isBlocking = false;
   bool _isSaving = false;
+  Timer? _suggestionDebounce;
+  KnowledgeSuggestionContext? _suggestionContext;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController.addListener(_scheduleKnowledgeSuggestions);
+    _descriptionController.addListener(_scheduleKnowledgeSuggestions);
+  }
 
   @override
   void dispose() {
+    _suggestionDebounce?.cancel();
     _titleController.dispose();
     _descriptionController.dispose();
     _locationController.dispose();
@@ -146,6 +160,7 @@ class _CreateIncidentScreenState extends ConsumerState<CreateIncidentScreen> {
                                   setState(() {
                                     _affectedServiceId = value ?? '';
                                   });
+                                  _scheduleKnowledgeSuggestions();
                                 },
                               ),
                               loading: () => const LinearProgressIndicator(),
@@ -172,6 +187,12 @@ class _CreateIncidentScreenState extends ConsumerState<CreateIncidentScreen> {
                         ),
                       ),
                     ),
+                    if (_suggestionContext != null) ...[
+                      const SizedBox(height: 16),
+                      IncidentKnowledgeSuggestions(
+                        suggestionContext: _suggestionContext!,
+                      ),
+                    ],
                     if (isManager) ...[
                       const SizedBox(height: 16),
                       Card(
@@ -256,6 +277,7 @@ class _CreateIncidentScreenState extends ConsumerState<CreateIncidentScreen> {
                                         _categoryId = value ?? '';
                                         _subcategoryName = '';
                                       });
+                                      _scheduleKnowledgeSuggestions();
                                     },
                                   ),
                                   _SubcategoryDropdown(
@@ -366,6 +388,21 @@ class _CreateIncidentScreenState extends ConsumerState<CreateIncidentScreen> {
       }
       return null;
     };
+  }
+
+  void _scheduleKnowledgeSuggestions() {
+    _suggestionDebounce?.cancel();
+    _suggestionDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      final next = KnowledgeSuggestionContext(
+        serviceId: _affectedServiceId,
+        incidentCategoryId: _categoryId,
+        text: '${_titleController.text} ${_descriptionController.text}',
+      );
+      setState(() {
+        _suggestionContext = next.indexKeys.isEmpty ? null : next;
+      });
+    });
   }
 
   Future<void> _save(IncidentUser user) async {

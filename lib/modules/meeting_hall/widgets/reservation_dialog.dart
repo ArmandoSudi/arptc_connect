@@ -52,11 +52,12 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
 
     return AlertDialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      title: Text('Nouvelle réservation',
+      title: Text(
+        'Nouvelle réservation',
         style: theme.textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.w800,
-      ),),
-
+          fontWeight: FontWeight.w800,
+        ),
+      ),
       content: SizedBox(
         width: 560,
         child: Form(
@@ -90,11 +91,13 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
                 Row(
                   children: [
                     Expanded(
-
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.45),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.45),
                           ),
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -108,12 +111,15 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
                         ),
                       ),
                     ),
-                    Gap(16.0),
+                    const Gap(16.0),
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.45),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.45),
                           ),
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -125,7 +131,6 @@ class _ReservationDialogState extends ConsumerState<ReservationDialog> {
                               ? () => _selectTime(context, false)
                               : null,
                         ),
-
                       ),
                     ),
                   ],

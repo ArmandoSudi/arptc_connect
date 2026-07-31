@@ -17,25 +17,20 @@ class CourrierBaseScreen extends ConsumerStatefulWidget {
 final selectedCourrier = StateProvider<String>((ref) => "");
 
 class _CourrierBaseScreenState extends ConsumerState<CourrierBaseScreen> {
-
   // var _selection = ValueNotifier<Courrier>(null);
   var id = "";
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-        builder: (context, dimens) {
+    return LayoutBuilder(builder: (context, dimens) {
       if (dimens.maxWidth >= 700) {
-        const kListViewWidth = 800.0;
         return Row(
           children: <Widget>[
             // List of all courriers
             Expanded(
-              // width: kListViewWidth,
               flex: 1,
               child: _buildCourrierList((val) {
-                ref.watch(selectedCourrier.notifier).state =
-                val.id!;
+                ref.watch(selectedCourrier.notifier).state = val.id!;
               }),
             ),
 
@@ -80,12 +75,7 @@ class _CourrierBaseScreenState extends ConsumerState<CourrierBaseScreen> {
         );
       }
 
-      print("Small SCReen");
-
       return _buildCourrierList((val) {
-
-        print("selecting details");
-
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => DetailsCourrierScreen(val.id!),
@@ -118,10 +108,9 @@ class _CourrierBaseScreenState extends ConsumerState<CourrierBaseScreen> {
               padding: const EdgeInsets.all(16.0),
               width: 800,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey)
-              ),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey)),
               child: ListView(
                 children: [
                   const Text(
@@ -133,7 +122,6 @@ class _CourrierBaseScreenState extends ConsumerState<CourrierBaseScreen> {
                   ),
                   const SizedBox(height: 10),
                   ...snapshot.data!.docs.map((DocumentSnapshot document) {
-
                     Courrier courrier = Courrier.fromDocument(document);
 
                     return ListTile(
@@ -155,7 +143,6 @@ class _CourrierBaseScreenState extends ConsumerState<CourrierBaseScreen> {
                         onSelect(courrier);
                       },
                     );
-
                   }),
                 ],
               ),

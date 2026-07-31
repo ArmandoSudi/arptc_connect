@@ -15,7 +15,7 @@ const {
 } = require('firebase/storage');
 
 // Storage rules resolve Firestore parent lookups in the emulator CLI project.
-const projectId = 'demo-arptc-connect-itsm-security';
+const projectId = 'demo-arptc-connect-itsm';
 const firestoreRules = fs.readFileSync(
   path.resolve(__dirname, '../../firestore.rules'),
   'utf8',
@@ -284,6 +284,7 @@ function uploadAttachment(
         workItemId,
         attachmentId,
         uploadedByUserId,
+        documentRequirementKey: 'supporting_document',
         isInternal: String(isInternal),
       },
     },
@@ -302,7 +303,7 @@ function workItem(requesterId, overrides = {}) {
     requesterId,
     requesterEmail: `${requesterId}@arptc.cd`,
     lifecycleState: 'active',
-    status: 'open',
+    status: 'draft',
     confidentiality: 'INTERNAL',
     authorizedUserIds: [],
     ...overrides,

@@ -102,6 +102,7 @@ abstract class IncidentRepository {
     required String resolutionSummary,
     required String resolutionCode,
     required IncidentActor actor,
+    Iterable<String> suggestedKnowledgeArticleIds = const [],
   });
 
   Future<void> closeTicket({

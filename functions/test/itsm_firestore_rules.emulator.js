@@ -21,7 +21,7 @@ const {
   where,
 } = require('firebase/firestore');
 
-const projectId = 'demo-arptc-connect-itsm-security';
+const projectId = 'demo-arptc-connect-itsm';
 const rules = fs.readFileSync(
   path.resolve(__dirname, '../../firestore.rules'),
   'utf8',
@@ -268,7 +268,7 @@ test('MANAGER reads operational records but restricted data needs authorization'
       ),
     ),
   );
-  await assertSucceeds(
+  await assertFails(
     addDoc(
       collection(
         authorized,
@@ -303,10 +303,10 @@ test('MANAGER reads operational records but restricted data needs authorization'
   );
 });
 
-test('self-service requests allow safe creates but deny protected fields', async () => {
+test('self-service requests are created only through trusted commands', async () => {
   const firestore = userFirestore('user-1');
 
-  await assertSucceeds(
+  await assertFails(
     setDoc(doc(firestore, 'serviceRequests/new-request'), {
       requesterId: 'user-1',
       title: 'Access request',
@@ -344,11 +344,11 @@ test('self-service requests allow safe creates but deny protected fields', async
   );
 });
 
-test('MANAGER manages drafts but cannot publish immutable configuration', async () => {
+test('configuration writes are restricted to trusted commands', async () => {
   const firestore = userFirestore('manager-1');
   const draft = doc(firestore, 'serviceCatalogItems/new-draft');
 
-  await assertSucceeds(
+  await assertFails(
     setDoc(draft, {
       name: 'New laptop',
       status: 'draft',
@@ -356,7 +356,7 @@ test('MANAGER manages drafts but cannot publish immutable configuration', async 
       updatedAt: serverTimestamp(),
     }),
   );
-  await assertSucceeds(
+  await assertFails(
     updateDoc(draft, {
       name: 'Standard laptop',
       updatedAt: serverTimestamp(),
@@ -395,9 +395,7 @@ test('USER reads only published configuration while ADMIN is read-only', async (
   );
 
   const adminDb = userFirestore('admin-1');
-  await assertSucceeds(
-    getDoc(doc(adminDb, 'serviceCatalogItems/draft-item')),
-  );
+  await assertFails(getDoc(doc(adminDb, 'serviceCatalogItems/draft-item')));
   await assertFails(
     updateDoc(doc(adminDb, 'serviceCatalogItems/draft-item'), {
       name: 'Admin mutation',
@@ -424,7 +422,7 @@ test('comments and attachment metadata inherit parent access', async () => {
     getDoc(doc(userDb, 'serviceRequests/request-1/attachments/internal')),
   );
 
-  await assertSucceeds(
+  await assertFails(
     addDoc(collection(userDb, 'serviceRequests/request-1/attachments'), {
       workItemCollection: 'serviceRequests',
       workItemId: 'request-1',

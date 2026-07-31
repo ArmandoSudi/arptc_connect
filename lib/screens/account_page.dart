@@ -91,12 +91,12 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 const SizedBox(height: 24),
 
                 // Administration Section
-                _SectionHeader(title: "Administration"),
+                const _SectionHeader(title: "Administration"),
                 const SizedBox(height: 8),
 
-                Card(
+                const Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -104,10 +104,11 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                           label: "Direction",
                           value: "Direction des systèmes d'information",
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                         _InfoRow(
                           label: "Service",
-                          value: "Service de devéloppement des applications et gestion de la base des données",
+                          value:
+                              "Service de devéloppement des applications et gestion de la base des données",
                         ),
                       ],
                     ),
@@ -117,7 +118,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 const SizedBox(height: 24),
 
                 // Social Section
-                _SectionHeader(title: "Social"),
+                const _SectionHeader(title: "Social"),
                 const SizedBox(height: 8),
                 const SizedBox(height: 10),
 
@@ -178,12 +179,12 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                   onPressed: () {
                     ref.read(authServiceProvider).signOut();
                   },
-                  child: Row(
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.logout, size: 18),
-                      const SizedBox(width: 8),
-                      const Text("Sign Out"),
+                      SizedBox(width: 8),
+                      Text("Sign Out"),
                     ],
                   ),
                 ),
@@ -218,7 +219,9 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               leading: const Icon(Icons.brightness_auto),
               title: const Text('System'),
               onTap: () {
-                ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.system);
+                ref
+                    .read(themeModeProvider.notifier)
+                    .setThemeMode(ThemeMode.system);
                 Navigator.pop(context);
               },
             ),
@@ -226,7 +229,9 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               leading: const Icon(Icons.light_mode),
               title: const Text('Light'),
               onTap: () {
-                ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.light);
+                ref
+                    .read(themeModeProvider.notifier)
+                    .setThemeMode(ThemeMode.light);
                 Navigator.pop(context);
               },
             ),
@@ -234,7 +239,9 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               leading: const Icon(Icons.dark_mode),
               title: const Text('Dark'),
               onTap: () {
-                ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.dark);
+                ref
+                    .read(themeModeProvider.notifier)
+                    .setThemeMode(ThemeMode.dark);
                 Navigator.pop(context);
               },
             ),
@@ -339,4 +346,3 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-

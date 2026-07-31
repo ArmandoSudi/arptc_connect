@@ -12,20 +12,19 @@ class SocialRefundsPage extends StatefulWidget {
 }
 
 class _SocialRefundsPageState extends State<SocialRefundsPage> {
-
   final db = FirebaseFirestore.instance;
-  final bool _isSearching = false;
 
   CollectionReference agentsRef =
-  FirebaseFirestore.instance.collection('refunds');
+      FirebaseFirestore.instance.collection('refunds');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        // title: _isSearching ? CupertinoSearchTextField() : Container(),
-        title: const CupertinoSearchTextField(placeholder: "Rechercher un remboursement",),
+        title: const CupertinoSearchTextField(
+          placeholder: "Rechercher un remboursement",
+        ),
       ),
       body: Padding(
           padding: ResponsiveBreakpoints.of(context).isMobile
@@ -34,18 +33,20 @@ class _SocialRefundsPageState extends State<SocialRefundsPage> {
           child: StreamBuilder<QuerySnapshot>(
               stream: agentsRef.snapshots(),
               builder: (context, snapshot) {
-
                 if (snapshot.hasError) {
                   return const Text("Une erreur est survenue");
                 }
 
-                if (snapshot.data == null || snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.data == null ||
+                    snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (!snapshot.hasData) {
                   return const Text("Il n'y a aucun bon");
                 }
 
-                List<Refund>? refunds = snapshot.data?.docs.map((data) => Refund.fromSnapshot(data)).toList();
+                List<Refund>? refunds = snapshot.data?.docs
+                    .map((data) => Refund.fromSnapshot(data))
+                    .toList();
 
                 return Card(
                     child: ListView.separated(
@@ -64,12 +65,8 @@ class _SocialRefundsPageState extends State<SocialRefundsPage> {
                           );
                         },
                         separatorBuilder: (context, index) => const Divider(),
-                        itemCount: refunds?.length ?? 0)
-                );
-              }
-
-          )
-      ),
+                        itemCount: refunds?.length ?? 0));
+              })),
     );
   }
 }

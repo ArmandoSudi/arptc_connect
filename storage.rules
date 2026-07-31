@@ -158,6 +158,14 @@ service firebase.storage {
             data.requesterEmail == request.auth.token.email
           ) ||
           (
+            data.keys().hasAny(['requestedForUserId']) &&
+            data.requestedForUserId == request.auth.uid
+          ) ||
+          (
+            data.keys().hasAny(['requestedForEmail']) &&
+            data.requestedForEmail == request.auth.token.email
+          ) ||
+          (
             data.keys().hasAny(['createdByUserId']) &&
             data.createdByUserId == request.auth.uid
           ) ||
@@ -271,12 +279,48 @@ service firebase.storage {
           (
             collectionName in ['serviceRequests', 'changeRequests'] &&
             (isItsmUser() || isItsmAdmin()) &&
-            isPrincipalWorkItemOwner(data)
+            isPrincipalWorkItemOwner(data) &&
+            (
+              collectionName != 'serviceRequests' ||
+              data.status == 'draft'
+            )
           )
         ) &&
         (
           isItsmManager() ||
           request.resource.metadata.isInternal == 'false'
+        );
+    }
+
+    function knowledgeArticleData(articleId) {
+      return firestore.get(
+        /databases/(default)/documents/knowledgeArticles/$(articleId)
+      ).data;
+    }
+
+    function knowledgeVersionData(articleId, versionId) {
+      return firestore.get(
+        /databases/(default)/documents/knowledgeArticles/$(articleId)/versions/$(versionId)
+      ).data;
+    }
+
+    function canReadKnowledgeAttachment(articleId) {
+      let data = knowledgeArticleData(articleId);
+      return isItsmManager() ||
+        (
+          (isItsmUser() || isItsmAdmin()) &&
+          data.state in ['PUBLISHED', 'published'] &&
+          (
+            !data.keys().hasAny(['visibility']) ||
+            data.visibility in [
+              'EMPLOYEE',
+              'employee',
+              'EMPLOYEES',
+              'employees',
+              'ALL',
+              'all'
+            ]
+          )
         );
     }
 
@@ -334,9 +378,12 @@ service firebase.storage {
         contentType == 'application/pdf' ||
         contentType == 'application/msword' ||
         contentType == 'application/vnd.ms-excel' ||
+        contentType == 'application/vnd.ms-powerpoint' ||
         contentType == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
         contentType == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-        contentType == 'text/plain';
+        contentType == 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+        contentType == 'text/plain' ||
+        contentType == 'text/csv';
     }
 
     function canReadTaskFile() {
@@ -390,9 +437,42 @@ service firebase.storage {
         request.resource.metadata.workItemId == workItemId &&
         request.resource.metadata.attachmentId == attachmentId &&
         request.resource.metadata.uploadedByUserId == request.auth.uid &&
+        request.resource.metadata.documentRequirementKey is string &&
         request.resource.metadata.isInternal in ['true', 'false'];
 
       allow update, delete: if false;
+    }
+
+    match /itsm/knowledgeArticles/{articleId}/versions/{versionId}/attachments/{attachmentId}/{fileName} {
+      allow read: if signedIn() &&
+        canReadKnowledgeAttachment(articleId) &&
+        (
+          !resource.metadata.keys().hasAny(['isInternal']) ||
+          resource.metadata.isInternal == 'false' ||
+          isItsmManager()
+        );
+
+      allow create: if signedIn() &&
+        isItsmManager() &&
+        request.resource.size <= 20 * 1024 * 1024 &&
+        hasSupportedContentType(request.resource.contentType) &&
+        knowledgeArticleData(articleId).state in ['DRAFT', 'draft'] &&
+        knowledgeArticleData(articleId).currentVersionId == versionId &&
+        knowledgeVersionData(articleId, versionId).state in ['DRAFT', 'draft'] &&
+        request.resource.metadata.articleId == articleId &&
+        request.resource.metadata.versionId == versionId &&
+        request.resource.metadata.attachmentId == attachmentId &&
+        request.resource.metadata.uploadedByUserId == request.auth.uid &&
+        request.resource.metadata.isInternal in ['true', 'false'];
+
+      allow update, delete: if false;
+    }
+
+    // Legacy unversioned Knowledge objects remain readable, but new uploads
+    // must use the immutable version-scoped path above.
+    match /itsm/knowledgeArticles/{articleId}/attachments/{attachmentId}/{fileName} {
+      allow read: if signedIn() && canReadKnowledgeAttachment(articleId);
+      allow create, update, delete: if false;
     }
 
     match /{allPaths=**} {

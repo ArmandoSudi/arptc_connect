@@ -9,8 +9,14 @@ import 'package:arptc_connect/modules/incident_management/domain/it_service.dart
 import 'package:arptc_connect/modules/incident_management/presentation/incident_localizations.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/controllers/incident_providers.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_priority_badge.dart';
+import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_linked_records_card.dart';
+import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_resolution_knowledge_selector.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_status_badge.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/widgets/incident_timeline.dart';
+import 'package:arptc_connect/modules/itsm/knowledge/application/knowledge_providers.dart';
+import 'package:arptc_connect/modules/itsm/knowledge/data/knowledge_repository.dart';
+import 'package:arptc_connect/modules/itsm/knowledge/domain/knowledge_domain.dart';
+import 'package:arptc_connect/modules/itsm/shared/domain/pagination.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
@@ -51,6 +57,7 @@ class _ManagerIncidentDetailsScreenState
   String _urgency = '';
   String _assignedToUserId = '';
   String _resolutionCode = '';
+  Set<String> _selectedKnowledgeArticleIds = const {};
   bool _isCategorizing = false;
   bool _isAssigning = false;
   bool _isResolving = false;
@@ -94,6 +101,21 @@ class _ManagerIncidentDetailsScreenState
             }
             _hydrateFromTicket(ticket);
 
+            final suggestions = ref.watch(
+              knowledgeSuggestionPageProvider(
+                KnowledgeSuggestionPageRequest(
+                  query: KnowledgeSuggestionQuery(
+                    context: KnowledgeSuggestionContext(
+                      serviceId: ticket.affectedServiceId,
+                      incidentCategoryId: ticket.categoryId,
+                      text: '${ticket.title} ${ticket.description}',
+                    ),
+                  ),
+                  page: PageRequest(limit: 8),
+                ),
+              ),
+            );
+
             final selectedCategory = categories.firstWhereOrNull(
               (category) => category.id == _categoryId,
             );
@@ -122,6 +144,16 @@ class _ManagerIncidentDetailsScreenState
                   ),
                   const SizedBox(height: 16),
                   _RequesterSummary(ticket: ticket),
+                  if (IncidentLinkedRecordsCard.recordsForTicket(ticket)
+                      .isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    IncidentLinkedRecordsCard.fromTicket(
+                      ticket: ticket,
+                      onRecordPressed: (record) => context.push(
+                        incidentLinkedRecordLocation(record),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   _WorkflowStepper(
                     ticket: ticket,
@@ -170,6 +202,16 @@ class _ManagerIncidentDetailsScreenState
                     resolutionCode: _resolutionCode,
                     onResolutionCodeChanged: (value) {
                       setState(() => _resolutionCode = value ?? '');
+                    },
+                    knowledgeArticles:
+                        suggestions.valueOrNull?.items ?? const [],
+                    selectedKnowledgeArticleIds: _selectedKnowledgeArticleIds,
+                    knowledgeLoading: suggestions.isLoading,
+                    knowledgeError: suggestions.hasError
+                        ? suggestions.error.toString()
+                        : null,
+                    onKnowledgeSelectionChanged: (value) {
+                      setState(() => _selectedKnowledgeArticleIds = value);
                     },
                     isCategorizing: _isCategorizing,
                     isAssigning: _isAssigning,
@@ -285,6 +327,8 @@ class _ManagerIncidentDetailsScreenState
     _resolutionSummaryController.text = ticket.resolutionSummary;
     _resolutionCode =
         IncidentResolutionCode.normalizeCode(ticket.resolutionCode);
+    _selectedKnowledgeArticleIds =
+        Set<String>.of(ticket.suggestedKnowledgeArticleIds);
   }
 
   Future<void> _categorizeTicket(
@@ -446,6 +490,7 @@ class _ManagerIncidentDetailsScreenState
             resolutionSummary: summary,
             resolutionCode: _resolutionCode,
             actor: actor,
+            suggestedKnowledgeArticleIds: _selectedKnowledgeArticleIds,
           );
       _showMessage(l10n.ticketMarkedSolved);
     } finally {
@@ -564,6 +609,11 @@ class _WorkflowStepper extends StatelessWidget {
     required this.resolutionCodes,
     required this.resolutionCode,
     required this.onResolutionCodeChanged,
+    required this.knowledgeArticles,
+    required this.selectedKnowledgeArticleIds,
+    required this.knowledgeLoading,
+    required this.knowledgeError,
+    required this.onKnowledgeSelectionChanged,
     required this.isCategorizing,
     required this.isAssigning,
     required this.isResolving,
@@ -600,6 +650,11 @@ class _WorkflowStepper extends StatelessWidget {
   final List<IncidentResolutionCode> resolutionCodes;
   final String resolutionCode;
   final ValueChanged<String?> onResolutionCodeChanged;
+  final List<KnowledgeArticle> knowledgeArticles;
+  final Set<String> selectedKnowledgeArticleIds;
+  final bool knowledgeLoading;
+  final String? knowledgeError;
+  final ValueChanged<Set<String>> onKnowledgeSelectionChanged;
   final bool isCategorizing;
   final bool isAssigning;
   final bool isResolving;
@@ -817,6 +872,15 @@ class _WorkflowStepper extends StatelessWidget {
                     onChanged: !isClosed && !isCancelled
                         ? onResolutionCodeChanged
                         : null,
+                  ),
+                  const SizedBox(height: 12),
+                  IncidentResolutionKnowledgeSelector(
+                    articles: knowledgeArticles,
+                    selectedArticleIds: selectedKnowledgeArticleIds,
+                    isLoading: knowledgeLoading,
+                    errorMessage: knowledgeError,
+                    enabled: !isClosed && !isCancelled,
+                    onSelectionChanged: onKnowledgeSelectionChanged,
                   ),
                   const SizedBox(height: 12),
                   Align(

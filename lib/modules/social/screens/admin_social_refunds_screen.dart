@@ -8,8 +8,8 @@ class AdminSocialRefundsScreen extends StatelessWidget {
 
   final db = FirebaseFirestore.instance;
 
-  CollectionReference vouchersRef =
-  FirebaseFirestore.instance.collection('refunds');
+  final CollectionReference vouchersRef =
+      FirebaseFirestore.instance.collection('refunds');
 
   @override
   Widget build(BuildContext context) {
@@ -21,26 +21,24 @@ class AdminSocialRefundsScreen extends StatelessWidget {
           child: StreamBuilder<QuerySnapshot>(
               stream: vouchersRef.snapshots(),
               builder: (context, snapshot) {
-
                 if (snapshot.hasError) {
                   return const Text("something went wrong");
                 }
 
-                if (snapshot.data == null || snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.data == null ||
+                    snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (!snapshot.hasData) {
                   return const Text("There is no dependant yet");
                 }
 
                 return _buildRefundList(context, snapshot.data?.docs ?? []);
-              }
-
-          )
-      ),
+              })),
     );
   }
 
-  Widget _buildRefundList( BuildContext context, List<DocumentSnapshot> snapshot) {
+  Widget _buildRefundList(
+      BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView(
       children: snapshot.map((data) => _buildRefund(context, data)).toList(),
     );
@@ -52,7 +50,9 @@ class AdminSocialRefundsScreen extends StatelessWidget {
       leading: const Icon(Icons.person),
       title: Text("${refund.amount} \$"),
       subtitle: Text(refund.hospital),
-      trailing: refund.isApproved ? const Text("Approuvé", style: TextStyle(color: Colors.green)) : const Text("En attente", style: TextStyle(color: Colors.red)),
+      trailing: refund.isApproved
+          ? const Text("Approuvé", style: TextStyle(color: Colors.green))
+          : const Text("En attente", style: TextStyle(color: Colors.red)),
       onTap: () {
         debugPrint("Doc ID: ${refund.reference.id}");
         // Navigator.of(context).push(

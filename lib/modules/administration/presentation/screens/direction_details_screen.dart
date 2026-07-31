@@ -10,7 +10,6 @@ import 'package:go_router/go_router.dart';
 import '../../domain/models/direction.dart';
 
 class DirectionDetailsScreen extends ConsumerStatefulWidget {
-
   final String directionId;
   const DirectionDetailsScreen({super.key, required this.directionId});
 
@@ -18,35 +17,33 @@ class DirectionDetailsScreen extends ConsumerStatefulWidget {
   ConsumerState createState() => _DirectionDetailsScreenState();
 }
 
-class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen> {
+class _DirectionDetailsScreenState
+    extends ConsumerState<DirectionDetailsScreen> {
   bool isServiceExpanded = false;
   bool isAgentExpanded = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          centerTitle: false,
-          title: const Text("Directions"),
-          actions: const [
-            IconButton(onPressed: null, icon: Icon(Icons.edit))
-          ],
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: FutureBuilder<Direction>(
-                future: ref.watch(administrationAPIProvider).getDirectionById(widget.directionId),
+      appBar: AppBar(
+        centerTitle: false,
+        title: const Text("Directions"),
+        actions: const [IconButton(onPressed: null, icon: Icon(Icons.edit))],
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FutureBuilder<Direction>(
+                future: ref
+                    .watch(administrationAPIProvider)
+                    .getDirectionById(widget.directionId),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState ==
-                      ConnectionState.waiting) {
-                    return const Center(
-                        child: CircularProgressIndicator());
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
-                    return const Center(
-                        child: Text('Erreur de connection'));
+                    return const Center(child: Text('Erreur de connection'));
                   }
                   final direction = snapshot.data as Direction;
                   return Column(
@@ -54,7 +51,8 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
                     children: [
                       Text(
                         direction.name,
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 20),
                       Card(
@@ -66,7 +64,8 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
                           child: Column(
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
                                     "Services",
@@ -75,7 +74,8 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
                                     ),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                                    icon: const Icon(
+                                        Icons.keyboard_arrow_down_rounded),
                                     onPressed: () {
                                       setState(() {
                                         isServiceExpanded = !isServiceExpanded;
@@ -87,14 +87,15 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
                               const SizedBox(height: 20),
                               isServiceExpanded
                                   ? ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: 3,
-                                  itemBuilder: (context, index) {
-                                    return ListTile(
-                                      title: Text("Service $index"),
-                                    );
-                                  })
+                                      shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      itemCount: 3,
+                                      itemBuilder: (context, index) {
+                                        return ListTile(
+                                          title: Text("Service $index"),
+                                        );
+                                      })
                                   : Container(),
                             ],
                           ),
@@ -110,7 +111,8 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
                           child: Column(
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
                                     "Agents",
@@ -119,7 +121,8 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
                                     ),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                                    icon: const Icon(
+                                        Icons.keyboard_arrow_down_rounded),
                                     onPressed: () {
                                       setState(() {
                                         isAgentExpanded = !isAgentExpanded;
@@ -131,14 +134,15 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
                               const SizedBox(height: 20),
                               isAgentExpanded
                                   ? ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: 3,
-                                  itemBuilder: (context, index) {
-                                    return ListTile(
-                                      title: Text("Agent $index"),
-                                    );
-                                  })
+                                      shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      itemCount: 3,
+                                      itemBuilder: (context, index) {
+                                        return ListTile(
+                                          title: Text("Agent $index"),
+                                        );
+                                      })
                                   : Container(),
                             ],
                           ),
@@ -146,11 +150,10 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
                       ),
                     ],
                   );
-                }
-              ),
-            ),
+                }),
           ),
         ),
+      ),
       bottomNavigationBar: BottomAppBar(
         child: Row(
           children: [
@@ -161,7 +164,8 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
                 onPressed: () {
                   // TODO Before deleting a direction, check if there are services and bureaux under it
                   // TODO Display a yesOrNo dialogBox
-                  ref.read(directionsControllerProvider.notifier)
+                  ref
+                      .read(directionsControllerProvider.notifier)
                       .delete(widget.directionId);
                   context.pop();
                 },
@@ -171,7 +175,8 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
             Expanded(
               child: TextButton(
                 style: TextButton.styleFrom(
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
                   minimumSize: const Size.fromHeight(50),
                 ),
                 onPressed: () {
@@ -186,7 +191,7 @@ class _DirectionDetailsScreenState extends ConsumerState<DirectionDetailsScreen>
     );
   }
 
-  void deleteDirection(Direction) {
+  void deleteDirection(Direction direction) {
     log("deleteDirection");
   }
 }

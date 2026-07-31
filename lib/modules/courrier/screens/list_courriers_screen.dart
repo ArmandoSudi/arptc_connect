@@ -17,7 +17,6 @@ class ListCourriersScreen extends ConsumerStatefulWidget {
 }
 
 class _ListCourriersScreenState extends ConsumerState<ListCourriersScreen> {
-  final String _searchDate = "Date d'enregistrement";
   bool isFiltering = false;
 
   @override
@@ -64,8 +63,8 @@ class _ListCourriersScreenState extends ConsumerState<ListCourriersScreen> {
                       ? const Icon(Icons.cancel_outlined)
                       : const Icon(Icons.filter_alt_rounded),
                   onPressed: () async {
-
-                    ref.read(dateFilterProvider.notifier).state = await showDatePicker(
+                    ref.read(dateFilterProvider.notifier).state =
+                        await showDatePicker(
                       context: context,
                       initialDate: DateTime.now(),
                       firstDate: DateTime(2021),
@@ -76,12 +75,12 @@ class _ListCourriersScreenState extends ConsumerState<ListCourriersScreen> {
                     setState(() {
                       isFiltering = !isFiltering;
                     });
-
-                  }, label: isFiltering
-                    ? Text("${ref.read(dateFilterProvider)?.toString()}}",
-                    style: const TextStyle(fontWeight: FontWeight.bold))
-                    : const Text("Filtrer par date",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                  },
+                  label: isFiltering
+                      ? Text("${ref.read(dateFilterProvider)?.toString()}}",
+                          style: const TextStyle(fontWeight: FontWeight.bold))
+                      : const Text("Filtrer par date",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
@@ -122,7 +121,8 @@ class _ListCourriersScreenState extends ConsumerState<ListCourriersScreen> {
                   error: (error, stackTrace) {
                     return const Text("something went wrong");
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                 ),
               ),
             ),

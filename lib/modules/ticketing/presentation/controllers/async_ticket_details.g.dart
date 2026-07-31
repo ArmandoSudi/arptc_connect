@@ -158,6 +158,8 @@ class AsyncTicketDetailsProvider
   }
 }
 
+// Riverpod 2 generates this deprecated reference type for compatibility.
+// ignore: deprecated_member_use
 mixin AsyncTicketDetailsRef on AutoDisposeAsyncNotifierProviderRef<Ticket> {
   /// The parameter `ticketId` of this provider.
   String get ticketId;

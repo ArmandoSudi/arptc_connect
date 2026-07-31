@@ -15,20 +15,22 @@ class Constants {
 
   static final Map<String, Service> modules = {
     "COURRIER":
-        Service("Courrier", "courriers", Icons.mail, color: Colors.blue),
-    "SOCIAL":
-        Service("Social", "social", Icons.family_restroom, color: Colors.amber),
-    "INVENTORY": Service("Inventaire", "inventory", Icons.inventory_rounded,
+        const Service("Courrier", "courriers", Icons.mail, color: Colors.blue),
+    "SOCIAL": const Service("Social", "social", Icons.family_restroom,
+        color: Colors.amber),
+    "INVENTORY": const Service(
+        "Inventaire", "inventory", Icons.inventory_rounded,
         color: Colors.red),
-    "TICKETING": Service(
+    "TICKETING": const Service(
         "Support IT", "ticketing", Icons.airplane_ticket_outlined,
         color: Colors.deepPurple),
-    "PARC_INFORMATIQUE": Service(
+    "PARC_INFORMATIQUE": const Service(
         "Parc Informatique", "ticketing", Icons.devices,
         color: Colors.greenAccent),
-    "TASK": Service("Activités", "tasks", Icons.task_alt_outlined,
+    "TASK": const Service("Activités", "tasks", Icons.task_alt_outlined,
         color: Colors.pink),
-    "MEETING": Service("Salles de réunion", "meeting-hall", Icons.meeting_room,
+    "MEETING": const Service(
+        "Salles de réunion", "meeting-hall", Icons.meeting_room,
         color: Colors.teal),
   };
 }

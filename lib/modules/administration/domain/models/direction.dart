@@ -1,3 +1,6 @@
+// Freezed applies JsonKey metadata to generated fields.
+// ignore_for_file: invalid_annotation_target
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -15,9 +18,9 @@ class Direction with _$Direction {
   }) = _Direction;
 
   factory Direction.newEmpty({required String userId}) => const Direction(
-      id: null,
-      name: '',
-      shortName: '',
+        id: null,
+        name: '',
+        shortName: '',
       );
 
   factory Direction.fromJson(Map<String, dynamic> json) =>
@@ -26,6 +29,7 @@ class Direction with _$Direction {
   factory Direction.fromDocument(DocumentSnapshot doc) {
     if (doc.data() == null) throw Exception("Direction document was null");
 
-    return Direction.fromJson(doc.data() as Map<String, Object?>).copyWith(id: doc.id);
+    return Direction.fromJson(doc.data() as Map<String, Object?>)
+        .copyWith(id: doc.id);
   }
 }

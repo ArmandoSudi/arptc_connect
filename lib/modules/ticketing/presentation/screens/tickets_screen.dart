@@ -25,8 +25,6 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
     end: DateTime.now(),
   );
 
-  DateTime? _selectedDate;
-
   final List<Ticket> _tickets = [];
 
   @override
@@ -67,31 +65,6 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
                       });
                     }
 
-                    List<Ticket> tickets = [
-                      Ticket(
-                        id: "1",
-                        author: "Armando",
-                        subject:
-                            "1. Problème de connexion internet, 2. Probleme de connexion internet, 3. problème de connection inter, 4. Probleme de connection internet",
-                        agent: "Jean Dupont",
-                        creationDate: DateTime.now(),
-                        isSolved: false,
-                        category: 'Internet',
-                        solution: 'Redémarrer le routeur',
-                      ),
-                      Ticket(
-                        id: "2",
-                        author: "Elie",
-                        subject: "Problème de mail",
-                        agent: "Jean Dupont",
-                        creationDate: DateTime.now(),
-                        isSolved: false,
-                        category: 'Messagerie',
-                        solution: 'Changer de port',
-                      ),
-                    ];
-
-                    // ReportService().printTicketReport(tickets);
                     ReportService().generateReport(_tickets);
 
                     // context.go("/service/ticketing/add");
