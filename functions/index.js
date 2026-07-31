@@ -30,6 +30,12 @@ const {
   ITSM_ASSETS_COMMANDS,
 } = require('./src/itsm_assets_validation');
 const {
+  createItsmChangesCallableHandler,
+} = require('./src/itsm_changes_handlers');
+const {
+  ITSM_CHANGES_COMMANDS,
+} = require('./src/itsm_changes_validation');
+const {
   processSoftwareLicenceExpiryNotifications,
   processSoftwareLicenceRenewalNotifications,
   processWarrantyExpiryNotifications,
@@ -240,6 +246,61 @@ exports.itsmCreateCiRelationship = registerItsmAssetsCallable(
 );
 exports.itsmRetireCiRelationship = registerItsmAssetsCallable(
   ITSM_ASSETS_COMMANDS.retireCiRelationship,
+);
+
+function registerItsmChangesCallable(command) {
+  return onCall(
+    createItsmChangesCallableHandler({
+      expectedCommand: command,
+      db,
+      fieldValue: FieldValue,
+      timestamp: Timestamp,
+      findAgent: findCallerAgent,
+      HttpsError,
+      logger,
+    }),
+  );
+}
+
+exports.itsmInitializeChangeDraft = registerItsmChangesCallable(
+  ITSM_CHANGES_COMMANDS.initializeDraft,
+);
+exports.itsmSaveChangeDraft = registerItsmChangesCallable(
+  ITSM_CHANGES_COMMANDS.saveDraft,
+);
+exports.itsmSubmitChange = registerItsmChangesCallable(
+  ITSM_CHANGES_COMMANDS.submit,
+);
+exports.itsmCancelChange = registerItsmChangesCallable(
+  ITSM_CHANGES_COMMANDS.cancel,
+);
+exports.itsmAssessChange = registerItsmChangesCallable(
+  ITSM_CHANGES_COMMANDS.assess,
+);
+exports.itsmRequestChangeApproval = registerItsmChangesCallable(
+  ITSM_CHANGES_COMMANDS.requestApproval,
+);
+exports.itsmDecideChangeApproval = registerItsmChangesCallable(
+  ITSM_CHANGES_COMMANDS.decideApproval,
+);
+exports.itsmSaveChangeCabMeeting = registerItsmChangesCallable(
+  ITSM_CHANGES_COMMANDS.saveCabMeeting,
+);
+exports.itsmScheduleChange = registerItsmChangesCallable(
+  ITSM_CHANGES_COMMANDS.schedule,
+);
+exports.itsmStartChangeImplementation = registerItsmChangesCallable(
+  ITSM_CHANGES_COMMANDS.startImplementation,
+);
+exports.itsmRecordChangeImplementationResult = registerItsmChangesCallable(
+  ITSM_CHANGES_COMMANDS.recordImplementationResult,
+);
+exports.itsmRecordChangePostImplementationReview =
+  registerItsmChangesCallable(
+    ITSM_CHANGES_COMMANDS.recordPostImplementationReview,
+  );
+exports.itsmCloseChange = registerItsmChangesCallable(
+  ITSM_CHANGES_COMMANDS.close,
 );
 
 exports.itsmProcessAssetExpiryNotifications = onSchedule(

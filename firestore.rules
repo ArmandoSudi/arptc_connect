@@ -239,7 +239,61 @@ service cloud.firestore {
     }
 
     function isSharedItsmWorkItemCollection(collectionName) {
-      return collectionName in ['serviceRequests', 'changeRequests'];
+      return collectionName == 'serviceRequests';
+    }
+
+    function isChangeRequester(data) {
+      return signedIn() &&
+        data.keys().hasAny(['requesterId']) &&
+        data.requesterId == request.auth.uid;
+    }
+
+    function canReadChangeRequest(data) {
+      return isManager() ||
+        (
+          isItsmSelfServiceRole() &&
+          isChangeRequester(data)
+        );
+    }
+
+    function canReadChangeParent(changeId) {
+      return canReadChangeRequest(
+        get(
+          /databases/$(database)/documents/changeRequests/$(changeId)
+        ).data
+      );
+    }
+
+    function canReadChangePublicSubresource(changeId, data) {
+      return canReadChangeParent(changeId) &&
+        (
+          isManager() ||
+          (
+            (!data.keys().hasAny(['isInternal']) || data.isInternal == false) &&
+            (!data.keys().hasAny(['selfServiceVisible']) ||
+              data.selfServiceVisible == true)
+          )
+        );
+    }
+
+    function isPublishedChangeCalendarEntry(data) {
+      return data.keys().hasAny(['publishMaintenance']) &&
+        data.publishMaintenance == true;
+    }
+
+    function canReadChangeCalendarEntry(data) {
+      return isManager() ||
+        (
+          isUser() &&
+          (
+            isPublishedChangeCalendarEntry(data) ||
+            (
+              data.keys().hasAny(['requesterId']) &&
+              data.requesterId == request.auth.uid
+            )
+          )
+        ) ||
+        (isAdmin() && isPublishedChangeCalendarEntry(data));
     }
 
     function isRestrictedItsmWorkItemCollection(collectionName) {
@@ -1213,6 +1267,83 @@ service cloud.firestore {
           canReadItsmConfiguration(resource.data);
         allow create, update, delete: if false;
       }
+    }
+
+    match /changeRequests/{changeId} {
+      allow get, list: if signedIn() && canReadChangeRequest(resource.data);
+      allow create, update, delete: if false;
+
+      match /comments/{commentId} {
+        allow get, list: if signedIn() &&
+          canReadChangePublicSubresource(changeId, resource.data);
+        allow create, update, delete: if false;
+      }
+
+      match /attachments/{attachmentId} {
+        allow get, list: if signedIn() &&
+          canReadChangePublicSubresource(changeId, resource.data);
+        allow create, update, delete: if false;
+      }
+
+      match /auditLogs/{auditLogId} {
+        allow get, list: if signedIn() &&
+          canReadChangePublicSubresource(changeId, resource.data);
+        allow create, update, delete: if false;
+      }
+
+      match /tasks/{taskId} {
+        allow get, list: if signedIn() &&
+          canReadChangePublicSubresource(changeId, resource.data);
+        allow create, update, delete: if false;
+      }
+
+      // Approval records and their immutable history are private CAB
+      // deliberations. Requesters consume only trusted summary fields on the
+      // parent change request.
+      match /approvals/{approvalId} {
+        allow get, list: if signedIn() && isManager();
+        allow create, update, delete: if false;
+
+        match /history/{historyId} {
+          allow get, list: if signedIn() && isManager();
+          allow create, update, delete: if false;
+        }
+      }
+
+      match /approvalHistory/{historyId} {
+        allow get, list: if signedIn() && isManager();
+        allow create, update, delete: if false;
+      }
+
+      match /cabMeetings/{meetingId} {
+        allow get, list: if signedIn() && isManager();
+        allow create, update, delete: if false;
+      }
+
+      match /workflowInstances/{workflowInstanceId} {
+        allow get, list: if signedIn() && isManager();
+        allow create, update, delete: if false;
+      }
+
+      match /{unknownPath=**} {
+        allow read, write: if false;
+      }
+    }
+
+    match /changeCalendarEntries/{changeId} {
+      allow get, list: if signedIn() &&
+        canReadChangeCalendarEntry(resource.data);
+      allow create, update, delete: if false;
+    }
+
+    match /changeApprovalGroups/{groupId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+    }
+
+    match /maintenanceWindows/{windowId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
     }
 
     match /{workItemCollection}/{workItemId} {

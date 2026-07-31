@@ -1175,6 +1175,117 @@ class S {
   String get attachmentRegistrationSuccessful =>
       _text('attachmentRegistrationSuccessful');
   String get chooseSupportingDocument => _text('chooseSupportingDocument');
+  String get changeManagementTitle => _text('changeManagementTitle');
+  String get changeManagementSubtitle => _text('changeManagementSubtitle');
+  String get newChange => _text('newChange');
+  String get myChanges => _text('myChanges');
+  String get operationalChanges => _text('operationalChanges');
+  String get changeEmptyTitle => _text('changeEmptyTitle');
+  String get changeEmptyDescription => _text('changeEmptyDescription');
+  String get changeRequestDetails => _text('changeRequestDetails');
+  String get changeType => _text('changeType');
+  String get changeStandard => _text('changeStandard');
+  String get changeNormal => _text('changeNormal');
+  String get changeEmergency => _text('changeEmergency');
+  String get changeJustification => _text('changeJustification');
+  String get saveChangeDraft => _text('saveChangeDraft');
+  String get submitChange => _text('submitChange');
+  String get assessChange => _text('assessChange');
+  String get requestChangeApproval => _text('requestChangeApproval');
+  String get scheduleChange => _text('scheduleChange');
+  String get startImplementation => _text('startImplementation');
+  String get recordImplementation => _text('recordImplementation');
+  String get recordPostImplementationReview =>
+      _text('recordPostImplementationReview');
+  String get closeChange => _text('closeChange');
+  String get cancelChange => _text('cancelChange');
+  String get changeOwner => _text('changeOwner');
+  String get changeRequester => _text('changeRequester');
+  String get affectedServices => _text('affectedServices');
+  String get affectedConfigurationItems => _text('affectedConfigurationItems');
+  String get affectedAssets => _text('affectedAssets');
+  String get plannedStart => _text('plannedStart');
+  String get plannedEnd => _text('plannedEnd');
+  String get expectedDowntime => _text('expectedDowntime');
+  String get implementationPlan => _text('implementationPlan');
+  String get testPlan => _text('testPlan');
+  String get communicationPlan => _text('communicationPlan');
+  String get rollbackPlan => _text('rollbackPlan');
+  String get cabApprovalsTitle => _text('cabApprovalsTitle');
+  String get cabApprovalsSubtitle => _text('cabApprovalsSubtitle');
+  String get approveChange => _text('approveChange');
+  String get approveWithConditions => _text('approveWithConditions');
+  String get rejectChange => _text('rejectChange');
+  String get requestClarification => _text('requestClarification');
+  String get decisionComment => _text('decisionComment');
+  String get approvalConditions => _text('approvalConditions');
+  String get changeCalendarTitle => _text('changeCalendarTitle');
+  String get changeCalendarSubtitle => _text('changeCalendarSubtitle');
+  String get calendarMonth => _text('calendarMonth');
+  String get calendarWeek => _text('calendarWeek');
+  String get calendarAgenda => _text('calendarAgenda');
+  String get calendarPrevious => _text('calendarPrevious');
+  String get calendarNext => _text('calendarNext');
+  String get changeConflict => _text('changeConflict');
+  String get maintenancePublished => _text('maintenancePublished');
+  String get changeReadOnly => _text('changeReadOnly');
+  String get changeCommandSuccessful => _text('changeCommandSuccessful');
+  String get changeReasonRequired => _text('changeReasonRequired');
+  String get changeSelectStatus => _text('changeSelectStatus');
+  String get changeActiveView => _text('changeActiveView');
+  String get changeHistoryView => _text('changeHistoryView');
+  String get changeStatusDraft => _text('changeStatusDraft');
+  String get changeStatusSubmitted => _text('changeStatusSubmitted');
+  String get changeStatusAssessment => _text('changeStatusAssessment');
+  String get changeStatusAwaitingApproval =>
+      _text('changeStatusAwaitingApproval');
+  String get changeStatusApproved => _text('changeStatusApproved');
+  String get changeStatusScheduled => _text('changeStatusScheduled');
+  String get changeStatusImplementation => _text('changeStatusImplementation');
+  String get changeStatusReview => _text('changeStatusReview');
+  String get changeStatusClosed => _text('changeStatusClosed');
+  String get changeStatusRejected => _text('changeStatusRejected');
+  String get changeStatusCancelled => _text('changeStatusCancelled');
+  String get changeStatusFailed => _text('changeStatusFailed');
+  String get changeStatusRolledBack => _text('changeStatusRolledBack');
+  String get changeComplexity => _text('changeComplexity');
+  String get maintenanceWindow => _text('maintenanceWindow');
+  String get changeRisk => _text('changeRisk');
+  String get changeRevision => _text('changeRevision');
+  String get changeRiskLow => _text('changeRiskLow');
+  String get changeRiskMedium => _text('changeRiskMedium');
+  String get changeRiskHigh => _text('changeRiskHigh');
+  String get changeRiskCritical => _text('changeRiskCritical');
+  String get changeServiceFilter => _text('changeServiceFilter');
+  String get changeCiFilter => _text('changeCiFilter');
+  String get changeRelatedRecords => _text('changeRelatedRecords');
+  String get changeImplementationResult => _text('changeImplementationResult');
+  String get changePostImplementationReview =>
+      _text('changePostImplementationReview');
+  String get changeOutcomeSuccessful => _text('changeOutcomeSuccessful');
+  String get changeOutcomePartial => _text('changeOutcomePartial');
+  String get changeOutcomeFailed => _text('changeOutcomeFailed');
+  String get changeOutcomeRolledBack => _text('changeOutcomeRolledBack');
+  String get cabMeeting => _text('cabMeeting');
+  String get cabMeetings => _text('cabMeetings');
+  String get scheduleCabMeeting => _text('scheduleCabMeeting');
+  String get cabApprovalGroup => _text('cabApprovalGroup');
+  String get cabParticipantIds => _text('cabParticipantIds');
+  String get cabMeetingNotes => _text('cabMeetingNotes');
+  String get noCabMeetings => _text('noCabMeetings');
+  String get changeConflictsOnly => _text('changeConflictsOnly');
+  String get changeComments => _text('changeComments');
+  String get changeAttachments => _text('changeAttachments');
+  String get changeActivityTimeline => _text('changeActivityTimeline');
+  String get noChangeComments => _text('noChangeComments');
+  String get noChangeAttachments => _text('noChangeAttachments');
+  String get noChangeActivity => _text('noChangeActivity');
+  String get unableToLoadChangeCollaboration =>
+      _text('unableToLoadChangeCollaboration');
+  String get requesterVisible => _text('requesterVisible');
+  String get internalVisibility => _text('internalVisibility');
+  String get changeCollaborationReadOnlyDescription =>
+      _text('changeCollaborationReadOnlyDescription');
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -2315,6 +2426,117 @@ const _localizedValues = <String, Map<String, String>>{
     'attachmentRegistrationSuccessful':
         "The file was uploaded and securely registered.",
     'chooseSupportingDocument': "Choose supporting document",
+    'changeManagementTitle': "Change Management",
+    'changeManagementSubtitle':
+        "Plan, assess, approve, schedule, and review controlled service changes.",
+    'newChange': "New change",
+    'myChanges': "My changes",
+    'operationalChanges': "Operational changes",
+    'changeEmptyTitle': "No change requests",
+    'changeEmptyDescription':
+        "Change requests matching this view will appear here.",
+    'changeRequestDetails': "Change request details",
+    'changeType': "Change type",
+    'changeStandard': "Standard",
+    'changeNormal': "Normal",
+    'changeEmergency': "Emergency",
+    'changeJustification': "Business justification",
+    'saveChangeDraft': "Save draft",
+    'submitChange': "Submit change",
+    'assessChange': "Assess change",
+    'requestChangeApproval': "Request approval",
+    'scheduleChange': "Schedule change",
+    'startImplementation': "Start implementation",
+    'recordImplementation': "Record result",
+    'recordPostImplementationReview': "Record review",
+    'closeChange': "Close change",
+    'cancelChange': "Cancel change",
+    'changeOwner': "Change owner",
+    'changeRequester': "Requester",
+    'affectedServices': "Affected services",
+    'affectedConfigurationItems': "Affected configuration items",
+    'affectedAssets': "Affected assets",
+    'plannedStart': "Planned start",
+    'plannedEnd': "Planned end",
+    'expectedDowntime': "Expected downtime (minutes)",
+    'implementationPlan': "Implementation plan",
+    'testPlan': "Test plan",
+    'communicationPlan': "Communication plan",
+    'rollbackPlan': "Rollback plan",
+    'cabApprovalsTitle': "Approvals and CAB",
+    'cabApprovalsSubtitle':
+        "Review pending changes and keep immutable decision history.",
+    'approveChange': "Approve",
+    'approveWithConditions': "Approve with conditions",
+    'rejectChange': "Reject",
+    'requestClarification': "Request clarification",
+    'decisionComment': "Decision comment",
+    'approvalConditions': "Approval conditions",
+    'changeCalendarTitle': "Change calendar",
+    'changeCalendarSubtitle':
+        "Review implementation windows, maintenance notices, and conflicts.",
+    'calendarMonth': "Month",
+    'calendarWeek': "Week",
+    'calendarAgenda': "Agenda",
+    'calendarPrevious': "Previous period",
+    'calendarNext': "Next period",
+    'changeConflict': "Conflict",
+    'maintenancePublished': "Published maintenance",
+    'changeReadOnly': "Read-only view",
+    'changeCommandSuccessful': "The change was updated successfully.",
+    'changeReasonRequired': "A reason is required.",
+    'changeSelectStatus': "Filter by status",
+    'changeActiveView': "Active",
+    'changeHistoryView': "History",
+    'changeStatusDraft': "Draft",
+    'changeStatusSubmitted': "Submitted",
+    'changeStatusAssessment': "Assessment",
+    'changeStatusAwaitingApproval': "Awaiting approval",
+    'changeStatusApproved': "Approved",
+    'changeStatusScheduled': "Scheduled",
+    'changeStatusImplementation': "Implementation",
+    'changeStatusReview': "Review",
+    'changeStatusClosed': "Closed",
+    'changeStatusRejected': "Rejected",
+    'changeStatusCancelled': "Cancelled",
+    'changeStatusFailed': "Failed",
+    'changeStatusRolledBack': "Rolled back",
+    'changeComplexity': "Complexity",
+    'maintenanceWindow': "Maintenance window",
+    'changeRisk': "Risk",
+    'changeRevision': "Revision",
+    'changeRiskLow': "Low",
+    'changeRiskMedium': "Medium",
+    'changeRiskHigh': "High",
+    'changeRiskCritical': "Critical",
+    'changeServiceFilter': "Affected service ID",
+    'changeCiFilter': "Configuration item ID",
+    'changeRelatedRecords': "Related records",
+    'changeImplementationResult': "Implementation result",
+    'changePostImplementationReview': "Post-implementation review",
+    'changeOutcomeSuccessful': "Successful",
+    'changeOutcomePartial': "Partially successful",
+    'changeOutcomeFailed': "Failed",
+    'changeOutcomeRolledBack': "Rolled back",
+    'cabMeeting': "CAB meeting",
+    'cabMeetings': "CAB meetings",
+    'scheduleCabMeeting': "Schedule CAB meeting",
+    'cabApprovalGroup': "CAB approval group ID",
+    'cabParticipantIds': "Participant manager UIDs",
+    'cabMeetingNotes': "Meeting notes",
+    'noCabMeetings': "No CAB meeting has been scheduled for this change.",
+    'changeConflictsOnly': "Conflicts only",
+    'changeComments': "Comments",
+    'changeAttachments': "Attachments",
+    'changeActivityTimeline': "Activity timeline",
+    'noChangeComments': "No visible comments yet.",
+    'noChangeAttachments': "No visible attachments yet.",
+    'noChangeActivity': "No visible activity yet.",
+    'unableToLoadChangeCollaboration': "Unable to load this information.",
+    'requesterVisible': "Requester visible",
+    'internalVisibility': "Internal",
+    'changeCollaborationReadOnlyDescription':
+        "Comments, attachments, and activity are shown according to your access. Workflow updates remain available only through the authorized actions above.",
   },
   'fr': <String, String>{
     'appName': "ARPTC Connect",
@@ -3451,5 +3673,118 @@ const _localizedValues = <String, Map<String, String>>{
     'attachmentRegistrationSuccessful':
         "Le fichier a été téléversé et enregistré de manière sécurisée.",
     'chooseSupportingDocument': "Choisir une pièce justificative",
+    'changeManagementTitle': "Gestion des changements",
+    'changeManagementSubtitle':
+        "Planifiez, évaluez, approuvez, programmez et révisez les changements de services contrôlés.",
+    'newChange': "Nouveau changement",
+    'myChanges': "Mes changements",
+    'operationalChanges': "Changements opérationnels",
+    'changeEmptyTitle': "Aucune demande de changement",
+    'changeEmptyDescription':
+        "Les demandes correspondant à cette vue apparaîtront ici.",
+    'changeRequestDetails': "Détails de la demande de changement",
+    'changeType': "Type de changement",
+    'changeStandard': "Standard",
+    'changeNormal': "Normal",
+    'changeEmergency': "Urgent",
+    'changeJustification': "Justification métier",
+    'saveChangeDraft': "Enregistrer le brouillon",
+    'submitChange': "Soumettre le changement",
+    'assessChange': "Évaluer le changement",
+    'requestChangeApproval': "Demander l'approbation",
+    'scheduleChange': "Programmer le changement",
+    'startImplementation': "Démarrer la mise en œuvre",
+    'recordImplementation': "Enregistrer le résultat",
+    'recordPostImplementationReview': "Enregistrer la revue",
+    'closeChange': "Clôturer le changement",
+    'cancelChange': "Annuler le changement",
+    'changeOwner': "Responsable du changement",
+    'changeRequester': "Demandeur",
+    'affectedServices': "Services affectés",
+    'affectedConfigurationItems': "Éléments de configuration affectés",
+    'affectedAssets': "Actifs affectés",
+    'plannedStart': "Début planifié",
+    'plannedEnd': "Fin planifiée",
+    'expectedDowntime': "Interruption prévue (minutes)",
+    'implementationPlan': "Plan de mise en œuvre",
+    'testPlan': "Plan de test",
+    'communicationPlan': "Plan de communication",
+    'rollbackPlan': "Plan de retour arrière",
+    'cabApprovalsTitle': "Approbations et CAB",
+    'cabApprovalsSubtitle':
+        "Examinez les changements en attente et conservez un historique immuable des décisions.",
+    'approveChange': "Approuver",
+    'approveWithConditions': "Approuver sous conditions",
+    'rejectChange': "Rejeter",
+    'requestClarification': "Demander une clarification",
+    'decisionComment': "Commentaire de décision",
+    'approvalConditions': "Conditions d'approbation",
+    'changeCalendarTitle': "Calendrier des changements",
+    'changeCalendarSubtitle':
+        "Consultez les fenêtres de mise en œuvre, les maintenances et les conflits.",
+    'calendarMonth': "Mois",
+    'calendarWeek': "Semaine",
+    'calendarAgenda': "Agenda",
+    'calendarPrevious': "Période précédente",
+    'calendarNext': "Période suivante",
+    'changeConflict': "Conflit",
+    'maintenancePublished': "Maintenance publiée",
+    'changeReadOnly': "Vue en lecture seule",
+    'changeCommandSuccessful': "Le changement a été mis à jour avec succès.",
+    'changeReasonRequired': "Un motif est obligatoire.",
+    'changeSelectStatus': "Filtrer par statut",
+    'changeActiveView': "Actifs",
+    'changeHistoryView': "Historique",
+    'changeStatusDraft': "Brouillon",
+    'changeStatusSubmitted': "Soumis",
+    'changeStatusAssessment': "Évaluation",
+    'changeStatusAwaitingApproval': "En attente d'approbation",
+    'changeStatusApproved': "Approuvé",
+    'changeStatusScheduled': "Programmé",
+    'changeStatusImplementation': "Mise en œuvre",
+    'changeStatusReview': "Revue",
+    'changeStatusClosed': "Clôturé",
+    'changeStatusRejected': "Rejeté",
+    'changeStatusCancelled': "Annulé",
+    'changeStatusFailed': "Échoué",
+    'changeStatusRolledBack': "Retour arrière effectué",
+    'changeComplexity': "Complexité",
+    'maintenanceWindow': "Fenêtre de maintenance",
+    'changeRisk': "Risque",
+    'changeRevision': "Révision",
+    'changeRiskLow': "Faible",
+    'changeRiskMedium': "Moyen",
+    'changeRiskHigh': "Élevé",
+    'changeRiskCritical': "Critique",
+    'changeServiceFilter': "ID du service affecté",
+    'changeCiFilter': "ID de l'élément de configuration",
+    'changeRelatedRecords': "Enregistrements liés",
+    'changeImplementationResult': "Résultat de la mise en œuvre",
+    'changePostImplementationReview': "Revue post-implémentation",
+    'changeOutcomeSuccessful': "Réussi",
+    'changeOutcomePartial': "Partiellement réussi",
+    'changeOutcomeFailed': "Échoué",
+    'changeOutcomeRolledBack': "Retour arrière effectué",
+    'cabMeeting': "Réunion CAB",
+    'cabMeetings': "Réunions CAB",
+    'scheduleCabMeeting': "Programmer une réunion CAB",
+    'cabApprovalGroup': "ID du groupe d'approbation CAB",
+    'cabParticipantIds': "UID des responsables participants",
+    'cabMeetingNotes': "Notes de réunion",
+    'noCabMeetings':
+        "Aucune réunion CAB n'a été programmée pour ce changement.",
+    'changeConflictsOnly': "Conflits uniquement",
+    'changeComments': "Commentaires",
+    'changeAttachments': "Pièces jointes",
+    'changeActivityTimeline': "Chronologie des activités",
+    'noChangeComments': "Aucun commentaire visible pour le moment.",
+    'noChangeAttachments': "Aucune pièce jointe visible pour le moment.",
+    'noChangeActivity': "Aucune activité visible pour le moment.",
+    'unableToLoadChangeCollaboration':
+        "Impossible de charger ces informations.",
+    'requesterVisible': "Visible par le demandeur",
+    'internalVisibility': "Interne",
+    'changeCollaborationReadOnlyDescription':
+        "Les commentaires, pièces jointes et activités sont affichés selon votre accès. Les mises à jour du workflow restent disponibles uniquement via les actions autorisées ci-dessus.",
   },
 };

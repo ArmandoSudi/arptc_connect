@@ -20,6 +20,11 @@ import 'package:arptc_connect/modules/inventory/presentation/livraison_screen.da
 import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
 import 'package:arptc_connect/modules/itsm/assets_configuration/application/assets_configuration_contracts.dart';
 import 'package:arptc_connect/modules/itsm/assets_configuration/presentation/assets_configuration_presentation.dart';
+import 'package:arptc_connect/modules/itsm/changes/presentation/screens/cab_approvals_screen.dart';
+import 'package:arptc_connect/modules/itsm/changes/presentation/screens/change_calendar_screen.dart';
+import 'package:arptc_connect/modules/itsm/changes/presentation/screens/change_request_detail_screen.dart';
+import 'package:arptc_connect/modules/itsm/changes/presentation/screens/change_requests_screen.dart';
+import 'package:arptc_connect/modules/itsm/changes/presentation/screens/create_change_screen.dart';
 import 'package:arptc_connect/modules/itsm/knowledge/presentation/screens/knowledge_article_screen.dart';
 import 'package:arptc_connect/modules/itsm/knowledge/presentation/screens/knowledge_base_screen.dart';
 import 'package:arptc_connect/modules/itsm/knowledge/presentation/screens/knowledge_editor_screen.dart';
@@ -540,14 +545,7 @@ GoRoute _buildItsmRoute() {
         ],
       ),
       _buildAssetsConfigurationRoute(),
-      _buildItsmSectionRoute(
-        ItsmSection.changes,
-        const [
-          ItsmFeature.changeRequests,
-          ItsmFeature.approvalsCab,
-          ItsmFeature.changeCalendar,
-        ],
-      ),
+      _buildChangesRoute(),
       _buildItsmSectionRoute(
         ItsmSection.securityCompliance,
         const [
@@ -566,6 +564,86 @@ GoRoute _buildItsmRoute() {
           ItsmFeature.workflowConfiguration,
           ItsmFeature.auditLogs,
         ],
+      ),
+    ],
+  );
+}
+
+GoRoute _buildChangesRoute() {
+  return GoRoute(
+    path: ItsmSection.changes.route.substring('${ItsmRoutes.root}/'.length),
+    builder: (context, state) => const ItsmRouteGuard(
+      section: ItsmSection.changes,
+      requirement: ItsmRouteRequirement.selfService,
+      child: ItsmSectionOverviewScreen(section: ItsmSection.changes),
+    ),
+    routes: [
+      GoRoute(
+        path: ItsmFeature.changeRequests.routeSegment,
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.changes,
+          feature: ItsmFeature.changeRequests,
+          requirement: ItsmRouteRequirement.selfService,
+          child: ChangeRequestsScreen(
+            onBack: () => context.go(ItsmRoutes.changes),
+            onNewChange: () => context.push('${ItsmRoutes.changeRequests}/new'),
+            onSelected: (change) =>
+                context.push(ItsmRoutes.changeRequestDetail(change.id)),
+          ),
+        ),
+        routes: [
+          GoRoute(
+            path: 'new',
+            builder: (context, state) => ItsmRouteGuard(
+              section: ItsmSection.changes,
+              feature: ItsmFeature.changeRequests,
+              requirement: ItsmRouteRequirement.selfService,
+              child: CreateChangeScreen(
+                onBack: () => context.pop(),
+                onCreated: (changeId) =>
+                    context.go(ItsmRoutes.changeRequestDetail(changeId)),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: ':changeId',
+            builder: (context, state) => ItsmRouteGuard(
+              section: ItsmSection.changes,
+              feature: ItsmFeature.changeRequests,
+              requirement: ItsmRouteRequirement.selfService,
+              child: ChangeRequestDetailScreen(
+                changeId: state.pathParameters['changeId'] as String,
+                onBack: () => context.pop(),
+              ),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: ItsmFeature.approvalsCab.routeSegment,
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.changes,
+          feature: ItsmFeature.approvalsCab,
+          requirement: ItsmRouteRequirement.operational,
+          child: CabApprovalsScreen(
+            onBack: () => context.go(ItsmRoutes.changes),
+            onSelected: (change) =>
+                context.push(ItsmRoutes.changeRequestDetail(change.id)),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: ItsmFeature.changeCalendar.routeSegment,
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.changes,
+          feature: ItsmFeature.changeCalendar,
+          requirement: ItsmRouteRequirement.selfService,
+          child: ChangeCalendarScreen(
+            onBack: () => context.go(ItsmRoutes.changes),
+            onSelected: (entry) =>
+                context.push(ItsmRoutes.changeRequestDetail(entry.changeId)),
+          ),
+        ),
       ),
     ],
   );
@@ -844,9 +922,9 @@ GoRoute _buildMyRequestsRoute() {
             ItsmWorkItemType.incident => MyIncidentDetailsScreen(ticketId: id),
             ItsmWorkItemType.serviceRequest =>
               MyRequestDetailScreen(requestId: id),
-            ItsmWorkItemType.changeRequest => const ItsmFeatureAccessScreen(
-                section: ItsmSection.changes,
-                feature: ItsmFeature.changeRequests,
+            ItsmWorkItemType.changeRequest => ChangeRequestDetailScreen(
+                changeId: id,
+                onBack: () => context.pop(),
               ),
             ItsmWorkItemType.securityFinding => const ItsmFeatureAccessScreen(
                 section: ItsmSection.securityCompliance,

@@ -62,6 +62,14 @@ void main() {
         '/services/itsm/changes/calendar',
       );
       expect(
+        ItsmRoutes.changeApprovals,
+        '/services/itsm/changes/approvals',
+      );
+      expect(
+        ItsmRoutes.changeRequestDetail('change / 42'),
+        '/services/itsm/changes/requests/change%20%2F%2042',
+      );
+      expect(
         ItsmFeature.accessReviews.routeFor(ItsmSection.securityCompliance),
         '/services/itsm/security-compliance/access-reviews',
       );

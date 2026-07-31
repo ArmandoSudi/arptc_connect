@@ -105,6 +105,30 @@ void main() {
         ),
         isFalse,
       );
+      expect(
+        ItsmRouteAccessPolicy.canAccess(
+          role: ItsmRole.user,
+          section: ItsmSection.changes,
+          feature: ItsmFeature.approvalsCab,
+        ),
+        isFalse,
+      );
+      expect(
+        ItsmRouteAccessPolicy.canAccess(
+          role: ItsmRole.admin,
+          section: ItsmSection.changes,
+          feature: ItsmFeature.approvalsCab,
+        ),
+        isFalse,
+      );
+      expect(
+        ItsmRouteAccessPolicy.canAccess(
+          role: ItsmRole.manager,
+          section: ItsmSection.changes,
+          feature: ItsmFeature.approvalsCab,
+        ),
+        isTrue,
+      );
     });
   });
 

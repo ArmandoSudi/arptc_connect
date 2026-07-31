@@ -20,6 +20,8 @@ abstract final class ItsmRoutes {
   static const cmdb = '$assetsConfiguration/cmdb';
   static const changes = '$root/changes';
   static const changeRequests = '$changes/requests';
+  static const changeApprovals = '$changes/approvals';
+  static const changeCalendar = '$changes/calendar';
   static const securityCompliance = '$root/security-compliance';
   static const reportingAdministration = '$root/reporting-administration';
 
@@ -28,6 +30,9 @@ abstract final class ItsmRoutes {
 
   static String assetRegisterDetail(String assetId) =>
       '$assetRegister/${Uri.encodeComponent(assetId)}';
+
+  static String changeRequestDetail(String changeId) =>
+      '$changeRequests/${Uri.encodeComponent(changeId)}';
 
   static const _legacyPrefixes = <String, String>{
     '/service/itsm': root,

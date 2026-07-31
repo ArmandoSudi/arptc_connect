@@ -308,6 +308,14 @@ service firebase.storage {
         );
     }
 
+    function canReadChangeStorage(data) {
+      return isItsmManager() ||
+        (
+          (isItsmUser() || isItsmAdmin()) &&
+          isPrincipalWorkItemOwner(data)
+        );
+    }
+
     function canReadItsmStorageParent(collectionName, workItemId) {
       let data = workItemData(collectionName, workItemId);
       return isItsmWorkItemCollection(collectionName) &&
@@ -317,7 +325,7 @@ service firebase.storage {
             canReadIncidentStorage(data)
           ) ||
           (
-            collectionName in ['serviceRequests', 'changeRequests'] &&
+            collectionName == 'serviceRequests' &&
             (
               (
                 isItsmManager() &&
@@ -332,6 +340,10 @@ service firebase.storage {
                 !isRestrictedItsmData(data)
               )
             )
+          ) ||
+          (
+            collectionName == 'changeRequests' &&
+            canReadChangeStorage(data)
           ) ||
           (
             collectionName in ['securityFindings', 'securityExceptions'] &&
@@ -353,13 +365,15 @@ service firebase.storage {
             isPrincipalWorkItemOwner(data)
           ) ||
           (
-            collectionName in ['serviceRequests', 'changeRequests'] &&
+            collectionName == 'serviceRequests' &&
             (isItsmUser() || isItsmAdmin()) &&
             isPrincipalWorkItemOwner(data) &&
-            (
-              collectionName != 'serviceRequests' ||
-              data.status == 'draft'
-            )
+            data.status == 'draft'
+          ) ||
+          (
+            collectionName == 'changeRequests' &&
+            (isItsmUser() || isItsmAdmin()) &&
+            isPrincipalWorkItemOwner(data)
           )
         ) &&
         (
@@ -506,6 +520,7 @@ service firebase.storage {
         );
 
       allow create: if signedIn() &&
+        resource == null &&
         canCreateItsmAttachment(workItemCollection, workItemId) &&
         request.resource.size <= 20 * 1024 * 1024 &&
         hasSupportedContentType(request.resource.contentType) &&
