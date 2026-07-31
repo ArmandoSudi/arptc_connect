@@ -49,6 +49,45 @@ void main() {
       }
     });
 
+    test(
+        'keeps security findings operational and other security features self-service',
+        () {
+      for (final role in [ItsmRole.user, ItsmRole.admin]) {
+        expect(
+          ItsmRouteAccessPolicy.canAccess(
+            role: role,
+            section: ItsmSection.securityCompliance,
+            feature: ItsmFeature.securityFindings,
+          ),
+          isFalse,
+        );
+        for (final feature in const [
+          ItsmFeature.securityExceptions,
+          ItsmFeature.assetCompliance,
+          ItsmFeature.accessReviews,
+        ]) {
+          expect(
+            ItsmRouteAccessPolicy.canAccess(
+              role: role,
+              section: ItsmSection.securityCompliance,
+              feature: feature,
+            ),
+            isTrue,
+            reason: '${feature.name} keeps ${role.value} self-service access',
+          );
+        }
+      }
+
+      expect(
+        ItsmRouteAccessPolicy.canAccess(
+          role: ItsmRole.manager,
+          section: ItsmSection.securityCompliance,
+          feature: ItsmFeature.securityFindings,
+        ),
+        isTrue,
+      );
+    });
+
     test('allows manager administration and read-only executive reporting', () {
       for (final role in [ItsmRole.manager, ItsmRole.admin]) {
         expect(

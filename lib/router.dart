@@ -37,6 +37,7 @@ import 'package:arptc_connect/modules/itsm/presentation/screens/itsm_feature_acc
 import 'package:arptc_connect/modules/itsm/presentation/screens/itsm_landing_screen.dart';
 import 'package:arptc_connect/modules/itsm/presentation/screens/itsm_section_overview_screen.dart';
 import 'package:arptc_connect/modules/itsm/presentation/widgets/itsm_route_guard.dart';
+import 'package:arptc_connect/modules/itsm/security_compliance/presentation/security_compliance_presentation.dart';
 import 'package:arptc_connect/modules/itsm/shared/domain/itsm_common.dart';
 import 'package:arptc_connect/modules/itsm/support/presentation/screens/create_service_request_screen.dart';
 import 'package:arptc_connect/modules/itsm/support/presentation/screens/my_requests_screen.dart';
@@ -546,15 +547,7 @@ GoRoute _buildItsmRoute() {
       ),
       _buildAssetsConfigurationRoute(),
       _buildChangesRoute(),
-      _buildItsmSectionRoute(
-        ItsmSection.securityCompliance,
-        const [
-          ItsmFeature.securityFindings,
-          ItsmFeature.securityExceptions,
-          ItsmFeature.assetCompliance,
-          ItsmFeature.accessReviews,
-        ],
-      ),
+      _buildSecurityComplianceRoute(),
       _buildItsmSectionRoute(
         ItsmSection.reportingAdministration,
         const [
@@ -926,13 +919,11 @@ GoRoute _buildMyRequestsRoute() {
                 changeId: id,
                 onBack: () => context.pop(),
               ),
-            ItsmWorkItemType.securityFinding => const ItsmFeatureAccessScreen(
-                section: ItsmSection.securityCompliance,
-                feature: ItsmFeature.securityFindings,
+            ItsmWorkItemType.securityFinding => SecurityFindingsScreen(
+                onBack: () => context.pop(),
               ),
-            ItsmWorkItemType.securityException => const ItsmFeatureAccessScreen(
-                section: ItsmSection.securityCompliance,
-                feature: ItsmFeature.securityExceptions,
+            ItsmWorkItemType.securityException => SecurityExceptionsScreen(
+                onBack: () => context.pop(),
               ),
             null => const ItsmFeatureAccessScreen(
                 section: ItsmSection.support,
@@ -1024,6 +1015,87 @@ GoRoute _buildKnowledgeBaseRoute() {
           child: KnowledgeArticleScreen(
             articleId: state.pathParameters['articleId'] as String,
           ),
+        ),
+      ),
+    ],
+  );
+}
+
+GoRoute _buildSecurityComplianceRoute() {
+  Widget guarded(
+    ItsmFeature feature,
+    Widget child, {
+    ItsmRouteRequirement requirement = ItsmRouteRequirement.automatic,
+  }) =>
+      ItsmRouteGuard(
+        section: ItsmSection.securityCompliance,
+        feature: feature,
+        requirement: requirement,
+        child: child,
+      );
+
+  GoRoute featureRoute({
+    required ItsmFeature feature,
+    required String parameterName,
+    required Widget Function(BuildContext context) screen,
+    ItsmRouteRequirement requirement = ItsmRouteRequirement.automatic,
+  }) =>
+      GoRoute(
+        path: feature.routeSegment,
+        builder: (context, state) => guarded(
+          feature,
+          screen(context),
+          requirement: requirement,
+        ),
+        routes: [
+          GoRoute(
+            path: ':$parameterName',
+            builder: (context, state) => guarded(
+              feature,
+              screen(context),
+              requirement: requirement,
+            ),
+          ),
+        ],
+      );
+
+  return GoRoute(
+    path: ItsmSection.securityCompliance.route
+        .substring('${ItsmRoutes.root}/'.length),
+    builder: (context, state) => const ItsmRouteGuard(
+      section: ItsmSection.securityCompliance,
+      child: ItsmSectionOverviewScreen(
+        section: ItsmSection.securityCompliance,
+      ),
+    ),
+    routes: [
+      featureRoute(
+        feature: ItsmFeature.securityFindings,
+        parameterName: 'findingId',
+        requirement: ItsmRouteRequirement.operational,
+        screen: (context) => SecurityFindingsScreen(
+          onBack: () => context.pop(),
+        ),
+      ),
+      featureRoute(
+        feature: ItsmFeature.securityExceptions,
+        parameterName: 'exceptionId',
+        screen: (context) => SecurityExceptionsScreen(
+          onBack: () => context.pop(),
+        ),
+      ),
+      featureRoute(
+        feature: ItsmFeature.assetCompliance,
+        parameterName: 'assessmentId',
+        screen: (context) => AssetComplianceScreen(
+          onBack: () => context.pop(),
+        ),
+      ),
+      featureRoute(
+        feature: ItsmFeature.accessReviews,
+        parameterName: 'reviewItemId',
+        screen: (context) => AccessReviewsScreen(
+          onBack: () => context.pop(),
         ),
       ),
     ],

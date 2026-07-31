@@ -23,6 +23,10 @@ abstract final class ItsmRoutes {
   static const changeApprovals = '$changes/approvals';
   static const changeCalendar = '$changes/calendar';
   static const securityCompliance = '$root/security-compliance';
+  static const securityFindings = '$securityCompliance/findings';
+  static const securityExceptions = '$securityCompliance/exceptions';
+  static const assetCompliance = '$securityCompliance/asset-compliance';
+  static const accessReviews = '$securityCompliance/access-reviews';
   static const reportingAdministration = '$root/reporting-administration';
 
   static String myAssetDetail(String assetId) =>
@@ -33,6 +37,18 @@ abstract final class ItsmRoutes {
 
   static String changeRequestDetail(String changeId) =>
       '$changeRequests/${Uri.encodeComponent(changeId)}';
+
+  static String securityFindingDetail(String findingId) =>
+      '$securityFindings/${Uri.encodeComponent(findingId)}';
+
+  static String securityExceptionDetail(String exceptionId) =>
+      '$securityExceptions/${Uri.encodeComponent(exceptionId)}';
+
+  static String assetComplianceDetail(String assessmentId) =>
+      '$assetCompliance/${Uri.encodeComponent(assessmentId)}';
+
+  static String accessReviewDetail(String reviewItemId) =>
+      '$accessReviews/${Uri.encodeComponent(reviewItemId)}';
 
   static const _legacyPrefixes = <String, String>{
     '/service/itsm': root,

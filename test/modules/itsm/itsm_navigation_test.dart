@@ -74,10 +74,42 @@ void main() {
         '/services/itsm/security-compliance/access-reviews',
       );
       expect(
+        ItsmRoutes.securityFindings,
+        '/services/itsm/security-compliance/findings',
+      );
+      expect(
+        ItsmRoutes.securityExceptions,
+        '/services/itsm/security-compliance/exceptions',
+      );
+      expect(
+        ItsmRoutes.assetCompliance,
+        '/services/itsm/security-compliance/asset-compliance',
+      );
+      expect(
         ItsmFeature.auditLogs.routeFor(
           ItsmSection.reportingAdministration,
         ),
         '/services/itsm/reporting-administration/audit-logs',
+      );
+    });
+
+    test('security detail routes encode document IDs', () {
+      expect(
+        ItsmRoutes.securityFindingDetail('finding / 42'),
+        '/services/itsm/security-compliance/findings/finding%20%2F%2042',
+      );
+      expect(
+        ItsmRoutes.securityExceptionDetail('exception / 42'),
+        '/services/itsm/security-compliance/exceptions/exception%20%2F%2042',
+      );
+      expect(
+        ItsmRoutes.assetComplianceDetail('assessment / 42'),
+        '/services/itsm/security-compliance/asset-compliance/'
+        'assessment%20%2F%2042',
+      );
+      expect(
+        ItsmRoutes.accessReviewDetail('item / 42'),
+        '/services/itsm/security-compliance/access-reviews/item%20%2F%2042',
       );
     });
   });

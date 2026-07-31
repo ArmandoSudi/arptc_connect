@@ -249,7 +249,7 @@ test('ADMIN has owner-scoped self-service reads and read-only reporting', async 
   );
 });
 
-test('MANAGER reads operational records but restricted data needs authorization', async () => {
+test('MANAGER reads findings while restricted request data and evidence stay scoped', async () => {
   const authorized = userFirestore('manager-1');
   await assertSucceeds(
     getDoc(doc(authorized, 'serviceRequests/request-2')),
@@ -290,7 +290,7 @@ test('MANAGER reads operational records but restricted data needs authorization'
   await assertFails(
     getDoc(doc(unauthorized, 'serviceRequests/restricted-request')),
   );
-  await assertFails(
+  await assertSucceeds(
     getDoc(doc(unauthorized, 'securityFindings/restricted-finding')),
   );
   await assertFails(

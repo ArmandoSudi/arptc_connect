@@ -36,6 +36,15 @@ const {
   ITSM_CHANGES_COMMANDS,
 } = require('./src/itsm_changes_validation');
 const {
+  createItsmSecurityComplianceCallableHandler,
+} = require('./src/itsm_security_compliance_handlers');
+const {
+  SECURITY_COMPLIANCE_COMMANDS,
+} = require('./src/itsm_security_compliance_validation');
+const {
+  registerItsmSecurityComplianceAttachment,
+} = require('./src/itsm_security_compliance_attachment_registration');
+const {
   processSoftwareLicenceExpiryNotifications,
   processSoftwareLicenceRenewalNotifications,
   processWarrantyExpiryNotifications,
@@ -303,6 +312,66 @@ exports.itsmCloseChange = registerItsmChangesCallable(
   ITSM_CHANGES_COMMANDS.close,
 );
 
+function registerItsmSecurityComplianceCallable(command) {
+  return onCall(
+    createItsmSecurityComplianceCallableHandler({
+      expectedCommand: command,
+      db,
+      fieldValue: FieldValue,
+      timestamp: Timestamp,
+      findAgent: findCallerAgent,
+      HttpsError,
+      logger,
+    }),
+  );
+}
+
+const securityComplianceCallables = {
+  itsmCreateSecurityFinding: SECURITY_COMPLIANCE_COMMANDS.createFinding,
+  itsmTriageSecurityFinding: SECURITY_COMPLIANCE_COMMANDS.triageFinding,
+  itsmAssignSecurityFinding: SECURITY_COMPLIANCE_COMMANDS.assignFinding,
+  itsmPlanSecurityFindingRemediation:
+    SECURITY_COMPLIANCE_COMMANDS.planRemediation,
+  itsmSubmitSecurityFindingValidation:
+    SECURITY_COMPLIANCE_COMMANDS.submitFindingValidation,
+  itsmValidateSecurityFinding: SECURITY_COMPLIANCE_COMMANDS.validateFinding,
+  itsmAcceptSecurityFindingRisk:
+    SECURITY_COMPLIANCE_COMMANDS.acceptFindingRisk,
+  itsmCloseSecurityFinding: SECURITY_COMPLIANCE_COMMANDS.closeFinding,
+  itsmCancelSecurityFinding: SECURITY_COMPLIANCE_COMMANDS.cancelFinding,
+  itsmCreateSecurityException: SECURITY_COMPLIANCE_COMMANDS.createException,
+  itsmSubmitSecurityException: SECURITY_COMPLIANCE_COMMANDS.submitException,
+  itsmRequestSecurityExceptionApproval:
+    SECURITY_COMPLIANCE_COMMANDS.requestExceptionApproval,
+  itsmDecideSecurityExceptionApproval:
+    SECURITY_COMPLIANCE_COMMANDS.decideExceptionApproval,
+  itsmActivateSecurityException:
+    SECURITY_COMPLIANCE_COMMANDS.activateException,
+  itsmRenewSecurityException: SECURITY_COMPLIANCE_COMMANDS.renewException,
+  itsmCloseSecurityException: SECURITY_COMPLIANCE_COMMANDS.closeException,
+  itsmAssessAssetCompliance: SECURITY_COMPLIANCE_COMMANDS.assessCompliance,
+  itsmCreateAccessReviewCampaign:
+    SECURITY_COMPLIANCE_COMMANDS.createReviewCampaign,
+  itsmActivateAccessReviewCampaign:
+    SECURITY_COMPLIANCE_COMMANDS.activateReviewCampaign,
+  itsmCompleteAccessReviewCampaign:
+    SECURITY_COMPLIANCE_COMMANDS.completeReviewCampaign,
+  itsmCreateAccessReviewItem:
+    SECURITY_COMPLIANCE_COMMANDS.createReviewItem,
+  itsmDecideAccessReviewItem:
+    SECURITY_COMPLIANCE_COMMANDS.decideReviewItem,
+  itsmRequestAccessCorrection:
+    SECURITY_COMPLIANCE_COMMANDS.requestAccessCorrection,
+  itsmCompleteAccessRevocationTask:
+    SECURITY_COMPLIANCE_COMMANDS.completeRevocationTask,
+};
+
+for (const [exportName, command] of Object.entries(
+  securityComplianceCallables,
+)) {
+  exports[exportName] = registerItsmSecurityComplianceCallable(command);
+}
+
 exports.itsmProcessAssetExpiryNotifications = onSchedule(
   {
     schedule: 'every day 02:00',
@@ -358,6 +427,15 @@ exports.itsmRegisterKnowledgeAttachment = onObjectFinalized(
 exports.itsmRegisterAssetsAttachment = onObjectFinalized(
   { bucket: DEFAULT_STORAGE_BUCKET },
   async (event) => registerItsmAssetsAttachment({
+    db,
+    fieldValue: FieldValue,
+    object: event.data,
+  }),
+);
+
+exports.itsmRegisterSecurityComplianceAttachment = onObjectFinalized(
+  { bucket: DEFAULT_STORAGE_BUCKET },
+  async (event) => registerItsmSecurityComplianceAttachment({
     db,
     fieldValue: FieldValue,
     object: event.data,

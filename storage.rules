@@ -212,6 +212,11 @@ service firebase.storage {
             request.auth.uid in data.authorizedUserIds
           ) ||
           (
+            data.keys().hasAny(['authorizedManagerIds']) &&
+            data.authorizedManagerIds is list &&
+            request.auth.uid in data.authorizedManagerIds
+          ) ||
+          (
             data.keys().hasAny(['assignedUserId']) &&
             data.assignedUserId == request.auth.uid
           ) ||
@@ -285,9 +290,7 @@ service firebase.storage {
       return collectionName in [
         'incidentTickets',
         'serviceRequests',
-        'changeRequests',
-        'securityFindings',
-        'securityExceptions'
+        'changeRequests'
       ];
     }
 
@@ -344,11 +347,6 @@ service firebase.storage {
           (
             collectionName == 'changeRequests' &&
             canReadChangeStorage(data)
-          ) ||
-          (
-            collectionName in ['securityFindings', 'securityExceptions'] &&
-            isItsmManager() &&
-            isExplicitlyAuthorizedForRestricted(data)
           )
         );
     }
@@ -378,6 +376,248 @@ service firebase.storage {
         ) &&
         (
           isItsmManager() ||
+          request.resource.metadata.isInternal == 'false'
+        );
+    }
+
+    function phase5ParentData(parentCollection, parentId) {
+      return firestore.get(
+        /databases/(default)/documents/$(parentCollection)/$(parentId)
+      ).data;
+    }
+
+    function phase5AttachmentPath(
+      parentCollection,
+      parentId,
+      metadataCollection,
+      attachmentId
+    ) {
+      return /databases/(default)/documents/$(parentCollection)/$(parentId)/$(metadataCollection)/$(attachmentId);
+    }
+
+    function phase5AttachmentExists(
+      parentCollection,
+      parentId,
+      metadataCollection,
+      attachmentId
+    ) {
+      return firestore.exists(
+        phase5AttachmentPath(
+          parentCollection,
+          parentId,
+          metadataCollection,
+          attachmentId
+        )
+      );
+    }
+
+    function phase5AttachmentData(
+      parentCollection,
+      parentId,
+      metadataCollection,
+      attachmentId
+    ) {
+      return firestore.get(
+        phase5AttachmentPath(
+          parentCollection,
+          parentId,
+          metadataCollection,
+          attachmentId
+        )
+      ).data;
+    }
+
+    function isSecurityExceptionRequesterStorage(data) {
+      return signedIn() &&
+        data.keys().hasAny(['requester']) &&
+        data.requester is map &&
+        data.requester.keys().hasAny(['userId']) &&
+        data.requester.userId == request.auth.uid;
+    }
+
+    function isManagerAuthorizedForPhase5Parent(data) {
+      return isItsmManager() &&
+        (
+          !isRestrictedItsmData(data) ||
+          isExplicitlyAuthorizedForRestricted(data) ||
+          (
+            data.keys().hasAny(['owner']) &&
+            data.owner is map &&
+            data.owner.keys().hasAny(['userId']) &&
+            data.owner.userId == request.auth.uid
+          )
+        );
+    }
+
+    function isPhase5AttachmentParentCollection(parentCollection) {
+      return parentCollection in [
+        'securityFindings',
+        'securityExceptions',
+        'assetComplianceAssessments',
+        'accessReviewItems'
+      ];
+    }
+
+    function canManagerAccessPhase5AttachmentParent(
+      parentCollection,
+      parentId
+    ) {
+      let data = phase5ParentData(parentCollection, parentId);
+      return isPhase5AttachmentParentCollection(parentCollection) &&
+        isManagerAuthorizedForPhase5Parent(data);
+    }
+
+    function canRequesterReadExceptionAttachment(
+      parentCollection,
+      parentId,
+      attachment
+    ) {
+      let parent = phase5ParentData(parentCollection, parentId);
+      return parentCollection == 'securityExceptions' &&
+        (isItsmUser() || isItsmAdmin()) &&
+        isSecurityExceptionRequesterStorage(parent) &&
+        attachment.confidentiality in ['INTERNAL', 'internal'] &&
+        attachment.requesterVisible == true &&
+        attachment.isInternal == false;
+    }
+
+    function canReadPhase5Attachment(
+      parentCollection,
+      parentId,
+      metadataCollection,
+      attachmentId,
+      fileName
+    ) {
+      let attachment = phase5AttachmentData(
+        parentCollection,
+        parentId,
+        metadataCollection,
+        attachmentId
+      );
+      return phase5AttachmentExists(
+          parentCollection,
+          parentId,
+          metadataCollection,
+          attachmentId
+        ) &&
+        (
+          (
+            canManagerAccessPhase5AttachmentParent(
+              parentCollection,
+              parentId
+            ) &&
+            (
+              !isRestrictedItsmData(attachment) ||
+              (
+                attachment.keys().hasAny(['authorizedManagerIds']) &&
+                attachment.authorizedManagerIds is list &&
+                request.auth.uid in attachment.authorizedManagerIds
+              )
+            )
+          ) ||
+          canRequesterReadExceptionAttachment(
+            parentCollection,
+            parentId,
+            attachment
+          )
+        ) &&
+        attachment.storagePath ==
+          'itsm/' + parentCollection + '/' + parentId + '/' +
+          metadataCollection + '/' + attachmentId + '/' + fileName &&
+        attachment.fileName == fileName &&
+        attachment.contentType == resource.contentType &&
+        attachment.sizeBytes == resource.size &&
+        attachment.parentCollection == parentCollection &&
+        attachment.parentId == parentId &&
+        attachment.attachmentId == attachmentId &&
+        resource.metadata.parentCollection == parentCollection &&
+        resource.metadata.parentId == parentId &&
+        resource.metadata.attachmentId == attachmentId &&
+        resource.metadata.storagePath == attachment.storagePath &&
+        resource.metadata.uploadedByUserId == attachment.uploadedByUserId &&
+        resource.metadata.confidentiality == attachment.confidentiality &&
+        (
+          (
+            attachment.requesterVisible == true &&
+            resource.metadata.requesterVisible == 'true'
+          ) ||
+          (
+            attachment.requesterVisible == false &&
+            resource.metadata.requesterVisible == 'false'
+          )
+        ) &&
+        (
+          (
+            attachment.isInternal == true &&
+            resource.metadata.isInternal == 'true'
+          ) ||
+          (
+            attachment.isInternal == false &&
+            resource.metadata.isInternal == 'false'
+          )
+        ) &&
+        (
+          !isRestrictedItsmData(attachment) ||
+          resource.metadata.authorizedManagerId in
+            attachment.authorizedManagerIds
+        );
+    }
+
+    function validPhase5AttachmentMetadata(
+      parentCollection,
+      parentId,
+      attachmentId,
+      fileName
+    ) {
+      return request.resource.metadata.parentCollection == parentCollection &&
+        request.resource.metadata.parentId == parentId &&
+        request.resource.metadata.attachmentId == attachmentId &&
+        request.resource.metadata.fileName == fileName &&
+        request.resource.metadata.storagePath ==
+          'itsm/' + parentCollection + '/' + parentId + '/attachments/' +
+          attachmentId + '/' + fileName &&
+        request.resource.metadata.uploadedByUserId == request.auth.uid &&
+        request.resource.metadata.confidentiality in ['internal', 'restricted'] &&
+        request.resource.metadata.requesterVisible in ['true', 'false'] &&
+        request.resource.metadata.isInternal in ['true', 'false'] &&
+        request.resource.metadata.authorizedManagerId is string;
+    }
+
+    function hasConsistentPhase5AttachmentVisibility() {
+      return (
+          request.resource.metadata.confidentiality == 'internal' &&
+          request.resource.metadata.requesterVisible == 'true' &&
+          request.resource.metadata.isInternal == 'false' &&
+          request.resource.metadata.authorizedManagerId == ''
+        ) ||
+        (
+          request.resource.metadata.confidentiality == 'internal' &&
+          request.resource.metadata.requesterVisible == 'false' &&
+          request.resource.metadata.isInternal == 'true' &&
+          request.resource.metadata.authorizedManagerId == ''
+        ) ||
+        (
+          request.resource.metadata.confidentiality == 'restricted' &&
+          request.resource.metadata.requesterVisible == 'false' &&
+          request.resource.metadata.isInternal == 'true' &&
+          request.resource.metadata.authorizedManagerId == request.auth.uid
+        );
+    }
+
+    function canCreatePhase5Attachment(parentCollection, parentId) {
+      let parent = phase5ParentData(parentCollection, parentId);
+      return (
+          canManagerAccessPhase5AttachmentParent(
+            parentCollection,
+            parentId
+          )
+        ) ||
+        (
+          parentCollection == 'securityExceptions' &&
+          (isItsmUser() || isItsmAdmin()) &&
+          isSecurityExceptionRequesterStorage(parent) &&
+          request.resource.metadata.confidentiality == 'internal' &&
+          request.resource.metadata.requesterVisible == 'true' &&
           request.resource.metadata.isInternal == 'false'
         );
     }
@@ -531,6 +771,32 @@ service firebase.storage {
         request.resource.metadata.documentRequirementKey is string &&
         request.resource.metadata.isInternal in ['true', 'false'];
 
+      allow update, delete: if false;
+    }
+
+    match /itsm/{parentCollection}/{parentId}/attachments/{attachmentId}/{fileName} {
+      allow read: if signedIn() &&
+        canReadPhase5Attachment(
+          parentCollection,
+          parentId,
+          'attachments',
+          attachmentId,
+          fileName
+        );
+      allow create: if signedIn() &&
+        resource == null &&
+        isPhase5AttachmentParentCollection(parentCollection) &&
+        canCreatePhase5Attachment(parentCollection, parentId) &&
+        request.resource.size > 0 &&
+        request.resource.size <= 20 * 1024 * 1024 &&
+        hasSupportedContentType(request.resource.contentType) &&
+        validPhase5AttachmentMetadata(
+          parentCollection,
+          parentId,
+          attachmentId,
+          fileName
+        ) &&
+        hasConsistentPhase5AttachmentVisibility();
       allow update, delete: if false;
     }
 

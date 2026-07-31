@@ -184,30 +184,34 @@ test('MANAGER can create internal attachments but USER cannot read them', async 
 
 test('restricted evidence requires explicit MANAGER authorization', async () => {
   const authorized = userStorage('manager-1');
+  const evidence = securityFindingEvidence({
+    findingId: 'finding-1',
+    attachmentId: 'evidence',
+    uploadedByUserId: 'manager-1',
+  });
   await assertSucceeds(
-    uploadAttachment(authorized, {
-      collectionName: 'securityFindings',
-      workItemId: 'finding-1',
-      attachmentId: 'evidence',
-      uploadedByUserId: 'manager-1',
-      isInternal: true,
-    }),
+    uploadSecurityFindingEvidence(authorized, evidence),
   );
 
-  const unauthorizedObject = attachmentRef(userStorage('manager-2'), {
-    collectionName: 'securityFindings',
-    workItemId: 'finding-1',
-    attachmentId: 'evidence',
-  });
+  // Phase 5 evidence is not readable until its immutable metadata is indexed.
+  await assertFails(getBytes(ref(authorized, evidence.storagePath)));
+  await registerSecurityFindingEvidence(evidence);
+  await assertSucceeds(getBytes(ref(authorized, evidence.storagePath)));
+
+  const unauthorizedObject = ref(
+    userStorage('manager-2'),
+    evidence.storagePath,
+  );
   await assertFails(getBytes(unauthorizedObject));
   await assertFails(
-    uploadAttachment(userStorage('manager-2'), {
-      collectionName: 'securityFindings',
-      workItemId: 'finding-1',
-      attachmentId: 'unauthorized-evidence',
-      uploadedByUserId: 'manager-2',
-      isInternal: true,
-    }),
+    uploadSecurityFindingEvidence(
+      userStorage('manager-2'),
+      securityFindingEvidence({
+        findingId: 'finding-1',
+        attachmentId: 'unauthorized-evidence',
+        uploadedByUserId: 'manager-2',
+      }),
+    ),
   );
 });
 
@@ -289,6 +293,70 @@ function uploadAttachment(
       },
     },
   );
+}
+
+function securityFindingEvidence({
+  findingId,
+  attachmentId,
+  uploadedByUserId,
+}) {
+  const fileName = 'file.pdf';
+  const storagePath =
+    `itsm/securityFindings/${findingId}/attachments/${attachmentId}/${fileName}`;
+  return {
+    findingId,
+    attachmentId,
+    fileName,
+    storagePath,
+    uploadedByUserId,
+  };
+}
+
+function uploadSecurityFindingEvidence(storage, evidence) {
+  return uploadBytes(
+    ref(storage, evidence.storagePath),
+    new Uint8Array([1, 2, 3]),
+    {
+      contentType: 'application/pdf',
+      customMetadata: {
+        parentCollection: 'securityFindings',
+        parentId: evidence.findingId,
+        attachmentId: evidence.attachmentId,
+        fileName: evidence.fileName,
+        storagePath: evidence.storagePath,
+        uploadedByUserId: evidence.uploadedByUserId,
+        confidentiality: 'restricted',
+        requesterVisible: 'false',
+        isInternal: 'true',
+        authorizedManagerId: evidence.uploadedByUserId,
+      },
+    },
+  );
+}
+
+async function registerSecurityFindingEvidence(evidence) {
+  await environment.withSecurityRulesDisabled(async (context) => {
+    await setDoc(
+      doc(
+        context.firestore(),
+        `securityFindings/${evidence.findingId}/attachments/${evidence.attachmentId}`,
+      ),
+      {
+        parentCollection: 'securityFindings',
+        parentId: evidence.findingId,
+        attachmentId: evidence.attachmentId,
+        storagePath: evidence.storagePath,
+        fileName: evidence.fileName,
+        contentType: 'application/pdf',
+        sizeBytes: 3,
+        uploadedByUserId: evidence.uploadedByUserId,
+        confidentiality: 'restricted',
+        requesterVisible: false,
+        isInternal: true,
+        authorizedManagerIds: [evidence.uploadedByUserId],
+      },
+    );
+  });
 }
 
 function agent(role) {

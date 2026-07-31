@@ -44,6 +44,8 @@ class S {
   String _text(String key) =>
       _messages[key] ?? _localizedValues['en']?[key] ?? key;
 
+  String lookup(String key) => _text(key);
+
   String _format(String key, Map<String, Object?> values) {
     var result = _text(key);
     for (final entry in values.entries) {
@@ -1286,6 +1288,227 @@ class S {
   String get internalVisibility => _text('internalVisibility');
   String get changeCollaborationReadOnlyDescription =>
       _text('changeCollaborationReadOnlyDescription');
+  String get itsmScSecurityComplianceTitle =>
+      _text('itsmScSecurityComplianceTitle');
+  String get itsmScSecurityComplianceSubtitle =>
+      _text('itsmScSecurityComplianceSubtitle');
+  String get itsmScSecurityFindingsTitle =>
+      _text('itsmScSecurityFindingsTitle');
+  String get itsmScSecurityFindingsSubtitle =>
+      _text('itsmScSecurityFindingsSubtitle');
+  String get itsmScSecurityExceptionsTitle =>
+      _text('itsmScSecurityExceptionsTitle');
+  String get itsmScSecurityExceptionsSubtitle =>
+      _text('itsmScSecurityExceptionsSubtitle');
+  String get itsmScAssetComplianceTitle => _text('itsmScAssetComplianceTitle');
+  String get itsmScAssetComplianceSubtitle =>
+      _text('itsmScAssetComplianceSubtitle');
+  String get itsmScAccessReviewsTitle => _text('itsmScAccessReviewsTitle');
+  String get itsmScAccessReviewsSubtitle =>
+      _text('itsmScAccessReviewsSubtitle');
+  String get itsmScLoading => _text('itsmScLoading');
+  String get itsmScRetry => _text('itsmScRetry');
+  String get itsmScLoadMore => _text('itsmScLoadMore');
+  String get itsmScLoadingMore => _text('itsmScLoadingMore');
+  String get itsmScNoData => _text('itsmScNoData');
+  String get itsmScNoDataDescription => _text('itsmScNoDataDescription');
+  String get itsmScUnableToLoad => _text('itsmScUnableToLoad');
+  String get itsmScAccessDenied => _text('itsmScAccessDenied');
+  String get itsmScManagerAccessRequired =>
+      _text('itsmScManagerAccessRequired');
+  String get itsmScSelfServiceAccessRequired =>
+      _text('itsmScSelfServiceAccessRequired');
+  String get itsmScAdminReadOnlyNotice => _text('itsmScAdminReadOnlyNotice');
+  String get itsmScSelfServiceOnlyNotice =>
+      _text('itsmScSelfServiceOnlyNotice');
+  String get itsmScOperationalView => _text('itsmScOperationalView');
+  String get itsmScMyRecords => _text('itsmScMyRecords');
+  String get itsmScCampaigns => _text('itsmScCampaigns');
+  String get itsmScReviewItems => _text('itsmScReviewItems');
+  String get itsmScCorrectionRequests => _text('itsmScCorrectionRequests');
+  String get itsmScAllStatuses => _text('itsmScAllStatuses');
+  String get itsmScStatus => _text('itsmScStatus');
+  String get itsmScSeverity => _text('itsmScSeverity');
+  String get itsmScRisk => _text('itsmScRisk');
+  String get itsmScOwner => _text('itsmScOwner');
+  String get itsmScDueDate => _text('itsmScDueDate');
+  String get itsmScUpdated => _text('itsmScUpdated');
+  String get itsmScReference => _text('itsmScReference');
+  String get itsmScSystem => _text('itsmScSystem');
+  String get itsmScDepartment => _text('itsmScDepartment');
+  String get itsmScCurrentAccess => _text('itsmScCurrentAccess');
+  String get itsmScCurrentRole => _text('itsmScCurrentRole');
+  String get itsmScDevice => _text('itsmScDevice');
+  String get itsmScAssessedAt => _text('itsmScAssessedAt');
+  String get itsmScReviewDate => _text('itsmScReviewDate');
+  String get itsmScPeriod => _text('itsmScPeriod');
+  String get itsmScEvidence => _text('itsmScEvidence');
+  String get itsmScRestrictedEvidenceHidden =>
+      _text('itsmScRestrictedEvidenceHidden');
+  String get itsmScNewFinding => _text('itsmScNewFinding');
+  String get itsmScSubmitException => _text('itsmScSubmitException');
+  String get itsmScRecordAssessment => _text('itsmScRecordAssessment');
+  String get itsmScNewCampaign => _text('itsmScNewCampaign');
+  String get itsmScRequestCorrection => _text('itsmScRequestCorrection');
+  String get itsmScRequestRevocation => _text('itsmScRequestRevocation');
+  String get itsmScDecide => _text('itsmScDecide');
+  String get itsmScApprove => _text('itsmScApprove');
+  String get itsmScReject => _text('itsmScReject');
+  String get itsmScRetain => _text('itsmScRetain');
+  String get itsmScRevoke => _text('itsmScRevoke');
+  String get itsmScModify => _text('itsmScModify');
+  String get itsmScTransition => _text('itsmScTransition');
+  String get itsmScCancel => _text('itsmScCancel');
+  String get itsmScSubmit => _text('itsmScSubmit');
+  String get itsmScSave => _text('itsmScSave');
+  String get itsmScTitle => _text('itsmScTitle');
+  String get itsmScDescription => _text('itsmScDescription');
+  String get itsmScSource => _text('itsmScSource');
+  String get itsmScRequirementOrControl => _text('itsmScRequirementOrControl');
+  String get itsmScBusinessJustification =>
+      _text('itsmScBusinessJustification');
+  String get itsmScScope => _text('itsmScScope');
+  String get itsmScRiskDescription => _text('itsmScRiskDescription');
+  String get itsmScCompensatingControl => _text('itsmScCompensatingControl');
+  String get itsmScReason => _text('itsmScReason');
+  String get itsmScComment => _text('itsmScComment');
+  String get itsmScAssetId => _text('itsmScAssetId');
+  String get itsmScAssetTag => _text('itsmScAssetTag');
+  String get itsmScAssetName => _text('itsmScAssetName');
+  String get itsmScSummary => _text('itsmScSummary');
+  String get itsmScCampaignTitle => _text('itsmScCampaignTitle');
+  String get itsmScSystemId => _text('itsmScSystemId');
+  String get itsmScSystemName => _text('itsmScSystemName');
+  String get itsmScCommandCompleted => _text('itsmScCommandCompleted');
+  String get itsmScCommandFailed => _text('itsmScCommandFailed');
+  String get itsmScRequiredField => _text('itsmScRequiredField');
+  String get itsmScCorrectionSubmitted => _text('itsmScCorrectionSubmitted');
+  String get itsmScOwnComplianceUnavailable =>
+      _text('itsmScOwnComplianceUnavailable');
+  String get itsmScFindingsCount => _text('itsmScFindingsCount');
+  String get itsmScExceptionsCount => _text('itsmScExceptionsCount');
+  String get itsmScAssessmentsCount => _text('itsmScAssessmentsCount');
+  String get itsmScReviewsCount => _text('itsmScReviewsCount');
+  String get itsmScComplianceCompliant => _text('itsmScComplianceCompliant');
+  String get itsmScComplianceActionRequired =>
+      _text('itsmScComplianceActionRequired');
+  String get itsmScComplianceAssessmentPending =>
+      _text('itsmScComplianceAssessmentPending');
+  String get itsmScSeverityLow => _text('itsmScSeverityLow');
+  String get itsmScSeverityMedium => _text('itsmScSeverityMedium');
+  String get itsmScSeverityHigh => _text('itsmScSeverityHigh');
+  String get itsmScSeverityCritical => _text('itsmScSeverityCritical');
+  String get itsmScNotAssigned => _text('itsmScNotAssigned');
+  String get itsmScOwnerUserId => _text('itsmScOwnerUserId');
+  String get itsmScRemediationPlan => _text('itsmScRemediationPlan');
+  String get itsmScValidationResult => _text('itsmScValidationResult');
+  String get itsmScActionTriageFinding => _text('itsmScActionTriageFinding');
+  String get itsmScActionAssignFinding => _text('itsmScActionAssignFinding');
+  String get itsmScActionPlanRemediation =>
+      _text('itsmScActionPlanRemediation');
+  String get itsmScActionSubmitValidation =>
+      _text('itsmScActionSubmitValidation');
+  String get itsmScActionValidateFinding =>
+      _text('itsmScActionValidateFinding');
+  String get itsmScActionAcceptRisk => _text('itsmScActionAcceptRisk');
+  String get itsmScActionCloseFinding => _text('itsmScActionCloseFinding');
+  String get itsmScActionCancelFinding => _text('itsmScActionCancelFinding');
+  String get itsmScActionSubmitException =>
+      _text('itsmScActionSubmitException');
+  String get itsmScActionRequestExceptionApproval =>
+      _text('itsmScActionRequestExceptionApproval');
+  String get itsmScActionDecideExceptionApproval =>
+      _text('itsmScActionDecideExceptionApproval');
+  String get itsmScActionActivateException =>
+      _text('itsmScActionActivateException');
+  String get itsmScActionRenewException => _text('itsmScActionRenewException');
+  String get itsmScActionCloseException => _text('itsmScActionCloseException');
+  String get itsmScApproverUserId => _text('itsmScApproverUserId');
+  String get itsmScApprovalId => _text('itsmScApprovalId');
+  String get itsmScDecision => _text('itsmScDecision');
+  String get itsmScFindingStatusDetected =>
+      _text('itsmScFindingStatusDetected');
+  String get itsmScFindingStatusTriaged => _text('itsmScFindingStatusTriaged');
+  String get itsmScFindingStatusAssigned =>
+      _text('itsmScFindingStatusAssigned');
+  String get itsmScFindingStatusRemediation =>
+      _text('itsmScFindingStatusRemediation');
+  String get itsmScFindingStatusValidation =>
+      _text('itsmScFindingStatusValidation');
+  String get itsmScFindingStatusClosed => _text('itsmScFindingStatusClosed');
+  String get itsmScFindingStatusRiskAccepted =>
+      _text('itsmScFindingStatusRiskAccepted');
+  String get itsmScFindingStatusCancelled =>
+      _text('itsmScFindingStatusCancelled');
+  String get itsmScExceptionStatusDraft => _text('itsmScExceptionStatusDraft');
+  String get itsmScExceptionStatusSubmitted =>
+      _text('itsmScExceptionStatusSubmitted');
+  String get itsmScExceptionStatusUnderReview =>
+      _text('itsmScExceptionStatusUnderReview');
+  String get itsmScExceptionStatusAwaitingApproval =>
+      _text('itsmScExceptionStatusAwaitingApproval');
+  String get itsmScExceptionStatusApproved =>
+      _text('itsmScExceptionStatusApproved');
+  String get itsmScExceptionStatusRejected =>
+      _text('itsmScExceptionStatusRejected');
+  String get itsmScExceptionStatusActive =>
+      _text('itsmScExceptionStatusActive');
+  String get itsmScExceptionStatusExpired =>
+      _text('itsmScExceptionStatusExpired');
+  String get itsmScExceptionStatusClosed =>
+      _text('itsmScExceptionStatusClosed');
+  String get itsmScExceptionStatusCancelled =>
+      _text('itsmScExceptionStatusCancelled');
+  String get itsmScCampaignStatusDraft => _text('itsmScCampaignStatusDraft');
+  String get itsmScCampaignStatusActive => _text('itsmScCampaignStatusActive');
+  String get itsmScCampaignStatusCompleted =>
+      _text('itsmScCampaignStatusCompleted');
+  String get itsmScCampaignStatusCancelled =>
+      _text('itsmScCampaignStatusCancelled');
+  String get itsmScReviewStatusPending => _text('itsmScReviewStatusPending');
+  String get itsmScReviewStatusDecided => _text('itsmScReviewStatusDecided');
+  String get itsmScReviewStatusRevocationPending =>
+      _text('itsmScReviewStatusRevocationPending');
+  String get itsmScReviewStatusCompleted =>
+      _text('itsmScReviewStatusCompleted');
+  String get itsmScCorrectionStatusSubmitted =>
+      _text('itsmScCorrectionStatusSubmitted');
+  String get itsmScCorrectionStatusInReview =>
+      _text('itsmScCorrectionStatusInReview');
+  String get itsmScCorrectionStatusCompleted =>
+      _text('itsmScCorrectionStatusCompleted');
+  String get itsmScCorrectionStatusRejected =>
+      _text('itsmScCorrectionStatusRejected');
+  String get itsmScCorrectionStatusCancelled =>
+      _text('itsmScCorrectionStatusCancelled');
+  String get itsmScValidationPassed => _text('itsmScValidationPassed');
+  String get itsmScValidationFailed => _text('itsmScValidationFailed');
+  String get itsmScValidationPartial => _text('itsmScValidationPartial');
+  String get itsmScRemediationSummary => _text('itsmScRemediationSummary');
+  String get itsmScControlOperatingSystem =>
+      _text('itsmScControlOperatingSystem');
+  String get itsmScControlPatchStatus => _text('itsmScControlPatchStatus');
+  String get itsmScControlAntivirus => _text('itsmScControlAntivirus');
+  String get itsmScControlEncryption => _text('itsmScControlEncryption');
+  String get itsmScControlBackup => _text('itsmScControlBackup');
+  String get itsmScControlApprovedSoftware =>
+      _text('itsmScControlApprovedSoftware');
+  String get itsmScControlSecurityBaseline =>
+      _text('itsmScControlSecurityBaseline');
+  String get itsmScNotApplicable => _text('itsmScNotApplicable');
+  String get itsmScUnknown => _text('itsmScUnknown');
+  String get itsmScCompleteRevocationTask =>
+      _text('itsmScCompleteRevocationTask');
+  String get itsmScActivateCampaign => _text('itsmScActivateCampaign');
+  String get itsmScCreateReviewItem => _text('itsmScCreateReviewItem');
+  String get itsmScCompleteCampaign => _text('itsmScCompleteCampaign');
+  String get itsmScSubjectUserId => _text('itsmScSubjectUserId');
+  String get itsmScDepartmentId => _text('itsmScDepartmentId');
+  String get itsmScReviewerUserId => _text('itsmScReviewerUserId');
+  String get itsmScAssignedToUserId => _text('itsmScAssignedToUserId');
+  String get itsmScTargetAccess => _text('itsmScTargetAccess');
+  String get itsmScTaskId => _text('itsmScTaskId');
+  String get itsmScCompletionEvidenceId => _text('itsmScCompletionEvidenceId');
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -2537,6 +2760,188 @@ const _localizedValues = <String, Map<String, String>>{
     'internalVisibility': "Internal",
     'changeCollaborationReadOnlyDescription':
         "Comments, attachments, and activity are shown according to your access. Workflow updates remain available only through the authorized actions above.",
+    'itsmScSecurityComplianceTitle': "Security & Compliance",
+    'itsmScSecurityComplianceSubtitle':
+        "Manage security risk, exceptions, device posture and access reviews.",
+    'itsmScSecurityFindingsTitle': "Security findings",
+    'itsmScSecurityFindingsSubtitle':
+        "Restricted operational findings and remediation progress.",
+    'itsmScSecurityExceptionsTitle': "Security exceptions",
+    'itsmScSecurityExceptionsSubtitle':
+        "Request, review and monitor time-bound risk exceptions.",
+    'itsmScAssetComplianceTitle': "Asset compliance",
+    'itsmScAssetComplianceSubtitle':
+        "Assess device controls or view your safe compliance status.",
+    'itsmScAccessReviewsTitle': "Access reviews",
+    'itsmScAccessReviewsSubtitle':
+        "Review access or request a correction to your own access.",
+    'itsmScLoading': "Loading security data…",
+    'itsmScRetry': "Retry",
+    'itsmScLoadMore': "Load more",
+    'itsmScLoadingMore': "Loading more…",
+    'itsmScNoData': "No records found",
+    'itsmScNoDataDescription': "There is no data for the selected view.",
+    'itsmScUnableToLoad': "Security data could not be loaded.",
+    'itsmScAccessDenied': "Access denied",
+    'itsmScManagerAccessRequired':
+        "This operational view is available to ITSM MANAGER users only.",
+    'itsmScSelfServiceAccessRequired':
+        "This self-service view is not available for your role.",
+    'itsmScAdminReadOnlyNotice':
+        "ADMIN has no raw operational access. Only owned self-service records are shown.",
+    'itsmScSelfServiceOnlyNotice':
+        "Only your own self-service records are shown in this view.",
+    'itsmScOperationalView': "Operational view",
+    'itsmScMyRecords': "My records",
+    'itsmScCampaigns': "Campaigns",
+    'itsmScReviewItems': "Review items",
+    'itsmScCorrectionRequests': "Correction requests",
+    'itsmScAllStatuses': "All statuses",
+    'itsmScStatus': "Status",
+    'itsmScSeverity': "Severity",
+    'itsmScRisk': "Risk",
+    'itsmScOwner': "Owner",
+    'itsmScDueDate': "Due date",
+    'itsmScUpdated': "Updated",
+    'itsmScReference': "Reference",
+    'itsmScSystem': "System",
+    'itsmScDepartment': "Department",
+    'itsmScCurrentAccess': "Current access",
+    'itsmScCurrentRole': "Current role",
+    'itsmScDevice': "Device",
+    'itsmScAssessedAt': "Assessed",
+    'itsmScReviewDate': "Review date",
+    'itsmScPeriod': "Period",
+    'itsmScEvidence': "Accessible evidence",
+    'itsmScRestrictedEvidenceHidden':
+        "Restricted evidence is hidden unless you are explicitly authorized.",
+    'itsmScNewFinding': "New finding",
+    'itsmScSubmitException': "Submit exception",
+    'itsmScRecordAssessment': "Record assessment",
+    'itsmScNewCampaign': "New campaign",
+    'itsmScRequestCorrection': "Request correction",
+    'itsmScRequestRevocation': "Request revocation",
+    'itsmScDecide': "Record decision",
+    'itsmScApprove': "Approve",
+    'itsmScReject': "Reject",
+    'itsmScRetain': "Retain",
+    'itsmScRevoke': "Revoke",
+    'itsmScModify': "Modify",
+    'itsmScTransition': "Change status",
+    'itsmScCancel': "Cancel",
+    'itsmScSubmit': "Submit",
+    'itsmScSave': "Save",
+    'itsmScTitle': "Title",
+    'itsmScDescription': "Description",
+    'itsmScSource': "Source",
+    'itsmScRequirementOrControl': "Requirement or control",
+    'itsmScBusinessJustification': "Business justification",
+    'itsmScScope': "Scope",
+    'itsmScRiskDescription': "Risk description",
+    'itsmScCompensatingControl': "Compensating control",
+    'itsmScReason': "Reason",
+    'itsmScComment': "Comment",
+    'itsmScAssetId': "Asset ID",
+    'itsmScAssetTag': "Asset tag",
+    'itsmScAssetName': "Asset name",
+    'itsmScSummary': "Summary",
+    'itsmScCampaignTitle': "Campaign title",
+    'itsmScSystemId': "System ID",
+    'itsmScSystemName': "System name",
+    'itsmScCommandCompleted': "The security operation was accepted.",
+    'itsmScCommandFailed': "The security operation could not be completed.",
+    'itsmScRequiredField': "This field is required.",
+    'itsmScCorrectionSubmitted':
+        "Your access correction request was submitted.",
+    'itsmScOwnComplianceUnavailable':
+        "Own-device compliance is available to USER self-service only.",
+    'itsmScFindingsCount': "Findings",
+    'itsmScExceptionsCount': "Exceptions",
+    'itsmScAssessmentsCount': "Assessments",
+    'itsmScReviewsCount': "Reviews",
+    'itsmScComplianceCompliant': "Compliant",
+    'itsmScComplianceActionRequired': "Action required",
+    'itsmScComplianceAssessmentPending': "Assessment pending",
+    'itsmScSeverityLow': "Low",
+    'itsmScSeverityMedium': "Medium",
+    'itsmScSeverityHigh': "High",
+    'itsmScSeverityCritical': "Critical",
+    'itsmScNotAssigned': "Not assigned",
+    'itsmScOwnerUserId': "Owner user ID",
+    'itsmScRemediationPlan': "Remediation plan",
+    'itsmScValidationResult': "Validation result",
+    'itsmScActionTriageFinding': "Triage finding",
+    'itsmScActionAssignFinding': "Assign finding",
+    'itsmScActionPlanRemediation': "Plan remediation",
+    'itsmScActionSubmitValidation': "Submit for validation",
+    'itsmScActionValidateFinding': "Record validation",
+    'itsmScActionAcceptRisk': "Accept risk",
+    'itsmScActionCloseFinding': "Close finding",
+    'itsmScActionCancelFinding': "Cancel finding",
+    'itsmScActionSubmitException': "Submit exception",
+    'itsmScActionRequestExceptionApproval': "Request approval",
+    'itsmScActionDecideExceptionApproval': "Decide approval",
+    'itsmScActionActivateException': "Activate exception",
+    'itsmScActionRenewException': "Renew exception",
+    'itsmScActionCloseException': "Close exception",
+    'itsmScApproverUserId': "Approver user ID",
+    'itsmScApprovalId': "Approval ID",
+    'itsmScDecision': "Decision",
+    'itsmScFindingStatusDetected': "Detected",
+    'itsmScFindingStatusTriaged': "Triaged",
+    'itsmScFindingStatusAssigned': "Assigned",
+    'itsmScFindingStatusRemediation': "Remediation",
+    'itsmScFindingStatusValidation': "Validation",
+    'itsmScFindingStatusClosed': "Closed",
+    'itsmScFindingStatusRiskAccepted': "Risk accepted",
+    'itsmScFindingStatusCancelled': "Cancelled",
+    'itsmScExceptionStatusDraft': "Draft",
+    'itsmScExceptionStatusSubmitted': "Submitted",
+    'itsmScExceptionStatusUnderReview': "Under review",
+    'itsmScExceptionStatusAwaitingApproval': "Awaiting approval",
+    'itsmScExceptionStatusApproved': "Approved",
+    'itsmScExceptionStatusRejected': "Rejected",
+    'itsmScExceptionStatusActive': "Active",
+    'itsmScExceptionStatusExpired': "Expired",
+    'itsmScExceptionStatusClosed': "Closed",
+    'itsmScExceptionStatusCancelled': "Cancelled",
+    'itsmScCampaignStatusDraft': "Draft",
+    'itsmScCampaignStatusActive': "Active",
+    'itsmScCampaignStatusCompleted': "Completed",
+    'itsmScCampaignStatusCancelled': "Cancelled",
+    'itsmScReviewStatusPending': "Pending",
+    'itsmScReviewStatusDecided': "Decided",
+    'itsmScReviewStatusRevocationPending': "Revocation pending",
+    'itsmScReviewStatusCompleted': "Completed",
+    'itsmScCorrectionStatusSubmitted': "Submitted",
+    'itsmScCorrectionStatusInReview': "In review",
+    'itsmScCorrectionStatusCompleted': "Completed",
+    'itsmScCorrectionStatusRejected': "Rejected",
+    'itsmScCorrectionStatusCancelled': "Cancelled",
+    'itsmScValidationPassed': "Passed",
+    'itsmScValidationFailed': "Failed",
+    'itsmScValidationPartial': "Partially validated",
+    'itsmScRemediationSummary': "Assessment and remediation summary",
+    'itsmScControlOperatingSystem': "Operating system support",
+    'itsmScControlPatchStatus': "Patch status",
+    'itsmScControlAntivirus': "Antivirus / EDR",
+    'itsmScControlEncryption': "Disk encryption",
+    'itsmScControlBackup': "Backup",
+    'itsmScControlApprovedSoftware': "Approved software",
+    'itsmScControlSecurityBaseline': "Security baseline",
+    'itsmScNotApplicable': "Not applicable",
+    'itsmScUnknown': "Unknown",
+    'itsmScCompleteRevocationTask': "Complete revocation task",
+    'itsmScActivateCampaign': "Activate campaign",
+    'itsmScCreateReviewItem': "Create review item",
+    'itsmScCompleteCampaign': "Complete campaign",
+    'itsmScSubjectUserId': "Subject user ID",
+    'itsmScDepartmentId': "Department ID",
+    'itsmScReviewerUserId': "Reviewer user ID",
+    'itsmScAssignedToUserId': "Assigned manager ID",
+    'itsmScTargetAccess': "Target access",
+    'itsmScTaskId': "Revocation task ID",
+    'itsmScCompletionEvidenceId': "Completion evidence ID",
   },
   'fr': <String, String>{
     'appName': "ARPTC Connect",
@@ -3786,5 +4191,187 @@ const _localizedValues = <String, Map<String, String>>{
     'internalVisibility': "Interne",
     'changeCollaborationReadOnlyDescription':
         "Les commentaires, pièces jointes et activités sont affichés selon votre accès. Les mises à jour du workflow restent disponibles uniquement via les actions autorisées ci-dessus.",
+    'itsmScSecurityComplianceTitle': "Sécurité et conformité",
+    'itsmScSecurityComplianceSubtitle':
+        "Gérez les risques, dérogations, appareils et revues des accès.",
+    'itsmScSecurityFindingsTitle': "Constats de sécurité",
+    'itsmScSecurityFindingsSubtitle':
+        "Constats opérationnels restreints et suivi des remédiations.",
+    'itsmScSecurityExceptionsTitle': "Dérogations de sécurité",
+    'itsmScSecurityExceptionsSubtitle':
+        "Demandez, examinez et suivez les dérogations limitées dans le temps.",
+    'itsmScAssetComplianceTitle': "Conformité des actifs",
+    'itsmScAssetComplianceSubtitle':
+        "Évaluez les contrôles ou consultez le statut sécurisé de vos appareils.",
+    'itsmScAccessReviewsTitle': "Revues des accès",
+    'itsmScAccessReviewsSubtitle':
+        "Examinez les accès ou demandez une correction de vos propres accès.",
+    'itsmScLoading': "Chargement des données de sécurité…",
+    'itsmScRetry': "Réessayer",
+    'itsmScLoadMore': "Charger plus",
+    'itsmScLoadingMore': "Chargement…",
+    'itsmScNoData': "Aucun enregistrement",
+    'itsmScNoDataDescription':
+        "Aucune donnée ne correspond à la vue sélectionnée.",
+    'itsmScUnableToLoad': "Impossible de charger les données de sécurité.",
+    'itsmScAccessDenied': "Accès refusé",
+    'itsmScManagerAccessRequired':
+        "Cette vue opérationnelle est réservée aux utilisateurs MANAGER ITSM.",
+    'itsmScSelfServiceAccessRequired':
+        "Cette vue libre-service n’est pas disponible pour votre rôle.",
+    'itsmScAdminReadOnlyNotice':
+        "ADMIN n’a pas accès aux opérations brutes. Seuls ses dossiers libre-service sont affichés.",
+    'itsmScSelfServiceOnlyNotice':
+        "Seuls vos propres dossiers libre-service sont affichés dans cette vue.",
+    'itsmScOperationalView': "Vue opérationnelle",
+    'itsmScMyRecords': "Mes dossiers",
+    'itsmScCampaigns': "Campagnes",
+    'itsmScReviewItems': "Éléments à revoir",
+    'itsmScCorrectionRequests': "Demandes de correction",
+    'itsmScAllStatuses': "Tous les statuts",
+    'itsmScStatus': "Statut",
+    'itsmScSeverity': "Sévérité",
+    'itsmScRisk': "Risque",
+    'itsmScOwner': "Responsable",
+    'itsmScDueDate': "Échéance",
+    'itsmScUpdated': "Mis à jour",
+    'itsmScReference': "Référence",
+    'itsmScSystem': "Système",
+    'itsmScDepartment': "Département",
+    'itsmScCurrentAccess': "Accès actuel",
+    'itsmScCurrentRole': "Rôle actuel",
+    'itsmScDevice': "Appareil",
+    'itsmScAssessedAt': "Évalué",
+    'itsmScReviewDate': "Date de revue",
+    'itsmScPeriod': "Période",
+    'itsmScEvidence': "Preuves accessibles",
+    'itsmScRestrictedEvidenceHidden':
+        "Les preuves restreintes sont masquées sans autorisation explicite.",
+    'itsmScNewFinding': "Nouveau constat",
+    'itsmScSubmitException': "Soumettre une dérogation",
+    'itsmScRecordAssessment': "Enregistrer une évaluation",
+    'itsmScNewCampaign': "Nouvelle campagne",
+    'itsmScRequestCorrection': "Demander une correction",
+    'itsmScRequestRevocation': "Demander une révocation",
+    'itsmScDecide': "Enregistrer la décision",
+    'itsmScApprove': "Approuver",
+    'itsmScReject': "Rejeter",
+    'itsmScRetain': "Conserver",
+    'itsmScRevoke': "Révoquer",
+    'itsmScModify': "Modifier",
+    'itsmScTransition': "Changer le statut",
+    'itsmScCancel': "Annuler",
+    'itsmScSubmit': "Soumettre",
+    'itsmScSave': "Enregistrer",
+    'itsmScTitle': "Titre",
+    'itsmScDescription': "Description",
+    'itsmScSource': "Source",
+    'itsmScRequirementOrControl': "Exigence ou contrôle",
+    'itsmScBusinessJustification': "Justification métier",
+    'itsmScScope': "Périmètre",
+    'itsmScRiskDescription': "Description du risque",
+    'itsmScCompensatingControl': "Mesure compensatoire",
+    'itsmScReason': "Motif",
+    'itsmScComment': "Commentaire",
+    'itsmScAssetId': "ID de l’actif",
+    'itsmScAssetTag': "Étiquette de l’actif",
+    'itsmScAssetName': "Nom de l’actif",
+    'itsmScSummary': "Résumé",
+    'itsmScCampaignTitle': "Titre de la campagne",
+    'itsmScSystemId': "ID du système",
+    'itsmScSystemName': "Nom du système",
+    'itsmScCommandCompleted': "L’opération de sécurité a été acceptée.",
+    'itsmScCommandFailed': "L’opération de sécurité n’a pas pu être exécutée.",
+    'itsmScRequiredField': "Ce champ est obligatoire.",
+    'itsmScCorrectionSubmitted': "Votre demande de correction a été soumise.",
+    'itsmScOwnComplianceUnavailable':
+        "La conformité de ses appareils est réservée au libre-service USER.",
+    'itsmScFindingsCount': "Constats",
+    'itsmScExceptionsCount': "Dérogations",
+    'itsmScAssessmentsCount': "Évaluations",
+    'itsmScReviewsCount': "Revues",
+    'itsmScComplianceCompliant': "Conforme",
+    'itsmScComplianceActionRequired': "Action requise",
+    'itsmScComplianceAssessmentPending': "Évaluation en attente",
+    'itsmScSeverityLow': "Faible",
+    'itsmScSeverityMedium': "Moyenne",
+    'itsmScSeverityHigh': "Élevée",
+    'itsmScSeverityCritical': "Critique",
+    'itsmScNotAssigned': "Non attribué",
+    'itsmScOwnerUserId': "ID du responsable",
+    'itsmScRemediationPlan': "Plan de remédiation",
+    'itsmScValidationResult': "Résultat de validation",
+    'itsmScActionTriageFinding': "Qualifier le constat",
+    'itsmScActionAssignFinding': "Attribuer le constat",
+    'itsmScActionPlanRemediation': "Planifier la remédiation",
+    'itsmScActionSubmitValidation': "Soumettre pour validation",
+    'itsmScActionValidateFinding': "Enregistrer la validation",
+    'itsmScActionAcceptRisk': "Accepter le risque",
+    'itsmScActionCloseFinding': "Clôturer le constat",
+    'itsmScActionCancelFinding': "Annuler le constat",
+    'itsmScActionSubmitException': "Soumettre la dérogation",
+    'itsmScActionRequestExceptionApproval': "Demander une approbation",
+    'itsmScActionDecideExceptionApproval': "Décider de l’approbation",
+    'itsmScActionActivateException': "Activer la dérogation",
+    'itsmScActionRenewException': "Renouveler la dérogation",
+    'itsmScActionCloseException': "Clôturer la dérogation",
+    'itsmScApproverUserId': "ID de l’approbateur",
+    'itsmScApprovalId': "ID de l’approbation",
+    'itsmScDecision': "Décision",
+    'itsmScFindingStatusDetected': "Détecté",
+    'itsmScFindingStatusTriaged': "Qualifié",
+    'itsmScFindingStatusAssigned': "Attribué",
+    'itsmScFindingStatusRemediation': "Remédiation",
+    'itsmScFindingStatusValidation': "Validation",
+    'itsmScFindingStatusClosed': "Clôturé",
+    'itsmScFindingStatusRiskAccepted': "Risque accepté",
+    'itsmScFindingStatusCancelled': "Annulé",
+    'itsmScExceptionStatusDraft': "Brouillon",
+    'itsmScExceptionStatusSubmitted': "Soumise",
+    'itsmScExceptionStatusUnderReview': "En cours d’examen",
+    'itsmScExceptionStatusAwaitingApproval': "En attente d’approbation",
+    'itsmScExceptionStatusApproved': "Approuvée",
+    'itsmScExceptionStatusRejected': "Rejetée",
+    'itsmScExceptionStatusActive': "Active",
+    'itsmScExceptionStatusExpired': "Expirée",
+    'itsmScExceptionStatusClosed': "Clôturée",
+    'itsmScExceptionStatusCancelled': "Annulée",
+    'itsmScCampaignStatusDraft': "Brouillon",
+    'itsmScCampaignStatusActive': "Active",
+    'itsmScCampaignStatusCompleted': "Terminée",
+    'itsmScCampaignStatusCancelled': "Annulée",
+    'itsmScReviewStatusPending': "En attente",
+    'itsmScReviewStatusDecided': "Décidée",
+    'itsmScReviewStatusRevocationPending': "Révocation en attente",
+    'itsmScReviewStatusCompleted': "Terminée",
+    'itsmScCorrectionStatusSubmitted': "Soumise",
+    'itsmScCorrectionStatusInReview': "En cours d’examen",
+    'itsmScCorrectionStatusCompleted': "Terminée",
+    'itsmScCorrectionStatusRejected': "Rejetée",
+    'itsmScCorrectionStatusCancelled': "Annulée",
+    'itsmScValidationPassed': "Réussie",
+    'itsmScValidationFailed': "Échouée",
+    'itsmScValidationPartial': "Partiellement validée",
+    'itsmScRemediationSummary': "Résumé de l’évaluation et de la remédiation",
+    'itsmScControlOperatingSystem': "Support du système d’exploitation",
+    'itsmScControlPatchStatus': "État des correctifs",
+    'itsmScControlAntivirus': "Antivirus / EDR",
+    'itsmScControlEncryption': "Chiffrement du disque",
+    'itsmScControlBackup': "Sauvegarde",
+    'itsmScControlApprovedSoftware': "Logiciels approuvés",
+    'itsmScControlSecurityBaseline': "Référentiel de sécurité",
+    'itsmScNotApplicable': "Non applicable",
+    'itsmScUnknown': "Inconnu",
+    'itsmScCompleteRevocationTask': "Terminer la tâche de révocation",
+    'itsmScActivateCampaign': "Activer la campagne",
+    'itsmScCreateReviewItem': "Créer un élément de revue",
+    'itsmScCompleteCampaign': "Terminer la campagne",
+    'itsmScSubjectUserId': "ID de l’utilisateur concerné",
+    'itsmScDepartmentId': "ID du département",
+    'itsmScReviewerUserId': "ID du réviseur",
+    'itsmScAssignedToUserId': "ID du responsable assigné",
+    'itsmScTargetAccess': "Accès cible",
+    'itsmScTaskId': "ID de la tâche de révocation",
+    'itsmScCompletionEvidenceId': "ID de la preuve d’exécution",
   },
 };

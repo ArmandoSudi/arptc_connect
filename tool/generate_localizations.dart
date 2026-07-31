@@ -95,6 +95,8 @@ void main(List<String> arguments) {
     ..writeln("  String _text(String key) =>")
     ..writeln("      _messages[key] ?? _localizedValues['en']?[key] ?? key;")
     ..writeln()
+    ..writeln('  String lookup(String key) => _text(key);')
+    ..writeln()
     ..writeln(
       '  String _format(String key, Map<String, Object?> values) {',
     )

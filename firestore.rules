@@ -165,6 +165,11 @@ service cloud.firestore {
             request.auth.uid in data.authorizedUserIds
           ) ||
           (
+            data.keys().hasAny(['authorizedManagerIds']) &&
+            data.authorizedManagerIds is list &&
+            request.auth.uid in data.authorizedManagerIds
+          ) ||
+          (
             data.keys().hasAny(['assignedUserId']) &&
             data.assignedUserId == request.auth.uid
           ) ||
@@ -238,6 +243,122 @@ service cloud.firestore {
       return isManager() && isExplicitlyAuthorizedForRestricted(data);
     }
 
+    function isBoundedSecurityComplianceQuery() {
+      return request.query.limit != null && request.query.limit <= 101;
+    }
+
+    function isSecurityFindingAuthorized(data) {
+      return isManager();
+    }
+
+    function isManagerAuthorizedForRestrictedSecurityData(data) {
+      return isManager() &&
+        (
+          !isRestrictedItsmData(data) ||
+          isExplicitlyAuthorizedForRestricted(data) ||
+          (
+            data.keys().hasAny(['owner']) &&
+            data.owner is map &&
+            data.owner.keys().hasAny(['userId']) &&
+            data.owner.userId == request.auth.uid
+          )
+        );
+    }
+
+    function isSecurityExceptionRequester(data) {
+      return signedIn() &&
+        data.keys().hasAny(['requester']) &&
+        data.requester is map &&
+        data.requester.keys().hasAny(['userId']) &&
+        data.requester.userId == request.auth.uid;
+    }
+
+    function canReadSecurityException(data) {
+      return isManager() ||
+        (
+          isItsmSelfServiceRole() &&
+          isSecurityExceptionRequester(data) &&
+          isSelfServiceVisible(data)
+        );
+    }
+
+    function isOwnAccessReviewItem(data) {
+      return signedIn() &&
+        data.keys().hasAny(['subjectUser']) &&
+        data.subjectUser is map &&
+        data.subjectUser.keys().hasAny(['userId']) &&
+        data.subjectUser.userId == request.auth.uid;
+    }
+
+    function canReadAccessReviewItem(data) {
+      return isManager() ||
+        (
+          isItsmSelfServiceRole() &&
+          isOwnAccessReviewItem(data) &&
+          isSelfServiceVisible(data)
+        );
+    }
+
+    function canReadAccessCorrectionRequest(data) {
+      return isManager() ||
+        (
+          isItsmSelfServiceRole() &&
+          data.keys().hasAny(['requestedBy']) &&
+          data.requestedBy == request.auth.uid
+        );
+    }
+
+    function canReadSecurityEvidence(parentData, evidenceData) {
+      return isManager() &&
+        (
+          !isRestrictedItsmData(parentData) ||
+          isManagerAuthorizedForRestrictedSecurityData(parentData)
+        ) &&
+        (
+          !isRestrictedItsmData(evidenceData) ||
+          (
+            evidenceData.keys().hasAny(['authorizedManagerIds']) &&
+            evidenceData.authorizedManagerIds is list &&
+            request.auth.uid in evidenceData.authorizedManagerIds
+          )
+        );
+    }
+
+    function isRequesterVisibleSecurityChild(data) {
+      return data.keys().hasAny(['requesterVisible']) &&
+        data.requesterVisible == true &&
+        data.keys().hasAny(['isInternal']) &&
+        data.isInternal == false &&
+        data.keys().hasAny(['confidentiality']) &&
+        data.confidentiality in ['INTERNAL', 'internal'];
+    }
+
+    function canReadSecurityExceptionChild(exceptionId, childData) {
+      let parent = get(
+        /databases/$(database)/documents/securityExceptions/$(exceptionId)
+      ).data;
+      return (
+          isManager() &&
+          (
+            !isRestrictedItsmData(parent) ||
+            isExplicitlyAuthorizedForRestricted(parent)
+          ) &&
+          (
+            !isRestrictedItsmData(childData) ||
+            (
+              childData.keys().hasAny(['authorizedManagerIds']) &&
+              childData.authorizedManagerIds is list &&
+              request.auth.uid in childData.authorizedManagerIds
+            )
+          )
+        ) ||
+        (
+          isItsmSelfServiceRole() &&
+          isSecurityExceptionRequester(parent) &&
+          isRequesterVisibleSecurityChild(childData)
+        );
+    }
+
     function isSharedItsmWorkItemCollection(collectionName) {
       return collectionName == 'serviceRequests';
     }
@@ -296,22 +417,12 @@ service cloud.firestore {
         (isAdmin() && isPublishedChangeCalendarEntry(data));
     }
 
-    function isRestrictedItsmWorkItemCollection(collectionName) {
-      return collectionName in ['securityFindings', 'securityExceptions'];
-    }
-
     function canReadItsmSubresourceParent(collectionName, workItemId) {
       let parent = get(
         /databases/$(database)/documents/$(collectionName)/$(workItemId)
       ).data;
-      return (
-          isSharedItsmWorkItemCollection(collectionName) &&
-          canReadItsmOperationalRecord(parent)
-        ) ||
-        (
-          isRestrictedItsmWorkItemCollection(collectionName) &&
-          canReadRestrictedItsmRecord(parent)
-        );
+      return isSharedItsmWorkItemCollection(collectionName) &&
+        canReadItsmOperationalRecord(parent);
     }
 
     function validSelfServiceRequestCreate() {
@@ -1431,14 +1542,308 @@ service cloud.firestore {
     }
 
     match /securityFindings/{findingId} {
-      allow get, list: if signedIn() &&
-        canReadRestrictedItsmRecord(resource.data);
+      allow get: if signedIn() && isSecurityFindingAuthorized(resource.data);
+      allow list: if signedIn() &&
+        isSecurityFindingAuthorized(resource.data) &&
+        isBoundedSecurityComplianceQuery();
       allow create, update, delete: if false;
+
+      match /attachments/{attachmentId} {
+        allow get: if signedIn() &&
+          canReadSecurityEvidence(
+            get(
+              /databases/$(database)/documents/securityFindings/$(findingId)
+            ).data,
+            resource.data
+          );
+        allow list: if signedIn() &&
+          canReadSecurityEvidence(
+            get(
+              /databases/$(database)/documents/securityFindings/$(findingId)
+            ).data,
+            resource.data
+          ) &&
+          isBoundedSecurityComplianceQuery();
+        allow create, update, delete: if false;
+      }
+
+      match /{governedCollection}/{recordId} {
+        allow get: if signedIn() &&
+          governedCollection in [
+            'auditLogs',
+            'comments',
+            'remediationLinks',
+            'validationHistory'
+          ] &&
+          isSecurityFindingAuthorized(
+            get(
+              /databases/$(database)/documents/securityFindings/$(findingId)
+            ).data
+          );
+        allow list: if signedIn() &&
+          governedCollection in [
+            'auditLogs',
+            'comments',
+            'remediationLinks',
+            'validationHistory'
+          ] &&
+          isSecurityFindingAuthorized(
+            get(
+              /databases/$(database)/documents/securityFindings/$(findingId)
+            ).data
+          ) &&
+          isBoundedSecurityComplianceQuery();
+        allow create, update, delete: if false;
+      }
+
+      match /{unknownPath=**} {
+        allow read, write: if false;
+      }
     }
 
     match /securityExceptions/{exceptionId} {
-      allow get, list: if signedIn() &&
-        canReadRestrictedItsmRecord(resource.data);
+      allow get: if signedIn() && canReadSecurityException(resource.data);
+      allow list: if signedIn() &&
+        canReadSecurityException(resource.data) &&
+        isBoundedSecurityComplianceQuery();
+      allow create, update, delete: if false;
+
+      match /comments/{commentId} {
+        allow get: if signedIn() &&
+          canReadSecurityExceptionChild(exceptionId, resource.data);
+        allow list: if signedIn() &&
+          canReadSecurityExceptionChild(exceptionId, resource.data) &&
+          isBoundedSecurityComplianceQuery();
+        allow create, update, delete: if false;
+      }
+
+      match /attachments/{attachmentId} {
+        allow get: if signedIn() &&
+          canReadSecurityExceptionChild(exceptionId, resource.data);
+        allow list: if signedIn() &&
+          canReadSecurityExceptionChild(exceptionId, resource.data) &&
+          isBoundedSecurityComplianceQuery();
+        allow create, update, delete: if false;
+      }
+
+      match /approvals/{approvalId} {
+        allow get: if signedIn() &&
+          isManager() &&
+          (
+            !isRestrictedItsmData(
+              get(
+                /databases/$(database)/documents/securityExceptions/$(exceptionId)
+              ).data
+            ) ||
+            isExplicitlyAuthorizedForRestricted(
+              get(
+                /databases/$(database)/documents/securityExceptions/$(exceptionId)
+              ).data
+            )
+          );
+        allow list: if signedIn() &&
+          isManager() &&
+          isBoundedSecurityComplianceQuery();
+        allow create, update, delete: if false;
+
+        match /history/{historyId} {
+          allow get: if signedIn() && isManager();
+          allow list: if signedIn() &&
+            isManager() &&
+            isBoundedSecurityComplianceQuery();
+          allow create, update, delete: if false;
+        }
+      }
+
+      match /{governedCollection}/{recordId} {
+        allow get: if signedIn() &&
+          governedCollection in [
+            'auditLogs',
+            'renewalRequests',
+            'reviewHistory'
+          ] &&
+          canReadSecurityExceptionChild(exceptionId, resource.data);
+        allow list: if signedIn() &&
+          governedCollection in [
+            'auditLogs',
+            'renewalRequests',
+            'reviewHistory'
+          ] &&
+          canReadSecurityExceptionChild(exceptionId, resource.data) &&
+          isBoundedSecurityComplianceQuery();
+        allow create, update, delete: if false;
+      }
+
+      match /{unknownPath=**} {
+        allow read, write: if false;
+      }
+    }
+
+    match /assetComplianceAssessments/{assessmentId} {
+      allow get: if signedIn() && isManager();
+      allow list: if signedIn() &&
+        isManager() &&
+        isBoundedSecurityComplianceQuery();
+      allow create, update, delete: if false;
+
+      match /attachments/{attachmentId} {
+        allow get: if signedIn() &&
+          canReadSecurityEvidence(
+            get(
+              /databases/$(database)/documents/assetComplianceAssessments/$(assessmentId)
+            ).data,
+            resource.data
+          );
+        allow list: if signedIn() &&
+          canReadSecurityEvidence(
+            get(
+              /databases/$(database)/documents/assetComplianceAssessments/$(assessmentId)
+            ).data,
+            resource.data
+          ) &&
+          isBoundedSecurityComplianceQuery();
+        allow create, update, delete: if false;
+      }
+
+      match /{governedCollection}/{recordId} {
+        allow get: if signedIn() &&
+          governedCollection in [
+            'auditLogs',
+            'comments',
+            'remediationLinks'
+          ] &&
+          isManager();
+        allow list: if signedIn() &&
+          governedCollection in [
+            'auditLogs',
+            'comments',
+            'remediationLinks'
+          ] &&
+          isManager() &&
+          isBoundedSecurityComplianceQuery();
+        allow create, update, delete: if false;
+      }
+
+      match /{unknownPath=**} {
+        allow read, write: if false;
+      }
+    }
+
+    match /assetComplianceSelfService/{projectionId} {
+      allow get: if signedIn() &&
+        (
+          isManager() ||
+          (
+            isUser() &&
+            resource.data.assignedUserId == request.auth.uid
+          )
+        );
+      allow list: if signedIn() &&
+        (
+          isManager() ||
+          (
+            isUser() &&
+            resource.data.assignedUserId == request.auth.uid
+          )
+        ) &&
+        isBoundedSecurityComplianceQuery();
+      allow create, update, delete: if false;
+
+      match /{unknownPath=**} {
+        allow read, write: if false;
+      }
+    }
+
+    match /accessReviewCampaigns/{campaignId} {
+      allow get: if signedIn() && isManager();
+      allow list: if signedIn() &&
+        isManager() &&
+        isBoundedSecurityComplianceQuery();
+      allow create, update, delete: if false;
+
+      match /{governedCollection}/{recordId} {
+        allow get: if signedIn() &&
+          governedCollection in ['auditLogs', 'decisionHistory'] &&
+          isManager();
+        allow list: if signedIn() &&
+          governedCollection in ['auditLogs', 'decisionHistory'] &&
+          isManager() &&
+          isBoundedSecurityComplianceQuery();
+        allow create, update, delete: if false;
+      }
+
+      match /{unknownPath=**} {
+        allow read, write: if false;
+      }
+    }
+
+    match /accessReviewItems/{itemId} {
+      allow get: if signedIn() && canReadAccessReviewItem(resource.data);
+      allow list: if signedIn() &&
+        canReadAccessReviewItem(resource.data) &&
+        isBoundedSecurityComplianceQuery();
+      allow create, update, delete: if false;
+
+      match /attachments/{attachmentId} {
+        allow get: if signedIn() &&
+          canReadSecurityEvidence(
+            get(
+              /databases/$(database)/documents/accessReviewItems/$(itemId)
+            ).data,
+            resource.data
+          );
+        allow list: if signedIn() &&
+          canReadSecurityEvidence(
+            get(
+              /databases/$(database)/documents/accessReviewItems/$(itemId)
+            ).data,
+            resource.data
+          ) &&
+          isBoundedSecurityComplianceQuery();
+        allow create, update, delete: if false;
+      }
+
+      match /correctionRequests/{requestId} {
+        allow get: if signedIn() &&
+          canReadAccessCorrectionRequest(resource.data);
+        allow list: if signedIn() &&
+          canReadAccessCorrectionRequest(resource.data) &&
+          isBoundedSecurityComplianceQuery();
+        allow create, update, delete: if false;
+      }
+
+      match /{governedCollection}/{recordId} {
+        allow get: if signedIn() &&
+          governedCollection in [
+            'auditLogs',
+            'comments',
+            'decisionHistory',
+            'revocationTasks'
+          ] &&
+          isManager();
+        allow list: if signedIn() &&
+          governedCollection in [
+            'auditLogs',
+            'comments',
+            'decisionHistory',
+            'revocationTasks'
+          ] &&
+          isManager() &&
+          isBoundedSecurityComplianceQuery();
+        allow create, update, delete: if false;
+      }
+
+      match /{unknownPath=**} {
+        allow read, write: if false;
+      }
+    }
+
+    match /{correctionPath=**}/correctionRequests/{requestId} {
+      allow get: if signedIn() &&
+        canReadAccessCorrectionRequest(resource.data);
+      allow list: if signedIn() &&
+        canReadAccessCorrectionRequest(resource.data) &&
+        isBoundedSecurityComplianceQuery();
       allow create, update, delete: if false;
     }
 
