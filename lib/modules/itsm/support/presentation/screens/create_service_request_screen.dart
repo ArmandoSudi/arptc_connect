@@ -24,6 +24,9 @@ class CreateServiceRequestScreen extends ConsumerStatefulWidget {
     super.key,
     this.onSubmitted,
     this.initialDocuments = const [],
+    this.initialResponses = const {},
+    this.initialTitle = '',
+    this.initialDescription = '',
     this.filePicker,
     this.attachmentIdFactory,
   });
@@ -31,6 +34,9 @@ class CreateServiceRequestScreen extends ConsumerStatefulWidget {
   final String catalogueItemId;
   final ValueChanged<ServiceRequestSubmissionReceipt>? onSubmitted;
   final List<ServiceRequestSubmissionDocument> initialDocuments;
+  final Map<String, Object?> initialResponses;
+  final String initialTitle;
+  final String initialDescription;
   final ServiceRequestFilePicker? filePicker;
   final String Function()? attachmentIdFactory;
 
@@ -151,6 +157,9 @@ class _CreateServiceRequestScreenState
           name: session.displayName,
           email: session.email,
         ),
+        title: widget.initialTitle,
+        description: widget.initialDescription,
+        responses: widget.initialResponses,
         documents: widget.initialDocuments,
       ),
     );

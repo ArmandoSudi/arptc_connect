@@ -7,6 +7,7 @@ const { HttpsError, onCall } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { onObjectFinalized } = require('firebase-functions/v2/storage');
 const admin = require('firebase-admin');
+const { FieldValue, Timestamp } = require('firebase-admin/firestore');
 const {
   archiveEligibleIncidents,
 } = require('./src/incident_archival');
@@ -22,6 +23,20 @@ const {
 const {
   ITSM_SUPPORT_COMMANDS,
 } = require('./src/itsm_support_validation');
+const {
+  createItsmAssetsCallableHandler,
+} = require('./src/itsm_assets_handlers');
+const {
+  ITSM_ASSETS_COMMANDS,
+} = require('./src/itsm_assets_validation');
+const {
+  processSoftwareLicenceExpiryNotifications,
+  processSoftwareLicenceRenewalNotifications,
+  processWarrantyExpiryNotifications,
+} = require('./src/itsm_assets_notifications');
+const {
+  registerItsmAssetsAttachment,
+} = require('./src/itsm_assets_attachment_registration');
 const {
   processServiceRequestSlaBatch,
   processServiceRequestSlaChange,
@@ -41,6 +56,8 @@ admin.initializeApp();
 const db = admin.firestore();
 const COMPANY_TOPIC = 'company_all';
 const DEFAULT_APP_BASE_URL = 'https://arptc-connect.web.app';
+const DEFAULT_STORAGE_BUCKET =
+  process.env.FIREBASE_STORAGE_BUCKET || 'arptc-connect.appspot.com';
 const ANDROID_NOTIFICATION_CHANNEL_ID = 'arptc_connect_notifications';
 const INVALID_TOKEN_CODES = new Set([
   'messaging/invalid-registration-token',
@@ -63,7 +80,7 @@ function registerItsmCallable(command) {
     createItsmCallableHandler({
       expectedCommand: command,
       db,
-      fieldValue: admin.firestore.FieldValue,
+      fieldValue: FieldValue,
       findAgent: findCallerAgent,
       HttpsError,
       logger,
@@ -93,8 +110,8 @@ function registerItsmSupportCallable(command) {
     createItsmSupportCallableHandler({
       expectedCommand: command,
       db,
-      fieldValue: admin.firestore.FieldValue,
-      timestamp: admin.firestore.Timestamp,
+      fieldValue: FieldValue,
+      timestamp: Timestamp,
       findAgent: findCallerAgent,
       HttpsError,
       logger,
@@ -136,18 +153,152 @@ exports.itsmArchiveKnowledgeArticle = registerItsmSupportCallable(
   ITSM_SUPPORT_COMMANDS.archiveKnowledgeArticle,
 );
 
+function registerItsmAssetsCallable(command) {
+  return onCall(
+    createItsmAssetsCallableHandler({
+      expectedCommand: command,
+      db,
+      fieldValue: FieldValue,
+      findAgent: findCallerAgent,
+      HttpsError,
+      logger,
+    }),
+  );
+}
+
+exports.itsmRegisterAsset = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.registerAsset,
+);
+exports.itsmUpdateAsset = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.updateAsset,
+);
+exports.itsmTransitionAsset = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.transitionAsset,
+);
+exports.itsmAssignAsset = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.assignAsset,
+);
+exports.itsmReturnAsset = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.returnAsset,
+);
+exports.itsmSaveStockLocation = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.saveStockLocation,
+);
+exports.itsmSaveStockItem = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.saveStockItem,
+);
+exports.itsmReceiveStock = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.receiveStock,
+);
+exports.itsmReserveStock = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.reserveStock,
+);
+exports.itsmIssueStock = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.issueStock,
+);
+exports.itsmReturnStock = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.returnStock,
+);
+exports.itsmTransferStock = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.transferStock,
+);
+exports.itsmAdjustStock = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.adjustStock,
+);
+exports.itsmReconcileStock = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.reconcileStock,
+);
+exports.itsmRegisterLicence = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.registerLicence,
+);
+exports.itsmAllocateLicence = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.allocateLicence,
+);
+exports.itsmReleaseLicence = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.releaseLicence,
+);
+exports.itsmSaveSupplier = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.saveSupplier,
+);
+exports.itsmSaveContract = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.saveContract,
+);
+exports.itsmSaveWarranty = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.saveWarranty,
+);
+exports.itsmRecordWarrantyClaim = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.recordWarrantyClaim,
+);
+exports.itsmTransitionWarrantyClaim = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.transitionWarrantyClaim,
+);
+exports.itsmSaveConfigurationItem = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.saveConfigurationItem,
+);
+exports.itsmCreateCiRelationship = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.createCiRelationship,
+);
+exports.itsmRetireCiRelationship = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.retireCiRelationship,
+);
+
+exports.itsmProcessAssetExpiryNotifications = onSchedule(
+  {
+    schedule: 'every day 02:00',
+    timeZone: 'Africa/Kinshasa',
+    region: 'us-central1',
+    retryCount: 3,
+  },
+  async () => {
+    const processors = [
+      processWarrantyExpiryNotifications,
+      processSoftwareLicenceRenewalNotifications,
+      processSoftwareLicenceExpiryNotifications,
+    ];
+    const results = [];
+    for (const processBatch of processors) {
+      let cursor = null;
+      let pageCount = 0;
+      do {
+        const result = await processBatch({
+          db,
+          fieldValue: FieldValue,
+          timestamp: Timestamp,
+          cursor,
+          logger,
+        });
+        results.push(result);
+        cursor = result.nextCursor;
+        pageCount += 1;
+      } while (cursor && pageCount < 20);
+    }
+    logger.info('ITSM asset expiry notification run completed', { results });
+  },
+);
+
 exports.itsmRegisterServiceRequestAttachment = onObjectFinalized(
+  { bucket: DEFAULT_STORAGE_BUCKET },
   async (event) => registerServiceRequestAttachment({
     db,
-    fieldValue: admin.firestore.FieldValue,
+    fieldValue: FieldValue,
     object: event.data,
   }),
 );
 
 exports.itsmRegisterKnowledgeAttachment = onObjectFinalized(
+  { bucket: DEFAULT_STORAGE_BUCKET },
   async (event) => registerKnowledgeAttachment({
     db,
-    fieldValue: admin.firestore.FieldValue,
+    fieldValue: FieldValue,
+    object: event.data,
+  }),
+);
+
+exports.itsmRegisterAssetsAttachment = onObjectFinalized(
+  { bucket: DEFAULT_STORAGE_BUCKET },
+  async (event) => registerItsmAssetsAttachment({
+    db,
+    fieldValue: FieldValue,
     object: event.data,
   }),
 );
@@ -181,7 +332,7 @@ exports.itsmNotifyServiceRequestChanges = onDocumentWritten(
       before: event.data && event.data.before,
       after: event.data && event.data.after,
       sourceEventId: event.id,
-      fieldValue: admin.firestore.FieldValue,
+      fieldValue: FieldValue,
     });
     return writeSupportNotificationEvents({ db, events });
   },
@@ -191,8 +342,8 @@ exports.itsmProcessServiceRequestSlaChange = onDocumentWritten(
   'serviceRequests/{workItemId}',
   async (event) => processServiceRequestSlaChange({
     db,
-    fieldValue: admin.firestore.FieldValue,
-    timestamp: admin.firestore.Timestamp,
+    fieldValue: FieldValue,
+    timestamp: Timestamp,
     after: event.data && event.data.after,
   }),
 );
@@ -206,8 +357,8 @@ exports.itsmProcessServiceRequestSlas = onSchedule(
   },
   async () => processServiceRequestSlaBatch({
     db,
-    fieldValue: admin.firestore.FieldValue,
-    timestamp: admin.firestore.Timestamp,
+    fieldValue: FieldValue,
+    timestamp: Timestamp,
     logger,
   }),
 );
@@ -216,7 +367,7 @@ exports.itsmSynchronizeServiceRequestApproval = onDocumentWritten(
   'serviceRequests/{requestId}/approvals/{approvalId}',
   async (event) => synchronizeServiceRequestApproval({
     db,
-    fieldValue: admin.firestore.FieldValue,
+    fieldValue: FieldValue,
     requestId: event.params.requestId,
     approvalId: event.params.approvalId,
     before: event.data && event.data.before,
@@ -229,7 +380,7 @@ exports.itsmSynchronizeServiceRequestTask = onDocumentWritten(
   'serviceRequests/{requestId}/tasks/{taskId}',
   async (event) => synchronizeServiceRequestTask({
     db,
-    fieldValue: admin.firestore.FieldValue,
+    fieldValue: FieldValue,
     requestId: event.params.requestId,
     taskId: event.params.taskId,
     before: event.data && event.data.before,
@@ -248,8 +399,8 @@ exports.archiveEligibleIncidents = onSchedule(
   async () => {
     const archivedCount = await archiveEligibleIncidents({
       db,
-      fieldValue: admin.firestore.FieldValue,
-      timestamp: admin.firestore.Timestamp,
+      fieldValue: FieldValue,
+      timestamp: Timestamp,
       logger,
     });
     logger.info('Incident archival run completed', { archivedCount });
@@ -318,7 +469,7 @@ exports.createAgentAccount = onCall(async (request) => {
       disabled: data.isActive === false,
     });
 
-    const now = admin.firestore.FieldValue.serverTimestamp();
+    const now = FieldValue.serverTimestamp();
     await db.collection('agents').doc(authUser.uid).set({
       firstName: normalizeString(data.firstName),
       name: normalizeString(data.name),
@@ -381,7 +532,7 @@ exports.dispatchNotificationEvent = onDocumentCreated(
     await snapshot.ref.set(
       {
         status: 'PROCESSING',
-        processingStartedAt: admin.firestore.FieldValue.serverTimestamp(),
+        processingStartedAt: FieldValue.serverTimestamp(),
       },
       { merge: true },
     );
@@ -424,7 +575,7 @@ exports.dispatchNotificationEvent = onDocumentCreated(
           status: 'PROCESSED',
           recipientCount,
           fcmCount,
-          processedAt: admin.firestore.FieldValue.serverTimestamp(),
+          processedAt: FieldValue.serverTimestamp(),
           errorMessage: '',
         },
         { merge: true },
@@ -438,7 +589,7 @@ exports.dispatchNotificationEvent = onDocumentCreated(
         {
           status: 'FAILED',
           errorMessage: error.message || String(error),
-          processedAt: admin.firestore.FieldValue.serverTimestamp(),
+          processedAt: FieldValue.serverTimestamp(),
         },
         { merge: true },
       );
@@ -464,8 +615,8 @@ exports.subscribeDeviceTokenToCompanyTopic = onDocumentCreated(
       await admin.messaging().subscribeToTopic([token], COMPANY_TOPIC);
       await snapshot.ref.set(
         {
-          subscribedTopics: admin.firestore.FieldValue.arrayUnion(COMPANY_TOPIC),
-          subscribedAt: admin.firestore.FieldValue.serverTimestamp(),
+          subscribedTopics: FieldValue.arrayUnion(COMPANY_TOPIC),
+          subscribedAt: FieldValue.serverTimestamp(),
         },
         { merge: true },
       );
@@ -587,7 +738,7 @@ function buildNotificationDocument(eventId, event) {
     createdByUserId: normalizeString(event.createdByUserId),
     createdByName: normalizeString(event.createdByName),
     createdByEmail: normalizeString(event.createdByEmail).toLowerCase(),
-    createdAt: event.createdAt || admin.firestore.FieldValue.serverTimestamp(),
+    createdAt: event.createdAt || FieldValue.serverTimestamp(),
     isRead: false,
   };
 }

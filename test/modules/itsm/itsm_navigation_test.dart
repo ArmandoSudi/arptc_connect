@@ -30,6 +30,34 @@ void main() {
         '/services/itsm/assets-configuration/cmdb',
       );
       expect(
+        ItsmRoutes.myAssets,
+        '/services/itsm/assets-configuration/assets/my',
+      );
+      expect(
+        ItsmRoutes.myAssetDetail('asset / 42'),
+        '/services/itsm/assets-configuration/assets/my/asset%20%2F%2042',
+      );
+      expect(
+        ItsmRoutes.assetRegister,
+        '/services/itsm/assets-configuration/assets/register',
+      );
+      expect(
+        ItsmRoutes.assetRegisterDetail('asset / 42'),
+        '/services/itsm/assets-configuration/assets/register/asset%20%2F%2042',
+      );
+      expect(
+        ItsmRoutes.stock,
+        '/services/itsm/assets-configuration/stock',
+      );
+      expect(
+        ItsmRoutes.licences,
+        '/services/itsm/assets-configuration/licences',
+      );
+      expect(
+        ItsmRoutes.suppliersWarranties,
+        '/services/itsm/assets-configuration/suppliers-warranties',
+      );
+      expect(
         ItsmFeature.changeCalendar.routeFor(ItsmSection.changes),
         '/services/itsm/changes/calendar',
       );

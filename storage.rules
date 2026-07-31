@@ -109,6 +109,82 @@ service firebase.storage {
       return itsmRole() in ['ADMIN', 'admin', 'Admin'];
     }
 
+    function assetExists(assetId) {
+      return firestore.exists(
+        /databases/(default)/documents/assets/$(assetId)
+      );
+    }
+
+    function assetAttachmentPath(assetId, resourceKind, resourceId) {
+      return /databases/(default)/documents/assets/$(assetId)/$(resourceKind)/$(resourceId);
+    }
+
+    function assetAttachmentExists(assetId, resourceKind, resourceId) {
+      return firestore.exists(
+        assetAttachmentPath(assetId, resourceKind, resourceId)
+      );
+    }
+
+    function assetAttachmentData(assetId, resourceKind, resourceId) {
+      return firestore.get(
+        assetAttachmentPath(assetId, resourceKind, resourceId)
+      ).data;
+    }
+
+    function stockSupportingDocumentPath(attachmentId) {
+      return /databases/(default)/documents/stockSupportingDocuments/$(attachmentId);
+    }
+
+    function stockSupportingDocumentExists(attachmentId) {
+      return firestore.exists(stockSupportingDocumentPath(attachmentId));
+    }
+
+    function stockSupportingDocumentData(attachmentId) {
+      return firestore.get(stockSupportingDocumentPath(attachmentId)).data;
+    }
+
+    function stockItemExists(stockItemId) {
+      return firestore.exists(
+        /databases/(default)/documents/stockItems/$(stockItemId)
+      );
+    }
+
+    function contractExists(contractId) {
+      return firestore.exists(
+        /databases/(default)/documents/supplierContracts/$(contractId)
+      );
+    }
+
+    function contractAttachmentPath(contractId, attachmentId) {
+      return /databases/(default)/documents/supplierContracts/$(contractId)/attachments/$(attachmentId);
+    }
+
+    function contractAttachmentExists(contractId, attachmentId) {
+      return firestore.exists(contractAttachmentPath(contractId, attachmentId));
+    }
+
+    function contractAttachmentData(contractId, attachmentId) {
+      return firestore.get(contractAttachmentPath(contractId, attachmentId)).data;
+    }
+
+    function warrantyExists(warrantyId) {
+      return firestore.exists(
+        /databases/(default)/documents/warranties/$(warrantyId)
+      );
+    }
+
+    function warrantyAttachmentPath(warrantyId, attachmentId) {
+      return /databases/(default)/documents/warranties/$(warrantyId)/attachments/$(attachmentId);
+    }
+
+    function warrantyAttachmentExists(warrantyId, attachmentId) {
+      return firestore.exists(warrantyAttachmentPath(warrantyId, attachmentId));
+    }
+
+    function warrantyAttachmentData(warrantyId, attachmentId) {
+      return firestore.get(warrantyAttachmentPath(warrantyId, attachmentId)).data;
+    }
+
     function isRestrictedItsmData(data) {
       return (
           data.keys().hasAny(['confidentiality']) &&
@@ -473,6 +549,128 @@ service firebase.storage {
     match /itsm/knowledgeArticles/{articleId}/attachments/{attachmentId}/{fileName} {
       allow read: if signedIn() && canReadKnowledgeAttachment(articleId);
       allow create, update, delete: if false;
+    }
+
+    match /itsm/assets/{assetId}/{resourceKind}/{resourceId}/{fileName} {
+      allow read: if signedIn() &&
+        isItsmManager() &&
+        resourceKind in ['attachments', 'photographs'] &&
+        assetExists(assetId) &&
+        assetAttachmentExists(assetId, resourceKind, resourceId) &&
+        assetAttachmentData(assetId, resourceKind, resourceId).assetId == assetId &&
+        assetAttachmentData(assetId, resourceKind, resourceId).resourceKind == resourceKind &&
+        assetAttachmentData(assetId, resourceKind, resourceId).resourceId == resourceId &&
+        assetAttachmentData(assetId, resourceKind, resourceId).storagePath ==
+          'itsm/assets/' + assetId + '/' + resourceKind + '/' + resourceId + '/' + fileName &&
+        assetAttachmentData(assetId, resourceKind, resourceId).fileName == fileName &&
+        assetAttachmentData(assetId, resourceKind, resourceId).contentType == resource.contentType &&
+        assetAttachmentData(assetId, resourceKind, resourceId).sizeBytes == resource.size &&
+        assetAttachmentData(assetId, resourceKind, resourceId).uploadedByUserId ==
+          resource.metadata.uploadedByUserId;
+
+      allow create: if signedIn() &&
+        isItsmManager() &&
+        resource == null &&
+        assetExists(assetId) &&
+        resourceKind in ['attachments', 'photographs'] &&
+        request.resource.size > 0 &&
+        request.resource.size <= 20 * 1024 * 1024 &&
+        hasSupportedContentType(request.resource.contentType) &&
+        (resourceKind != 'photographs' ||
+          request.resource.contentType.matches('image/.*')) &&
+        request.resource.metadata.assetId == assetId &&
+        request.resource.metadata.resourceId == resourceId &&
+        request.resource.metadata.resourceKind == resourceKind &&
+        request.resource.metadata.uploadedByUserId == request.auth.uid &&
+        request.resource.metadata.isInternal in ['true', 'false'];
+
+      allow update, delete: if false;
+    }
+
+    match /itsm/stock/{stockItemId}/supportingDocuments/{attachmentId}/{fileName} {
+      allow read: if signedIn() &&
+        isItsmManager() &&
+        stockItemExists(stockItemId) &&
+        stockSupportingDocumentExists(attachmentId) &&
+        stockSupportingDocumentData(attachmentId).stockItemId == stockItemId &&
+        stockSupportingDocumentData(attachmentId).attachmentId == attachmentId &&
+        stockSupportingDocumentData(attachmentId).storagePath ==
+          'itsm/stock/' + stockItemId + '/supportingDocuments/' +
+          attachmentId + '/' + fileName &&
+        stockSupportingDocumentData(attachmentId).fileName == fileName &&
+        stockSupportingDocumentData(attachmentId).contentType == resource.contentType &&
+        stockSupportingDocumentData(attachmentId).sizeBytes == resource.size &&
+        stockSupportingDocumentData(attachmentId).uploadedByUserId ==
+          resource.metadata.uploadedByUserId;
+
+      allow create: if signedIn() &&
+        isItsmManager() &&
+        resource == null &&
+        stockItemExists(stockItemId) &&
+        request.resource.size > 0 &&
+        request.resource.size <= 20 * 1024 * 1024 &&
+        hasSupportedContentType(request.resource.contentType) &&
+        request.resource.metadata.stockItemId == stockItemId &&
+        request.resource.metadata.attachmentId == attachmentId &&
+        request.resource.metadata.uploadedByUserId == request.auth.uid;
+
+      allow update, delete: if false;
+    }
+
+    match /itsm/contracts/{contractId}/attachments/{attachmentId}/{fileName} {
+      allow read: if signedIn() &&
+        isItsmManager() &&
+        contractExists(contractId) &&
+        contractAttachmentExists(contractId, attachmentId) &&
+        contractAttachmentData(contractId, attachmentId).contractId == contractId &&
+        contractAttachmentData(contractId, attachmentId).attachmentId == attachmentId &&
+        contractAttachmentData(contractId, attachmentId).storagePath ==
+          'itsm/contracts/' + contractId + '/attachments/' +
+          attachmentId + '/' + fileName &&
+        contractAttachmentData(contractId, attachmentId).fileName == fileName &&
+        contractAttachmentData(contractId, attachmentId).contentType == resource.contentType &&
+        contractAttachmentData(contractId, attachmentId).sizeBytes == resource.size &&
+        contractAttachmentData(contractId, attachmentId).uploadedByUserId ==
+          resource.metadata.uploadedByUserId;
+      allow create: if signedIn() &&
+        isItsmManager() &&
+        resource == null &&
+        contractExists(contractId) &&
+        request.resource.size > 0 &&
+        request.resource.size <= 20 * 1024 * 1024 &&
+        hasSupportedContentType(request.resource.contentType) &&
+        request.resource.metadata.contractId == contractId &&
+        request.resource.metadata.attachmentId == attachmentId &&
+        request.resource.metadata.uploadedByUserId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    match /itsm/warranties/{warrantyId}/attachments/{attachmentId}/{fileName} {
+      allow read: if signedIn() &&
+        isItsmManager() &&
+        warrantyExists(warrantyId) &&
+        warrantyAttachmentExists(warrantyId, attachmentId) &&
+        warrantyAttachmentData(warrantyId, attachmentId).warrantyId == warrantyId &&
+        warrantyAttachmentData(warrantyId, attachmentId).attachmentId == attachmentId &&
+        warrantyAttachmentData(warrantyId, attachmentId).storagePath ==
+          'itsm/warranties/' + warrantyId + '/attachments/' +
+          attachmentId + '/' + fileName &&
+        warrantyAttachmentData(warrantyId, attachmentId).fileName == fileName &&
+        warrantyAttachmentData(warrantyId, attachmentId).contentType == resource.contentType &&
+        warrantyAttachmentData(warrantyId, attachmentId).sizeBytes == resource.size &&
+        warrantyAttachmentData(warrantyId, attachmentId).uploadedByUserId ==
+          resource.metadata.uploadedByUserId;
+      allow create: if signedIn() &&
+        isItsmManager() &&
+        resource == null &&
+        warrantyExists(warrantyId) &&
+        request.resource.size > 0 &&
+        request.resource.size <= 20 * 1024 * 1024 &&
+        hasSupportedContentType(request.resource.contentType) &&
+        request.resource.metadata.warrantyId == warrantyId &&
+        request.resource.metadata.attachmentId == attachmentId &&
+        request.resource.metadata.uploadedByUserId == request.auth.uid;
+      allow update, delete: if false;
     }
 
     match /{allPaths=**} {

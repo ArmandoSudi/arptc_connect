@@ -11,11 +11,23 @@ abstract final class ItsmRoutes {
   static const knowledge = '$support/knowledge';
   static const assetsConfiguration = '$root/assets-configuration';
   static const assets = '$assetsConfiguration/assets';
+  static const myAssets = '$assets/my';
+  static const assetRegister = '$assets/register';
+  static const stock = '$assetsConfiguration/stock';
+  static const licences = '$assetsConfiguration/licences';
+  static const suppliersWarranties =
+      '$assetsConfiguration/suppliers-warranties';
   static const cmdb = '$assetsConfiguration/cmdb';
   static const changes = '$root/changes';
   static const changeRequests = '$changes/requests';
   static const securityCompliance = '$root/security-compliance';
   static const reportingAdministration = '$root/reporting-administration';
+
+  static String myAssetDetail(String assetId) =>
+      '$myAssets/${Uri.encodeComponent(assetId)}';
+
+  static String assetRegisterDetail(String assetId) =>
+      '$assetRegister/${Uri.encodeComponent(assetId)}';
 
   static const _legacyPrefixes = <String, String>{
     '/service/itsm': root,

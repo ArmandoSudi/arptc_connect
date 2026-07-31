@@ -21,6 +21,7 @@ class CommonTextInput extends StatelessWidget {
     this.isPassword = false,
     this.isMultiline = false,
     this.controller,
+    this.initialValue,
     this.hintText,
     this.validator,
     this.inputFormatters,
@@ -46,6 +47,7 @@ class CommonTextInput extends StatelessWidget {
   final bool isPassword;
   final bool isMultiline;
   final TextEditingController? controller;
+  final String? initialValue;
   final String? hintText;
   final String? Function(String?)? validator;
   final List<TextInputFormatter>? inputFormatters;
@@ -98,6 +100,7 @@ class CommonTextInput extends StatelessWidget {
           ),
         TextFormField(
           controller: controller,
+          initialValue: controller == null ? initialValue : null,
           focusNode: focusNode,
           style: theme.textTheme.bodyLarge,
           keyboardType: _keyboardType,

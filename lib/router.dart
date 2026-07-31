@@ -18,6 +18,8 @@ import 'package:arptc_connect/modules/inventory/presentation/appro_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/inventory_main_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/livraison_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
+import 'package:arptc_connect/modules/itsm/assets_configuration/application/assets_configuration_contracts.dart';
+import 'package:arptc_connect/modules/itsm/assets_configuration/presentation/assets_configuration_presentation.dart';
 import 'package:arptc_connect/modules/itsm/knowledge/presentation/screens/knowledge_article_screen.dart';
 import 'package:arptc_connect/modules/itsm/knowledge/presentation/screens/knowledge_base_screen.dart';
 import 'package:arptc_connect/modules/itsm/knowledge/presentation/screens/knowledge_editor_screen.dart';
@@ -537,16 +539,7 @@ GoRoute _buildItsmRoute() {
           _buildKnowledgeBaseRoute(),
         ],
       ),
-      _buildItsmSectionRoute(
-        ItsmSection.assetsConfiguration,
-        const [
-          ItsmFeature.assets,
-          ItsmFeature.stock,
-          ItsmFeature.licences,
-          ItsmFeature.suppliersWarranties,
-          ItsmFeature.cmdb,
-        ],
-      ),
+      _buildAssetsConfigurationRoute(),
       _buildItsmSectionRoute(
         ItsmSection.changes,
         const [
@@ -576,6 +569,162 @@ GoRoute _buildItsmRoute() {
       ),
     ],
   );
+}
+
+GoRoute _buildAssetsConfigurationRoute() {
+  return GoRoute(
+    path: ItsmSection.assetsConfiguration.route
+        .substring('${ItsmRoutes.root}/'.length),
+    builder: (context, state) => ItsmRouteGuard(
+      section: ItsmSection.assetsConfiguration,
+      requirement: ItsmRouteRequirement.selfService,
+      child: AssetsConfigurationOverviewScreen(
+        onBack: () => context.go(ItsmRoutes.root),
+        onMyAssets: () => context.go(ItsmRoutes.myAssets),
+        onAssetRegister: () => context.go(ItsmRoutes.assetRegister),
+        onStock: () => context.go(ItsmRoutes.stock),
+        onLicences: () => context.go(ItsmRoutes.licences),
+        onSuppliersWarranties: () => context.go(ItsmRoutes.suppliersWarranties),
+        onCmdb: () => context.go(ItsmRoutes.cmdb),
+      ),
+    ),
+    routes: [
+      GoRoute(
+        path: ItsmFeature.assets.routeSegment,
+        redirect: (context, state) => state.matchedLocation == ItsmRoutes.assets
+            ? ItsmRoutes.myAssets
+            : null,
+        routes: [
+          GoRoute(
+            path: 'my',
+            builder: (context, state) => ItsmRouteGuard(
+              section: ItsmSection.assetsConfiguration,
+              feature: ItsmFeature.assets,
+              requirement: ItsmRouteRequirement.selfService,
+              child: MyAssetsScreen(
+                onBack: () => context.go(ItsmRoutes.assetsConfiguration),
+                onAssetSelected: (asset) =>
+                    context.push(ItsmRoutes.myAssetDetail(asset.id)),
+              ),
+            ),
+            routes: [
+              GoRoute(
+                path: ':assetId',
+                builder: (context, state) => ItsmRouteGuard(
+                  section: ItsmSection.assetsConfiguration,
+                  feature: ItsmFeature.assets,
+                  requirement: ItsmRouteRequirement.selfService,
+                  child: AssetDetailScreen(
+                    assetId: state.pathParameters['assetId'] as String,
+                    selfService: true,
+                    onBack: () => context.pop(),
+                    onCatalogueAction: (assetId, action) => context.push(
+                      _assetCatalogueRoute(assetId, action),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: 'register',
+            builder: (context, state) => ItsmRouteGuard(
+              section: ItsmSection.assetsConfiguration,
+              feature: ItsmFeature.assets,
+              requirement: ItsmRouteRequirement.operational,
+              child: AssetRegisterScreen(
+                onBack: () => context.go(ItsmRoutes.assetsConfiguration),
+                onRegisterAsset: showRegisterAssetDialog,
+                onAssetSelected: (asset) =>
+                    context.push(ItsmRoutes.assetRegisterDetail(asset.id)),
+              ),
+            ),
+            routes: [
+              GoRoute(
+                path: ':assetId',
+                builder: (context, state) => ItsmRouteGuard(
+                  section: ItsmSection.assetsConfiguration,
+                  feature: ItsmFeature.assets,
+                  requirement: ItsmRouteRequirement.operational,
+                  child: AssetDetailScreen(
+                    assetId: state.pathParameters['assetId'] as String,
+                    selfService: false,
+                    onBack: () => context.pop(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: ItsmFeature.stock.routeSegment,
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.assetsConfiguration,
+          feature: ItsmFeature.stock,
+          requirement: ItsmRouteRequirement.operational,
+          child: StockScreen(
+            onBack: () => context.go(ItsmRoutes.assetsConfiguration),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: ItsmFeature.licences.routeSegment,
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.assetsConfiguration,
+          feature: ItsmFeature.licences,
+          requirement: ItsmRouteRequirement.operational,
+          child: LicencesScreen(
+            onBack: () => context.go(ItsmRoutes.assetsConfiguration),
+            onAddLicence: showRegisterLicenceDialog,
+            onLicenceSelected: showLicenceActionDialog,
+          ),
+        ),
+      ),
+      GoRoute(
+        path: ItsmFeature.suppliersWarranties.routeSegment,
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.assetsConfiguration,
+          feature: ItsmFeature.suppliersWarranties,
+          requirement: ItsmRouteRequirement.operational,
+          child: SuppliersWarrantiesScreen(
+            onBack: () => context.go(ItsmRoutes.assetsConfiguration),
+            onAddSupplier: showAddSupplierDialog,
+            onAddContract: showAddContractDialog,
+            onAddWarranty: showAddWarrantyDialog,
+            onWarrantySelected: showWarrantyClaimDialog,
+          ),
+        ),
+      ),
+      GoRoute(
+        path: ItsmFeature.cmdb.routeSegment,
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.assetsConfiguration,
+          feature: ItsmFeature.cmdb,
+          requirement: ItsmRouteRequirement.operational,
+          child: CmdbScreen(
+            onBack: () => context.go(ItsmRoutes.assetsConfiguration),
+            onAddConfigurationItem: showAddConfigurationItemDialog,
+            onCreateRelationship: showCreateRelationshipDialog,
+            onRetireRelationship: showRetireRelationshipDialog,
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+String _assetCatalogueRoute(String assetId, AssetCatalogueAction action) {
+  final catalogueItemId = switch (action) {
+    AssetCatalogueAction.reportFault => 'report_it_incident',
+    AssetCatalogueAction.requestRepair => 'equipment_repair',
+    AssetCatalogueAction.requestReplacement => 'equipment_replacement',
+    AssetCatalogueAction.requestConfiguration => 'asset_configuration',
+    AssetCatalogueAction.requestReturn => 'equipment_return_transfer',
+  };
+  return '${ItsmRoutes.serviceRequests}/catalogue/$catalogueItemId/create'
+      '?assetId=${Uri.encodeQueryComponent(assetId)}'
+      '&assetAction=${Uri.encodeQueryComponent(action.name)}';
 }
 
 GoRoute _buildServiceRequestsRoute() {
@@ -621,6 +770,7 @@ GoRoute _buildServiceRequestsRoute() {
               child: CreateServiceRequestScreen(
                 catalogueItemId:
                     state.pathParameters['catalogueItemId'] as String,
+                initialResponses: _assetRequestInitialResponses(state),
                 onSubmitted: (receipt) => context.go(
                   '${ItsmRoutes.myRequests}/'
                   '${Uri.encodeComponent(receipt.requestId)}',
@@ -657,6 +807,17 @@ GoRoute _buildServiceRequestsRoute() {
       ),
     ],
   );
+}
+
+Map<String, Object?> _assetRequestInitialResponses(GoRouterState state) {
+  final queryParameters = Uri.parse(state.location).queryParameters;
+  final assetId = queryParameters['assetId']?.trim() ?? '';
+  if (assetId.isEmpty) return const {};
+  final action = queryParameters['assetAction'];
+  return {
+    'assetId': assetId,
+    if (action == 'requestReturn') 'movementType': 'return',
+  };
 }
 
 GoRoute _buildMyRequestsRoute() {

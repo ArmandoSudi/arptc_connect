@@ -36,6 +36,17 @@ void main() {
         ),
         isTrue,
       );
+      for (final role in [ItsmRole.user, ItsmRole.admin, ItsmRole.manager]) {
+        expect(
+          ItsmRouteAccessPolicy.canAccess(
+            role: role,
+            section: ItsmSection.assetsConfiguration,
+            feature: ItsmFeature.assets,
+          ),
+          isTrue,
+          reason: 'My Assets is a self-service capability for ${role.value}',
+        );
+      }
     });
 
     test('allows manager administration and read-only executive reporting', () {

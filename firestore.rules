@@ -418,6 +418,35 @@ service cloud.firestore {
         );
     }
 
+    function canReadAssetSelfServiceProjection(data) {
+      return isManager() ||
+        (
+          isItsmSelfServiceRole() &&
+          data.keys().hasAll(['assignedUserId', 'isCurrent']) &&
+          data.assignedUserId == request.auth.uid &&
+          data.isCurrent == true
+        );
+    }
+
+    function canReadAssetAssignment(data) {
+      return isManager() ||
+        (
+          isItsmSelfServiceRole() &&
+          data.keys().hasAny(['assignedUserId']) &&
+          data.assignedUserId == request.auth.uid &&
+          (
+            (
+              data.keys().hasAny(['isCurrent']) &&
+              data.isCurrent == true
+            ) ||
+            (
+              data.keys().hasAny(['status']) &&
+              data.status in ['current', 'CURRENT']
+            )
+          )
+        );
+    }
+
     function newsRole() {
       let data = principalData();
       let permissions = data.keys().hasAny(['modulePermissions'])
@@ -919,6 +948,133 @@ service cloud.firestore {
       allow get, list: if signedIn() && hasIncidentAccess();
       allow create, update: if signedIn() && isManager();
       allow delete: if false;
+    }
+
+    match /assets/{assetId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+
+      match /attachments/{attachmentId} {
+        allow get, list: if signedIn() && isManager();
+        allow create, update, delete: if false;
+      }
+
+      match /photographs/{photographId} {
+        allow get, list: if signedIn() && isManager();
+        allow create, update, delete: if false;
+      }
+    }
+
+    match /assetSelfServiceProjections/{projectionId} {
+      allow get, list: if signedIn() &&
+        canReadAssetSelfServiceProjection(resource.data);
+      allow create, update, delete: if false;
+    }
+
+    match /assetModels/{modelId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+    }
+
+    match /assetAssignments/{assignmentId} {
+      allow get, list: if signedIn() &&
+        canReadAssetAssignment(resource.data);
+      allow create, update, delete: if false;
+    }
+
+    match /assetLifecycleEvents/{eventId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+    }
+
+    match /stockLocations/{locationId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+    }
+
+    match /stockItems/{stockItemId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+    }
+
+    match /stockMovements/{movementId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+    }
+
+    match /stockSupportingDocuments/{attachmentId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+    }
+
+    match /softwareLicences/{licenceId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+
+      match /allocations/{allocationId} {
+        allow get, list: if signedIn() && isManager();
+        allow create, update, delete: if false;
+      }
+
+      match /history/{eventId} {
+        allow get, list: if signedIn() && isManager();
+        allow create, update, delete: if false;
+      }
+    }
+
+    match /suppliers/{supplierId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+
+      match /contacts/{contactId} {
+        allow get, list: if signedIn() && isManager();
+        allow create, update, delete: if false;
+      }
+    }
+
+    match /supplierContracts/{contractId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+
+      match /attachments/{attachmentId} {
+        allow get, list: if signedIn() && isManager();
+        allow create, update, delete: if false;
+      }
+    }
+
+    match /warranties/{warrantyId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+
+      match /claims/{claimId} {
+        allow get, list: if signedIn() && isManager();
+        allow create, update, delete: if false;
+
+        match /history/{eventId} {
+          allow get, list: if signedIn() && isManager();
+          allow create, update, delete: if false;
+        }
+      }
+
+      match /attachments/{attachmentId} {
+        allow get, list: if signedIn() && isManager();
+        allow create, update, delete: if false;
+      }
+    }
+
+    match /configurationItems/{configurationItemId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+
+      match /history/{eventId} {
+        allow get, list: if signedIn() && isManager();
+        allow create, update, delete: if false;
+      }
+    }
+
+    match /ciRelationships/{relationshipId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
     }
 
     match /itsmWorkItemIndex/{workItemId} {

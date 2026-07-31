@@ -7,12 +7,15 @@
   },
   "main": "index.js",
   "scripts": {
-    "lint": "node --check index.js && node --check src/incident_archival.js && node --check src/itsm_permissions.js && node --check src/itsm_command_validation.js && node --check src/itsm_idempotency.js && node --check src/itsm_command_service.js && node --check src/itsm_callable_handlers.js && node --check src/itsm_support_validation.js && node --check src/itsm_support_service.js && node --check src/itsm_support_handlers.js && node --check src/itsm_support_triggers.js && node --check src/itsm_support_sla.js",
+    "lint": "node --check index.js && node --check src/incident_archival.js && node --check src/itsm_permissions.js && node --check src/itsm_command_validation.js && node --check src/itsm_idempotency.js && node --check src/itsm_command_service.js && node --check src/itsm_callable_handlers.js && node --check src/itsm_support_validation.js && node --check src/itsm_support_service.js && node --check src/itsm_support_handlers.js && node --check src/itsm_support_triggers.js && node --check src/itsm_support_sla.js && node --check src/itsm_assets_validation.js && node --check src/itsm_assets_service.js && node --check src/itsm_assets_handlers.js && node --check src/itsm_assets_notifications.js && node --check src/itsm_assets_attachment_registration.js",
     "test": "npm run test:unit",
     "test:unit": "node --test test/*.test.js",
     "test:rules": "node --test test/firestore_incident_rules.emulator.js",
-    "test:rules:itsm": "node --test --test-concurrency=1 test/itsm_firestore_rules.emulator.js test/itsm_storage_rules.emulator.js test/itsm_support_firestore_rules.emulator.js test/itsm_support_storage_rules.emulator.js",
-    "test:rules:support": "node --test --test-concurrency=1 test/itsm_support_firestore_rules.emulator.js test/itsm_support_storage_rules.emulator.js"
+    "test:rules:itsm": "node --test --test-concurrency=1 test/itsm_firestore_rules.emulator.js test/itsm_storage_rules.emulator.js test/itsm_support_firestore_rules.emulator.js test/itsm_support_storage_rules.emulator.js test/itsm_assets_firestore_rules.emulator.js test/itsm_assets_storage_rules.emulator.js",
+    "test:rules:support": "node --test --test-concurrency=1 test/itsm_support_firestore_rules.emulator.js test/itsm_support_storage_rules.emulator.js",
+    "test:rules:assets": "node --test --test-concurrency=1 test/itsm_assets_firestore_rules.emulator.js test/itsm_assets_storage_rules.emulator.js",
+    "test:emulator:assets": "node --test --test-concurrency=1 test/itsm_assets_firestore_rules.emulator.js test/itsm_assets_storage_rules.emulator.js test/itsm_assets_integration.emulator.js",
+    "test:emulator:assets:callable": "node --test --test-concurrency=1 test/itsm_assets_callable.emulator.js"
   },
   "dependencies": {
     "firebase-admin": "^12.7.0",

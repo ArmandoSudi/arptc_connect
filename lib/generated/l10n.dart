@@ -20,7 +20,8 @@ class S {
 
   static Future<S> load(Locale locale) async {
     final localeName = _supportedLanguageCodes.contains(locale.languageCode)
-        ? locale.languageCode : 'en';
+        ? locale.languageCode
+        : 'en';
     final instance = S._(
       localeName,
       _localizedValues[localeName] ?? _localizedValues['en']!,
@@ -166,7 +167,8 @@ class S {
   String get homeNewsDescription => _text('homeNewsDescription');
   String get companyNews => _text('companyNews');
   String get noCompanyNewsYet => _text('noCompanyNewsYet');
-  String get publishedInformationWillAppearHere => _text('publishedInformationWillAppearHere');
+  String get publishedInformationWillAppearHere =>
+      _text('publishedInformationWillAppearHere');
   String get loadingCompanyNews => _text('loadingCompanyNews');
   String get unableToLoadCompanyNews => _text('unableToLoadCompanyNews');
   String get news => _text('news');
@@ -187,7 +189,8 @@ class S {
   String get serviceWelcome => _text('serviceWelcome');
   String get loadingModules => _text('loadingModules');
   String get noAuthorizedModule => _text('noAuthorizedModule');
-  String get noAuthorizedModuleDescription => _text('noAuthorizedModuleDescription');
+  String get noAuthorizedModuleDescription =>
+      _text('noAuthorizedModuleDescription');
   String get moduleTasksName => _text('moduleTasksName');
   String get moduleTasksDescription => _text('moduleTasksDescription');
   String get moduleInventoryName => _text('moduleInventoryName');
@@ -201,13 +204,17 @@ class S {
   String get itsmSupport => _text('itsmSupport');
   String get itsmSupportDescription => _text('itsmSupportDescription');
   String get itsmAssetsConfiguration => _text('itsmAssetsConfiguration');
-  String get itsmAssetsConfigurationDescription => _text('itsmAssetsConfigurationDescription');
+  String get itsmAssetsConfigurationDescription =>
+      _text('itsmAssetsConfigurationDescription');
   String get itsmChanges => _text('itsmChanges');
   String get itsmChangesDescription => _text('itsmChangesDescription');
   String get itsmSecurityCompliance => _text('itsmSecurityCompliance');
-  String get itsmSecurityComplianceDescription => _text('itsmSecurityComplianceDescription');
-  String get itsmReportingAdministration => _text('itsmReportingAdministration');
-  String get itsmReportingAdministrationDescription => _text('itsmReportingAdministrationDescription');
+  String get itsmSecurityComplianceDescription =>
+      _text('itsmSecurityComplianceDescription');
+  String get itsmReportingAdministration =>
+      _text('itsmReportingAdministration');
+  String get itsmReportingAdministrationDescription =>
+      _text('itsmReportingAdministrationDescription');
   String get itsmIncidents => _text('itsmIncidents');
   String get itsmServiceRequests => _text('itsmServiceRequests');
   String get itsmMyRequests => _text('itsmMyRequests');
@@ -252,20 +259,24 @@ class S {
   String get itsmWorkflowConfiguration => _text('itsmWorkflowConfiguration');
   String get itsmAuditLogs => _text('itsmAuditLogs');
   String get itsmFeatureCardDescription => _text('itsmFeatureCardDescription');
-  String get itsmFeatureUnavailableDescription => _text('itsmFeatureUnavailableDescription');
+  String get itsmFeatureUnavailableDescription =>
+      _text('itsmFeatureUnavailableDescription');
   String get itsmAccessDeniedTitle => _text('itsmAccessDeniedTitle');
-  String get itsmAccessDeniedDescription => _text('itsmAccessDeniedDescription');
+  String get itsmAccessDeniedDescription =>
+      _text('itsmAccessDeniedDescription');
   String get itsmLoadingAccess => _text('itsmLoadingAccess');
   String get itsmUnableToLoadAccess => _text('itsmUnableToLoadAccess');
   String get moduleUserManagementName => _text('moduleUserManagementName');
-  String get moduleUserManagementDescription => _text('moduleUserManagementDescription');
+  String get moduleUserManagementDescription =>
+      _text('moduleUserManagementDescription');
   String get moduleNewsName => _text('moduleNewsName');
   String get moduleNewsDescription => _text('moduleNewsDescription');
   String get moduleCourrierName => _text('moduleCourrierName');
   String get moduleCourrierDescription => _text('moduleCourrierDescription');
   String get profile => _text('profile');
   String get profileUnavailable => _text('profileUnavailable');
-  String get profileUnavailableDescription => _text('profileUnavailableDescription');
+  String get profileUnavailableDescription =>
+      _text('profileUnavailableDescription');
   String get connectedAgentInformation => _text('connectedAgentInformation');
   String get agentInformation => _text('agentInformation');
   String get noFields => _text('noFields');
@@ -275,10 +286,13 @@ class S {
   String get unableToLoadProfile => _text('unableToLoadProfile');
   String get enableNotifications => _text('enableNotifications');
   String get notificationsEnabled => _text('notificationsEnabled');
-  String get notificationPermissionNotGranted => _text('notificationPermissionNotGranted');
-  String get unableToEnableNotifications => _text('unableToEnableNotifications');
+  String get notificationPermissionNotGranted =>
+      _text('notificationPermissionNotGranted');
+  String get unableToEnableNotifications =>
+      _text('unableToEnableNotifications');
   String get webPushNotConfigured => _text('webPushNotConfigured');
-  String get webPushNotConfiguredDescription => _text('webPushNotConfiguredDescription');
+  String get webPushNotConfiguredDescription =>
+      _text('webPushNotConfiguredDescription');
   String get webPushNotConfiguredAction => _text('webPushNotConfiguredAction');
   String get disableNotifications => _text('disableNotifications');
   String get notificationsBlocked => _text('notificationsBlocked');
@@ -286,17 +300,20 @@ class S {
       _format('notificationsEnabledForPlatform', {
         'platform': platform,
       });
-  String get notificationsProvisionallyEnabled => _text('notificationsProvisionallyEnabled');
+  String get notificationsProvisionallyEnabled =>
+      _text('notificationsProvisionallyEnabled');
   String notificationsBlockedForPlatform(Object? platform) =>
       _format('notificationsBlockedForPlatform', {
         'platform': platform,
       });
   String get allowNotificationsPrompt => _text('allowNotificationsPrompt');
-  String get disableNotificationsWindows => _text('disableNotificationsWindows');
+  String get disableNotificationsWindows =>
+      _text('disableNotificationsWindows');
   String get disableNotificationsMac => _text('disableNotificationsMac');
   String get disableNotificationsWeb => _text('disableNotificationsWeb');
   String get disableNotificationsDevice => _text('disableNotificationsDevice');
-  String get blockedNotificationsWindows => _text('blockedNotificationsWindows');
+  String get blockedNotificationsWindows =>
+      _text('blockedNotificationsWindows');
   String get blockedNotificationsMac => _text('blockedNotificationsMac');
   String get blockedNotificationsWeb => _text('blockedNotificationsWeb');
   String get blockedNotificationsDevice => _text('blockedNotificationsDevice');
@@ -314,18 +331,23 @@ class S {
   String get incidentManagement => _text('incidentManagement');
   String get incidentSupport => _text('incidentSupport');
   String get incidentOperations => _text('incidentOperations');
-  String get incidentOperationsDescription => _text('incidentOperationsDescription');
+  String get incidentOperationsDescription =>
+      _text('incidentOperationsDescription');
   String get incidentSupervision => _text('incidentSupervision');
-  String get incidentSupervisionDescription => _text('incidentSupervisionDescription');
+  String get incidentSupervisionDescription =>
+      _text('incidentSupervisionDescription');
   String get newIncident => _text('newIncident');
   String get newSupportIncident => _text('newSupportIncident');
   String get submitSupportTicket => _text('submitSupportTicket');
   String get submitTicket => _text('submitTicket');
   String get submitting => _text('submitting');
-  String get createIncidentManagerDescription => _text('createIncidentManagerDescription');
-  String get createIncidentUserDescription => _text('createIncidentUserDescription');
+  String get createIncidentManagerDescription =>
+      _text('createIncidentManagerDescription');
+  String get createIncidentUserDescription =>
+      _text('createIncidentUserDescription');
   String get readOnlyIncidentAccess => _text('readOnlyIncidentAccess');
-  String get onlyUsersAndManagersCreateIncidents => _text('onlyUsersAndManagersCreateIncidents');
+  String get onlyUsersAndManagersCreateIncidents =>
+      _text('onlyUsersAndManagersCreateIncidents');
   String get titleExampleEmailAccess => _text('titleExampleEmailAccess');
   String get shortDescription => _text('shortDescription');
   String get describeIssue => _text('describeIssue');
@@ -335,7 +357,8 @@ class S {
   String get thisIssueBlocksMyWork => _text('thisIssueBlocksMyWork');
   String get blockingWorkDescription => _text('blockingWorkDescription');
   String get managerCategorization => _text('managerCategorization');
-  String get managerCategorizationDescription => _text('managerCategorizationDescription');
+  String get managerCategorizationDescription =>
+      _text('managerCategorizationDescription');
   String get affectedAgent => _text('affectedAgent');
   String get searchAffectedAgentHint => _text('searchAffectedAgentHint');
   String get searchByNameEmailMatricule => _text('searchByNameEmailMatricule');
@@ -352,7 +375,8 @@ class S {
   String get selectCategory => _text('selectCategory');
   String get selectImpact => _text('selectImpact');
   String get selectUrgency => _text('selectUrgency');
-  String get completeCategoryImpactUrgency => _text('completeCategoryImpactUrgency');
+  String get completeCategoryImpactUrgency =>
+      _text('completeCategoryImpactUrgency');
   String get openTickets => _text('openTickets');
   String get openTicketsSubtitle => _text('openTicketsSubtitle');
   String get unassignedTickets => _text('unassignedTickets');
@@ -365,11 +389,14 @@ class S {
   String get closedThisWeek => _text('closedThisWeek');
   String get parameters => _text('parameters');
   String get operationalQueue => _text('operationalQueue');
-  String get operationalQueueDescription => _text('operationalQueueDescription');
+  String get operationalQueueDescription =>
+      _text('operationalQueueDescription');
   String get noActiveIncident => _text('noActiveIncident');
-  String get newOperationalTicketsWillAppearHere => _text('newOperationalTicketsWillAppearHere');
+  String get newOperationalTicketsWillAppearHere =>
+      _text('newOperationalTicketsWillAppearHere');
   String get myAssignedTickets => _text('myAssignedTickets');
-  String get myAssignedTicketsDescription => _text('myAssignedTicketsDescription');
+  String get myAssignedTicketsDescription =>
+      _text('myAssignedTicketsDescription');
   String get ticketsByPriority => _text('ticketsByPriority');
   String get ticketsByStatus => _text('ticketsByStatus');
   String get ticketsByAffectedService => _text('ticketsByAffectedService');
@@ -378,14 +405,20 @@ class S {
   String get priority => _text('priority');
   String get age => _text('age');
   String get createdAtColumn => _text('createdAtColumn');
-  String get openTicketsQueueDescription => _text('openTicketsQueueDescription');
-  String get unassignedTicketsQueueDescription => _text('unassignedTicketsQueueDescription');
-  String get assignedToMeQueueDescription => _text('assignedToMeQueueDescription');
-  String get solvedTicketsQueueDescription => _text('solvedTicketsQueueDescription');
+  String get openTicketsQueueDescription =>
+      _text('openTicketsQueueDescription');
+  String get unassignedTicketsQueueDescription =>
+      _text('unassignedTicketsQueueDescription');
+  String get assignedToMeQueueDescription =>
+      _text('assignedToMeQueueDescription');
+  String get solvedTicketsQueueDescription =>
+      _text('solvedTicketsQueueDescription');
   String get closedTicketHistory => _text('closedTicketHistory');
-  String get closedTicketHistoryDescription => _text('closedTicketHistoryDescription');
+  String get closedTicketHistoryDescription =>
+      _text('closedTicketHistoryDescription');
   String get noClosedTicketsHistory => _text('noClosedTicketsHistory');
-  String get noClosedTicketsHistoryDescription => _text('noClosedTicketsHistoryDescription');
+  String get noClosedTicketsHistoryDescription =>
+      _text('noClosedTicketsHistoryDescription');
   String get noTicketsFound => _text('noTicketsFound');
   String get queueEmpty => _text('queueEmpty');
   String get tryAnotherSearchOrStatus => _text('tryAnotherSearchOrStatus');
@@ -408,8 +441,10 @@ class S {
   String get resolutionCodeHint => _text('resolutionCodeHint');
   String get resolutionCodes => _text('resolutionCodes');
   String get selectResolutionCode => _text('selectResolutionCode');
-  String get selectResolutionCodeBeforeSolved => _text('selectResolutionCodeBeforeSolved');
-  String get selectResolutionCodeBeforeClosing => _text('selectResolutionCodeBeforeClosing');
+  String get selectResolutionCodeBeforeSolved =>
+      _text('selectResolutionCodeBeforeSolved');
+  String get selectResolutionCodeBeforeClosing =>
+      _text('selectResolutionCodeBeforeClosing');
   String get closedAt => _text('closedAt');
   String get archiveEligible => _text('archiveEligible');
   String get internalNotes => _text('internalNotes');
@@ -418,16 +453,23 @@ class S {
   String get adding => _text('adding');
   String get internalNoteAdded => _text('internalNoteAdded');
   String get workflowStepSubmitTicket => _text('workflowStepSubmitTicket');
-  String get workflowStepSubmitTicketDescription => _text('workflowStepSubmitTicketDescription');
-  String get workflowStepCategorizeTicket => _text('workflowStepCategorizeTicket');
-  String get workflowStepCategorizeOpenDescription => _text('workflowStepCategorizeOpenDescription');
-  String get workflowStepCategorizeActiveDescription => _text('workflowStepCategorizeActiveDescription');
+  String get workflowStepSubmitTicketDescription =>
+      _text('workflowStepSubmitTicketDescription');
+  String get workflowStepCategorizeTicket =>
+      _text('workflowStepCategorizeTicket');
+  String get workflowStepCategorizeOpenDescription =>
+      _text('workflowStepCategorizeOpenDescription');
+  String get workflowStepCategorizeActiveDescription =>
+      _text('workflowStepCategorizeActiveDescription');
   String get workflowStepAssignTicket => _text('workflowStepAssignTicket');
-  String get workflowStepAssignTicketDescription => _text('workflowStepAssignTicketDescription');
+  String get workflowStepAssignTicketDescription =>
+      _text('workflowStepAssignTicketDescription');
   String get workflowStepSolveTicket => _text('workflowStepSolveTicket');
-  String get workflowStepSolveTicketDescription => _text('workflowStepSolveTicketDescription');
+  String get workflowStepSolveTicketDescription =>
+      _text('workflowStepSolveTicketDescription');
   String get workflowStepCloseTicket => _text('workflowStepCloseTicket');
-  String get workflowStepCloseTicketDescription => _text('workflowStepCloseTicketDescription');
+  String get workflowStepCloseTicketDescription =>
+      _text('workflowStepCloseTicketDescription');
   String get categorizeTicket => _text('categorizeTicket');
   String get categorizing => _text('categorizing');
   String get ticketCategorized => _text('ticketCategorized');
@@ -446,35 +488,45 @@ class S {
   String get keepTicket => _text('keepTicket');
   String get cancelling => _text('cancelling');
   String get ticketCancelled => _text('ticketCancelled');
-  String get selectServiceCategoryImpactUrgency => _text('selectServiceCategoryImpactUrgency');
+  String get selectServiceCategoryImpactUrgency =>
+      _text('selectServiceCategoryImpactUrgency');
   String get selectItStaffAssignee => _text('selectItStaffAssignee');
-  String get enterResolutionSummaryBeforeSolved => _text('enterResolutionSummaryBeforeSolved');
-  String get enterResolutionSummaryBeforeClosing => _text('enterResolutionSummaryBeforeClosing');
+  String get enterResolutionSummaryBeforeSolved =>
+      _text('enterResolutionSummaryBeforeSolved');
+  String get enterResolutionSummaryBeforeClosing =>
+      _text('enterResolutionSummaryBeforeClosing');
   String get myIncidents => _text('myIncidents');
   String get createAndFollowIncidents => _text('createAndFollowIncidents');
   String get activeIncidents => _text('activeIncidents');
   String get closedAndArchived => _text('closedAndArchived');
-  String get noActiveIncidentUserDescription => _text('noActiveIncidentUserDescription');
+  String get noActiveIncidentUserDescription =>
+      _text('noActiveIncidentUserDescription');
   String get noClosedIncident => _text('noClosedIncident');
-  String get closedAndArchivedDescription => _text('closedAndArchivedDescription');
+  String get closedAndArchivedDescription =>
+      _text('closedAndArchivedDescription');
   String get loadingIncidents => _text('loadingIncidents');
   String get unableToLoadIncidents => _text('unableToLoadIncidents');
   String get incidentAccessUnavailable => _text('incidentAccessUnavailable');
-  String get incidentAccessUnavailableDescription => _text('incidentAccessUnavailableDescription');
+  String get incidentAccessUnavailableDescription =>
+      _text('incidentAccessUnavailableDescription');
   String get noIncidentDashboardAccess => _text('noIncidentDashboardAccess');
   String get loadingIncidentAccess => _text('loadingIncidentAccess');
-  String get loadingIncidentDashboardAccess => _text('loadingIncidentDashboardAccess');
+  String get loadingIncidentDashboardAccess =>
+      _text('loadingIncidentDashboardAccess');
   String get unableToLoadIncidentAccess => _text('unableToLoadIncidentAccess');
-  String get unableToLoadIncidentDashboardAccess => _text('unableToLoadIncidentDashboardAccess');
+  String get unableToLoadIncidentDashboardAccess =>
+      _text('unableToLoadIncidentDashboardAccess');
   String get incidentParameters => _text('incidentParameters');
-  String get incidentParametersDescription => _text('incidentParametersDescription');
+  String get incidentParametersDescription =>
+      _text('incidentParametersDescription');
   String get addItService => _text('addItService');
   String get addCategory => _text('addCategory');
   String get addResolutionCode => _text('addResolutionCode');
   String get editResolutionCode => _text('editResolutionCode');
   String get noResolutionCodes => _text('noResolutionCodes');
   String get resolutionCodeIdentifier => _text('resolutionCodeIdentifier');
-  String get resolutionCodeIdentifierHint => _text('resolutionCodeIdentifierHint');
+  String get resolutionCodeIdentifierHint =>
+      _text('resolutionCodeIdentifierHint');
   String get resolutionCodeLabelEnglish => _text('resolutionCodeLabelEnglish');
   String get resolutionCodeLabelFrench => _text('resolutionCodeLabelFrench');
   String get totalIncidentsThisMonth => _text('totalIncidentsThisMonth');
@@ -484,8 +536,10 @@ class S {
   String get ticketsByCategory => _text('ticketsByCategory');
   String get ticketsByDepartment => _text('ticketsByDepartment');
   String get recentCriticalTickets => _text('recentCriticalTickets');
-  String get recentCriticalTicketsDescription => _text('recentCriticalTicketsDescription');
-  String get criticalTicketsWillAppearHere => _text('criticalTicketsWillAppearHere');
+  String get recentCriticalTicketsDescription =>
+      _text('recentCriticalTicketsDescription');
+  String get criticalTicketsWillAppearHere =>
+      _text('criticalTicketsWillAppearHere');
   String get adminReadOnly => _text('adminReadOnly');
   String get incidentStatusOpen => _text('incidentStatusOpen');
   String get incidentStatusCategorized => _text('incidentStatusCategorized');
@@ -504,13 +558,15 @@ class S {
   String get incidentUrgencyLow => _text('incidentUrgencyLow');
   String get incidentUrgencyMedium => _text('incidentUrgencyMedium');
   String get incidentUrgencyHigh => _text('incidentUrgencyHigh');
-  String get incidentPriorityUnprioritized => _text('incidentPriorityUnprioritized');
+  String get incidentPriorityUnprioritized =>
+      _text('incidentPriorityUnprioritized');
   String get incidentRoleNoAccess => _text('incidentRoleNoAccess');
   String get incidentRoleUser => _text('incidentRoleUser');
   String get incidentRoleManager => _text('incidentRoleManager');
   String get incidentRoleAdmin => _text('incidentRoleAdmin');
   String get userManagement => _text('userManagement');
-  String get manageDepartmentsServicesBureauxAgents => _text('manageDepartmentsServicesBureauxAgents');
+  String get manageDepartmentsServicesBureauxAgents =>
+      _text('manageDepartmentsServicesBureauxAgents');
   String get addDepartment => _text('addDepartment');
   String get addService => _text('addService');
   String get addBureau => _text('addBureau');
@@ -547,8 +603,7 @@ class S {
   String get cartDescription => _text('cartDescription');
   String get deliver => _text('deliver');
   String get restock => _text('restock');
-  String totalArticles(Object? count) =>
-      _format('totalArticles', {
+  String totalArticles(Object? count) => _format('totalArticles', {
         'count': count,
       });
   String get selectDirection => _text('selectDirection');
@@ -573,11 +628,11 @@ class S {
   String get taskNotFound => _text('taskNotFound');
   String get taskLoadFailed => _text('taskLoadFailed');
   String get taskAccessDenied => _text('taskAccessDenied');
-  String get taskDepartmentMissingDescription => _text('taskDepartmentMissingDescription');
+  String get taskDepartmentMissingDescription =>
+      _text('taskDepartmentMissingDescription');
   String get adminReadOnlyTask => _text('adminReadOnlyTask');
   String get allDepartmentTasks => _text('allDepartmentTasks');
-  String departmentTasks(Object? department) =>
-      _format('departmentTasks', {
+  String departmentTasks(Object? department) => _format('departmentTasks', {
         'department': department,
       });
   String get loadingTasks => _text('loadingTasks');
@@ -601,8 +656,7 @@ class S {
   String get upload => _text('upload');
   String get uploading => _text('uploading');
   String get uploadSuccessful => _text('uploadSuccessful');
-  String uploadFailed(Object? error) =>
-      _format('uploadFailed', {
+  String uploadFailed(Object? error) => _format('uploadFailed', {
         'error': error,
       });
   String get uploadedSuccessfully => _text('uploadedSuccessfully');
@@ -627,8 +681,7 @@ class S {
         'taskLabel': taskLabel,
       });
   String get taskDeleted => _text('taskDeleted');
-  String taskDeleteFailed(Object? error) =>
-      _format('taskDeleteFailed', {
+  String taskDeleteFailed(Object? error) => _format('taskDeleteFailed', {
         'error': error,
       });
   String get departmentRequired => _text('departmentRequired');
@@ -649,7 +702,8 @@ class S {
   String get emissionDate => _text('emissionDate');
   String get weeklyReport => _text('weeklyReport');
   String get weeklyReportFileName => _text('weeklyReportFileName');
-  String get informationSystemsDepartment => _text('informationSystemsDepartment');
+  String get informationSystemsDepartment =>
+      _text('informationSystemsDepartment');
   String get projectsOtherProcessing => _text('projectsOtherProcessing');
   String get social => _text('social');
   String get socialDashboard => _text('socialDashboard');
@@ -674,8 +728,10 @@ class S {
   String get unableToLoadRefunds => _text('unableToLoadRefunds');
   String get loadingRefunds => _text('loadingRefunds');
   String get noRefundsYet => _text('noRefundsYet');
-  String get refundRequestsWillAppearHere => _text('refundRequestsWillAppearHere');
-  String get addDependantsToRequestVouchers => _text('addDependantsToRequestVouchers');
+  String get refundRequestsWillAppearHere =>
+      _text('refundRequestsWillAppearHere');
+  String get addDependantsToRequestVouchers =>
+      _text('addDependantsToRequestVouchers');
   String get meetingRooms => _text('meetingRooms');
   String get meetingRoom => _text('meetingRoom');
   String get noMeetingRoomsAvailable => _text('noMeetingRoomsAvailable');
@@ -687,8 +743,7 @@ class S {
   String get available => _text('available');
   String get unavailable => _text('unavailable');
   String get capacity => _text('capacity');
-  String capacityPeople(Object? count) =>
-      _format('capacityPeople', {
+  String capacityPeople(Object? count) => _format('capacityPeople', {
         'count': count,
       });
   String get roomLocation => _text('roomLocation');
@@ -702,7 +757,8 @@ class S {
   String get mainDashboard => _text('mainDashboard');
   String get loadingStatistics => _text('loadingStatistics');
   String get errorLoadingData => _text('errorLoadingData');
-  String get failedToLoadDashboardStatistics => _text('failedToLoadDashboardStatistics');
+  String get failedToLoadDashboardStatistics =>
+      _text('failedToLoadDashboardStatistics');
   String get dashboardDataDoesNotExist => _text('dashboardDataDoesNotExist');
   String get chartMedicalVouchers => _text('chartMedicalVouchers');
   String get monthJanuaryShort => _text('monthJanuaryShort');
@@ -727,7 +783,8 @@ class S {
   String get moduleRoleReviewer => _text('moduleRoleReviewer');
   String get moduleRoleNone => _text('moduleRoleNone');
   String get permissionAdminDescription => _text('permissionAdminDescription');
-  String get permissionManagerDescription => _text('permissionManagerDescription');
+  String get permissionManagerDescription =>
+      _text('permissionManagerDescription');
   String get permissionUserDescription => _text('permissionUserDescription');
   String get permissionNoneDescription => _text('permissionNoneDescription');
   String get requiredField => _text('requiredField');
@@ -739,7 +796,8 @@ class S {
   String get selectRole => _text('selectRole');
   String get selectModule => _text('selectModule');
   String get searchByName => _text('searchByName');
-  String get searchByNameEmailOrMatricule => _text('searchByNameEmailOrMatricule');
+  String get searchByNameEmailOrMatricule =>
+      _text('searchByNameEmailOrMatricule');
   String get noResults => _text('noResults');
   String get noItems => _text('noItems');
   String get emptyList => _text('emptyList');
@@ -761,17 +819,20 @@ class S {
   String get relation => _text('relation');
   String get beneficiary => _text('beneficiary');
   String get serviceCatalogueTitle => _text('serviceCatalogueTitle');
-  String get serviceCatalogueDescription => _text('serviceCatalogueDescription');
+  String get serviceCatalogueDescription =>
+      _text('serviceCatalogueDescription');
   String get serviceCatalogueSearchHint => _text('serviceCatalogueSearchHint');
   String get serviceCatalogueEmpty => _text('serviceCatalogueEmpty');
-  String get serviceCatalogueEmptyDescription => _text('serviceCatalogueEmptyDescription');
+  String get serviceCatalogueEmptyDescription =>
+      _text('serviceCatalogueEmptyDescription');
   String get browseCatalogue => _text('browseCatalogue');
   String get allCatalogueCategories => _text('allCatalogueCategories');
   String get requestThisService => _text('requestThisService');
   String get createServiceRequest => _text('createServiceRequest');
   String get serviceRequestDetails => _text('serviceRequestDetails');
   String get serviceRequestQueue => _text('serviceRequestQueue');
-  String get serviceRequestQueueDescription => _text('serviceRequestQueueDescription');
+  String get serviceRequestQueueDescription =>
+      _text('serviceRequestQueueDescription');
   String get requestOnBehalfOf => _text('requestOnBehalfOf');
   String get requestedFor => _text('requestedFor');
   String get requestSubmitted => _text('requestSubmitted');
@@ -795,7 +856,8 @@ class S {
   String get loadingMore => _text('loadingMore');
   String get requestStatusDraft => _text('requestStatusDraft');
   String get requestStatusSubmitted => _text('requestStatusSubmitted');
-  String get requestStatusAwaitingApproval => _text('requestStatusAwaitingApproval');
+  String get requestStatusAwaitingApproval =>
+      _text('requestStatusAwaitingApproval');
   String get requestStatusApproved => _text('requestStatusApproved');
   String get requestStatusAssigned => _text('requestStatusAssigned');
   String get requestStatusInFulfilment => _text('requestStatusInFulfilment');
@@ -838,7 +900,8 @@ class S {
   String get recentArticles => _text('recentArticles');
   String get knowledgeArticleDetails => _text('knowledgeArticleDetails');
   String get noKnowledgeArticles => _text('noKnowledgeArticles');
-  String get noKnowledgeArticlesDescription => _text('noKnowledgeArticlesDescription');
+  String get noKnowledgeArticlesDescription =>
+      _text('noKnowledgeArticlesDescription');
   String get loadingKnowledge => _text('loadingKnowledge');
   String get unableToLoadKnowledge => _text('unableToLoadKnowledge');
   String get wasThisHelpful => _text('wasThisHelpful');
@@ -872,7 +935,8 @@ class S {
   String get relatedCatalogueItems => _text('relatedCatalogueItems');
   String get relatedIncidentCategories => _text('relatedIncidentCategories');
   String get suggestedKnowledge => _text('suggestedKnowledge');
-  String get suggestedKnowledgeDescription => _text('suggestedKnowledgeDescription');
+  String get suggestedKnowledgeDescription =>
+      _text('suggestedKnowledgeDescription');
   String get viewArticle => _text('viewArticle');
   String get knowledgeAttachments => _text('knowledgeAttachments');
   String get knowledgeAttachmentsHint => _text('knowledgeAttachmentsHint');
@@ -880,6 +944,237 @@ class S {
   String get operationalActions => _text('operationalActions');
   String get readOnlyAccess => _text('readOnlyAccess');
   String get readOnlyAccessDescription => _text('readOnlyAccessDescription');
+  String get assetConfigurationOverview => _text('assetConfigurationOverview');
+  String get assetConfigurationOverviewDescription =>
+      _text('assetConfigurationOverviewDescription');
+  String get myAssets => _text('myAssets');
+  String get myAssetsDescription => _text('myAssetsDescription');
+  String get assetRegister => _text('assetRegister');
+  String get assetRegisterDescription => _text('assetRegisterDescription');
+  String get noAssetsAssigned => _text('noAssetsAssigned');
+  String get noAssetsFound => _text('noAssetsFound');
+  String get unableToLoadAssets => _text('unableToLoadAssets');
+  String get searchAssets => _text('searchAssets');
+  String get assetTag => _text('assetTag');
+  String get serialNumber => _text('serialNumber');
+  String get brand => _text('brand');
+  String get model => _text('model');
+  String get condition => _text('condition');
+  String get custodian => _text('custodian');
+  String get acquisitionDate => _text('acquisitionDate');
+  String get acquisitionCost => _text('acquisitionCost');
+  String get supplier => _text('supplier');
+  String get warranty => _text('warranty');
+  String get securityBaseline => _text('securityBaseline');
+  String get lifecycleHistory => _text('lifecycleHistory');
+  String get assetPhotographs => _text('assetPhotographs');
+  String get reportAssetFault => _text('reportAssetFault');
+  String get requestAssetRepair => _text('requestAssetRepair');
+  String get requestAssetReplacement => _text('requestAssetReplacement');
+  String get requestAssetConfiguration => _text('requestAssetConfiguration');
+  String get requestAssetReturn => _text('requestAssetReturn');
+  String get assetActionCreatesRequest => _text('assetActionCreatesRequest');
+  String get stockManagement => _text('stockManagement');
+  String get stockManagementDescription => _text('stockManagementDescription');
+  String get stockLocations => _text('stockLocations');
+  String get stockItems => _text('stockItems');
+  String get stockMovements => _text('stockMovements');
+  String get quantityOnHand => _text('quantityOnHand');
+  String get quantityReserved => _text('quantityReserved');
+  String get quantityAvailable => _text('quantityAvailable');
+  String get minimumStockThreshold => _text('minimumStockThreshold');
+  String get lowStock => _text('lowStock');
+  String get movementType => _text('movementType');
+  String get movementReceipt => _text('movementReceipt');
+  String get movementReservation => _text('movementReservation');
+  String get movementIssue => _text('movementIssue');
+  String get movementReturn => _text('movementReturn');
+  String get movementTransfer => _text('movementTransfer');
+  String get movementAdjustment => _text('movementAdjustment');
+  String get movementReconciliation => _text('movementReconciliation');
+  String get sourceLocation => _text('sourceLocation');
+  String get destinationLocation => _text('destinationLocation');
+  String get recipient => _text('recipient');
+  String get relatedRequest => _text('relatedRequest');
+  String get supportingDocument => _text('supportingDocument');
+  String get softwareLicences => _text('softwareLicences');
+  String get softwareLicencesDescription =>
+      _text('softwareLicencesDescription');
+  String get softwareProduct => _text('softwareProduct');
+  String get vendor => _text('vendor');
+  String get licenceType => _text('licenceType');
+  String get purchasedQuantity => _text('purchasedQuantity');
+  String get allocatedQuantity => _text('allocatedQuantity');
+  String get availableQuantity => _text('availableQuantity');
+  String get effectiveDate => _text('effectiveDate');
+  String get renewalDate => _text('renewalDate');
+  String get complianceStatus => _text('complianceStatus');
+  String get licenceAssignments => _text('licenceAssignments');
+  String get suppliersWarrantiesDescription =>
+      _text('suppliersWarrantiesDescription');
+  String get supplierRegister => _text('supplierRegister');
+  String get contracts => _text('contracts');
+  String get supportTerms => _text('supportTerms');
+  String get contractStart => _text('contractStart');
+  String get contractEnd => _text('contractEnd');
+  String get warrantyCoverage => _text('warrantyCoverage');
+  String get warrantyExpiration => _text('warrantyExpiration');
+  String get warrantyClaims => _text('warrantyClaims');
+  String get configurationManagementDatabase =>
+      _text('configurationManagementDatabase');
+  String get cmdbDescription => _text('cmdbDescription');
+  String get configurationItems => _text('configurationItems');
+  String get ciType => _text('ciType');
+  String get ciOwner => _text('ciOwner');
+  String get supportGroup => _text('supportGroup');
+  String get criticality => _text('criticality');
+  String get operationalStatus => _text('operationalStatus');
+  String get configurationBaseline => _text('configurationBaseline');
+  String get dataQualityStatus => _text('dataQualityStatus');
+  String get relationships => _text('relationships');
+  String get impactView => _text('impactView');
+  String get dependencyView => _text('dependencyView');
+  String get dependsOn => _text('dependsOn');
+  String get runsOn => _text('runsOn');
+  String get connectedTo => _text('connectedTo');
+  String get uses => _text('uses');
+  String get representedBy => _text('representedBy');
+  String get managerOperationalAccessRequired =>
+      _text('managerOperationalAccessRequired');
+  String get assetCommandCompleted => _text('assetCommandCompleted');
+  String get stockMovementCompleted => _text('stockMovementCompleted');
+  String get licenceOperationCompleted => _text('licenceOperationCompleted');
+  String get registerNewAsset => _text('registerNewAsset');
+  String get registerNewLicence => _text('registerNewLicence');
+  String get allocateLicence => _text('allocateLicence');
+  String get releaseLicence => _text('releaseLicence');
+  String get saveSupplier => _text('saveSupplier');
+  String get saveContract => _text('saveContract');
+  String get saveWarranty => _text('saveWarranty');
+  String get recordWarrantyClaim => _text('recordWarrantyClaim');
+  String get saveConfigurationItem => _text('saveConfigurationItem');
+  String get createRelationship => _text('createRelationship');
+  String get retireRelationship => _text('retireRelationship');
+  String get configurationOperationCompleted =>
+      _text('configurationOperationCompleted');
+  String get recordIdentifier => _text('recordIdentifier');
+  String get categoryId => _text('categoryId');
+  String get supplierId => _text('supplierId');
+  String get contractId => _text('contractId');
+  String get warrantyId => _text('warrantyId');
+  String get claimId => _text('claimId');
+  String get allocationId => _text('allocationId');
+  String get assigneeId => _text('assigneeId');
+  String get assigneeName => _text('assigneeName');
+  String get assignmentType => _text('assignmentType');
+  String get contactName => _text('contactName');
+  String get legalName => _text('legalName');
+  String get contractNumber => _text('contractNumber');
+  String get warrantyNumber => _text('warrantyNumber');
+  String get relationshipType => _text('relationshipType');
+  String get sourceType => _text('sourceType');
+  String get sourceId => _text('sourceId');
+  String get targetType => _text('targetType');
+  String get targetId => _text('targetId');
+  String get linkedAssetId => _text('linkedAssetId');
+  String get ownerUserId => _text('ownerUserId');
+  String get ownerName => _text('ownerName');
+  String get address => _text('address');
+  String get currency => _text('currency');
+  String get invalidIdentifier => _text('invalidIdentifier');
+  String get invalidDate => _text('invalidDate');
+  String get positiveWholeNumberRequired =>
+      _text('positiveWholeNumberRequired');
+  String get isoDateHint => _text('isoDateHint');
+  String get assignmentUser => _text('assignmentUser');
+  String get assignmentDevice => _text('assignmentDevice');
+  String get ciService => _text('ciService');
+  String get ciApplication => _text('ciApplication');
+  String get ciServer => _text('ciServer');
+  String get ciDatabase => _text('ciDatabase');
+  String get ciNetwork => _text('ciNetwork');
+  String get ciDevice => _text('ciDevice');
+  String get statusPlanned => _text('statusPlanned');
+  String get statusDegraded => _text('statusDegraded');
+  String get statusMaintenance => _text('statusMaintenance');
+  String get statusRetired => _text('statusRetired');
+  String get dataQualityVerified => _text('dataQualityVerified');
+  String get dataQualityNeedsReview => _text('dataQualityNeedsReview');
+  String get dataQualityIncomplete => _text('dataQualityIncomplete');
+  String get editAsset => _text('editAsset');
+  String get assignAsset => _text('assignAsset');
+  String get returnAsset => _text('returnAsset');
+  String get transitionAsset => _text('transitionAsset');
+  String get assignedUserId => _text('assignedUserId');
+  String get assignedAssetReturnHint => _text('assignedAssetReturnHint');
+  String get transitionReason => _text('transitionReason');
+  String get lifecycleOperationCompleted =>
+      _text('lifecycleOperationCompleted');
+  String get addStockLocation => _text('addStockLocation');
+  String get editStockLocation => _text('editStockLocation');
+  String get addStockItem => _text('addStockItem');
+  String get editStockItem => _text('editStockItem');
+  String get stockLocationId => _text('stockLocationId');
+  String get stockItemId => _text('stockItemId');
+  String get sku => _text('sku');
+  String get unitOfMeasure => _text('unitOfMeasure');
+  String get isConsumable => _text('isConsumable');
+  String get adjustmentDirection => _text('adjustmentDirection');
+  String get increaseStock => _text('increaseStock');
+  String get decreaseStock => _text('decreaseStock');
+  String get reservedQuantityFulfilled => _text('reservedQuantityFulfilled');
+  String get targetOnHand => _text('targetOnHand');
+  String get targetReserved => _text('targetReserved');
+  String get movementReason => _text('movementReason');
+  String get movementRequirementsHint => _text('movementRequirementsHint');
+  String get sourceLocationRequired => _text('sourceLocationRequired');
+  String get destinationLocationRequired =>
+      _text('destinationLocationRequired');
+  String get recipientRequired => _text('recipientRequired');
+  String get evidenceRequired => _text('evidenceRequired');
+  String get nonNegativeNumberRequired => _text('nonNegativeNumberRequired');
+  String get reservedQuantityTooHigh => _text('reservedQuantityTooHigh');
+  String get editSupplier => _text('editSupplier');
+  String get editContract => _text('editContract');
+  String get editWarranty => _text('editWarranty');
+  String get manageWarranty => _text('manageWarranty');
+  String get transitionWarrantyClaim => _text('transitionWarrantyClaim');
+  String get claimStatus => _text('claimStatus');
+  String get claimResolution => _text('claimResolution');
+  String get supplierContact => _text('supplierContact');
+  String get editConfigurationItem => _text('editConfigurationItem');
+  String get relatedIncidentIds => _text('relatedIncidentIds');
+  String get relatedRequestIds => _text('relatedRequestIds');
+  String get relatedChangeIds => _text('relatedChangeIds');
+  String get relatedFindingIds => _text('relatedFindingIds');
+  String get commaSeparatedIdsHint => _text('commaSeparatedIdsHint');
+  String get allRelationships => _text('allRelationships');
+  String get showDependencies => _text('showDependencies');
+  String get showImpact => _text('showImpact');
+  String get recipientUserId => _text('recipientUserId');
+  String get claimSubmitted => _text('claimSubmitted');
+  String get claimAcknowledged => _text('claimAcknowledged');
+  String get claimApproved => _text('claimApproved');
+  String get claimRejected => _text('claimRejected');
+  String get claimResolved => _text('claimResolved');
+  String get claimClosed => _text('claimClosed');
+  String get assetStatusOrdered => _text('assetStatusOrdered');
+  String get assetStatusReceived => _text('assetStatusReceived');
+  String get assetStatusInStock => _text('assetStatusInStock');
+  String get assetStatusConfigured => _text('assetStatusConfigured');
+  String get assetStatusAssigned => _text('assetStatusAssigned');
+  String get assetStatusReturned => _text('assetStatusReturned');
+  String get assetStatusDisposed => _text('assetStatusDisposed');
+  String get assetStatusLost => _text('assetStatusLost');
+  String get assetStatusStolen => _text('assetStatusStolen');
+  String get uploadAssetAttachment => _text('uploadAssetAttachment');
+  String get uploadAssetPhotograph => _text('uploadAssetPhotograph');
+  String get scanStockBarcode => _text('scanStockBarcode');
+  String get scanStockBarcodeHint => _text('scanStockBarcodeHint');
+  String get barcodeNotFound => _text('barcodeNotFound');
+  String get attachmentRegistrationSuccessful =>
+      _text('attachmentRegistrationSuccessful');
+  String get chooseSupportingDocument => _text('chooseSupportingDocument');
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -1014,10 +1309,12 @@ const _localizedValues = <String, Map<String, String>>{
     'resetPassword': "Reset password",
     'password': "Password",
     'homeNewsTitle': "News",
-    'homeNewsDescription': "Published posts from authorized company communicators.",
+    'homeNewsDescription':
+        "Published posts from authorized company communicators.",
     'companyNews': "Company news",
     'noCompanyNewsYet': "No company news yet",
-    'publishedInformationWillAppearHere': "Published information will appear here.",
+    'publishedInformationWillAppearHere':
+        "Published information will appear here.",
     'loadingCompanyNews': "Loading company news...",
     'unableToLoadCompanyNews': "Unable to load company news",
     'news': "News",
@@ -1038,7 +1335,8 @@ const _localizedValues = <String, Map<String, String>>{
     'serviceWelcome': "Welcome",
     'loadingModules': "Loading modules...",
     'noAuthorizedModule': "No authorized module",
-    'noAuthorizedModuleDescription': "No module is authorized for this user. Please contact the administrator.",
+    'noAuthorizedModuleDescription':
+        "No module is authorized for this user. Please contact the administrator.",
     'moduleTasksName': "Tasks",
     'moduleTasksDescription': "Task and activity reporting",
     'moduleInventoryName': "Inventory",
@@ -1046,19 +1344,26 @@ const _localizedValues = <String, Map<String, String>>{
     'moduleIncidentName': "Support",
     'moduleIncidentDescription': "IT incident and support management",
     'moduleItsmName': "IT Service Management",
-    'moduleItsmDescription': "Integrated IT services, support, assets, and governance",
+    'moduleItsmDescription':
+        "Integrated IT services, support, assets, and governance",
     'itsmLandingTitle': "IT Service Management",
-    'itsmLandingDescription': "Access support, assets, changes, security, and IT service governance from one place.",
+    'itsmLandingDescription':
+        "Access support, assets, changes, security, and IT service governance from one place.",
     'itsmSupport': "Support",
-    'itsmSupportDescription': "Report incidents, request IT services, follow your requests, and find guidance.",
+    'itsmSupportDescription':
+        "Report incidents, request IT services, follow your requests, and find guidance.",
     'itsmAssetsConfiguration': "Assets & Configuration",
-    'itsmAssetsConfigurationDescription': "Manage IT assets, stock, licences, suppliers, warranties, and configuration items.",
+    'itsmAssetsConfigurationDescription':
+        "Manage IT assets, stock, licences, suppliers, warranties, and configuration items.",
     'itsmChanges': "Changes",
-    'itsmChangesDescription': "Plan, approve, schedule, and review controlled changes to IT services.",
+    'itsmChangesDescription':
+        "Plan, approve, schedule, and review controlled changes to IT services.",
     'itsmSecurityCompliance': "Security & Compliance",
-    'itsmSecurityComplianceDescription': "Track security findings, exceptions, asset compliance, and access reviews.",
+    'itsmSecurityComplianceDescription':
+        "Track security findings, exceptions, asset compliance, and access reviews.",
     'itsmReportingAdministration': "Reporting & Administration",
-    'itsmReportingAdministrationDescription': "Monitor service performance and manage ITSM policies, workflows, and audit records.",
+    'itsmReportingAdministrationDescription':
+        "Monitor service performance and manage ITSM policies, workflows, and audit records.",
     'itsmIncidents': "Incidents",
     'itsmServiceRequests': "Service Requests",
     'itsmMyRequests': "My Requests",
@@ -1103,20 +1408,24 @@ const _localizedValues = <String, Map<String, String>>{
     'itsmWorkflowConfiguration': "Workflow Configuration",
     'itsmAuditLogs': "Audit Logs",
     'itsmFeatureCardDescription': "Open this ITSM capability.",
-    'itsmFeatureUnavailableDescription': "This capability is part of the staged ITSM rollout and is not available in this phase. No protected data has been loaded.",
+    'itsmFeatureUnavailableDescription':
+        "This capability is part of the staged ITSM rollout and is not available in this phase. No protected data has been loaded.",
     'itsmAccessDeniedTitle': "ITSM access restricted",
-    'itsmAccessDeniedDescription': "Your current ITSM role does not allow access to this area.",
+    'itsmAccessDeniedDescription':
+        "Your current ITSM role does not allow access to this area.",
     'itsmLoadingAccess': "Loading ITSM access...",
     'itsmUnableToLoadAccess': "Unable to load ITSM access",
     'moduleUserManagementName': "User Management",
-    'moduleUserManagementDescription': "Manage departments, services, offices, agents, and modules",
+    'moduleUserManagementDescription':
+        "Manage departments, services, offices, agents, and modules",
     'moduleNewsName': "News",
     'moduleNewsDescription': "Company communication and publishing",
     'moduleCourrierName': "Mail",
     'moduleCourrierDescription': "Official mail and routing",
     'profile': "Profile",
     'profileUnavailable': "Profile unavailable",
-    'profileUnavailableDescription': "No agent data is cached on this device for the current session.",
+    'profileUnavailableDescription':
+        "No agent data is cached on this device for the current session.",
     'connectedAgentInformation': "Connected agent information",
     'agentInformation': "Agent Information",
     'noFields': "No fields",
@@ -1126,28 +1435,44 @@ const _localizedValues = <String, Map<String, String>>{
     'unableToLoadProfile': "Unable to load profile",
     'enableNotifications': "Enable notifications",
     'notificationsEnabled': "Notifications are enabled.",
-    'notificationPermissionNotGranted': "Notification permission was not granted yet.",
+    'notificationPermissionNotGranted':
+        "Notification permission was not granted yet.",
     'unableToEnableNotifications': "Unable to enable notifications",
     'webPushNotConfigured': "Web push is not configured",
-    'webPushNotConfiguredDescription': "Web push is not configured for this build. Rebuild with the Firebase Web Push VAPID key.",
-    'webPushNotConfiguredAction': "Run or build the web app with --dart-define=FIREBASE_WEB_PUSH_VAPID_KEY=YOUR_PUBLIC_KEY, then try again.",
+    'webPushNotConfiguredDescription':
+        "Web push is not configured for this build. Rebuild with the Firebase Web Push VAPID key.",
+    'webPushNotConfiguredAction':
+        "Run or build the web app with --dart-define=FIREBASE_WEB_PUSH_VAPID_KEY=YOUR_PUBLIC_KEY, then try again.",
     'disableNotifications': "Disable notifications",
     'notificationsBlocked': "Notifications are blocked",
-    'notificationsEnabledForPlatform': "Notifications are enabled for this {platform}.",
-    'notificationsProvisionallyEnabled': "Notifications are provisionally enabled.",
-    'notificationsBlockedForPlatform': "Notifications are blocked for this {platform}.",
-    'allowNotificationsPrompt': "Check this box to allow ARPTC Connect to send notifications.",
-    'disableNotificationsWindows': "Notification permissions are controlled by Windows and your browser.\n\nTo disable them, open the browser site settings for this app and block notifications. You can also open Windows Settings > System > Notifications, then disable notifications for the installed ARPTC Connect app, Chrome, or Edge.",
-    'disableNotificationsMac': "Notification permissions are controlled by macOS and your browser.\n\nTo disable them, open System Settings > Notifications, then disable notifications for ARPTC Connect or Safari. You can also use Safari > Settings > Websites > Notifications to block this app domain.",
-    'disableNotificationsWeb': "Notification permissions are controlled by your browser. Use the site settings in your browser to block notifications for this app.",
-    'disableNotificationsDevice': "Notification permissions are controlled by this device. Use your system notification settings to disable notifications for ARPTC Connect.",
-    'blockedNotificationsWindows': "Windows or your browser has blocked notifications for this app, so ARPTC Connect cannot show the permission prompt again.\n\nOn Windows, open Settings > System > Notifications and make sure notifications are enabled for the installed ARPTC Connect app, Google Chrome, or Microsoft Edge.\n\nThen open your browser site settings for this app domain and set Notifications to Allow. In Chrome or Edge, this is usually Settings > Privacy and security > Site settings > Notifications. After that, reopen the installed app and enable notifications again from this profile page.",
-    'blockedNotificationsMac': "Safari or macOS has blocked notifications for this app, so ARPTC Connect cannot show the permission prompt again.\n\nOn macOS, open System Settings > Notifications, then select ARPTC Connect or Safari and allow notifications.\n\nIf it is still blocked, open Safari > Settings > Websites > Notifications, find this app domain, then change it to Allow or remove the saved decision. After that, reopen the installed app and enable notifications again from this profile page.",
-    'blockedNotificationsWeb': "Your browser has blocked notifications for this app, so ARPTC Connect cannot show the permission prompt again.\n\nOpen the browser site settings for this app domain, set Notifications to Allow, then reopen the app and enable notifications again from this profile page.",
-    'blockedNotificationsDevice': "This device has blocked notifications for ARPTC Connect.\n\nOpen your system notification settings, allow notifications for ARPTC Connect, then return to this profile page and enable notifications again.",
+    'notificationsEnabledForPlatform':
+        "Notifications are enabled for this {platform}.",
+    'notificationsProvisionallyEnabled':
+        "Notifications are provisionally enabled.",
+    'notificationsBlockedForPlatform':
+        "Notifications are blocked for this {platform}.",
+    'allowNotificationsPrompt':
+        "Check this box to allow ARPTC Connect to send notifications.",
+    'disableNotificationsWindows':
+        "Notification permissions are controlled by Windows and your browser.\n\nTo disable them, open the browser site settings for this app and block notifications. You can also open Windows Settings > System > Notifications, then disable notifications for the installed ARPTC Connect app, Chrome, or Edge.",
+    'disableNotificationsMac':
+        "Notification permissions are controlled by macOS and your browser.\n\nTo disable them, open System Settings > Notifications, then disable notifications for ARPTC Connect or Safari. You can also use Safari > Settings > Websites > Notifications to block this app domain.",
+    'disableNotificationsWeb':
+        "Notification permissions are controlled by your browser. Use the site settings in your browser to block notifications for this app.",
+    'disableNotificationsDevice':
+        "Notification permissions are controlled by this device. Use your system notification settings to disable notifications for ARPTC Connect.",
+    'blockedNotificationsWindows':
+        "Windows or your browser has blocked notifications for this app, so ARPTC Connect cannot show the permission prompt again.\n\nOn Windows, open Settings > System > Notifications and make sure notifications are enabled for the installed ARPTC Connect app, Google Chrome, or Microsoft Edge.\n\nThen open your browser site settings for this app domain and set Notifications to Allow. In Chrome or Edge, this is usually Settings > Privacy and security > Site settings > Notifications. After that, reopen the installed app and enable notifications again from this profile page.",
+    'blockedNotificationsMac':
+        "Safari or macOS has blocked notifications for this app, so ARPTC Connect cannot show the permission prompt again.\n\nOn macOS, open System Settings > Notifications, then select ARPTC Connect or Safari and allow notifications.\n\nIf it is still blocked, open Safari > Settings > Websites > Notifications, find this app domain, then change it to Allow or remove the saved decision. After that, reopen the installed app and enable notifications again from this profile page.",
+    'blockedNotificationsWeb':
+        "Your browser has blocked notifications for this app, so ARPTC Connect cannot show the permission prompt again.\n\nOpen the browser site settings for this app domain, set Notifications to Allow, then reopen the app and enable notifications again from this profile page.",
+    'blockedNotificationsDevice':
+        "This device has blocked notifications for ARPTC Connect.\n\nOpen your system notification settings, allow notifications for ARPTC Connect, then return to this profile page and enable notifications again.",
     'notifications': "Notifications",
     'noNotificationsYet': "No notifications yet",
-    'noNotificationsDescription': "Notifications about incidents, news, and workflows will appear here.",
+    'noNotificationsDescription':
+        "Notifications about incidents, news, and workflows will appear here.",
     'loadingNotifications': "Loading notifications...",
     'unableToLoadNotifications': "Unable to load notifications",
     'clearAllNotifications': "Clear all notifications",
@@ -1159,28 +1484,36 @@ const _localizedValues = <String, Map<String, String>>{
     'incidentManagement': "Incident Management",
     'incidentSupport': "Support",
     'incidentOperations': "Incident Operations",
-    'incidentOperationsDescription': "Live operational view for IT triage and resolution.",
+    'incidentOperationsDescription':
+        "Live operational view for IT triage and resolution.",
     'incidentSupervision': "Incident Supervision",
-    'incidentSupervisionDescription': "Read-only global visibility across active, closed, and archived incidents.",
+    'incidentSupervisionDescription':
+        "Read-only global visibility across active, closed, and archived incidents.",
     'newIncident': "New Incident",
     'newSupportIncident': "New Support Incident",
     'submitSupportTicket': "Submit a Support Ticket",
     'submitTicket': "Submit ticket",
     'submitting': "Submitting...",
-    'createIncidentManagerDescription': "Create and categorize an incident in one pass.",
-    'createIncidentUserDescription': "Tell IT what is blocked. The support team will categorize the rest.",
+    'createIncidentManagerDescription':
+        "Create and categorize an incident in one pass.",
+    'createIncidentUserDescription':
+        "Tell IT what is blocked. The support team will categorize the rest.",
     'readOnlyIncidentAccess': "Read-only incident access",
-    'onlyUsersAndManagersCreateIncidents': "Only users and managers can create incident tickets.",
+    'onlyUsersAndManagersCreateIncidents':
+        "Only users and managers can create incident tickets.",
     'titleExampleEmailAccess': "Example: Unable to access email",
     'shortDescription': "Short description",
     'describeIssue': "Describe the issue",
-    'describeIssueAndWork': "Describe what happened and what you were trying to do",
+    'describeIssueAndWork':
+        "Describe what happened and what you were trying to do",
     'affectedItService': "Affected IT service",
     'selectAffectedService': "Select the service you cannot reach",
     'thisIssueBlocksMyWork': "This issue blocks my work",
-    'blockingWorkDescription': "Turn this on if you cannot continue your normal work.",
+    'blockingWorkDescription':
+        "Turn this on if you cannot continue your normal work.",
     'managerCategorization': "Manager categorization",
-    'managerCategorizationDescription': "Managers create the first two workflow steps together: submission and categorization.",
+    'managerCategorizationDescription':
+        "Managers create the first two workflow steps together: submission and categorization.",
     'affectedAgent': "Affected agent",
     'searchAffectedAgentHint': "Leave empty to create the ticket for yourself",
     'searchByNameEmailMatricule': "Search by name, email, or employee number",
@@ -1197,7 +1530,8 @@ const _localizedValues = <String, Map<String, String>>{
     'selectCategory': "Select a category",
     'selectImpact': "Select Impact",
     'selectUrgency': "Select Urgency",
-    'completeCategoryImpactUrgency': "Complete category, impact, and urgency before submitting.",
+    'completeCategoryImpactUrgency':
+        "Complete category, impact, and urgency before submitting.",
     'openTickets': "Open Tickets",
     'openTicketsSubtitle': "Submitted, not categorized",
     'unassignedTickets': "Unassigned Tickets",
@@ -1210,11 +1544,14 @@ const _localizedValues = <String, Map<String, String>>{
     'closedThisWeek': "Closed This Week",
     'parameters': "Parameters",
     'operationalQueue': "Operational Queue",
-    'operationalQueueDescription': "Active incidents sorted by priority first, then oldest first.",
+    'operationalQueueDescription':
+        "Active incidents sorted by priority first, then oldest first.",
     'noActiveIncident': "No active incident",
-    'newOperationalTicketsWillAppearHere': "New operational tickets will appear here.",
+    'newOperationalTicketsWillAppearHere':
+        "New operational tickets will appear here.",
     'myAssignedTickets': "My Assigned Tickets",
-    'myAssignedTicketsDescription': "Active incidents currently assigned to you.",
+    'myAssignedTicketsDescription':
+        "Active incidents currently assigned to you.",
     'ticketsByPriority': "Tickets by Priority",
     'ticketsByStatus': "Tickets by Status",
     'ticketsByAffectedService': "Tickets by Affected Service",
@@ -1223,12 +1560,17 @@ const _localizedValues = <String, Map<String, String>>{
     'priority': "Priority",
     'age': "Age",
     'createdAtColumn': "Created at",
-    'openTicketsQueueDescription': "Tickets submitted by users that have not been categorized yet.",
-    'unassignedTicketsQueueDescription': "Categorized tickets waiting for an IT staff assignment.",
-    'assignedToMeQueueDescription': "Active tickets assigned to the current manager.",
-    'solvedTicketsQueueDescription': "Solved tickets waiting to be marked closed.",
+    'openTicketsQueueDescription':
+        "Tickets submitted by users that have not been categorized yet.",
+    'unassignedTicketsQueueDescription':
+        "Categorized tickets waiting for an IT staff assignment.",
+    'assignedToMeQueueDescription':
+        "Active tickets assigned to the current manager.",
+    'solvedTicketsQueueDescription':
+        "Solved tickets waiting to be marked closed.",
     'closedTicketHistory': "Closed ticket history",
-    'closedTicketHistoryDescription': "Review incidents completed and closed by IT support.",
+    'closedTicketHistoryDescription':
+        "Review incidents completed and closed by IT support.",
     'noClosedTicketsHistory': "No closed tickets",
     'noClosedTicketsHistoryDescription': "Closed incidents will appear here.",
     'noTicketsFound': "No tickets found",
@@ -1250,8 +1592,10 @@ const _localizedValues = <String, Map<String, String>>{
     'resolutionCodeHint': "Select how the incident was resolved",
     'resolutionCodes': "Resolution codes",
     'selectResolutionCode': "Select a resolution code",
-    'selectResolutionCodeBeforeSolved': "Select a resolution code before marking the ticket solved.",
-    'selectResolutionCodeBeforeClosing': "Select a resolution code before closing the ticket.",
+    'selectResolutionCodeBeforeSolved':
+        "Select a resolution code before marking the ticket solved.",
+    'selectResolutionCodeBeforeClosing':
+        "Select a resolution code before closing the ticket.",
     'closedAt': "Closed at",
     'archiveEligible': "Archive eligible",
     'internalNotes': "Internal notes",
@@ -1260,16 +1604,22 @@ const _localizedValues = <String, Map<String, String>>{
     'adding': "Adding...",
     'internalNoteAdded': "Internal note added.",
     'workflowStepSubmitTicket': "Step 1: Submit ticket",
-    'workflowStepSubmitTicketDescription': "The requester provides basic details.",
+    'workflowStepSubmitTicketDescription':
+        "The requester provides basic details.",
     'workflowStepCategorizeTicket': "Step 2: Categorize ticket",
-    'workflowStepCategorizeOpenDescription': "Complete triage and move this ticket to in progress.",
-    'workflowStepCategorizeActiveDescription': "Operational categorization can still be updated while active.",
+    'workflowStepCategorizeOpenDescription':
+        "Complete triage and move this ticket to in progress.",
+    'workflowStepCategorizeActiveDescription':
+        "Operational categorization can still be updated while active.",
     'workflowStepAssignTicket': "Step 3: Assign ticket",
-    'workflowStepAssignTicketDescription': "Assign the incident to IT staff. The ticket status does not change here.",
+    'workflowStepAssignTicketDescription':
+        "Assign the incident to IT staff. The ticket status does not change here.",
     'workflowStepSolveTicket': "Step 4: Solve ticket",
-    'workflowStepSolveTicketDescription': "Record the resolution summary before closing.",
+    'workflowStepSolveTicketDescription':
+        "Record the resolution summary before closing.",
     'workflowStepCloseTicket': "Step 5: Close ticket",
-    'workflowStepCloseTicketDescription': "Close the ticket once the solution is validated.",
+    'workflowStepCloseTicketDescription':
+        "Close the ticket once the solution is validated.",
     'categorizeTicket': "Categorize ticket",
     'categorizing': "Categorizing...",
     'ticketCategorized': "Ticket categorized.",
@@ -1284,32 +1634,42 @@ const _localizedValues = <String, Map<String, String>>{
     'ticketClosed': "Ticket closed.",
     'cancelTicket': "Cancel ticket",
     'cancelThisTicket': "Cancel this ticket?",
-    'cancelTicketWarning': "This should only be used when the incident is a false alarm. The ticket will leave the operational queue.",
+    'cancelTicketWarning':
+        "This should only be used when the incident is a false alarm. The ticket will leave the operational queue.",
     'keepTicket': "Keep ticket",
     'cancelling': "Cancelling...",
     'ticketCancelled': "Ticket cancelled.",
-    'selectServiceCategoryImpactUrgency': "Select affected service, category, impact, and urgency first.",
-    'selectItStaffAssignee': "Select the IT staff member who will solve the incident.",
-    'enterResolutionSummaryBeforeSolved': "Enter a resolution summary before marking solved.",
-    'enterResolutionSummaryBeforeClosing': "Enter a resolution summary before closing.",
+    'selectServiceCategoryImpactUrgency':
+        "Select affected service, category, impact, and urgency first.",
+    'selectItStaffAssignee':
+        "Select the IT staff member who will solve the incident.",
+    'enterResolutionSummaryBeforeSolved':
+        "Enter a resolution summary before marking solved.",
+    'enterResolutionSummaryBeforeClosing':
+        "Enter a resolution summary before closing.",
     'myIncidents': "My incidents",
     'createAndFollowIncidents': "Create and follow your IT incidents",
     'activeIncidents': "Active",
     'closedAndArchived': "Closed & archived",
     'noActiveIncidentUserDescription': "Your open incidents will appear here.",
     'noClosedIncident': "No closed incident",
-    'closedAndArchivedDescription': "Closed and archived incidents will appear here.",
+    'closedAndArchivedDescription':
+        "Closed and archived incidents will appear here.",
     'loadingIncidents': "Loading incidents...",
     'unableToLoadIncidents': "Unable to load incidents",
     'incidentAccessUnavailable': "Incident access unavailable",
-    'incidentAccessUnavailableDescription': "No Incident Management permission is assigned to this agent.",
-    'noIncidentDashboardAccess': "You do not have access to the Incident Management dashboard.",
+    'incidentAccessUnavailableDescription':
+        "No Incident Management permission is assigned to this agent.",
+    'noIncidentDashboardAccess':
+        "You do not have access to the Incident Management dashboard.",
     'loadingIncidentAccess': "Loading incident access...",
     'loadingIncidentDashboardAccess': "Loading incident dashboard access...",
     'unableToLoadIncidentAccess': "Unable to load incident access",
-    'unableToLoadIncidentDashboardAccess': "Unable to load incident dashboard access",
+    'unableToLoadIncidentDashboardAccess':
+        "Unable to load incident dashboard access",
     'incidentParameters': "Incident Parameters",
-    'incidentParametersDescription': "Configure IT services, categories, and resolution codes used by support tickets.",
+    'incidentParametersDescription':
+        "Configure IT services, categories, and resolution codes used by support tickets.",
     'addItService': "Add IT service",
     'addCategory': "Add category",
     'addResolutionCode': "Add resolution code",
@@ -1326,7 +1686,8 @@ const _localizedValues = <String, Map<String, String>>{
     'ticketsByCategory': "Tickets by Category",
     'ticketsByDepartment': "Tickets by Department",
     'recentCriticalTickets': "Recent Critical Tickets",
-    'recentCriticalTicketsDescription': "Latest P1 and P2 incidents. This list is read-only for admins.",
+    'recentCriticalTicketsDescription':
+        "Latest P1 and P2 incidents. This list is read-only for admins.",
     'criticalTicketsWillAppearHere': "P1 and P2 incidents will appear here.",
     'adminReadOnly': "Read-only",
     'incidentStatusOpen': "Open",
@@ -1352,7 +1713,8 @@ const _localizedValues = <String, Map<String, String>>{
     'incidentRoleManager': "Manager",
     'incidentRoleAdmin': "Admin",
     'userManagement': "User Management",
-    'manageDepartmentsServicesBureauxAgents': "Manage departments, services, offices, modules, and agents.",
+    'manageDepartmentsServicesBureauxAgents':
+        "Manage departments, services, offices, modules, and agents.",
     'addDepartment': "Add Department",
     'addService': "Add Service",
     'addBureau': "Add Office",
@@ -1412,8 +1774,10 @@ const _localizedValues = <String, Map<String, String>>{
     'taskNotFound': "Task not found",
     'taskLoadFailed': "Unable to load tasks",
     'taskAccessDenied': "You do not have access to task management.",
-    'taskDepartmentMissingDescription': "Your profile must be linked to a department before you can access departmental tasks.",
-    'adminReadOnlyTask': "Administrator access is read-only. You can review tasks from every department.",
+    'taskDepartmentMissingDescription':
+        "Your profile must be linked to a department before you can access departmental tasks.",
+    'adminReadOnlyTask':
+        "Administrator access is read-only. You can review tasks from every department.",
     'allDepartmentTasks': "Tasks from all departments",
     'departmentTasks': "Tasks for {department}",
     'loadingTasks': "Loading tasks...",
@@ -1547,8 +1911,10 @@ const _localizedValues = <String, Map<String, String>>{
     'moduleRoleAdmin': "Admin",
     'moduleRoleReviewer': "Reviewer",
     'moduleRoleNone': "None",
-    'permissionAdminDescription': "Can supervise the module according to the configured access model.",
-    'permissionManagerDescription': "Can manage operational work in the module.",
+    'permissionAdminDescription':
+        "Can supervise the module according to the configured access model.",
+    'permissionManagerDescription':
+        "Can manage operational work in the module.",
     'permissionUserDescription': "Can use the module for their own work.",
     'permissionNoneDescription': "No access to this module.",
     'requiredField': "This field is required",
@@ -1556,7 +1922,7 @@ const _localizedValues = <String, Map<String, String>>{
     'enterShortDescription': "Enter a short description",
     'enterName': "Enter a name",
     'enterEmail': "Enter an email",
-    'invalidEmail': "Enter a valid email",
+    'invalidEmail': "Enter a valid email address.",
     'selectRole': "Select a role",
     'selectModule': "Select a module",
     'searchByName': "Search by name",
@@ -1582,32 +1948,38 @@ const _localizedValues = <String, Map<String, String>>{
     'relation': "Relation",
     'beneficiary': "Beneficiary",
     'serviceCatalogueTitle': "Service Catalogue",
-    'serviceCatalogueDescription': "Browse published IT services and submit a guided request.",
+    'serviceCatalogueDescription':
+        "Browse published IT services and submit a guided request.",
     'serviceCatalogueSearchHint': "Search services",
     'serviceCatalogueEmpty': "No catalogue services are available",
-    'serviceCatalogueEmptyDescription': "Published services will appear here when they become available.",
+    'serviceCatalogueEmptyDescription':
+        "Published services will appear here when they become available.",
     'browseCatalogue': "Browse catalogue",
     'allCatalogueCategories': "All categories",
     'requestThisService': "Request this service",
     'createServiceRequest': "Create service request",
     'serviceRequestDetails': "Service request details",
     'serviceRequestQueue': "Service request queue",
-    'serviceRequestQueueDescription': "Review, assign, approve, and fulfil service requests.",
+    'serviceRequestQueueDescription':
+        "Review, assign, approve, and fulfil service requests.",
     'requestOnBehalfOf': "Request on behalf of an agent",
     'requestedFor': "Requested for",
     'requestSubmitted': "Your service request has been submitted.",
     'submitRequest': "Submit request",
     'submittingRequest': "Submitting request...",
-    'serviceRequestValidationIssues': "Please correct the following request fields: {issues}",
+    'serviceRequestValidationIssues':
+        "Please correct the following request fields: {issues}",
     'requiredDocuments': "Required documents",
     'requiredInformation': "Required information",
     'eligibility': "Eligibility",
     'estimatedDelivery': "Estimated delivery",
     'myRequestsTitle': "My Requests",
-    'myRequestsDescription': "Track your incidents, service requests, and other ITSM work in one place.",
+    'myRequestsDescription':
+        "Track your incidents, service requests, and other ITSM work in one place.",
     'myRequestsSearchHint': "Search by reference or title",
     'myRequestsEmpty': "You have no requests yet",
-    'myRequestsEmptyDescription': "Incidents and service requests that you submit will appear here.",
+    'myRequestsEmptyDescription':
+        "Incidents and service requests that you submit will appear here.",
     'allRequestTypes': "All request types",
     'loadMore': "Load more",
     'loadingMore': "Loading more...",
@@ -1623,7 +1995,8 @@ const _localizedValues = <String, Map<String, String>>{
     'requestStatusRejected': "Rejected",
     'requestStatusCancelled': "Cancelled",
     'cancelRequest': "Cancel request",
-    'confirmCancelRequest': "Cancel this request? This action cannot be undone.",
+    'confirmCancelRequest':
+        "Cancel this request? This action cannot be undone.",
     'requestCancelled': "The request has been cancelled.",
     'approveRequest': "Approve request",
     'rejectRequest': "Reject request",
@@ -1650,13 +2023,15 @@ const _localizedValues = <String, Map<String, String>>{
     'slaPaused': "Paused",
     'dueDate': "Due date",
     'knowledgeBaseTitle': "Knowledge Base",
-    'knowledgeBaseDescription': "Find trusted guidance, solutions, and service information.",
+    'knowledgeBaseDescription':
+        "Find trusted guidance, solutions, and service information.",
     'knowledgeSearchHint': "Search the knowledge base",
     'featuredArticles': "Featured articles",
     'recentArticles': "Recent articles",
     'knowledgeArticleDetails': "Knowledge article",
     'noKnowledgeArticles': "No knowledge articles are available",
-    'noKnowledgeArticlesDescription': "Published guidance will appear here when it becomes available.",
+    'noKnowledgeArticlesDescription':
+        "Published guidance will appear here when it becomes available.",
     'loadingKnowledge': "Loading knowledge...",
     'unableToLoadKnowledge': "Unable to load the knowledge base",
     'wasThisHelpful': "Was this article helpful?",
@@ -1690,14 +2065,256 @@ const _localizedValues = <String, Map<String, String>>{
     'relatedCatalogueItems': "Related catalogue items",
     'relatedIncidentCategories': "Related incident categories",
     'suggestedKnowledge': "Suggested knowledge",
-    'suggestedKnowledgeDescription': "These published articles may help resolve this request.",
+    'suggestedKnowledgeDescription':
+        "These published articles may help resolve this request.",
     'viewArticle': "View article",
     'knowledgeAttachments': "Article attachments",
-    'knowledgeAttachmentsHint': "Select files before saving. Uploaded files are registered against the immutable article version.",
+    'knowledgeAttachmentsHint':
+        "Select files before saving. Uploaded files are registered against the immutable article version.",
     'internalAttachment': "Visible only to IT staff",
     'operationalActions': "Operational actions",
     'readOnlyAccess': "Read-only access",
-    'readOnlyAccessDescription': "You can view this information but cannot change it.",
+    'readOnlyAccessDescription':
+        "You can view this information but cannot change it.",
+    'assetConfigurationOverview': "Assets & Configuration",
+    'assetConfigurationOverviewDescription':
+        "Track equipment, stock, licences, suppliers, warranties, and service dependencies.",
+    'myAssets': "My Assets",
+    'myAssetsDescription':
+        "View equipment currently assigned to you and request help through the service catalogue.",
+    'assetRegister': "Asset register",
+    'assetRegisterDescription':
+        "Manage the complete lifecycle and custody of organizational IT assets.",
+    'noAssetsAssigned': "No assets are currently assigned to you.",
+    'noAssetsFound': "No assets match the selected filters.",
+    'unableToLoadAssets': "Unable to load assets",
+    'searchAssets': "Search by asset tag, serial number, brand, or model",
+    'assetTag': "Asset tag",
+    'serialNumber': "Serial number",
+    'brand': "Brand",
+    'model': "Model",
+    'condition': "Condition",
+    'custodian': "Custodian",
+    'acquisitionDate': "Acquisition date",
+    'acquisitionCost': "Acquisition cost",
+    'supplier': "Supplier",
+    'warranty': "Warranty",
+    'securityBaseline': "Security baseline",
+    'lifecycleHistory': "Lifecycle history",
+    'assetPhotographs': "Asset photographs",
+    'reportAssetFault': "Report a fault",
+    'requestAssetRepair': "Request repair",
+    'requestAssetReplacement': "Request replacement",
+    'requestAssetConfiguration': "Request configuration",
+    'requestAssetReturn': "Request return",
+    'assetActionCreatesRequest':
+        "This action creates a governed service request and does not modify the asset directly.",
+    'stockManagement': "Stock management",
+    'stockManagementDescription':
+        "Control quantities through traceable and atomic stock movements.",
+    'stockLocations': "Stock locations",
+    'stockItems': "Stock items",
+    'stockMovements': "Stock movements",
+    'quantityOnHand': "Quantity on hand",
+    'quantityReserved': "Quantity reserved",
+    'quantityAvailable': "Quantity available",
+    'minimumStockThreshold': "Minimum stock threshold",
+    'lowStock': "Low stock",
+    'movementType': "Movement type",
+    'movementReceipt': "Receipt",
+    'movementReservation': "Reservation",
+    'movementIssue': "Issue",
+    'movementReturn': "Return",
+    'movementTransfer': "Transfer",
+    'movementAdjustment': "Adjustment",
+    'movementReconciliation': "Reconciliation",
+    'sourceLocation': "Source location",
+    'destinationLocation': "Destination location",
+    'recipient': "Recipient",
+    'relatedRequest': "Related request",
+    'supportingDocument': "Supporting document",
+    'softwareLicences': "Software licences",
+    'softwareLicencesDescription':
+        "Manage allocations, compliance, contracts, and renewals without exposing licence secrets.",
+    'softwareProduct': "Software product",
+    'vendor': "Vendor",
+    'licenceType': "Licence type",
+    'purchasedQuantity': "Purchased quantity",
+    'allocatedQuantity': "Allocated quantity",
+    'availableQuantity': "Available quantity",
+    'effectiveDate': "Effective date",
+    'renewalDate': "Renewal date",
+    'complianceStatus': "Compliance status",
+    'licenceAssignments': "Licence assignments",
+    'suppliersWarrantiesDescription':
+        "Manage suppliers, contracts, warranty coverage, claims, and expiry dates.",
+    'supplierRegister': "Supplier register",
+    'contracts': "Contracts",
+    'supportTerms': "Support terms",
+    'contractStart': "Contract start",
+    'contractEnd': "Contract end",
+    'warrantyCoverage': "Warranty coverage",
+    'warrantyExpiration': "Warranty expiration",
+    'warrantyClaims': "Warranty claims",
+    'configurationManagementDatabase': "Configuration management database",
+    'cmdbDescription':
+        "Map critical services, applications, infrastructure, devices, and their directional dependencies.",
+    'configurationItems': "Configuration items",
+    'ciType': "CI type",
+    'ciOwner': "CI owner",
+    'supportGroup': "Support group",
+    'criticality': "Criticality",
+    'operationalStatus': "Operational status",
+    'configurationBaseline': "Configuration baseline",
+    'dataQualityStatus': "Data quality status",
+    'relationships': "Relationships",
+    'impactView': "Impact view",
+    'dependencyView': "Dependency view",
+    'dependsOn': "Depends on",
+    'runsOn': "Runs on",
+    'connectedTo': "Connected to",
+    'uses': "Uses",
+    'representedBy': "Represented by",
+    'managerOperationalAccessRequired':
+        "A MANAGER role is required to access this operational capability.",
+    'assetCommandCompleted': "The asset operation was completed.",
+    'stockMovementCompleted': "The stock movement was recorded.",
+    'licenceOperationCompleted': "The licence operation was completed.",
+    'registerNewAsset': "Register a new asset",
+    'registerNewLicence': "Register a new licence",
+    'allocateLicence': "Allocate licence",
+    'releaseLicence': "Release allocation",
+    'saveSupplier': "Save supplier",
+    'saveContract': "Save contract",
+    'saveWarranty': "Save warranty",
+    'recordWarrantyClaim': "Record warranty claim",
+    'saveConfigurationItem': "Save configuration item",
+    'createRelationship': "Create relationship",
+    'retireRelationship': "Retire relationship",
+    'configurationOperationCompleted':
+        "The configuration operation was completed.",
+    'recordIdentifier': "Record ID",
+    'categoryId': "Category ID",
+    'supplierId': "Supplier ID",
+    'contractId': "Contract ID",
+    'warrantyId': "Warranty ID",
+    'claimId': "Claim ID",
+    'allocationId': "Allocation ID",
+    'assigneeId': "Assignee ID",
+    'assigneeName': "Assignee name",
+    'assignmentType': "Assignment type",
+    'contactName': "Contact name",
+    'legalName': "Legal name",
+    'contractNumber': "Contract number",
+    'warrantyNumber': "Warranty number",
+    'relationshipType': "Relationship type",
+    'sourceType': "Source type",
+    'sourceId': "Source ID",
+    'targetType': "Target type",
+    'targetId': "Target ID",
+    'linkedAssetId': "Linked asset ID",
+    'ownerUserId': "Owner user ID",
+    'ownerName': "Owner name",
+    'address': "Address",
+    'currency': "Currency",
+    'invalidIdentifier':
+        "Use letters, numbers, dots, dashes, underscores, or colons only.",
+    'invalidDate': "Enter a valid date in YYYY-MM-DD format.",
+    'positiveWholeNumberRequired': "Enter a positive whole number.",
+    'isoDateHint': "YYYY-MM-DD",
+    'assignmentUser': "User",
+    'assignmentDevice': "Device",
+    'ciService': "Service",
+    'ciApplication': "Application",
+    'ciServer': "Server",
+    'ciDatabase': "Database",
+    'ciNetwork': "Network",
+    'ciDevice': "Device",
+    'statusPlanned': "Planned",
+    'statusDegraded': "Degraded",
+    'statusMaintenance': "Maintenance",
+    'statusRetired': "Retired",
+    'dataQualityVerified': "Verified",
+    'dataQualityNeedsReview': "Needs review",
+    'dataQualityIncomplete': "Incomplete",
+    'editAsset': "Edit asset",
+    'assignAsset': "Assign asset",
+    'returnAsset': "Return asset",
+    'transitionAsset': "Change lifecycle state",
+    'assignedUserId': "Assigned agent UID",
+    'assignedAssetReturnHint':
+        "Return is available only while the asset has a current assignment.",
+    'transitionReason': "Transition reason",
+    'lifecycleOperationCompleted': "The asset operation was completed.",
+    'addStockLocation': "Add stock location",
+    'editStockLocation': "Edit stock location",
+    'addStockItem': "Add stock item",
+    'editStockItem': "Edit stock item",
+    'stockLocationId': "Stock location ID",
+    'stockItemId': "Stock item ID",
+    'sku': "SKU",
+    'unitOfMeasure': "Unit of measure",
+    'isConsumable': "Consumable item",
+    'adjustmentDirection': "Adjustment direction",
+    'increaseStock': "Increase stock",
+    'decreaseStock': "Decrease stock",
+    'reservedQuantityFulfilled': "Reserved quantity fulfilled",
+    'targetOnHand': "Target quantity on hand",
+    'targetReserved': "Target reserved quantity",
+    'movementReason': "Movement reason",
+    'movementRequirementsHint':
+        "Required fields change with the selected movement type.",
+    'sourceLocationRequired':
+        "A source location is required for this movement.",
+    'destinationLocationRequired':
+        "A destination location is required for this movement.",
+    'recipientRequired': "A recipient agent UID is required for this movement.",
+    'evidenceRequired':
+        "A supporting document ID is required for this movement.",
+    'nonNegativeNumberRequired': "Enter zero or a positive number.",
+    'reservedQuantityTooHigh':
+        "Reserved fulfilment cannot exceed the issued quantity.",
+    'editSupplier': "Edit supplier",
+    'editContract': "Edit contract",
+    'editWarranty': "Edit warranty",
+    'manageWarranty': "Manage warranty",
+    'transitionWarrantyClaim': "Update claim status",
+    'claimStatus': "Claim status",
+    'claimResolution': "Claim reason or resolution",
+    'supplierContact': "Primary supplier contact",
+    'editConfigurationItem': "Edit configuration item",
+    'relatedIncidentIds': "Related incident IDs",
+    'relatedRequestIds': "Related request IDs",
+    'relatedChangeIds': "Related change IDs",
+    'relatedFindingIds': "Related security finding IDs",
+    'commaSeparatedIdsHint': "Comma-separated IDs",
+    'allRelationships': "All relationships",
+    'showDependencies': "Dependencies",
+    'showImpact': "Impact",
+    'recipientUserId': "Recipient agent UID",
+    'claimSubmitted': "Submitted",
+    'claimAcknowledged': "Acknowledged",
+    'claimApproved': "Approved",
+    'claimRejected': "Rejected",
+    'claimResolved': "Resolved",
+    'claimClosed': "Closed",
+    'assetStatusOrdered': "Ordered",
+    'assetStatusReceived': "Received",
+    'assetStatusInStock': "In stock",
+    'assetStatusConfigured': "Configured",
+    'assetStatusAssigned': "Assigned",
+    'assetStatusReturned': "Returned",
+    'assetStatusDisposed': "Disposed",
+    'assetStatusLost': "Lost",
+    'assetStatusStolen': "Stolen",
+    'uploadAssetAttachment': "Upload attachment",
+    'uploadAssetPhotograph': "Upload photograph",
+    'scanStockBarcode': "Scan barcode",
+    'scanStockBarcodeHint': "Scan or enter the stock item barcode",
+    'barcodeNotFound': "No stock item matches this barcode.",
+    'attachmentRegistrationSuccessful':
+        "The file was uploaded and securely registered.",
+    'chooseSupportingDocument': "Choose supporting document",
   },
   'fr': <String, String>{
     'appName': "ARPTC Connect",
@@ -1809,12 +2426,15 @@ const _localizedValues = <String, Map<String, String>>{
     'resetPassword': "Réinitialiser le mot de passe",
     'password': "Mot de passe",
     'homeNewsTitle': "Actualités",
-    'homeNewsDescription': "Publications des communicateurs autorisés de l'entreprise.",
+    'homeNewsDescription':
+        "Publications des communicateurs autorisés de l'entreprise.",
     'companyNews': "Actualités de l'entreprise",
     'noCompanyNewsYet': "Aucune actualité de l'entreprise pour le moment",
-    'publishedInformationWillAppearHere': "Les informations publiées apparaîtront ici.",
+    'publishedInformationWillAppearHere':
+        "Les informations publiées apparaîtront ici.",
     'loadingCompanyNews': "Chargement des actualités de l'entreprise...",
-    'unableToLoadCompanyNews': "Impossible de charger les actualités de l'entreprise",
+    'unableToLoadCompanyNews':
+        "Impossible de charger les actualités de l'entreprise",
     'news': "Actualités",
     'newPost': "Nouvelle publication",
     'postDetails': "Détails de la publication",
@@ -1833,27 +2453,36 @@ const _localizedValues = <String, Map<String, String>>{
     'serviceWelcome': "Bienvenue",
     'loadingModules': "Chargement des modules...",
     'noAuthorizedModule': "Aucun module autorisé",
-    'noAuthorizedModuleDescription': "Aucun module n'est autorisé pour cet utilisateur. Veuillez contacter l'administrateur.",
+    'noAuthorizedModuleDescription':
+        "Aucun module n'est autorisé pour cet utilisateur. Veuillez contacter l'administrateur.",
     'moduleTasksName': "Tâches",
     'moduleTasksDescription': "Rapport des tâches et activités",
     'moduleInventoryName': "Inventaire",
-    'moduleInventoryDescription': "Gérer les stocks et les articles de l'organisation",
+    'moduleInventoryDescription':
+        "Gérer les stocks et les articles de l'organisation",
     'moduleIncidentName': "Support",
     'moduleIncidentDescription': "Gestion des incidents IT et du support",
     'moduleItsmName': "Gestion des services informatiques",
-    'moduleItsmDescription': "Services IT, support, actifs et gouvernance intégrés",
+    'moduleItsmDescription':
+        "Services IT, support, actifs et gouvernance intégrés",
     'itsmLandingTitle': "Gestion des services informatiques",
-    'itsmLandingDescription': "Accédez au support, aux actifs, aux changements, à la sécurité et à la gouvernance des services IT depuis un seul espace.",
+    'itsmLandingDescription':
+        "Accédez au support, aux actifs, aux changements, à la sécurité et à la gouvernance des services IT depuis un seul espace.",
     'itsmSupport': "Support",
-    'itsmSupportDescription': "Signalez des incidents, demandez des services IT, suivez vos demandes et trouvez des conseils.",
+    'itsmSupportDescription':
+        "Signalez des incidents, demandez des services IT, suivez vos demandes et trouvez des conseils.",
     'itsmAssetsConfiguration': "Actifs et configuration",
-    'itsmAssetsConfigurationDescription': "Gérez les actifs IT, le stock, les licences, les fournisseurs, les garanties et les éléments de configuration.",
+    'itsmAssetsConfigurationDescription':
+        "Gérez les actifs IT, le stock, les licences, les fournisseurs, les garanties et les éléments de configuration.",
     'itsmChanges': "Changements",
-    'itsmChangesDescription': "Planifiez, approuvez, programmez et évaluez les changements contrôlés des services IT.",
+    'itsmChangesDescription':
+        "Planifiez, approuvez, programmez et évaluez les changements contrôlés des services IT.",
     'itsmSecurityCompliance': "Sécurité et conformité",
-    'itsmSecurityComplianceDescription': "Suivez les constats de sécurité, les exceptions, la conformité des actifs et les revues d'accès.",
+    'itsmSecurityComplianceDescription':
+        "Suivez les constats de sécurité, les exceptions, la conformité des actifs et les revues d'accès.",
     'itsmReportingAdministration': "Rapports et administration",
-    'itsmReportingAdministrationDescription': "Surveillez la performance des services et gérez les politiques, les workflows et les audits ITSM.",
+    'itsmReportingAdministrationDescription':
+        "Surveillez la performance des services et gérez les politiques, les workflows et les audits ITSM.",
     'itsmIncidents': "Incidents",
     'itsmServiceRequests': "Demandes de service",
     'itsmMyRequests': "Mes demandes",
@@ -1870,7 +2499,8 @@ const _localizedValues = <String, Map<String, String>>{
     'itsmConfirmCompletion': "Confirmer l'exécution",
     'itsmCancelRequest': "Annuler la demande",
     'itsmRejectRequest': "Rejeter la demande",
-    'itsmConfirmStatusChange': "Voulez-vous appliquer ce changement de statut ?",
+    'itsmConfirmStatusChange':
+        "Voulez-vous appliquer ce changement de statut ?",
     'itsmActionCompleted': "Action terminée.",
     'itsmAssignRequest': "Assigner la demande",
     'actions': "Actions",
@@ -1898,20 +2528,24 @@ const _localizedValues = <String, Map<String, String>>{
     'itsmWorkflowConfiguration': "Configuration des workflows",
     'itsmAuditLogs': "Journaux d'audit",
     'itsmFeatureCardDescription': "Ouvrir cette fonctionnalité ITSM.",
-    'itsmFeatureUnavailableDescription': "Cette fonctionnalité fait partie du déploiement progressif de l'ITSM et n'est pas disponible dans cette phase. Aucune donnée protégée n'a été chargée.",
+    'itsmFeatureUnavailableDescription':
+        "Cette fonctionnalité fait partie du déploiement progressif de l'ITSM et n'est pas disponible dans cette phase. Aucune donnée protégée n'a été chargée.",
     'itsmAccessDeniedTitle': "Accès ITSM restreint",
-    'itsmAccessDeniedDescription': "Votre rôle ITSM actuel ne permet pas d'accéder à cet espace.",
+    'itsmAccessDeniedDescription':
+        "Votre rôle ITSM actuel ne permet pas d'accéder à cet espace.",
     'itsmLoadingAccess': "Chargement des accès ITSM...",
     'itsmUnableToLoadAccess': "Impossible de charger les accès ITSM",
     'moduleUserManagementName': "Gestion des utilisateurs",
-    'moduleUserManagementDescription': "Gérer les départements, services, bureaux, agents et modules",
+    'moduleUserManagementDescription':
+        "Gérer les départements, services, bureaux, agents et modules",
     'moduleNewsName': "Actualités",
     'moduleNewsDescription': "Communication et publication internes",
     'moduleCourrierName': "Courrier",
     'moduleCourrierDescription': "Courrier officiel et circuit de transmission",
     'profile': "Profil",
     'profileUnavailable': "Profil indisponible",
-    'profileUnavailableDescription': "Aucune donnée d'agent n'est mise en cache sur cet appareil pour la session actuelle.",
+    'profileUnavailableDescription':
+        "Aucune donnée d'agent n'est mise en cache sur cet appareil pour la session actuelle.",
     'connectedAgentInformation': "Informations de l'agent connecté",
     'agentInformation': "Informations de l'agent",
     'noFields': "Aucun champ",
@@ -1921,28 +2555,44 @@ const _localizedValues = <String, Map<String, String>>{
     'unableToLoadProfile': "Impossible de charger le profil",
     'enableNotifications': "Activer les notifications",
     'notificationsEnabled': "Les notifications sont activées.",
-    'notificationPermissionNotGranted': "L'autorisation de notification n'a pas encore été accordée.",
+    'notificationPermissionNotGranted':
+        "L'autorisation de notification n'a pas encore été accordée.",
     'unableToEnableNotifications': "Impossible d'activer les notifications",
     'webPushNotConfigured': "Web push n'est pas configuré",
-    'webPushNotConfiguredDescription': "Web push n'est pas configuré pour cette version. Reconstruisez l'application avec la clé VAPID Firebase Web Push.",
-    'webPushNotConfiguredAction': "Lancez ou construisez l'application web avec --dart-define=FIREBASE_WEB_PUSH_VAPID_KEY=VOTRE_CLE_PUBLIQUE, puis réessayez.",
+    'webPushNotConfiguredDescription':
+        "Web push n'est pas configuré pour cette version. Reconstruisez l'application avec la clé VAPID Firebase Web Push.",
+    'webPushNotConfiguredAction':
+        "Lancez ou construisez l'application web avec --dart-define=FIREBASE_WEB_PUSH_VAPID_KEY=VOTRE_CLE_PUBLIQUE, puis réessayez.",
     'disableNotifications': "Désactiver les notifications",
     'notificationsBlocked': "Les notifications sont bloquées",
-    'notificationsEnabledForPlatform': "Les notifications sont activées pour ce {platform}.",
-    'notificationsProvisionallyEnabled': "Les notifications sont activées provisoirement.",
-    'notificationsBlockedForPlatform': "Les notifications sont bloquées pour ce {platform}.",
-    'allowNotificationsPrompt': "Cochez cette case pour autoriser ARPTC Connect à envoyer des notifications.",
-    'disableNotificationsWindows': "Les autorisations de notification sont contrôlées par Windows et votre navigateur.\n\nPour les désactiver, ouvrez les paramètres du site dans le navigateur pour cette application et bloquez les notifications. Vous pouvez aussi ouvrir Paramètres Windows > Système > Notifications, puis désactiver les notifications pour l'application ARPTC Connect installée, Chrome ou Edge.",
-    'disableNotificationsMac': "Les autorisations de notification sont contrôlées par macOS et votre navigateur.\n\nPour les désactiver, ouvrez Réglages Système > Notifications, puis désactivez les notifications pour ARPTC Connect ou Safari. Vous pouvez aussi utiliser Safari > Réglages > Sites web > Notifications pour bloquer le domaine de cette application.",
-    'disableNotificationsWeb': "Les autorisations de notification sont contrôlées par votre navigateur. Utilisez les paramètres du site dans votre navigateur pour bloquer les notifications de cette application.",
-    'disableNotificationsDevice': "Les autorisations de notification sont contrôlées par cet appareil. Utilisez les paramètres système de notification pour désactiver les notifications d'ARPTC Connect.",
-    'blockedNotificationsWindows': "Windows ou votre navigateur a bloqué les notifications pour cette application. ARPTC Connect ne peut donc plus afficher la demande d'autorisation.\n\nSous Windows, ouvrez Paramètres > Système > Notifications et assurez-vous que les notifications sont activées pour l'application ARPTC Connect installée, Google Chrome ou Microsoft Edge.\n\nOuvrez ensuite les paramètres du site de ce domaine dans votre navigateur et définissez Notifications sur Autoriser. Dans Chrome ou Edge, cela se trouve généralement dans Paramètres > Confidentialité et sécurité > Paramètres des sites > Notifications. Ensuite, rouvrez l'application installée et activez de nouveau les notifications depuis cette page de profil.",
-    'blockedNotificationsMac': "Safari ou macOS a bloqué les notifications pour cette application. ARPTC Connect ne peut donc plus afficher la demande d'autorisation.\n\nSous macOS, ouvrez Réglages Système > Notifications, puis sélectionnez ARPTC Connect ou Safari et autorisez les notifications.\n\nSi elles restent bloquées, ouvrez Safari > Réglages > Sites web > Notifications, trouvez le domaine de cette application, puis passez-le sur Autoriser ou supprimez la décision enregistrée. Ensuite, rouvrez l'application installée et activez de nouveau les notifications depuis cette page de profil.",
-    'blockedNotificationsWeb': "Votre navigateur a bloqué les notifications pour cette application. ARPTC Connect ne peut donc plus afficher la demande d'autorisation.\n\nOuvrez les paramètres du site pour ce domaine, définissez Notifications sur Autoriser, puis rouvrez l'application et activez de nouveau les notifications depuis cette page de profil.",
-    'blockedNotificationsDevice': "Cet appareil a bloqué les notifications pour ARPTC Connect.\n\nOuvrez les paramètres système de notification, autorisez les notifications pour ARPTC Connect, puis revenez sur cette page de profil et activez-les de nouveau.",
+    'notificationsEnabledForPlatform':
+        "Les notifications sont activées pour ce {platform}.",
+    'notificationsProvisionallyEnabled':
+        "Les notifications sont activées provisoirement.",
+    'notificationsBlockedForPlatform':
+        "Les notifications sont bloquées pour ce {platform}.",
+    'allowNotificationsPrompt':
+        "Cochez cette case pour autoriser ARPTC Connect à envoyer des notifications.",
+    'disableNotificationsWindows':
+        "Les autorisations de notification sont contrôlées par Windows et votre navigateur.\n\nPour les désactiver, ouvrez les paramètres du site dans le navigateur pour cette application et bloquez les notifications. Vous pouvez aussi ouvrir Paramètres Windows > Système > Notifications, puis désactiver les notifications pour l'application ARPTC Connect installée, Chrome ou Edge.",
+    'disableNotificationsMac':
+        "Les autorisations de notification sont contrôlées par macOS et votre navigateur.\n\nPour les désactiver, ouvrez Réglages Système > Notifications, puis désactivez les notifications pour ARPTC Connect ou Safari. Vous pouvez aussi utiliser Safari > Réglages > Sites web > Notifications pour bloquer le domaine de cette application.",
+    'disableNotificationsWeb':
+        "Les autorisations de notification sont contrôlées par votre navigateur. Utilisez les paramètres du site dans votre navigateur pour bloquer les notifications de cette application.",
+    'disableNotificationsDevice':
+        "Les autorisations de notification sont contrôlées par cet appareil. Utilisez les paramètres système de notification pour désactiver les notifications d'ARPTC Connect.",
+    'blockedNotificationsWindows':
+        "Windows ou votre navigateur a bloqué les notifications pour cette application. ARPTC Connect ne peut donc plus afficher la demande d'autorisation.\n\nSous Windows, ouvrez Paramètres > Système > Notifications et assurez-vous que les notifications sont activées pour l'application ARPTC Connect installée, Google Chrome ou Microsoft Edge.\n\nOuvrez ensuite les paramètres du site de ce domaine dans votre navigateur et définissez Notifications sur Autoriser. Dans Chrome ou Edge, cela se trouve généralement dans Paramètres > Confidentialité et sécurité > Paramètres des sites > Notifications. Ensuite, rouvrez l'application installée et activez de nouveau les notifications depuis cette page de profil.",
+    'blockedNotificationsMac':
+        "Safari ou macOS a bloqué les notifications pour cette application. ARPTC Connect ne peut donc plus afficher la demande d'autorisation.\n\nSous macOS, ouvrez Réglages Système > Notifications, puis sélectionnez ARPTC Connect ou Safari et autorisez les notifications.\n\nSi elles restent bloquées, ouvrez Safari > Réglages > Sites web > Notifications, trouvez le domaine de cette application, puis passez-le sur Autoriser ou supprimez la décision enregistrée. Ensuite, rouvrez l'application installée et activez de nouveau les notifications depuis cette page de profil.",
+    'blockedNotificationsWeb':
+        "Votre navigateur a bloqué les notifications pour cette application. ARPTC Connect ne peut donc plus afficher la demande d'autorisation.\n\nOuvrez les paramètres du site pour ce domaine, définissez Notifications sur Autoriser, puis rouvrez l'application et activez de nouveau les notifications depuis cette page de profil.",
+    'blockedNotificationsDevice':
+        "Cet appareil a bloqué les notifications pour ARPTC Connect.\n\nOuvrez les paramètres système de notification, autorisez les notifications pour ARPTC Connect, puis revenez sur cette page de profil et activez-les de nouveau.",
     'notifications': "Notifications",
     'noNotificationsYet': "Aucune notification pour le moment",
-    'noNotificationsDescription': "Les notifications concernant les incidents, les actualités et les workflows apparaîtront ici.",
+    'noNotificationsDescription':
+        "Les notifications concernant les incidents, les actualités et les workflows apparaîtront ici.",
     'loadingNotifications': "Chargement des notifications...",
     'unableToLoadNotifications': "Impossible de charger les notifications",
     'clearAllNotifications': "Effacer toutes les notifications",
@@ -1954,30 +2604,40 @@ const _localizedValues = <String, Map<String, String>>{
     'incidentManagement': "Gestion des incidents",
     'incidentSupport': "Support",
     'incidentOperations': "Opérations incidents",
-    'incidentOperationsDescription': "Vue opérationnelle en temps réel pour le triage et la résolution IT.",
+    'incidentOperationsDescription':
+        "Vue opérationnelle en temps réel pour le triage et la résolution IT.",
     'incidentSupervision': "Supervision des incidents",
-    'incidentSupervisionDescription': "Visibilité globale en lecture seule sur les incidents actifs, fermés et archivés.",
+    'incidentSupervisionDescription':
+        "Visibilité globale en lecture seule sur les incidents actifs, fermés et archivés.",
     'newIncident': "Nouvel incident",
     'newSupportIncident': "Nouvel incident support",
     'submitSupportTicket': "Soumettre un ticket support",
     'submitTicket': "Soumettre le ticket",
     'submitting': "Soumission...",
-    'createIncidentManagerDescription': "Créer et catégoriser un incident en une seule étape.",
-    'createIncidentUserDescription': "Indiquez à l'IT ce qui est bloqué. L'équipe support catégorisera le reste.",
+    'createIncidentManagerDescription':
+        "Créer et catégoriser un incident en une seule étape.",
+    'createIncidentUserDescription':
+        "Indiquez à l'IT ce qui est bloqué. L'équipe support catégorisera le reste.",
     'readOnlyIncidentAccess': "Accès incident en lecture seule",
-    'onlyUsersAndManagersCreateIncidents': "Seuls les utilisateurs et les managers peuvent créer des tickets d'incident.",
+    'onlyUsersAndManagersCreateIncidents':
+        "Seuls les utilisateurs et les managers peuvent créer des tickets d'incident.",
     'titleExampleEmailAccess': "Exemple : Impossible d'accéder à l'e-mail",
     'shortDescription': "Brève description",
     'describeIssue': "Décrivez le problème",
-    'describeIssueAndWork': "Décrivez ce qui s'est passé et ce que vous essayiez de faire",
+    'describeIssueAndWork':
+        "Décrivez ce qui s'est passé et ce que vous essayiez de faire",
     'affectedItService': "Service IT affecté",
-    'selectAffectedService': "Sélectionnez le service que vous ne parvenez pas à joindre",
+    'selectAffectedService':
+        "Sélectionnez le service que vous ne parvenez pas à joindre",
     'thisIssueBlocksMyWork': "Ce problème bloque mon travail",
-    'blockingWorkDescription': "Activez cette option si vous ne pouvez pas poursuivre votre travail normal.",
+    'blockingWorkDescription':
+        "Activez cette option si vous ne pouvez pas poursuivre votre travail normal.",
     'managerCategorization': "Catégorisation manager",
-    'managerCategorizationDescription': "Les managers effectuent ensemble les deux premières étapes du workflow : soumission et catégorisation.",
+    'managerCategorizationDescription':
+        "Les managers effectuent ensemble les deux premières étapes du workflow : soumission et catégorisation.",
     'affectedAgent': "Agent concerné",
-    'searchAffectedAgentHint': "Laissez vide pour créer le ticket pour vous-même",
+    'searchAffectedAgentHint':
+        "Laissez vide pour créer le ticket pour vous-même",
     'searchByNameEmailMatricule': "Rechercher par nom, e-mail ou matricule",
     'location': "Emplacement",
     'locationHint': "Bureau, étage, salle",
@@ -1992,7 +2652,8 @@ const _localizedValues = <String, Map<String, String>>{
     'selectCategory': "Sélectionnez une catégorie",
     'selectImpact': "Sélectionnez l'impact",
     'selectUrgency': "Sélectionnez l'urgence",
-    'completeCategoryImpactUrgency': "Complétez la catégorie, l'impact et l'urgence avant de soumettre.",
+    'completeCategoryImpactUrgency':
+        "Complétez la catégorie, l'impact et l'urgence avant de soumettre.",
     'openTickets': "Tickets ouverts",
     'openTicketsSubtitle': "Soumis, non catégorisés",
     'unassignedTickets': "Tickets non assignés",
@@ -2005,11 +2666,14 @@ const _localizedValues = <String, Map<String, String>>{
     'closedThisWeek': "Fermés cette semaine",
     'parameters': "Paramètres",
     'operationalQueue': "File opérationnelle",
-    'operationalQueueDescription': "Incidents actifs triés d'abord par priorité, puis du plus ancien au plus récent.",
+    'operationalQueueDescription':
+        "Incidents actifs triés d'abord par priorité, puis du plus ancien au plus récent.",
     'noActiveIncident': "Aucun incident actif",
-    'newOperationalTicketsWillAppearHere': "Les nouveaux tickets opérationnels apparaîtront ici.",
+    'newOperationalTicketsWillAppearHere':
+        "Les nouveaux tickets opérationnels apparaîtront ici.",
     'myAssignedTickets': "Mes tickets assignés",
-    'myAssignedTicketsDescription': "Incidents actifs actuellement assignés à vous.",
+    'myAssignedTicketsDescription':
+        "Incidents actifs actuellement assignés à vous.",
     'ticketsByPriority': "Tickets par priorité",
     'ticketsByStatus': "Tickets par statut",
     'ticketsByAffectedService': "Tickets par service affecté",
@@ -2018,17 +2682,23 @@ const _localizedValues = <String, Map<String, String>>{
     'priority': "Priorité",
     'age': "Âge",
     'createdAtColumn': "Créé le",
-    'openTicketsQueueDescription': "Tickets soumis par les utilisateurs et non encore catégorisés.",
-    'unassignedTicketsQueueDescription': "Tickets catégorisés en attente d'assignation à un membre IT.",
-    'assignedToMeQueueDescription': "Tickets actifs assignés au manager actuel.",
+    'openTicketsQueueDescription':
+        "Tickets soumis par les utilisateurs et non encore catégorisés.",
+    'unassignedTicketsQueueDescription':
+        "Tickets catégorisés en attente d'assignation à un membre IT.",
+    'assignedToMeQueueDescription':
+        "Tickets actifs assignés au manager actuel.",
     'solvedTicketsQueueDescription': "Tickets résolus en attente de clôture.",
     'closedTicketHistory': "Historique des tickets fermés",
-    'closedTicketHistoryDescription': "Consultez les incidents traités et fermés par le support IT.",
+    'closedTicketHistoryDescription':
+        "Consultez les incidents traités et fermés par le support IT.",
     'noClosedTicketsHistory': "Aucun ticket fermé",
-    'noClosedTicketsHistoryDescription': "Les incidents fermés apparaîtront ici.",
+    'noClosedTicketsHistoryDescription':
+        "Les incidents fermés apparaîtront ici.",
     'noTicketsFound': "Aucun ticket trouvé",
     'queueEmpty': "Cette file est vide.",
-    'tryAnotherSearchOrStatus': "Essayez une autre recherche ou un autre filtre de statut.",
+    'tryAnotherSearchOrStatus':
+        "Essayez une autre recherche ou un autre filtre de statut.",
     'thereIsNoQueueItem': "Il n'y a aucun {queueLabel}.",
     'searchIncidents': "Rechercher des incidents",
     'ticketDetails': "Détails de l'incident",
@@ -2045,8 +2715,10 @@ const _localizedValues = <String, Map<String, String>>{
     'resolutionCodeHint': "Sélectionnez comment l'incident a été résolu",
     'resolutionCodes': "Codes de résolution",
     'selectResolutionCode': "Sélectionnez un code de résolution",
-    'selectResolutionCodeBeforeSolved': "Sélectionnez un code de résolution avant de marquer le ticket comme résolu.",
-    'selectResolutionCodeBeforeClosing': "Sélectionnez un code de résolution avant de fermer le ticket.",
+    'selectResolutionCodeBeforeSolved':
+        "Sélectionnez un code de résolution avant de marquer le ticket comme résolu.",
+    'selectResolutionCodeBeforeClosing':
+        "Sélectionnez un code de résolution avant de fermer le ticket.",
     'closedAt': "Fermé le",
     'archiveEligible': "Archivable le",
     'internalNotes': "Notes internes",
@@ -2055,16 +2727,22 @@ const _localizedValues = <String, Map<String, String>>{
     'adding': "Ajout...",
     'internalNoteAdded': "Note interne ajoutée.",
     'workflowStepSubmitTicket': "Étape 1 : Soumettre le ticket",
-    'workflowStepSubmitTicketDescription': "Le demandeur fournit les informations de base.",
+    'workflowStepSubmitTicketDescription':
+        "Le demandeur fournit les informations de base.",
     'workflowStepCategorizeTicket': "Étape 2 : Catégoriser le ticket",
-    'workflowStepCategorizeOpenDescription': "Complétez le triage et passez ce ticket en cours de traitement.",
-    'workflowStepCategorizeActiveDescription': "La catégorisation opérationnelle peut encore être mise à jour tant que le ticket est actif.",
+    'workflowStepCategorizeOpenDescription':
+        "Complétez le triage et passez ce ticket en cours de traitement.",
+    'workflowStepCategorizeActiveDescription':
+        "La catégorisation opérationnelle peut encore être mise à jour tant que le ticket est actif.",
     'workflowStepAssignTicket': "Étape 3 : Assigner le ticket",
-    'workflowStepAssignTicketDescription': "Assignez l'incident au personnel IT. Le statut du ticket ne change pas ici.",
+    'workflowStepAssignTicketDescription':
+        "Assignez l'incident au personnel IT. Le statut du ticket ne change pas ici.",
     'workflowStepSolveTicket': "Étape 4 : Résoudre le ticket",
-    'workflowStepSolveTicketDescription': "Enregistrez le résumé de résolution avant la clôture.",
+    'workflowStepSolveTicketDescription':
+        "Enregistrez le résumé de résolution avant la clôture.",
     'workflowStepCloseTicket': "Étape 5 : Fermer le ticket",
-    'workflowStepCloseTicketDescription': "Fermez le ticket une fois la solution validée.",
+    'workflowStepCloseTicketDescription':
+        "Fermez le ticket une fois la solution validée.",
     'categorizeTicket': "Catégoriser le ticket",
     'categorizing': "Catégorisation...",
     'ticketCategorized': "Ticket catégorisé.",
@@ -2079,32 +2757,45 @@ const _localizedValues = <String, Map<String, String>>{
     'ticketClosed': "Ticket fermé.",
     'cancelTicket': "Annuler le ticket",
     'cancelThisTicket': "Annuler ce ticket ?",
-    'cancelTicketWarning': "Cette action ne doit être utilisée que si l'incident est une fausse alerte. Le ticket quittera la file opérationnelle.",
+    'cancelTicketWarning':
+        "Cette action ne doit être utilisée que si l'incident est une fausse alerte. Le ticket quittera la file opérationnelle.",
     'keepTicket': "Conserver le ticket",
     'cancelling': "Annulation...",
     'ticketCancelled': "Ticket annulé.",
-    'selectServiceCategoryImpactUrgency': "Sélectionnez d'abord le service affecté, la catégorie, l'impact et l'urgence.",
-    'selectItStaffAssignee': "Sélectionnez le membre IT qui résoudra l'incident.",
-    'enterResolutionSummaryBeforeSolved': "Saisissez un résumé de résolution avant de marquer comme résolu.",
-    'enterResolutionSummaryBeforeClosing': "Saisissez un résumé de résolution avant de fermer.",
+    'selectServiceCategoryImpactUrgency':
+        "Sélectionnez d'abord le service affecté, la catégorie, l'impact et l'urgence.",
+    'selectItStaffAssignee':
+        "Sélectionnez le membre IT qui résoudra l'incident.",
+    'enterResolutionSummaryBeforeSolved':
+        "Saisissez un résumé de résolution avant de marquer comme résolu.",
+    'enterResolutionSummaryBeforeClosing':
+        "Saisissez un résumé de résolution avant de fermer.",
     'myIncidents': "Mes incidents",
     'createAndFollowIncidents': "Créez et suivez vos incidents IT",
     'activeIncidents': "Actifs",
     'closedAndArchived': "Fermés et archivés",
-    'noActiveIncidentUserDescription': "Vos incidents ouverts apparaîtront ici.",
+    'noActiveIncidentUserDescription':
+        "Vos incidents ouverts apparaîtront ici.",
     'noClosedIncident': "Aucun incident fermé",
-    'closedAndArchivedDescription': "Les incidents fermés et archivés apparaîtront ici.",
+    'closedAndArchivedDescription':
+        "Les incidents fermés et archivés apparaîtront ici.",
     'loadingIncidents': "Chargement des incidents...",
     'unableToLoadIncidents': "Impossible de charger les incidents",
     'incidentAccessUnavailable': "Accès aux incidents indisponible",
-    'incidentAccessUnavailableDescription': "Aucune permission de Gestion des incidents n'est attribuée à cet agent.",
-    'noIncidentDashboardAccess': "Vous n'avez pas accès au tableau de bord de Gestion des incidents.",
+    'incidentAccessUnavailableDescription':
+        "Aucune permission de Gestion des incidents n'est attribuée à cet agent.",
+    'noIncidentDashboardAccess':
+        "Vous n'avez pas accès au tableau de bord de Gestion des incidents.",
     'loadingIncidentAccess': "Chargement des accès aux incidents...",
-    'loadingIncidentDashboardAccess': "Chargement des accès au tableau de bord des incidents...",
-    'unableToLoadIncidentAccess': "Impossible de charger les accès aux incidents",
-    'unableToLoadIncidentDashboardAccess': "Impossible de charger les accès au tableau de bord des incidents",
+    'loadingIncidentDashboardAccess':
+        "Chargement des accès au tableau de bord des incidents...",
+    'unableToLoadIncidentAccess':
+        "Impossible de charger les accès aux incidents",
+    'unableToLoadIncidentDashboardAccess':
+        "Impossible de charger les accès au tableau de bord des incidents",
     'incidentParameters': "Paramètres des incidents",
-    'incidentParametersDescription': "Configurez les services IT, les catégories et les codes de résolution utilisés par les tickets support.",
+    'incidentParametersDescription':
+        "Configurez les services IT, les catégories et les codes de résolution utilisés par les tickets support.",
     'addItService': "Ajouter un service IT",
     'addCategory': "Ajouter une catégorie",
     'addResolutionCode': "Ajouter un code de résolution",
@@ -2121,7 +2812,8 @@ const _localizedValues = <String, Map<String, String>>{
     'ticketsByCategory': "Tickets par catégorie",
     'ticketsByDepartment': "Tickets par département",
     'recentCriticalTickets': "Tickets critiques récents",
-    'recentCriticalTicketsDescription': "Derniers incidents P1 et P2. Cette liste est en lecture seule pour les admins.",
+    'recentCriticalTicketsDescription':
+        "Derniers incidents P1 et P2. Cette liste est en lecture seule pour les admins.",
     'criticalTicketsWillAppearHere': "Les incidents P1 et P2 apparaîtront ici.",
     'adminReadOnly': "Lecture seule",
     'incidentStatusOpen': "Ouvert",
@@ -2147,7 +2839,8 @@ const _localizedValues = <String, Map<String, String>>{
     'incidentRoleManager': "Manager",
     'incidentRoleAdmin': "Admin",
     'userManagement': "Gestion des utilisateurs",
-    'manageDepartmentsServicesBureauxAgents': "Gérer les départements, services, bureaux, modules et agents.",
+    'manageDepartmentsServicesBureauxAgents':
+        "Gérer les départements, services, bureaux, modules et agents.",
     'addDepartment': "Ajouter un département",
     'addService': "Ajouter un service",
     'addBureau': "Ajouter un bureau",
@@ -2207,13 +2900,16 @@ const _localizedValues = <String, Map<String, String>>{
     'taskNotFound': "Tâche introuvable",
     'taskLoadFailed': "Impossible de charger les tâches",
     'taskAccessDenied': "Vous n'avez pas accès à la gestion des tâches.",
-    'taskDepartmentMissingDescription': "Votre profil doit être rattaché à un département avant de pouvoir accéder aux tâches départementales.",
-    'adminReadOnlyTask': "L'accès administrateur est en lecture seule. Vous pouvez consulter les tâches de tous les départements.",
+    'taskDepartmentMissingDescription':
+        "Votre profil doit être rattaché à un département avant de pouvoir accéder aux tâches départementales.",
+    'adminReadOnlyTask':
+        "L'accès administrateur est en lecture seule. Vous pouvez consulter les tâches de tous les départements.",
     'allDepartmentTasks': "Tâches de tous les départements",
     'departmentTasks': "Tâches de {department}",
     'loadingTasks': "Chargement des tâches...",
     'noTasks': "Aucune tâche trouvée",
-    'noTasksDescription': "Aucune tâche ne correspond aux filtres sélectionnés.",
+    'noTasksDescription':
+        "Aucune tâche ne correspond aux filtres sélectionnés.",
     'allTypes': "Tous les types",
     'createActivity': "Créer une activité",
     'activityObject': "Objet de l'activité",
@@ -2250,7 +2946,8 @@ const _localizedValues = <String, Map<String, String>>{
     'fileCouldNotBeRead': "Le fichier sélectionné n'a pas pu être lu.",
     'fileTooLarge': "Le fichier sélectionné dépasse la limite de 20 Mo.",
     'deleteTask': "Supprimer la tâche",
-    'deleteTaskConfirmation': "Voulez-vous vraiment supprimer \"{taskLabel}\" ?",
+    'deleteTaskConfirmation':
+        "Voulez-vous vraiment supprimer \"{taskLabel}\" ?",
     'taskDeleted': "Tâche supprimée",
     'taskDeleteFailed': "Impossible de supprimer la tâche : {error}",
     'departmentRequired': "Département requis",
@@ -2296,8 +2993,10 @@ const _localizedValues = <String, Map<String, String>>{
     'unableToLoadRefunds': "Impossible de charger les remboursements",
     'loadingRefunds': "Chargement des remboursements...",
     'noRefundsYet': "Aucun remboursement pour le moment",
-    'refundRequestsWillAppearHere': "Vos demandes de remboursement apparaîtront ici",
-    'addDependantsToRequestVouchers': "Ajoutez vos dépendants pour demander des bons",
+    'refundRequestsWillAppearHere':
+        "Vos demandes de remboursement apparaîtront ici",
+    'addDependantsToRequestVouchers':
+        "Ajoutez vos dépendants pour demander des bons",
     'meetingRooms': "Salles de réunion",
     'meetingRoom': "Salle de réunion",
     'noMeetingRoomsAvailable': "Aucune salle de réunion disponible.",
@@ -2318,8 +3017,10 @@ const _localizedValues = <String, Map<String, String>>{
     'mainDashboard': "Tableau de bord principal",
     'loadingStatistics': "Chargement des statistiques...",
     'errorLoadingData': "Erreur lors du chargement des données",
-    'failedToLoadDashboardStatistics': "Échec du chargement des statistiques du tableau de bord",
-    'dashboardDataDoesNotExist': "Les données du tableau de bord n'existent pas",
+    'failedToLoadDashboardStatistics':
+        "Échec du chargement des statistiques du tableau de bord",
+    'dashboardDataDoesNotExist':
+        "Les données du tableau de bord n'existent pas",
     'chartMedicalVouchers': "Nombre de bons",
     'monthJanuaryShort': "Jan",
     'monthFebruaryShort': "Fév",
@@ -2342,16 +3043,19 @@ const _localizedValues = <String, Map<String, String>>{
     'moduleRoleAdmin': "Admin",
     'moduleRoleReviewer': "Réviseur",
     'moduleRoleNone': "Aucun",
-    'permissionAdminDescription': "Peut superviser le module selon le modèle d'accès configuré.",
-    'permissionManagerDescription': "Peut gérer le travail opérationnel dans le module.",
-    'permissionUserDescription': "Peut utiliser le module pour son propre travail.",
+    'permissionAdminDescription':
+        "Peut superviser le module selon le modèle d'accès configuré.",
+    'permissionManagerDescription':
+        "Peut gérer le travail opérationnel dans le module.",
+    'permissionUserDescription':
+        "Peut utiliser le module pour son propre travail.",
     'permissionNoneDescription': "Aucun accès à ce module.",
     'requiredField': "Ce champ est obligatoire",
     'enterTitle': "Saisissez un titre",
     'enterShortDescription': "Saisissez une brève description",
     'enterName': "Saisissez un nom",
     'enterEmail': "Saisissez un e-mail",
-    'invalidEmail': "Saisissez un e-mail valide",
+    'invalidEmail': "Saisissez une adresse e-mail valide.",
     'selectRole': "Sélectionnez un rôle",
     'selectModule': "Sélectionnez un module",
     'searchByName': "Rechercher par nom",
@@ -2377,32 +3081,38 @@ const _localizedValues = <String, Map<String, String>>{
     'relation': "Relation",
     'beneficiary': "Bénéficiaire",
     'serviceCatalogueTitle': "Catalogue de services",
-    'serviceCatalogueDescription': "Parcourez les services IT publiés et soumettez une demande guidée.",
+    'serviceCatalogueDescription':
+        "Parcourez les services IT publiés et soumettez une demande guidée.",
     'serviceCatalogueSearchHint': "Rechercher des services",
     'serviceCatalogueEmpty': "Aucun service du catalogue n'est disponible",
-    'serviceCatalogueEmptyDescription': "Les services publiés apparaîtront ici dès qu'ils seront disponibles.",
+    'serviceCatalogueEmptyDescription':
+        "Les services publiés apparaîtront ici dès qu'ils seront disponibles.",
     'browseCatalogue': "Parcourir le catalogue",
     'allCatalogueCategories': "Toutes les catégories",
     'requestThisService': "Demander ce service",
     'createServiceRequest': "Créer une demande de service",
     'serviceRequestDetails': "Détails de la demande de service",
     'serviceRequestQueue': "File des demandes de service",
-    'serviceRequestQueueDescription': "Examinez, affectez, approuvez et exécutez les demandes de service.",
+    'serviceRequestQueueDescription':
+        "Examinez, affectez, approuvez et exécutez les demandes de service.",
     'requestOnBehalfOf': "Demander au nom d'un agent",
     'requestedFor': "Demandé pour",
     'requestSubmitted': "Votre demande de service a été soumise.",
     'submitRequest': "Soumettre la demande",
     'submittingRequest': "Soumission de la demande...",
-    'serviceRequestValidationIssues': "Veuillez corriger les champs suivants de la demande : {issues}",
+    'serviceRequestValidationIssues':
+        "Veuillez corriger les champs suivants de la demande : {issues}",
     'requiredDocuments': "Documents requis",
     'requiredInformation': "Informations requises",
     'eligibility': "Éligibilité",
     'estimatedDelivery': "Délai estimé",
     'myRequestsTitle': "Mes demandes",
-    'myRequestsDescription': "Suivez vos incidents, demandes de service et autres travaux ITSM au même endroit.",
+    'myRequestsDescription':
+        "Suivez vos incidents, demandes de service et autres travaux ITSM au même endroit.",
     'myRequestsSearchHint': "Rechercher par référence ou titre",
     'myRequestsEmpty': "Vous n'avez encore aucune demande",
-    'myRequestsEmptyDescription': "Les incidents et demandes de service que vous soumettez apparaîtront ici.",
+    'myRequestsEmptyDescription':
+        "Les incidents et demandes de service que vous soumettez apparaîtront ici.",
     'allRequestTypes': "Tous les types de demande",
     'loadMore': "Charger plus",
     'loadingMore': "Chargement...",
@@ -2418,7 +3128,8 @@ const _localizedValues = <String, Map<String, String>>{
     'requestStatusRejected': "Rejetée",
     'requestStatusCancelled': "Annulée",
     'cancelRequest': "Annuler la demande",
-    'confirmCancelRequest': "Annuler cette demande ? Cette action est irréversible.",
+    'confirmCancelRequest':
+        "Annuler cette demande ? Cette action est irréversible.",
     'requestCancelled': "La demande a été annulée.",
     'approveRequest': "Approuver la demande",
     'rejectRequest': "Rejeter la demande",
@@ -2445,13 +3156,15 @@ const _localizedValues = <String, Map<String, String>>{
     'slaPaused': "En pause",
     'dueDate': "Date d'échéance",
     'knowledgeBaseTitle': "Base de connaissances",
-    'knowledgeBaseDescription': "Trouvez des conseils, des solutions et des informations de service fiables.",
+    'knowledgeBaseDescription':
+        "Trouvez des conseils, des solutions et des informations de service fiables.",
     'knowledgeSearchHint': "Rechercher dans la base de connaissances",
     'featuredArticles': "Articles à la une",
     'recentArticles': "Articles récents",
     'knowledgeArticleDetails': "Article de connaissance",
     'noKnowledgeArticles': "Aucun article de connaissance n'est disponible",
-    'noKnowledgeArticlesDescription': "Les conseils publiés apparaîtront ici dès qu'ils seront disponibles.",
+    'noKnowledgeArticlesDescription':
+        "Les conseils publiés apparaîtront ici dès qu'ils seront disponibles.",
     'loadingKnowledge': "Chargement de la base de connaissances...",
     'unableToLoadKnowledge': "Impossible de charger la base de connaissances",
     'wasThisHelpful': "Cet article vous a-t-il été utile ?",
@@ -2485,13 +3198,258 @@ const _localizedValues = <String, Map<String, String>>{
     'relatedCatalogueItems': "Éléments du catalogue liés",
     'relatedIncidentCategories': "Catégories d'incident liées",
     'suggestedKnowledge': "Connaissances suggérées",
-    'suggestedKnowledgeDescription': "Ces articles publiés peuvent aider à résoudre cette demande.",
+    'suggestedKnowledgeDescription':
+        "Ces articles publiés peuvent aider à résoudre cette demande.",
     'viewArticle': "Voir l'article",
     'knowledgeAttachments': "Pièces jointes de l'article",
-    'knowledgeAttachmentsHint': "Sélectionnez les fichiers avant l'enregistrement. Les fichiers téléversés sont rattachés à la version immuable de l'article.",
+    'knowledgeAttachmentsHint':
+        "Sélectionnez les fichiers avant l'enregistrement. Les fichiers téléversés sont rattachés à la version immuable de l'article.",
     'internalAttachment': "Visible uniquement par le personnel informatique",
     'operationalActions': "Actions opérationnelles",
     'readOnlyAccess': "Accès en lecture seule",
-    'readOnlyAccessDescription': "Vous pouvez consulter ces informations sans les modifier.",
+    'readOnlyAccessDescription':
+        "Vous pouvez consulter ces informations sans les modifier.",
+    'assetConfigurationOverview': "Actifs et configuration",
+    'assetConfigurationOverviewDescription':
+        "Suivez les équipements, le stock, les licences, les fournisseurs, les garanties et les dépendances de service.",
+    'myAssets': "Mes actifs",
+    'myAssetsDescription':
+        "Consultez les équipements qui vous sont affectés et demandez une assistance via le catalogue de services.",
+    'assetRegister': "Registre des actifs",
+    'assetRegisterDescription':
+        "Gérez le cycle de vie complet et la garde des actifs informatiques de l'organisation.",
+    'noAssetsAssigned': "Aucun actif ne vous est actuellement affecté.",
+    'noAssetsFound': "Aucun actif ne correspond aux filtres sélectionnés.",
+    'unableToLoadAssets': "Impossible de charger les actifs",
+    'searchAssets':
+        "Rechercher par étiquette, numéro de série, marque ou modèle",
+    'assetTag': "Étiquette de l'actif",
+    'serialNumber': "Numéro de série",
+    'brand': "Marque",
+    'model': "Modèle",
+    'condition': "État",
+    'custodian': "Dépositaire",
+    'acquisitionDate': "Date d'acquisition",
+    'acquisitionCost': "Coût d'acquisition",
+    'supplier': "Fournisseur",
+    'warranty': "Garantie",
+    'securityBaseline': "Référentiel de sécurité",
+    'lifecycleHistory': "Historique du cycle de vie",
+    'assetPhotographs': "Photographies de l'actif",
+    'reportAssetFault': "Signaler une panne",
+    'requestAssetRepair': "Demander une réparation",
+    'requestAssetReplacement': "Demander un remplacement",
+    'requestAssetConfiguration': "Demander une configuration",
+    'requestAssetReturn': "Demander un retour",
+    'assetActionCreatesRequest':
+        "Cette action crée une demande de service gouvernée et ne modifie pas directement l'actif.",
+    'stockManagement': "Gestion du stock",
+    'stockManagementDescription':
+        "Contrôlez les quantités au moyen de mouvements de stock traçables et atomiques.",
+    'stockLocations': "Emplacements de stock",
+    'stockItems': "Articles en stock",
+    'stockMovements': "Mouvements de stock",
+    'quantityOnHand': "Quantité en stock",
+    'quantityReserved': "Quantité réservée",
+    'quantityAvailable': "Quantité disponible",
+    'minimumStockThreshold': "Seuil minimum de stock",
+    'lowStock': "Stock faible",
+    'movementType': "Type de mouvement",
+    'movementReceipt': "Réception",
+    'movementReservation': "Réservation",
+    'movementIssue': "Sortie",
+    'movementReturn': "Retour",
+    'movementTransfer': "Transfert",
+    'movementAdjustment': "Ajustement",
+    'movementReconciliation': "Rapprochement",
+    'sourceLocation': "Emplacement source",
+    'destinationLocation': "Emplacement de destination",
+    'recipient': "Bénéficiaire",
+    'relatedRequest': "Demande liée",
+    'supportingDocument': "Justificatif",
+    'softwareLicences': "Licences logicielles",
+    'softwareLicencesDescription':
+        "Gérez les affectations, la conformité, les contrats et les renouvellements sans exposer les secrets de licence.",
+    'softwareProduct': "Produit logiciel",
+    'vendor': "Éditeur",
+    'licenceType': "Type de licence",
+    'purchasedQuantity': "Quantité achetée",
+    'allocatedQuantity': "Quantité affectée",
+    'availableQuantity': "Quantité disponible",
+    'effectiveDate': "Date d'effet",
+    'renewalDate': "Date de renouvellement",
+    'complianceStatus': "État de conformité",
+    'licenceAssignments': "Affectations de licences",
+    'suppliersWarrantiesDescription':
+        "Gérez les fournisseurs, les contrats, la couverture de garantie, les réclamations et les dates d'expiration.",
+    'supplierRegister': "Registre des fournisseurs",
+    'contracts': "Contrats",
+    'supportTerms': "Conditions d'assistance",
+    'contractStart': "Début du contrat",
+    'contractEnd': "Fin du contrat",
+    'warrantyCoverage': "Couverture de garantie",
+    'warrantyExpiration': "Expiration de la garantie",
+    'warrantyClaims': "Réclamations de garantie",
+    'configurationManagementDatabase':
+        "Base de données de gestion des configurations",
+    'cmdbDescription':
+        "Cartographiez les services critiques, les applications, l'infrastructure, les appareils et leurs dépendances directionnelles.",
+    'configurationItems': "Éléments de configuration",
+    'ciType': "Type d'élément de configuration",
+    'ciOwner': "Responsable de l'élément",
+    'supportGroup': "Groupe de support",
+    'criticality': "Criticité",
+    'operationalStatus': "État opérationnel",
+    'configurationBaseline': "Référentiel de configuration",
+    'dataQualityStatus': "État de qualité des données",
+    'relationships': "Relations",
+    'impactView': "Vue d'impact",
+    'dependencyView': "Vue des dépendances",
+    'dependsOn': "Dépend de",
+    'runsOn': "S'exécute sur",
+    'connectedTo': "Connecté à",
+    'uses': "Utilise",
+    'representedBy': "Représenté par",
+    'managerOperationalAccessRequired':
+        "Le rôle MANAGER est requis pour accéder à cette fonction opérationnelle.",
+    'assetCommandCompleted': "L'opération sur l'actif est terminée.",
+    'stockMovementCompleted': "Le mouvement de stock a été enregistré.",
+    'licenceOperationCompleted': "L'opération sur la licence est terminée.",
+    'registerNewAsset': "Enregistrer un nouvel actif",
+    'registerNewLicence': "Enregistrer une nouvelle licence",
+    'allocateLicence': "Affecter la licence",
+    'releaseLicence': "Libérer l'affectation",
+    'saveSupplier': "Enregistrer le fournisseur",
+    'saveContract': "Enregistrer le contrat",
+    'saveWarranty': "Enregistrer la garantie",
+    'recordWarrantyClaim': "Enregistrer une réclamation de garantie",
+    'saveConfigurationItem': "Enregistrer l'élément de configuration",
+    'createRelationship': "Créer une relation",
+    'retireRelationship': "Retirer la relation",
+    'configurationOperationCompleted':
+        "L'opération de configuration est terminée.",
+    'recordIdentifier': "Identifiant de l'enregistrement",
+    'categoryId': "Identifiant de catégorie",
+    'supplierId': "Identifiant du fournisseur",
+    'contractId': "Identifiant du contrat",
+    'warrantyId': "Identifiant de la garantie",
+    'claimId': "Identifiant de la réclamation",
+    'allocationId': "Identifiant de l'affectation",
+    'assigneeId': "Identifiant du bénéficiaire",
+    'assigneeName': "Nom du bénéficiaire",
+    'assignmentType': "Type d'affectation",
+    'contactName': "Nom du contact",
+    'legalName': "Raison sociale",
+    'contractNumber': "Numéro de contrat",
+    'warrantyNumber': "Numéro de garantie",
+    'relationshipType': "Type de relation",
+    'sourceType': "Type de source",
+    'sourceId': "Identifiant de la source",
+    'targetType': "Type de cible",
+    'targetId': "Identifiant de la cible",
+    'linkedAssetId': "Identifiant de l'actif lié",
+    'ownerUserId': "Identifiant du responsable",
+    'ownerName': "Nom du responsable",
+    'address': "Adresse",
+    'currency': "Devise",
+    'invalidIdentifier':
+        "Utilisez uniquement des lettres, chiffres, points, tirets, traits de soulignement ou deux-points.",
+    'invalidDate': "Saisissez une date valide au format AAAA-MM-JJ.",
+    'positiveWholeNumberRequired': "Saisissez un nombre entier positif.",
+    'isoDateHint': "AAAA-MM-JJ",
+    'assignmentUser': "Utilisateur",
+    'assignmentDevice': "Appareil",
+    'ciService': "Service",
+    'ciApplication': "Application",
+    'ciServer': "Serveur",
+    'ciDatabase': "Base de données",
+    'ciNetwork': "Réseau",
+    'ciDevice': "Appareil",
+    'statusPlanned': "Planifié",
+    'statusDegraded': "Dégradé",
+    'statusMaintenance': "Maintenance",
+    'statusRetired': "Retiré",
+    'dataQualityVerified': "Vérifié",
+    'dataQualityNeedsReview': "À réviser",
+    'dataQualityIncomplete': "Incomplet",
+    'editAsset': "Modifier l'actif",
+    'assignAsset': "Affecter l'actif",
+    'returnAsset': "Restituer l'actif",
+    'transitionAsset': "Changer l'état du cycle de vie",
+    'assignedUserId': "UID de l'agent affecté",
+    'assignedAssetReturnHint':
+        "La restitution est disponible uniquement lorsque l'actif a une affectation en cours.",
+    'transitionReason': "Motif de la transition",
+    'lifecycleOperationCompleted': "L'opération sur l'actif est terminée.",
+    'addStockLocation': "Ajouter un emplacement de stock",
+    'editStockLocation': "Modifier un emplacement de stock",
+    'addStockItem': "Ajouter un article de stock",
+    'editStockItem': "Modifier un article de stock",
+    'stockLocationId': "ID de l'emplacement de stock",
+    'stockItemId': "ID de l'article de stock",
+    'sku': "UGS",
+    'unitOfMeasure': "Unité de mesure",
+    'isConsumable': "Article consommable",
+    'adjustmentDirection': "Sens de l'ajustement",
+    'increaseStock': "Augmenter le stock",
+    'decreaseStock': "Diminuer le stock",
+    'reservedQuantityFulfilled': "Quantité réservée honorée",
+    'targetOnHand': "Quantité physique cible",
+    'targetReserved': "Quantité réservée cible",
+    'movementReason': "Motif du mouvement",
+    'movementRequirementsHint':
+        "Les champs obligatoires changent selon le type de mouvement sélectionné.",
+    'sourceLocationRequired':
+        "Un emplacement source est obligatoire pour ce mouvement.",
+    'destinationLocationRequired':
+        "Un emplacement de destination est obligatoire pour ce mouvement.",
+    'recipientRequired':
+        "L'UID de l'agent destinataire est obligatoire pour ce mouvement.",
+    'evidenceRequired':
+        "L'ID d'une pièce justificative est obligatoire pour ce mouvement.",
+    'nonNegativeNumberRequired': "Saisissez zéro ou un nombre positif.",
+    'reservedQuantityTooHigh':
+        "La quantité réservée honorée ne peut pas dépasser la quantité sortie.",
+    'editSupplier': "Modifier le fournisseur",
+    'editContract': "Modifier le contrat",
+    'editWarranty': "Modifier la garantie",
+    'manageWarranty': "Gérer la garantie",
+    'transitionWarrantyClaim': "Mettre à jour l'état de la réclamation",
+    'claimStatus': "État de la réclamation",
+    'claimResolution': "Motif ou résolution de la réclamation",
+    'supplierContact': "Contact principal du fournisseur",
+    'editConfigurationItem': "Modifier l'élément de configuration",
+    'relatedIncidentIds': "IDs des incidents liés",
+    'relatedRequestIds': "IDs des demandes liées",
+    'relatedChangeIds': "IDs des changements liés",
+    'relatedFindingIds': "IDs des constats de sécurité liés",
+    'commaSeparatedIdsHint': "IDs séparés par des virgules",
+    'allRelationships': "Toutes les relations",
+    'showDependencies': "Dépendances",
+    'showImpact': "Impact",
+    'recipientUserId': "UID de l'agent destinataire",
+    'claimSubmitted': "Soumise",
+    'claimAcknowledged': "Accusée réception",
+    'claimApproved': "Approuvée",
+    'claimRejected': "Rejetée",
+    'claimResolved': "Résolue",
+    'claimClosed': "Clôturée",
+    'assetStatusOrdered': "Commandé",
+    'assetStatusReceived': "Reçu",
+    'assetStatusInStock': "En stock",
+    'assetStatusConfigured': "Configuré",
+    'assetStatusAssigned': "Affecté",
+    'assetStatusReturned': "Restitué",
+    'assetStatusDisposed': "Mis au rebut",
+    'assetStatusLost': "Perdu",
+    'assetStatusStolen': "Volé",
+    'uploadAssetAttachment': "Téléverser une pièce jointe",
+    'uploadAssetPhotograph': "Téléverser une photographie",
+    'scanStockBarcode': "Scanner le code-barres",
+    'scanStockBarcodeHint': "Scannez ou saisissez le code-barres de l'article",
+    'barcodeNotFound': "Aucun article en stock ne correspond à ce code-barres.",
+    'attachmentRegistrationSuccessful':
+        "Le fichier a été téléversé et enregistré de manière sécurisée.",
+    'chooseSupportingDocument': "Choisir une pièce justificative",
   },
 };

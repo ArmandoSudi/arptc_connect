@@ -107,6 +107,7 @@ class ServiceRequestFormView extends StatelessWidget {
               children: [
                 CommonTextInput(
                   label: l10n.title,
+                  initialValue: state.title,
                   onChanged: onTitleChanged,
                   validator: (value) =>
                       value?.trim().isEmpty == true ? l10n.errorOccurred : null,
@@ -114,6 +115,7 @@ class ServiceRequestFormView extends StatelessWidget {
                 const SizedBox(height: 16),
                 CommonTextInput(
                   label: l10n.description,
+                  initialValue: state.description,
                   isMultiline: true,
                   onChanged: onDescriptionChanged,
                 ),
@@ -284,6 +286,7 @@ class _DynamicField extends StatelessWidget {
         return CommonTextInput(
           label: label,
           hintText: help,
+          initialValue: value?.toString(),
           type: field.type == CatalogueFieldType.integer
               ? CommonTextInputType.number
               : CommonTextInputType.decimal,
@@ -297,6 +300,7 @@ class _DynamicField extends StatelessWidget {
         return CommonTextInput(
           label: label,
           hintText: help,
+          initialValue: value?.toString(),
           isMultiline: true,
           onChanged: onChanged,
         );
@@ -304,6 +308,7 @@ class _DynamicField extends StatelessWidget {
         return CommonTextInput(
           label: label,
           hintText: help,
+          initialValue: value?.toString(),
           type: CommonTextInputType.email,
           onChanged: onChanged,
         );
@@ -311,6 +316,7 @@ class _DynamicField extends StatelessWidget {
         return CommonTextInput(
           label: label,
           hintText: help,
+          initialValue: value?.toString(),
           type: CommonTextInputType.phone,
           onChanged: onChanged,
         );
@@ -323,6 +329,7 @@ class _DynamicField extends StatelessWidget {
         return CommonTextInput(
           label: label,
           hintText: help,
+          initialValue: value?.toString(),
           onChanged: onChanged,
         );
     }
