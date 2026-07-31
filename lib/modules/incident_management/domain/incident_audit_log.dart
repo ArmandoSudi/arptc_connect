@@ -29,10 +29,21 @@ class IncidentAuditLog {
     DocumentSnapshot<Map<String, dynamic>> snapshot, {
     required String ticketId,
   }) {
-    final data = snapshot.data() ?? <String, dynamic>{};
+    return IncidentAuditLog.fromMap(
+      id: snapshot.id,
+      ticketId: ticketId,
+      data: snapshot.data() ?? <String, dynamic>{},
+    );
+  }
+
+  factory IncidentAuditLog.fromMap({
+    required String id,
+    required String ticketId,
+    required Map<String, dynamic> data,
+  }) {
     final rawChanges = data['changes'];
     return IncidentAuditLog(
-      id: snapshot.id,
+      id: id,
       ticketId: ticketId,
       action: stringFromFirestore(data, 'action'),
       message: stringFromFirestore(data, 'message'),

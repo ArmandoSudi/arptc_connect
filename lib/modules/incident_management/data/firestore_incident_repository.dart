@@ -8,6 +8,7 @@ import 'package:arptc_connect/modules/incident_management/domain/incident_commen
 import 'package:arptc_connect/modules/incident_management/domain/incident_enums.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_resolution_code.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_ticket.dart';
+import 'package:arptc_connect/modules/incident_management/domain/incident_ticket_page.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_user.dart';
 import 'package:arptc_connect/modules/incident_management/domain/it_service.dart';
 import 'package:arptc_connect/modules/notifications/domain/notification_event.dart';
@@ -20,6 +21,10 @@ final incidentRepositoryProvider = Provider<IncidentRepository>((ref) {
 
 class FirestoreIncidentRepository implements IncidentRepository {
   FirestoreIncidentRepository(this.firestore);
+
+  static const operationalLiveLimit = 250;
+  static const dashboardCompatibilityLimit = 1000;
+  static const childResourceLimit = 250;
 
   final FirebaseFirestore firestore;
 
@@ -42,6 +47,97 @@ class FirestoreIncidentRepository implements IncidentRepository {
       firestore.collection('notificationEvents');
 
   @override
+  Future<IncidentTicketPage> fetchMyActiveTicketsPage(
+    String userEmail,
+    IncidentTicketPageRequest request,
+  ) {
+    return _fetchTicketPage(
+      _tickets
+          .where('affectedUserEmail', isEqualTo: userEmail)
+          .where(
+            'lifecycleState',
+            isEqualTo: IncidentLifecycleState.active.value,
+          )
+          .where('isDeleted', isEqualTo: false),
+      request,
+    );
+  }
+
+  @override
+  Future<IncidentTicketPage> fetchMyClosedAndArchivedTicketsPage(
+    String userEmail,
+    IncidentTicketPageRequest request,
+  ) {
+    return _fetchTicketPage(
+      _tickets.where('affectedUserEmail', isEqualTo: userEmail).where(
+        'lifecycleState',
+        whereIn: [
+          IncidentLifecycleState.closed.value,
+          IncidentLifecycleState.archived.value,
+        ],
+      ).where('isDeleted', isEqualTo: false),
+      request,
+    );
+  }
+
+  @override
+  Future<IncidentTicketPage> fetchManagerActiveTicketsPage(
+    IncidentTicketPageRequest request,
+  ) {
+    return _fetchTicketPage(
+      _tickets
+          .where(
+            'lifecycleState',
+            isEqualTo: IncidentLifecycleState.active.value,
+          )
+          .where('isDeleted', isEqualTo: false),
+      request,
+    );
+  }
+
+  @override
+  Future<IncidentTicketPage> fetchManagerClosedTicketsPage(
+    IncidentTicketPageRequest request,
+  ) {
+    return _fetchTicketPage(
+      _tickets
+          .where(
+            'lifecycleState',
+            isEqualTo: IncidentLifecycleState.closed.value,
+          )
+          .where('isDeleted', isEqualTo: false),
+      request,
+    );
+  }
+
+  @override
+  Future<IncidentTicketPage> fetchAssignedToMeTicketsPage(
+    String userId,
+    IncidentTicketPageRequest request,
+  ) {
+    return _fetchTicketPage(
+      _tickets
+          .where('assignedToUserId', isEqualTo: userId)
+          .where(
+            'lifecycleState',
+            isEqualTo: IncidentLifecycleState.active.value,
+          )
+          .where('isDeleted', isEqualTo: false),
+      request,
+    );
+  }
+
+  @override
+  Future<IncidentTicketPage> fetchAllTicketsPage(
+    IncidentTicketPageRequest request,
+  ) {
+    return _fetchTicketPage(
+      _tickets.where('isDeleted', isEqualTo: false),
+      request,
+    );
+  }
+
+  @override
   Stream<List<IncidentTicket>> watchMyActiveTickets(String userEmail) {
     return _watchTickets(
       _tickets
@@ -49,6 +145,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
           .where('lifecycleState',
               isEqualTo: IncidentLifecycleState.active.value)
           .where('isDeleted', isEqualTo: false),
+      limit: operationalLiveLimit,
     );
   }
 
@@ -63,6 +160,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
           IncidentLifecycleState.archived.value,
         ],
       ).where('isDeleted', isEqualTo: false),
+      limit: operationalLiveLimit,
     );
   }
 
@@ -73,6 +171,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
           .where('lifecycleState',
               isEqualTo: IncidentLifecycleState.active.value)
           .where('isDeleted', isEqualTo: false),
+      limit: operationalLiveLimit,
     );
   }
 
@@ -83,6 +182,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
           .where('lifecycleState',
               isEqualTo: IncidentLifecycleState.closed.value)
           .where('isDeleted', isEqualTo: false),
+      limit: operationalLiveLimit,
     );
   }
 
@@ -94,12 +194,16 @@ class FirestoreIncidentRepository implements IncidentRepository {
           .where('lifecycleState',
               isEqualTo: IncidentLifecycleState.active.value)
           .where('isDeleted', isEqualTo: false),
+      limit: operationalLiveLimit,
     );
   }
 
   @override
   Stream<List<IncidentTicket>> watchAllTicketsForAdmin() {
-    return _watchTickets(_tickets.where('isDeleted', isEqualTo: false));
+    return _watchTickets(
+      _tickets.where('isDeleted', isEqualTo: false),
+      limit: dashboardCompatibilityLimit,
+    );
   }
 
   @override
@@ -218,10 +322,20 @@ class FirestoreIncidentRepository implements IncidentRepository {
   }
 
   @override
-  Stream<List<IncidentComment>> watchComments(String ticketId) {
-    return _tickets
+  Stream<List<IncidentComment>> watchComments(
+    String ticketId, {
+    bool includeInternal = false,
+  }) {
+    Query<Map<String, dynamic>> query = _tickets
         .doc(ticketId)
         .collection('comments')
+        .orderBy('createdAt', descending: true);
+    if (!includeInternal) {
+      query = query.where('isInternal', isEqualTo: false);
+    }
+
+    return query
+        .limit(childResourceLimit)
         .snapshots()
         .map((snapshot) {
       final comments = snapshot.docs
@@ -237,6 +351,8 @@ class FirestoreIncidentRepository implements IncidentRepository {
     return _tickets
         .doc(ticketId)
         .collection('auditLogs')
+        .orderBy('createdAt', descending: true)
+        .limit(childResourceLimit)
         .snapshots()
         .map((snapshot) {
       final logs = snapshot.docs
@@ -585,13 +701,56 @@ class FirestoreIncidentRepository implements IncidentRepository {
   }
 
   Stream<List<IncidentTicket>> _watchTickets(
-    Query<Map<String, dynamic>> query,
-  ) {
-    return query.snapshots().map((snapshot) {
+    Query<Map<String, dynamic>> query, {
+    required int limit,
+  }) {
+    return _orderedTicketQuery(query).limit(limit).snapshots().map((snapshot) {
       final tickets = snapshot.docs.map(IncidentTicket.fromFirestore).toList()
         ..sort(_compareTickets);
       return tickets;
     });
+  }
+
+  Future<IncidentTicketPage> _fetchTicketPage(
+    Query<Map<String, dynamic>> baseQuery,
+    IncidentTicketPageRequest request,
+  ) async {
+    Query<Map<String, dynamic>> query = _orderedTicketQuery(baseQuery);
+    final cursor = request.cursor;
+    if (cursor != null) {
+      query = query.startAfter([
+        Timestamp.fromDate(cursor.updatedAt),
+        cursor.documentId,
+      ]);
+    }
+
+    final snapshot = await query.limit(request.limit + 1).get();
+    final hasMore = snapshot.docs.length > request.limit;
+    final pageDocuments =
+        hasMore ? snapshot.docs.take(request.limit).toList() : snapshot.docs;
+    final items =
+        pageDocuments.map(IncidentTicket.fromFirestore).toList(growable: false);
+    final lastDocument = pageDocuments.isEmpty ? null : pageDocuments.last;
+    final lastUpdatedAt = items.isEmpty ? null : items.last.updatedAt;
+
+    return IncidentTicketPage(
+      items: items,
+      hasMore: hasMore,
+      nextCursor: lastDocument == null || lastUpdatedAt == null
+          ? null
+          : IncidentTicketPageCursor(
+              updatedAt: lastUpdatedAt,
+              documentId: lastDocument.id,
+            ),
+    );
+  }
+
+  Query<Map<String, dynamic>> _orderedTicketQuery(
+    Query<Map<String, dynamic>> query,
+  ) {
+    return query
+        .orderBy('updatedAt', descending: true)
+        .orderBy(FieldPath.documentId, descending: true);
   }
 
   int _compareTickets(IncidentTicket left, IncidentTicket right) {

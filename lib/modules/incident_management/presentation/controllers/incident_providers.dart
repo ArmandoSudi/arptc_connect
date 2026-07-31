@@ -231,7 +231,11 @@ final incidentCommentsProvider =
   if (sessionKey == null || !_hasIncidentAccess(role)) {
     return Stream.value(const <IncidentComment>[]);
   }
-  return ref.read(incidentRepositoryProvider).watchComments(ticketId);
+  return ref.read(incidentRepositoryProvider).watchComments(
+        ticketId,
+        includeInternal:
+            role == IncidentRole.manager || role == IncidentRole.admin,
+      );
 });
 
 final incidentAuditLogsProvider =

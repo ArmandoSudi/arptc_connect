@@ -27,9 +27,20 @@ class IncidentComment {
     DocumentSnapshot<Map<String, dynamic>> snapshot, {
     required String ticketId,
   }) {
-    final data = snapshot.data() ?? <String, dynamic>{};
-    return IncidentComment(
+    return IncidentComment.fromMap(
       id: snapshot.id,
+      ticketId: ticketId,
+      data: snapshot.data() ?? <String, dynamic>{},
+    );
+  }
+
+  factory IncidentComment.fromMap({
+    required String id,
+    required String ticketId,
+    required Map<String, dynamic> data,
+  }) {
+    return IncidentComment(
+      id: id,
       ticketId: ticketId,
       body: stringFromFirestore(data, 'body'),
       createdByUserId: stringFromFirestore(data, 'createdByUserId'),

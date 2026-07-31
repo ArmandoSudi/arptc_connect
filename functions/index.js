@@ -1,7 +1,11 @@
 const { logger } = require('firebase-functions');
 const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const { HttpsError, onCall } = require('firebase-functions/v2/https');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
+const {
+  archiveEligibleIncidents,
+} = require('./src/incident_archival');
 
 admin.initializeApp();
 
@@ -24,6 +28,24 @@ const DEFAULT_MODULE_KEYS = [
   'meetinghall',
   'usermanagement',
 ];
+
+exports.archiveEligibleIncidents = onSchedule(
+  {
+    schedule: 'every day 01:00',
+    timeZone: 'Africa/Kinshasa',
+    region: 'us-central1',
+    retryCount: 3,
+  },
+  async () => {
+    const archivedCount = await archiveEligibleIncidents({
+      db,
+      fieldValue: admin.firestore.FieldValue,
+      timestamp: admin.firestore.Timestamp,
+      logger,
+    });
+    logger.info('Incident archival run completed', { archivedCount });
+  },
+);
 
 exports.createAgentAccount = onCall(async (request) => {
   if (!request.auth) {

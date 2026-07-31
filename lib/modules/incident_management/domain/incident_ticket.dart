@@ -157,9 +157,18 @@ class IncidentTicket {
   factory IncidentTicket.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
   ) {
-    final data = snapshot.data() ?? <String, dynamic>{};
-    return IncidentTicket(
+    return IncidentTicket.fromMap(
       id: snapshot.id,
+      data: snapshot.data() ?? <String, dynamic>{},
+    );
+  }
+
+  factory IncidentTicket.fromMap({
+    required String id,
+    required Map<String, dynamic> data,
+  }) {
+    return IncidentTicket(
+      id: id,
       ticketNumber: stringFromFirestore(data, 'ticketNumber'),
       title: stringFromFirestore(data, 'title'),
       description: stringFromFirestore(data, 'description'),

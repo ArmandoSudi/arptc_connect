@@ -29,9 +29,20 @@ class IncidentAttachment {
     DocumentSnapshot<Map<String, dynamic>> snapshot, {
     required String ticketId,
   }) {
-    final data = snapshot.data() ?? <String, dynamic>{};
-    return IncidentAttachment(
+    return IncidentAttachment.fromMap(
       id: snapshot.id,
+      ticketId: ticketId,
+      data: snapshot.data() ?? <String, dynamic>{},
+    );
+  }
+
+  factory IncidentAttachment.fromMap({
+    required String id,
+    required String ticketId,
+    required Map<String, dynamic> data,
+  }) {
+    return IncidentAttachment(
+      id: id,
       ticketId: ticketId,
       fileName: stringFromFirestore(data, 'fileName'),
       fileUrl: stringFromFirestore(data, 'fileUrl'),

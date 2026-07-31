@@ -4,10 +4,38 @@ import 'package:arptc_connect/modules/incident_management/domain/incident_catego
 import 'package:arptc_connect/modules/incident_management/domain/incident_comment.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_resolution_code.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_ticket.dart';
+import 'package:arptc_connect/modules/incident_management/domain/incident_ticket_page.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_user.dart';
 import 'package:arptc_connect/modules/incident_management/domain/it_service.dart';
 
 abstract class IncidentRepository {
+  Future<IncidentTicketPage> fetchMyActiveTicketsPage(
+    String userEmail,
+    IncidentTicketPageRequest request,
+  );
+
+  Future<IncidentTicketPage> fetchMyClosedAndArchivedTicketsPage(
+    String userEmail,
+    IncidentTicketPageRequest request,
+  );
+
+  Future<IncidentTicketPage> fetchManagerActiveTicketsPage(
+    IncidentTicketPageRequest request,
+  );
+
+  Future<IncidentTicketPage> fetchManagerClosedTicketsPage(
+    IncidentTicketPageRequest request,
+  );
+
+  Future<IncidentTicketPage> fetchAssignedToMeTicketsPage(
+    String userId,
+    IncidentTicketPageRequest request,
+  );
+
+  Future<IncidentTicketPage> fetchAllTicketsPage(
+    IncidentTicketPageRequest request,
+  );
+
   Stream<List<IncidentTicket>> watchMyActiveTickets(String userEmail);
 
   Stream<List<IncidentTicket>> watchMyClosedAndArchivedTickets(
@@ -39,7 +67,10 @@ abstract class IncidentRepository {
 
   Stream<List<IncidentUser>> watchAgents();
 
-  Stream<List<IncidentComment>> watchComments(String ticketId);
+  Stream<List<IncidentComment>> watchComments(
+    String ticketId, {
+    bool includeInternal = false,
+  });
 
   Stream<List<IncidentAuditLog>> watchAuditLogs(String ticketId);
 
