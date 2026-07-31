@@ -88,6 +88,65 @@ test('draft initialization pins nested configuration and submission is replay-sa
   assert.equal(index.workflowVersion, 3);
 });
 
+test('new drafts pin immutable catalogue versions across parent publication changes', async () => {
+  const documents = baseDocuments();
+  const publishedVersion = clone(documents['serviceCatalogItems/computer']);
+  documents['serviceCatalogItems/computer'] = {
+    ...documents['serviceCatalogItems/computer'],
+    currentPublishedVersion: 4,
+    currentPublishedVersionId: '000004',
+  };
+  documents['serviceCatalogItems/computer/versions/000004'] = publishedVersion;
+  const db = fakeDatabase(documents);
+  const common = {
+    db,
+    fieldValue,
+    timestamp,
+    actor: actor('user-1', 'USER'),
+    agent: userAgent(),
+  };
+  const initialized = await executeSupportCommand({
+    ...common,
+    command: command(
+      ITSM_SUPPORT_COMMANDS.initializeServiceRequestDraft,
+      'initialize-pinned-catalogue-1234',
+      {
+        catalogueItemId: 'computer',
+        responses: { justification: 'Field inspections' },
+      },
+    ),
+  });
+  const draft = db.document(`serviceRequests/${initialized.requestId}`);
+  assert.equal(draft.catalogueItemVersion, 4);
+  assert.equal(draft.catalogueItemVersionDocumentId, '000004');
+
+  db.put('serviceCatalogItems/computer', {
+    ...documents['serviceCatalogItems/computer'],
+    version: 5,
+    currentPublishedVersion: 5,
+    currentPublishedVersionId: '000005',
+    formFields: [{ key: 'new_required_field', required: true }],
+  });
+  db.put('serviceCatalogItems/computer/versions/000005', {
+    ...publishedVersion,
+    version: 5,
+    formFields: [{ key: 'new_required_field', required: true }],
+  });
+
+  await executeSupportCommand({
+    ...common,
+    command: command(
+      ITSM_SUPPORT_COMMANDS.submitServiceRequest,
+      'submit-pinned-catalogue-1234',
+      { requestId: initialized.requestId, attachmentIds: [] },
+    ),
+  });
+  assert.equal(
+    db.document(`serviceRequests/${initialized.requestId}`).status,
+    'awaiting_approval',
+  );
+});
+
 test('submission queues later approval steps and preserves mandatory task policy', async () => {
   const documents = baseDocuments();
   documents['workflowDefinitions/service-request/versions/000003'] = {

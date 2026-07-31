@@ -1509,6 +1509,122 @@ class S {
   String get itsmScTargetAccess => _text('itsmScTargetAccess');
   String get itsmScTaskId => _text('itsmScTaskId');
   String get itsmScCompletionEvidenceId => _text('itsmScCompletionEvidenceId');
+  String get itsmReportingTitle => _text('itsmReportingTitle');
+  String get itsmReportingSubtitle => _text('itsmReportingSubtitle');
+  String get itsmReportingDashboards => _text('itsmReportingDashboards');
+  String get itsmReportingDashboardsDescription =>
+      _text('itsmReportingDashboardsDescription');
+  String get itsmReportingSla => _text('itsmReportingSla');
+  String get itsmReportingSlaDescription =>
+      _text('itsmReportingSlaDescription');
+  String get itsmReportingCatalogue => _text('itsmReportingCatalogue');
+  String get itsmReportingCatalogueDescription =>
+      _text('itsmReportingCatalogueDescription');
+  String get itsmReportingWorkflows => _text('itsmReportingWorkflows');
+  String get itsmReportingWorkflowsDescription =>
+      _text('itsmReportingWorkflowsDescription');
+  String get itsmReportingAudit => _text('itsmReportingAudit');
+  String get itsmReportingAuditDescription =>
+      _text('itsmReportingAuditDescription');
+  String get itsmReportingOperationalDashboard =>
+      _text('itsmReportingOperationalDashboard');
+  String get itsmReportingExecutiveDashboard =>
+      _text('itsmReportingExecutiveDashboard');
+  String get itsmReportingIncidentDashboard =>
+      _text('itsmReportingIncidentDashboard');
+  String get itsmReportingReadOnly => _text('itsmReportingReadOnly');
+  String get itsmReportingAccessDenied => _text('itsmReportingAccessDenied');
+  String get itsmReportingAccessDeniedDescription =>
+      _text('itsmReportingAccessDeniedDescription');
+  String get itsmReportingLoading => _text('itsmReportingLoading');
+  String get itsmReportingError => _text('itsmReportingError');
+  String get itsmReportingEmpty => _text('itsmReportingEmpty');
+  String get itsmReportingRetry => _text('itsmReportingRetry');
+  String get itsmReportingIncompleteSnapshot =>
+      _text('itsmReportingIncompleteSnapshot');
+  String get itsmReportingGeneratedAt => _text('itsmReportingGeneratedAt');
+  String get itsmReportingHighlights => _text('itsmReportingHighlights');
+  String get itsmReportingBreakdowns => _text('itsmReportingBreakdowns');
+  String get itsmReportingTrends => _text('itsmReportingTrends');
+  String get itsmReportingCreateDraft => _text('itsmReportingCreateDraft');
+  String get itsmReportingPublish => _text('itsmReportingPublish');
+  String get itsmReportingRetire => _text('itsmReportingRetire');
+  String get itsmReportingValidate => _text('itsmReportingValidate');
+  String get itsmReportingDraft => _text('itsmReportingDraft');
+  String get itsmReportingPublished => _text('itsmReportingPublished');
+  String get itsmReportingRetired => _text('itsmReportingRetired');
+  String get itsmReportingVersions => _text('itsmReportingVersions');
+  String get itsmReportingImmutable => _text('itsmReportingImmutable');
+  String get itsmReportingValidationPassed =>
+      _text('itsmReportingValidationPassed');
+  String get itsmReportingValidationIssues =>
+      _text('itsmReportingValidationIssues');
+  String get itsmReportingAuditFilters => _text('itsmReportingAuditFilters');
+  String get itsmReportingFrom => _text('itsmReportingFrom');
+  String get itsmReportingTo => _text('itsmReportingTo');
+  String get itsmReportingDimension => _text('itsmReportingDimension');
+  String get itsmReportingValue => _text('itsmReportingValue');
+  String get itsmReportingApply => _text('itsmReportingApply');
+  String get itsmReportingExport => _text('itsmReportingExport');
+  String get itsmReportingLoadMore => _text('itsmReportingLoadMore');
+  String get itsmReportingNoEvents => _text('itsmReportingNoEvents');
+  String get itsmReportingConfigurationReadOnly =>
+      _text('itsmReportingConfigurationReadOnly');
+  String get itsmReportingAuditExportQueued =>
+      _text('itsmReportingAuditExportQueued');
+  String get itsmReportingNoData => _text('itsmReportingNoData');
+  String get itsmReportingNone => _text('itsmReportingNone');
+  String get itsmReportingSaveDraft => _text('itsmReportingSaveDraft');
+  String get itsmReportingPolicyName => _text('itsmReportingPolicyName');
+  String get itsmReportingTimeZone => _text('itsmReportingTimeZone');
+  String get itsmReportingResponseTarget =>
+      _text('itsmReportingResponseTarget');
+  String get itsmReportingResolutionTarget =>
+      _text('itsmReportingResolutionTarget');
+  String get itsmReportingWeekdayStart => _text('itsmReportingWeekdayStart');
+  String get itsmReportingWeekdayEnd => _text('itsmReportingWeekdayEnd');
+  String get itsmReportingWarningThreshold =>
+      _text('itsmReportingWarningThreshold');
+  String get itsmReportingHolidays => _text('itsmReportingHolidays');
+  String get itsmReportingPauseStatuses => _text('itsmReportingPauseStatuses');
+  String get itsmReportingBusinessHoursOrder =>
+      _text('itsmReportingBusinessHoursOrder');
+  String get itsmReportingRequiredField => _text('itsmReportingRequiredField');
+  String get itsmReportingPositiveNumber =>
+      _text('itsmReportingPositiveNumber');
+  String get itsmReportingMinutesRange => _text('itsmReportingMinutesRange');
+  String get itsmReportingThresholdRange =>
+      _text('itsmReportingThresholdRange');
+  String get itsmReportingNameEnglish => _text('itsmReportingNameEnglish');
+  String get itsmReportingNameFrench => _text('itsmReportingNameFrench');
+  String get itsmReportingDescriptionEnglish =>
+      _text('itsmReportingDescriptionEnglish');
+  String get itsmReportingDescriptionFrench =>
+      _text('itsmReportingDescriptionFrench');
+  String get itsmReportingCategoryId => _text('itsmReportingCategoryId');
+  String get itsmReportingWorkflowId => _text('itsmReportingWorkflowId');
+  String get itsmReportingWorkflowVersion =>
+      _text('itsmReportingWorkflowVersion');
+  String get itsmReportingSlaPolicyId => _text('itsmReportingSlaPolicyId');
+  String get itsmReportingSlaVersion => _text('itsmReportingSlaVersion');
+  String get itsmReportingVersion => _text('itsmReportingVersion');
+  String get itsmReportingValidationPassedLong =>
+      _text('itsmReportingValidationPassedLong');
+  String get itsmReportingStatesTransitions =>
+      _text('itsmReportingStatesTransitions');
+  String get itsmReportingTransitions => _text('itsmReportingTransitions');
+  String get itsmReportingTerminal => _text('itsmReportingTerminal');
+  String get itsmReportingEditDraft => _text('itsmReportingEditDraft');
+  String get itsmReportingEvent => _text('itsmReportingEvent');
+  String get itsmReportingOccurred => _text('itsmReportingOccurred');
+  String get itsmReportingActor => _text('itsmReportingActor');
+  String get itsmReportingEntity => _text('itsmReportingEntity');
+  String get itsmReportingCorrelation => _text('itsmReportingCorrelation');
+  String get itsmReportingConfidentiality =>
+      _text('itsmReportingConfidentiality');
+  String get itsmReportingTransition => _text('itsmReportingTransition');
+  String get itsmReportingBefore => _text('itsmReportingBefore');
+  String get itsmReportingAfter => _text('itsmReportingAfter');
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -2942,6 +3058,105 @@ const _localizedValues = <String, Map<String, String>>{
     'itsmScTargetAccess': "Target access",
     'itsmScTaskId': "Revocation task ID",
     'itsmScCompletionEvidenceId': "Completion evidence ID",
+    'itsmReportingTitle': "Reporting & Administration",
+    'itsmReportingSubtitle':
+        "Trusted dashboards, service controls and audit oversight.",
+    'itsmReportingDashboards': "Dashboards",
+    'itsmReportingDashboardsDescription':
+        "Operational and executive performance snapshots.",
+    'itsmReportingSla': "SLA policies",
+    'itsmReportingSlaDescription':
+        "Business calendars, targets, warnings and escalations.",
+    'itsmReportingCatalogue': "Service catalogue",
+    'itsmReportingCatalogueDescription':
+        "Version and publish request offerings.",
+    'itsmReportingWorkflows': "Workflows",
+    'itsmReportingWorkflowsDescription':
+        "Validate and publish immutable workflow versions.",
+    'itsmReportingAudit': "Audit logs",
+    'itsmReportingAuditDescription':
+        "Bounded, append-only operational evidence.",
+    'itsmReportingOperationalDashboard': "Operational dashboard",
+    'itsmReportingExecutiveDashboard': "Executive dashboard",
+    'itsmReportingIncidentDashboard': "Incident reporting",
+    'itsmReportingReadOnly': "Read-only",
+    'itsmReportingAccessDenied': "Access denied",
+    'itsmReportingAccessDeniedDescription':
+        "You do not have access to Reporting & Administration.",
+    'itsmReportingLoading': "Loading trusted data...",
+    'itsmReportingError': "The trusted data could not be loaded.",
+    'itsmReportingEmpty': "No data is available for this view.",
+    'itsmReportingRetry': "Retry",
+    'itsmReportingIncompleteSnapshot':
+        "Snapshot reconciliation is still in progress.",
+    'itsmReportingGeneratedAt': "Generated",
+    'itsmReportingHighlights': "Highlights",
+    'itsmReportingBreakdowns': "Breakdowns",
+    'itsmReportingTrends': "Trends",
+    'itsmReportingCreateDraft': "Create draft",
+    'itsmReportingPublish': "Publish",
+    'itsmReportingRetire': "Retire",
+    'itsmReportingValidate': "Validate",
+    'itsmReportingDraft': "Draft",
+    'itsmReportingPublished': "Published",
+    'itsmReportingRetired': "Retired",
+    'itsmReportingVersions': "Version history",
+    'itsmReportingImmutable': "Published versions are immutable",
+    'itsmReportingValidationPassed': "Ready to publish",
+    'itsmReportingValidationIssues': "Validation issues",
+    'itsmReportingAuditFilters': "Audit filters",
+    'itsmReportingFrom': "From",
+    'itsmReportingTo': "To",
+    'itsmReportingDimension': "Dimension",
+    'itsmReportingValue': "Value",
+    'itsmReportingApply': "Apply",
+    'itsmReportingExport': "Request export",
+    'itsmReportingLoadMore': "Load more",
+    'itsmReportingNoEvents': "No audit events match these filters.",
+    'itsmReportingConfigurationReadOnly':
+        "ADMIN can inspect published and retired versions only.",
+    'itsmReportingAuditExportQueued': "Audit export queued.",
+    'itsmReportingNoData': "No data",
+    'itsmReportingNone': "None",
+    'itsmReportingSaveDraft': "Save draft",
+    'itsmReportingPolicyName': "Policy name",
+    'itsmReportingTimeZone': "IANA time zone",
+    'itsmReportingResponseTarget': "Response target (minutes)",
+    'itsmReportingResolutionTarget': "Resolution target (minutes)",
+    'itsmReportingWeekdayStart': "Weekday start (minutes after midnight)",
+    'itsmReportingWeekdayEnd': "Weekday end (minutes after midnight)",
+    'itsmReportingWarningThreshold': "Warning threshold (0-1)",
+    'itsmReportingHolidays': "Holidays (YYYY-MM-DD, comma separated)",
+    'itsmReportingPauseStatuses': "Pause statuses (comma separated)",
+    'itsmReportingBusinessHoursOrder': "Business hours end must follow start.",
+    'itsmReportingRequiredField': "This field is required.",
+    'itsmReportingPositiveNumber': "Enter a positive number.",
+    'itsmReportingMinutesRange': "Enter a value from 0 to 1440.",
+    'itsmReportingThresholdRange': "Enter a value between 0 and 1.",
+    'itsmReportingNameEnglish': "Name (English)",
+    'itsmReportingNameFrench': "Name (French)",
+    'itsmReportingDescriptionEnglish': "Description (English)",
+    'itsmReportingDescriptionFrench': "Description (French)",
+    'itsmReportingCategoryId': "Category ID",
+    'itsmReportingWorkflowId': "Published workflow ID",
+    'itsmReportingWorkflowVersion': "Workflow version",
+    'itsmReportingSlaPolicyId': "Published SLA policy ID",
+    'itsmReportingSlaVersion': "SLA policy version",
+    'itsmReportingVersion': "Version",
+    'itsmReportingValidationPassedLong': "All local validation checks passed.",
+    'itsmReportingStatesTransitions': "States and transitions",
+    'itsmReportingTransitions': "Transitions",
+    'itsmReportingTerminal': "Terminal",
+    'itsmReportingEditDraft': "Edit and validate this draft version.",
+    'itsmReportingEvent': "Event",
+    'itsmReportingOccurred': "Occurred",
+    'itsmReportingActor': "Actor",
+    'itsmReportingEntity': "Entity",
+    'itsmReportingCorrelation': "Correlation",
+    'itsmReportingConfidentiality': "Confidentiality",
+    'itsmReportingTransition': "Transition",
+    'itsmReportingBefore': "Before",
+    'itsmReportingAfter': "After",
   },
   'fr': <String, String>{
     'appName': "ARPTC Connect",
@@ -4373,5 +4588,110 @@ const _localizedValues = <String, Map<String, String>>{
     'itsmScTargetAccess': "Accès cible",
     'itsmScTaskId': "ID de la tâche de révocation",
     'itsmScCompletionEvidenceId': "ID de la preuve d’exécution",
+    'itsmReportingTitle': "Rapports et administration",
+    'itsmReportingSubtitle':
+        "Tableaux de bord fiables, contrôle des services et supervision des audits.",
+    'itsmReportingDashboards': "Tableaux de bord",
+    'itsmReportingDashboardsDescription':
+        "Indicateurs opérationnels et exécutifs consolidés.",
+    'itsmReportingSla': "Politiques SLA",
+    'itsmReportingSlaDescription':
+        "Calendriers ouvrés, objectifs, alertes et escalades.",
+    'itsmReportingCatalogue': "Catalogue de services",
+    'itsmReportingCatalogueDescription':
+        "Versionner et publier les offres de demande.",
+    'itsmReportingWorkflows': "Flux de travail",
+    'itsmReportingWorkflowsDescription':
+        "Valider et publier des versions immuables des flux.",
+    'itsmReportingAudit': "Journaux d’audit",
+    'itsmReportingAuditDescription':
+        "Preuves opérationnelles bornées et immuables.",
+    'itsmReportingOperationalDashboard': "Tableau de bord opérationnel",
+    'itsmReportingExecutiveDashboard': "Tableau de bord exécutif",
+    'itsmReportingIncidentDashboard': "Rapports sur les incidents",
+    'itsmReportingReadOnly': "Lecture seule",
+    'itsmReportingAccessDenied': "Accès refusé",
+    'itsmReportingAccessDeniedDescription':
+        "Vous n’avez pas accès aux rapports et à l’administration.",
+    'itsmReportingLoading': "Chargement des données fiables...",
+    'itsmReportingError': "Les données fiables n’ont pas pu être chargées.",
+    'itsmReportingEmpty': "Aucune donnée n’est disponible pour cette vue.",
+    'itsmReportingRetry': "Réessayer",
+    'itsmReportingIncompleteSnapshot':
+        "La réconciliation de l’instantané est en cours.",
+    'itsmReportingGeneratedAt': "Généré",
+    'itsmReportingHighlights': "Points clés",
+    'itsmReportingBreakdowns': "Répartitions",
+    'itsmReportingTrends': "Tendances",
+    'itsmReportingCreateDraft': "Créer un brouillon",
+    'itsmReportingPublish': "Publier",
+    'itsmReportingRetire': "Retirer",
+    'itsmReportingValidate': "Valider",
+    'itsmReportingDraft': "Brouillon",
+    'itsmReportingPublished': "Publié",
+    'itsmReportingRetired': "Retiré",
+    'itsmReportingVersions': "Historique des versions",
+    'itsmReportingImmutable': "Les versions publiées sont immuables",
+    'itsmReportingValidationPassed': "Prêt à publier",
+    'itsmReportingValidationIssues': "Problèmes de validation",
+    'itsmReportingAuditFilters': "Filtres d’audit",
+    'itsmReportingFrom': "Du",
+    'itsmReportingTo': "Au",
+    'itsmReportingDimension': "Dimension",
+    'itsmReportingValue': "Valeur",
+    'itsmReportingApply': "Appliquer",
+    'itsmReportingExport': "Demander un export",
+    'itsmReportingLoadMore': "Charger plus",
+    'itsmReportingNoEvents':
+        "Aucun événement d’audit ne correspond à ces filtres.",
+    'itsmReportingConfigurationReadOnly':
+        "ADMIN peut uniquement consulter les versions publiées et retirées.",
+    'itsmReportingAuditExportQueued': "Export d’audit mis en file d’attente.",
+    'itsmReportingNoData': "Aucune donnée",
+    'itsmReportingNone': "Aucun",
+    'itsmReportingSaveDraft': "Enregistrer le brouillon",
+    'itsmReportingPolicyName': "Nom de la politique",
+    'itsmReportingTimeZone': "Fuseau horaire IANA",
+    'itsmReportingResponseTarget': "Objectif de réponse (minutes)",
+    'itsmReportingResolutionTarget': "Objectif de résolution (minutes)",
+    'itsmReportingWeekdayStart': "Début de journée (minutes après minuit)",
+    'itsmReportingWeekdayEnd': "Fin de journée (minutes après minuit)",
+    'itsmReportingWarningThreshold': "Seuil d’alerte (0-1)",
+    'itsmReportingHolidays':
+        "Jours fériés (AAAA-MM-JJ, séparés par des virgules)",
+    'itsmReportingPauseStatuses': "Statuts de pause (séparés par des virgules)",
+    'itsmReportingBusinessHoursOrder':
+        "La fin des heures ouvrées doit suivre leur début.",
+    'itsmReportingRequiredField': "Ce champ est obligatoire.",
+    'itsmReportingPositiveNumber': "Saisissez un nombre positif.",
+    'itsmReportingMinutesRange':
+        "Saisissez une valeur comprise entre 0 et 1440.",
+    'itsmReportingThresholdRange':
+        "Saisissez une valeur comprise entre 0 et 1.",
+    'itsmReportingNameEnglish': "Nom (anglais)",
+    'itsmReportingNameFrench': "Nom (français)",
+    'itsmReportingDescriptionEnglish': "Description (anglais)",
+    'itsmReportingDescriptionFrench': "Description (français)",
+    'itsmReportingCategoryId': "ID de catégorie",
+    'itsmReportingWorkflowId': "ID du flux publié",
+    'itsmReportingWorkflowVersion': "Version du flux",
+    'itsmReportingSlaPolicyId': "ID de la politique SLA publiée",
+    'itsmReportingSlaVersion': "Version de la politique SLA",
+    'itsmReportingVersion': "Version",
+    'itsmReportingValidationPassedLong':
+        "Tous les contrôles de validation locaux ont réussi.",
+    'itsmReportingStatesTransitions': "États et transitions",
+    'itsmReportingTransitions': "Transitions",
+    'itsmReportingTerminal': "Terminal",
+    'itsmReportingEditDraft': "Modifier et valider cette version brouillon.",
+    'itsmReportingEvent': "Événement",
+    'itsmReportingOccurred': "Survenu le",
+    'itsmReportingActor': "Acteur",
+    'itsmReportingEntity': "Entité",
+    'itsmReportingCorrelation': "Corrélation",
+    'itsmReportingConfidentiality': "Confidentialité",
+    'itsmReportingTransition': "Transition",
+    'itsmReportingBefore': "Avant",
+    'itsmReportingAfter': "Après",
   },
 };

@@ -247,6 +247,10 @@ service cloud.firestore {
       return request.query.limit != null && request.query.limit <= 101;
     }
 
+    function isBoundedItsmAdministrationQuery() {
+      return request.query.limit != null && request.query.limit <= 101;
+    }
+
     function isSecurityFindingAuthorized(data) {
       return isManager();
     }
@@ -454,9 +458,31 @@ service cloud.firestore {
         );
     }
 
-    function canReadItsmConfiguration(data) {
+    function isRetiredConfiguration(data) {
+      return (
+          data.keys().hasAny(['status']) &&
+          data.status in ['RETIRED', 'retired']
+        ) ||
+        (
+          data.keys().hasAny(['state']) &&
+          data.state in ['RETIRED', 'retired']
+        );
+    }
+
+    function isPublishedOrRetiredConfiguration(data) {
+      return isPublishedConfiguration(data) || isRetiredConfiguration(data);
+    }
+
+    function canReadItsmConfigurationParent(data) {
       return isManager() ||
-        ((isAdmin() || isUser()) && isPublishedConfiguration(data));
+        (isAdmin() && isPublishedOrRetiredConfiguration(data)) ||
+        (isUser() && isPublishedConfiguration(data));
+    }
+
+    function canReadItsmConfigurationVersion(data) {
+      return isManager() ||
+        (isAdmin() && isPublishedOrRetiredConfiguration(data)) ||
+        (isUser() && isPublishedConfiguration(data));
     }
 
     function canReadItsmCatalogueItem(data) {
@@ -565,22 +591,93 @@ service cloud.firestore {
           (
             isManager() &&
             data.keys().hasAny(['audience']) &&
-            data.audience in ['MANAGER', 'manager', 'ALL', 'all']
+            data.audience in ['MANAGER', 'manager']
           ) ||
           (
             isAdmin() &&
             data.keys().hasAny(['audience']) &&
-            data.audience in ['ADMIN', 'admin', 'ALL', 'all']
+            data.audience in ['ADMIN', 'admin']
           )
         );
     }
 
-    function canReadItsmAuditEvent(data) {
-      return (isManager() || isAdmin()) &&
+    function isManagerExplicitlyAuthorizedForAudit(data) {
+      return isManager() &&
         (
-          !isRestrictedItsmData(data) ||
-          isExplicitlyAuthorizedForRestricted(data)
+          (
+            data.keys().hasAny(['authorizedManagerIds']) &&
+            data.authorizedManagerIds is list &&
+            request.auth.uid in data.authorizedManagerIds
+          ) ||
+          (
+            data.keys().hasAny(['authorizedUserIds']) &&
+            data.authorizedUserIds is list &&
+            request.auth.uid in data.authorizedUserIds
+          )
         );
+    }
+
+    function canGetItsmAuditEvent(data) {
+      return (
+          isManager() &&
+          (
+            !isRestrictedItsmData(data) ||
+            isManagerExplicitlyAuthorizedForAudit(data)
+          )
+        ) ||
+        (isAdmin() && !isRestrictedItsmData(data));
+    }
+
+    function canListItsmAuditEvent(data) {
+      return (
+          isManager() &&
+          (
+            data.isRestricted == false ||
+            (
+              data.isRestricted == true &&
+              request.auth.uid in data.authorizedManagerIds
+            )
+          )
+        ) ||
+        (isAdmin() && data.isRestricted == false);
+    }
+
+    function canReadItsmSlaState(data) {
+      return (
+          isManager() &&
+          (
+            !isRestrictedItsmData(data) ||
+            isExplicitlyAuthorizedForRestricted(data)
+          )
+        ) ||
+        (
+          isItsmSelfServiceRole() &&
+          isPrincipalWorkItemOwner(data) &&
+          isSelfServiceVisible(data) &&
+          !isRestrictedItsmData(data)
+        );
+    }
+
+    function canReadItsmReferenceData(data) {
+      return isManager() ||
+        (
+          (isAdmin() || isUser()) &&
+          !isRestrictedItsmData(data) &&
+          isPublishedConfiguration(data)
+        );
+    }
+
+    function canReadItsmAuditExport(data) {
+      return (isManager() || isAdmin()) &&
+        data.keys().hasAll([
+          'requesterUserId',
+          'status',
+          'expiresAt'
+        ]) &&
+        data.requesterUserId == request.auth.uid &&
+        data.status in ['COMPLETED', 'completed'] &&
+        data.expiresAt is timestamp &&
+        data.expiresAt > request.time;
     }
 
     function canReadAssetSelfServiceProjection(data) {
@@ -1249,21 +1346,58 @@ service cloud.firestore {
     }
 
     match /itsmReportSnapshots/{snapshotId} {
-      allow get, list: if signedIn() &&
-        canReadItsmReportSnapshot(resource.data);
+      allow get: if signedIn() && canReadItsmReportSnapshot(resource.data);
+      allow list: if signedIn() &&
+        canReadItsmReportSnapshot(resource.data) &&
+        isBoundedItsmAdministrationQuery();
       allow create, update, delete: if false;
+
+      match /shards/{shardId} {
+        allow read, write: if false;
+      }
+
+      match /{unknownPath=**} {
+        allow read, write: if false;
+      }
+    }
+
+    match /itsmReportContributions/{contributionId} {
+      allow read, write: if false;
     }
 
     match /itsmAuditEvents/{eventId} {
-      allow get, list: if signedIn() &&
-        canReadItsmAuditEvent(resource.data);
+      allow get: if signedIn() && canGetItsmAuditEvent(resource.data);
+      allow list: if signedIn() &&
+        canListItsmAuditEvent(resource.data) &&
+        isBoundedItsmAdministrationQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /itsmAuditExports/{exportId} {
+      allow get: if signedIn() && canReadItsmAuditExport(resource.data);
+      allow list: if false;
       allow create, update, delete: if false;
     }
 
     match /serviceCatalogItems/{catalogItemId} {
-      allow get, list: if signedIn() &&
-        canReadItsmCatalogueItem(resource.data);
+      allow get: if signedIn() && canReadItsmCatalogueItem(resource.data);
+      allow list: if signedIn() &&
+        canReadItsmCatalogueItem(resource.data) &&
+        isBoundedItsmAdministrationQuery();
       allow create, update, delete: if false;
+
+      match /versions/{versionId} {
+        allow get: if signedIn() &&
+          canReadItsmConfigurationVersion(resource.data);
+        allow list: if signedIn() &&
+          canReadItsmConfigurationVersion(resource.data) &&
+          isBoundedItsmAdministrationQuery();
+        allow create, update, delete: if false;
+      }
+
+      match /{unknownPath=**} {
+        allow read, write: if false;
+      }
     }
 
     match /knowledgeCategories/{categoryId} {
@@ -1357,27 +1491,55 @@ service cloud.firestore {
     }
 
     match /workflowDefinitions/{workflowDefinitionId} {
-      allow get, list: if signedIn() &&
-        canReadItsmConfiguration(resource.data);
+      allow get: if signedIn() &&
+        canReadItsmConfigurationParent(resource.data);
+      allow list: if signedIn() &&
+        canReadItsmConfigurationParent(resource.data) &&
+        isBoundedItsmAdministrationQuery();
       allow create, update, delete: if false;
 
       match /versions/{versionId} {
-        allow get, list: if signedIn() &&
-          canReadItsmConfiguration(resource.data);
+        allow get: if signedIn() &&
+          canReadItsmConfigurationVersion(resource.data);
+        allow list: if signedIn() &&
+          canReadItsmConfigurationVersion(resource.data) &&
+          isBoundedItsmAdministrationQuery();
         allow create, update, delete: if false;
       }
     }
 
     match /slaPolicies/{slaPolicyId} {
-      allow get, list: if signedIn() &&
-        canReadItsmConfiguration(resource.data);
+      allow get: if signedIn() &&
+        canReadItsmConfigurationParent(resource.data);
+      allow list: if signedIn() &&
+        canReadItsmConfigurationParent(resource.data) &&
+        isBoundedItsmAdministrationQuery();
       allow create, update, delete: if false;
 
       match /versions/{versionId} {
-        allow get, list: if signedIn() &&
-          canReadItsmConfiguration(resource.data);
+        allow get: if signedIn() &&
+          canReadItsmConfigurationVersion(resource.data);
+        allow list: if signedIn() &&
+          canReadItsmConfigurationVersion(resource.data) &&
+          isBoundedItsmAdministrationQuery();
         allow create, update, delete: if false;
       }
+    }
+
+    match /itsmSlaStates/{slaStateId} {
+      allow get: if signedIn() && canReadItsmSlaState(resource.data);
+      allow list: if signedIn() &&
+        canReadItsmSlaState(resource.data) &&
+        isBoundedItsmAdministrationQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /itsmReferenceData/{referenceId} {
+      allow get: if signedIn() && canReadItsmReferenceData(resource.data);
+      allow list: if signedIn() &&
+        canReadItsmReferenceData(resource.data) &&
+        isBoundedItsmAdministrationQuery();
+      allow create, update, delete: if false;
     }
 
     match /changeRequests/{changeId} {

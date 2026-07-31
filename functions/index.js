@@ -45,6 +45,23 @@ const {
   registerItsmSecurityComplianceAttachment,
 } = require('./src/itsm_security_compliance_attachment_registration');
 const {
+  processAuditExport,
+} = require('./src/itsm_reporting_administration_audit');
+const {
+  createItsmReportingAdministrationCallableHandler,
+} = require('./src/itsm_reporting_administration_handlers');
+const {
+  compactReportSnapshots,
+  maintainReportContribution,
+} = require('./src/itsm_reporting_administration_reporting');
+const {
+  processSlaTimers,
+  processSlaWorkItemChange,
+} = require('./src/itsm_reporting_administration_sla');
+const {
+  REPORTING_ADMINISTRATION_COMMANDS,
+} = require('./src/itsm_reporting_administration_validation');
+const {
   processSoftwareLicenceExpiryNotifications,
   processSoftwareLicenceRenewalNotifications,
   processWarrantyExpiryNotifications,
@@ -371,6 +388,160 @@ for (const [exportName, command] of Object.entries(
 )) {
   exports[exportName] = registerItsmSecurityComplianceCallable(command);
 }
+
+function registerItsmReportingAdministrationCallable(command) {
+  return onCall(
+    createItsmReportingAdministrationCallableHandler({
+      expectedCommand: command,
+      db,
+      fieldValue: FieldValue,
+      timestamp: Timestamp,
+      findAgent: findCallerAgent,
+      HttpsError,
+      logger,
+    }),
+  );
+}
+
+const reportingAdministrationCallables = {
+  itsmCreateSlaPolicyDraft:
+    REPORTING_ADMINISTRATION_COMMANDS.createSlaPolicyDraft,
+  itsmUpdateSlaPolicyDraft:
+    REPORTING_ADMINISTRATION_COMMANDS.updateSlaPolicyDraft,
+  itsmValidateSlaPolicyDraft:
+    REPORTING_ADMINISTRATION_COMMANDS.validateSlaPolicyDraft,
+  itsmPublishSlaPolicyVersion:
+    REPORTING_ADMINISTRATION_COMMANDS.publishSlaPolicyVersion,
+  itsmRetireSlaPolicyVersion:
+    REPORTING_ADMINISTRATION_COMMANDS.retireSlaPolicyVersion,
+  itsmRecalculateSla:
+    REPORTING_ADMINISTRATION_COMMANDS.recalculateSla,
+  itsmCreateCatalogueItemDraft:
+    REPORTING_ADMINISTRATION_COMMANDS.createCatalogueItemDraft,
+  itsmUpdateCatalogueItemDraft:
+    REPORTING_ADMINISTRATION_COMMANDS.updateCatalogueItemDraft,
+  itsmValidateCatalogueItemDraft:
+    REPORTING_ADMINISTRATION_COMMANDS.validateCatalogueItemDraft,
+  itsmPublishCatalogueItemVersion:
+    REPORTING_ADMINISTRATION_COMMANDS.publishCatalogueItemVersion,
+  itsmRetireCatalogueItemVersion:
+    REPORTING_ADMINISTRATION_COMMANDS.retireCatalogueItemVersion,
+  itsmCreateWorkflowDraft:
+    REPORTING_ADMINISTRATION_COMMANDS.createWorkflowDraft,
+  itsmUpdateWorkflowDraft:
+    REPORTING_ADMINISTRATION_COMMANDS.updateWorkflowDraft,
+  itsmValidateWorkflowDraft:
+    REPORTING_ADMINISTRATION_COMMANDS.validateWorkflowDraft,
+  itsmPublishWorkflowVersion:
+    REPORTING_ADMINISTRATION_COMMANDS.publishWorkflowVersion,
+  itsmRetireWorkflowVersion:
+    REPORTING_ADMINISTRATION_COMMANDS.retireWorkflowVersion,
+  itsmRequestAuditExport:
+    REPORTING_ADMINISTRATION_COMMANDS.requestAuditExport,
+};
+
+for (const [exportName, command] of Object.entries(
+  reportingAdministrationCallables,
+)) {
+  exports[exportName] = registerItsmReportingAdministrationCallable(command);
+}
+
+const reportingSourceTriggers = {
+  itsmReportIncidentTickets: 'incidentTickets',
+  itsmReportServiceRequests: 'serviceRequests',
+  itsmReportAssets: 'assets',
+  itsmReportStockItems: 'stockItems',
+  itsmReportSoftwareLicences: 'softwareLicences',
+  itsmReportWarranties: 'warranties',
+  itsmReportChangeRequests: 'changeRequests',
+  itsmReportSecurityFindings: 'securityFindings',
+  itsmReportSecurityExceptions: 'securityExceptions',
+  itsmReportAssetCompliance: 'assetComplianceAssessments',
+  itsmReportAccessReviewCampaigns: 'accessReviewCampaigns',
+  itsmReportAccessReviewItems: 'accessReviewItems',
+};
+const slaEnabledReportingSources = new Set([
+  'incidentTickets',
+  'serviceRequests',
+  'changeRequests',
+  'securityFindings',
+  'securityExceptions',
+  'assetComplianceAssessments',
+  'accessReviewItems',
+]);
+
+for (const [exportName, collectionName] of Object.entries(
+  reportingSourceTriggers,
+)) {
+  exports[exportName] = onDocumentWritten(
+    `${collectionName}/{documentId}`,
+    async (event) => {
+      const reportingResult = await maintainReportContribution({
+        db,
+        fieldValue: FieldValue,
+        collectionName,
+        documentId: event.params.documentId,
+        after: event.data && event.data.after,
+        sourceEventId: event.id,
+        now: Timestamp.now(),
+      });
+      const slaResult = slaEnabledReportingSources.has(collectionName)
+        ? await processSlaWorkItemChange({
+          db,
+          fieldValue: FieldValue,
+          timestamp: Timestamp,
+          collectionName,
+          workItemId: event.params.documentId,
+          before: event.data && event.data.before,
+          after: event.data && event.data.after,
+        })
+        : false;
+      return { reportingResult, slaResult };
+    },
+  );
+}
+
+exports.itsmCompactReportSnapshots = onSchedule(
+  {
+    schedule: 'every 5 minutes',
+    timeZone: 'Africa/Kinshasa',
+    region: 'us-central1',
+    retryCount: 3,
+  },
+  async () => compactReportSnapshots({
+    db,
+    fieldValue: FieldValue,
+    logger,
+  }),
+);
+
+exports.itsmProcessSlaTimers = onSchedule(
+  {
+    schedule: 'every 5 minutes',
+    timeZone: 'Africa/Kinshasa',
+    region: 'us-central1',
+    retryCount: 3,
+  },
+  async () => processSlaTimers({
+    db,
+    fieldValue: FieldValue,
+    timestamp: Timestamp,
+    logger,
+  }),
+);
+
+exports.itsmGenerateAuditExport = onDocumentCreated(
+  'itsmAuditExports/{exportId}',
+  async (event) => processAuditExport({
+    db,
+    bucket: admin.storage().bucket(DEFAULT_STORAGE_BUCKET),
+    fieldValue: FieldValue,
+    timestamp: Timestamp,
+    exportId: event.params.exportId,
+    exportSnapshot: event.data,
+    logger,
+  }),
+);
 
 exports.itsmProcessAssetExpiryNotifications = onSchedule(
   {

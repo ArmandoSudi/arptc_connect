@@ -84,7 +84,12 @@ async function initializeServiceRequestDraft({
     .doc(payload.catalogueItemId);
   const catalogueSnapshot = await transaction.get(catalogueRef);
   requireExisting(catalogueSnapshot, 'The catalogue item does not exist.');
-  const catalogue = catalogueSnapshot.data() || {};
+  const catalogueVersion = await resolvePublishedCatalogueVersion({
+    transaction,
+    parentRef: catalogueRef,
+    parentSnapshot: catalogueSnapshot,
+  });
+  const catalogue = catalogueVersion.data;
   const now = trustedNow(timestamp);
   validatePublishedCatalogueItem(catalogue, actor, agent, now);
 
@@ -140,7 +145,8 @@ async function initializeServiceRequestDraft({
     reference: requestNumber,
     catalogueItemId: catalogueSnapshot.id,
     catalogueItemCode: normalizeString(catalogue.code || catalogueSnapshot.id),
-    catalogueItemVersion: positiveInteger(catalogue.version, 1),
+    catalogueItemVersion: catalogueVersion.version,
+    catalogueItemVersionDocumentId: catalogueVersion.documentId,
     catalogueItemName: catalogueName,
     title: payload.title || catalogueName,
     description: payload.description || localizedText(catalogue.description),
@@ -241,12 +247,13 @@ async function submitServiceRequest({
     throw failed('Only a draft service request can be submitted.');
   }
 
-  const catalogueRef = db
-    .collection('serviceCatalogItems')
-    .doc(normalizeString(request.catalogueItemId));
-  const catalogueSnapshot = await transaction.get(catalogueRef);
-  requireExisting(catalogueSnapshot, 'The catalogue item no longer exists.');
-  const catalogue = catalogueSnapshot.data() || {};
+  const catalogue = await getPinnedCatalogueVersion({
+    db,
+    transaction,
+    catalogueItemId: request.catalogueItemId,
+    versionDocumentId: request.catalogueItemVersionDocumentId,
+    version: request.catalogueItemVersion,
+  });
   const responses = { ...(request.responses || {}), ...payload.responses };
   validateDynamicResponses(catalogue, responses);
   const attachments = [];
@@ -894,6 +901,79 @@ async function resolvePublishedVersion({
     }
   }
   throw failed(`The configured ${label} version does not exist.`);
+}
+
+async function resolvePublishedCatalogueVersion({
+  transaction,
+  parentRef,
+  parentSnapshot,
+}) {
+  const parent = parentSnapshot.data() || {};
+  const version = positiveInteger(
+    parent.currentPublishedVersion || parent.publishedVersion || parent.version,
+    1,
+  );
+  const explicitDocumentId = normalizeString(
+    parent.currentPublishedVersionId ||
+      parent.currentPublishedVersionDocumentId,
+  );
+  const candidates = [
+    explicitDocumentId,
+    versionDocumentId(version),
+    String(version),
+  ].filter(Boolean);
+  for (const documentId of [...new Set(candidates)]) {
+    const snapshot = await transaction.get(
+      parentRef.collection('versions').doc(documentId),
+    );
+    if (!snapshot.exists) continue;
+    const data = snapshot.data() || {};
+    if (normalizeString(data.status || data.state).toLowerCase() !== 'published') {
+      throw failed('The configured catalogue item version is not published.');
+    }
+    return {
+      data,
+      documentId,
+      version: positiveInteger(data.version, version),
+    };
+  }
+  if (explicitDocumentId) {
+    throw failed('The configured catalogue item version does not exist.');
+  }
+
+  // Existing parent-only catalogue records remain readable until explicitly
+  // versioned; all newly administered records carry a published-version ID.
+  return { data: parent, documentId: null, version };
+}
+
+async function getPinnedCatalogueVersion({
+  db,
+  transaction,
+  catalogueItemId,
+  versionDocumentId: storedDocumentId,
+  version,
+}) {
+  const parentRef = db
+    .collection('serviceCatalogItems')
+    .doc(normalizeString(catalogueItemId));
+  const documentId = normalizeString(storedDocumentId);
+  if (documentId) {
+    const snapshot = await transaction.get(
+      parentRef.collection('versions').doc(documentId),
+    );
+    requireExisting(snapshot, 'The pinned catalogue item version does not exist.');
+    return snapshot.data() || {};
+  }
+
+  const parentSnapshot = await transaction.get(parentRef);
+  requireExisting(parentSnapshot, 'The catalogue item no longer exists.');
+  const parent = parentSnapshot.data() || {};
+  if (positiveInteger(parent.version, 1) !== positiveInteger(version, 1)) {
+    throw failed(
+      'The legacy catalogue item changed before this draft was submitted.',
+    );
+  }
+  return parent;
 }
 
 async function getPinnedVersion({

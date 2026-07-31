@@ -7,7 +7,6 @@ import 'package:arptc_connect/modules/courrier/screens/details_courrier.dart';
 import 'package:arptc_connect/modules/courrier/screens/list_courriers_screen.dart';
 import 'package:arptc_connect/modules/dashboard/presentation/screens/main_dashboard_screen.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/screens/create_incident_screen.dart';
-import 'package:arptc_connect/modules/incident_management/presentation/screens/incident_dashboard_router.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/screens/incident_role_gate_screen.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/screens/manager_incident_details_screen.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/screens/manager_incident_history_screen.dart';
@@ -37,6 +36,8 @@ import 'package:arptc_connect/modules/itsm/presentation/screens/itsm_feature_acc
 import 'package:arptc_connect/modules/itsm/presentation/screens/itsm_landing_screen.dart';
 import 'package:arptc_connect/modules/itsm/presentation/screens/itsm_section_overview_screen.dart';
 import 'package:arptc_connect/modules/itsm/presentation/widgets/itsm_route_guard.dart';
+import 'package:arptc_connect/modules/itsm/reporting_administration/domain/reporting_administration_domain.dart';
+import 'package:arptc_connect/modules/itsm/reporting_administration/presentation/reporting_administration_presentation.dart';
 import 'package:arptc_connect/modules/itsm/security_compliance/presentation/security_compliance_presentation.dart';
 import 'package:arptc_connect/modules/itsm/shared/domain/itsm_common.dart';
 import 'package:arptc_connect/modules/itsm/support/presentation/screens/create_service_request_screen.dart';
@@ -548,14 +549,172 @@ GoRoute _buildItsmRoute() {
       _buildAssetsConfigurationRoute(),
       _buildChangesRoute(),
       _buildSecurityComplianceRoute(),
-      _buildItsmSectionRoute(
-        ItsmSection.reportingAdministration,
-        const [
-          ItsmFeature.dashboards,
-          ItsmFeature.sla,
-          ItsmFeature.serviceCatalogue,
-          ItsmFeature.workflowConfiguration,
-          ItsmFeature.auditLogs,
+      _buildReportingAdministrationRoute(),
+    ],
+  );
+}
+
+GoRoute _buildReportingAdministrationRoute() {
+  const section = ItsmSection.reportingAdministration;
+  return GoRoute(
+    path: section.route.substring('${ItsmRoutes.root}/'.length),
+    builder: (context, state) => ItsmRouteGuard(
+      section: section,
+      requirement: ItsmRouteRequirement.operationalOrExecutive,
+      child: ReportingAdministrationOverviewScreen(
+        onOpen: (destination) => context.go(switch (destination) {
+          ReportingAdministrationDestination.dashboards =>
+            ItsmRoutes.reportingDashboards,
+          ReportingAdministrationDestination.sla => ItsmRoutes.slaPolicies,
+          ReportingAdministrationDestination.catalogue =>
+            ItsmRoutes.catalogueAdministration,
+          ReportingAdministrationDestination.workflows =>
+            ItsmRoutes.workflowAdministration,
+          ReportingAdministrationDestination.audit => ItsmRoutes.auditLogs,
+        }),
+      ),
+    ),
+    routes: [
+      GoRoute(
+        path: 'dashboards',
+        builder: (context, state) => const ItsmRouteGuard(
+          section: section,
+          feature: ItsmFeature.dashboards,
+          requirement: ItsmRouteRequirement.operationalOrExecutive,
+          child: ItsmDashboardRouter(),
+        ),
+        routes: [
+          GoRoute(
+            path: 'operations',
+            builder: (context, state) => const ItsmRouteGuard(
+              section: section,
+              feature: ItsmFeature.dashboards,
+              requirement: ItsmRouteRequirement.operational,
+              child: ManagerItsmDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'executive',
+            builder: (context, state) => const ItsmRouteGuard(
+              section: section,
+              feature: ItsmFeature.dashboards,
+              requirement: ItsmRouteRequirement.executive,
+              child: AdminItsmDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'incidents',
+            builder: (context, state) => const ItsmRouteGuard(
+              section: section,
+              feature: ItsmFeature.dashboards,
+              requirement: ItsmRouteRequirement.operationalOrExecutive,
+              child: IncidentReportingDashboardScreen(),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: 'sla',
+        builder: (context, state) => ItsmRouteGuard(
+          section: section,
+          feature: ItsmFeature.sla,
+          requirement: ItsmRouteRequirement.operationalOrExecutive,
+          child: SlaPoliciesScreen(
+            onOpenPolicy: (policyId) =>
+                context.push(ItsmRoutes.slaPolicyDetail(policyId)),
+          ),
+        ),
+        routes: [
+          GoRoute(
+            path: ':policyId',
+            builder: (context, state) => ItsmRouteGuard(
+              section: section,
+              feature: ItsmFeature.sla,
+              requirement: ItsmRouteRequirement.operationalOrExecutive,
+              child: SlaPolicyDetailScreen(
+                policyId: state.pathParameters['policyId'] as String,
+              ),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: 'service-catalogue',
+        builder: (context, state) => ItsmRouteGuard(
+          section: section,
+          feature: ItsmFeature.serviceCatalogue,
+          requirement: ItsmRouteRequirement.operationalOrExecutive,
+          child: ServiceCatalogueAdministrationScreen(
+            onOpenItem: (itemId) =>
+                context.push(ItsmRoutes.catalogueAdministrationDetail(itemId)),
+          ),
+        ),
+        routes: [
+          GoRoute(
+            path: ':itemId',
+            builder: (context, state) => ItsmRouteGuard(
+              section: section,
+              feature: ItsmFeature.serviceCatalogue,
+              requirement: ItsmRouteRequirement.operationalOrExecutive,
+              child: ServiceCatalogueAdministrationDetailScreen(
+                itemId: state.pathParameters['itemId'] as String,
+              ),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: 'workflows',
+        builder: (context, state) => ItsmRouteGuard(
+          section: section,
+          feature: ItsmFeature.workflowConfiguration,
+          requirement: ItsmRouteRequirement.operationalOrExecutive,
+          child: WorkflowDefinitionsScreen(
+            onOpenWorkflow: (workflowId) => context
+                .push(ItsmRoutes.workflowAdministrationDetail(workflowId)),
+          ),
+        ),
+        routes: [
+          GoRoute(
+            path: ':workflowId',
+            builder: (context, state) => ItsmRouteGuard(
+              section: section,
+              feature: ItsmFeature.workflowConfiguration,
+              requirement: ItsmRouteRequirement.operationalOrExecutive,
+              child: WorkflowDefinitionDetailScreen(
+                workflowId: state.pathParameters['workflowId'] as String,
+              ),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: 'audit-logs',
+        builder: (context, state) => ItsmRouteGuard(
+          section: section,
+          feature: ItsmFeature.auditLogs,
+          requirement: ItsmRouteRequirement.operationalOrExecutive,
+          child: AuditLogsScreen(
+            onOpenEvent: (event) => context.push(
+              ItsmRoutes.auditLogDetail(event.id),
+              extra: event,
+            ),
+          ),
+        ),
+        routes: [
+          GoRoute(
+            path: ':eventId',
+            redirect: (context, state) =>
+                state.extra is GlobalAuditEvent ? null : ItsmRoutes.auditLogs,
+            builder: (context, state) => ItsmRouteGuard(
+              section: section,
+              feature: ItsmFeature.auditLogs,
+              requirement: ItsmRouteRequirement.operationalOrExecutive,
+              child: AuditLogDetailScreen(
+                event: state.extra! as GlobalAuditEvent,
+              ),
+            ),
+          ),
         ],
       ),
     ],
@@ -1102,39 +1261,6 @@ GoRoute _buildSecurityComplianceRoute() {
   );
 }
 
-GoRoute _buildItsmSectionRoute(
-  ItsmSection section,
-  List<ItsmFeature> features,
-) {
-  return GoRoute(
-    path: section.route.substring('${ItsmRoutes.root}/'.length),
-    builder: (context, state) => ItsmRouteGuard(
-      section: section,
-      child: ItsmSectionOverviewScreen(section: section),
-    ),
-    routes: [
-      for (final feature in features) _buildItsmFeatureRoute(section, feature),
-    ],
-  );
-}
-
-GoRoute _buildItsmFeatureRoute(
-  ItsmSection section,
-  ItsmFeature feature,
-) {
-  return GoRoute(
-    path: feature.routeSegment,
-    builder: (context, state) => ItsmRouteGuard(
-      section: section,
-      feature: feature,
-      child: ItsmFeatureAccessScreen(
-        section: section,
-        feature: feature,
-      ),
-    ),
-  );
-}
-
 GoRoute _buildCanonicalIncidentRoute() {
   return GoRoute(
     path: ItsmFeature.incidents.routeSegment,
@@ -1147,11 +1273,9 @@ GoRoute _buildCanonicalIncidentRoute() {
     routes: [
       GoRoute(
         path: 'dashboard',
-        builder: (context, state) => const ItsmRouteGuard(
-          section: ItsmSection.support,
-          feature: ItsmFeature.incidents,
-          requirement: ItsmRouteRequirement.operationalOrExecutive,
-          child: IncidentDashboardRouter(),
+        redirect: (context, state) => _replacePathPreservingParameters(
+          state.location,
+          ItsmRoutes.incidentReportingDashboard,
         ),
       ),
       GoRoute(

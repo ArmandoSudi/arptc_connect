@@ -654,6 +654,48 @@ service firebase.storage {
         );
     }
 
+    function auditExportPath(exportId) {
+      return /databases/(default)/documents/itsmAuditExports/$(exportId);
+    }
+
+    function auditExportExists(exportId) {
+      return firestore.exists(auditExportPath(exportId));
+    }
+
+    function auditExportData(exportId) {
+      return firestore.get(auditExportPath(exportId)).data;
+    }
+
+    function canReadAuditExport(
+      requesterUserId,
+      exportId,
+      fileName
+    ) {
+      let data = auditExportData(exportId);
+      return signedIn() &&
+        (isItsmManager() || isItsmAdmin()) &&
+        request.auth.uid == requesterUserId &&
+        auditExportExists(exportId) &&
+        data.keys().hasAll([
+          'requesterUserId',
+          'status',
+          'expiresAt',
+          'storagePath',
+          'fileName'
+        ]) &&
+        data.requesterUserId == requesterUserId &&
+        data.status in ['COMPLETED', 'completed'] &&
+        data.expiresAt is timestamp &&
+        data.expiresAt > request.time &&
+        data.storagePath ==
+          'itsm/reporting-exports/' + requesterUserId + '/' + exportId +
+          '/' + fileName &&
+        data.fileName == fileName &&
+        resource.metadata.requesterUserId == requesterUserId &&
+        resource.metadata.exportId == exportId &&
+        resource.metadata.storagePath == data.storagePath;
+    }
+
     function taskRole() {
       let data = principalData();
       let permissions = data.keys().hasAny(['modulePermissions'])
@@ -952,6 +994,15 @@ service firebase.storage {
         request.resource.metadata.attachmentId == attachmentId &&
         request.resource.metadata.uploadedByUserId == request.auth.uid;
       allow update, delete: if false;
+    }
+
+    match /itsm/reporting-exports/{requesterUserId}/{exportId}/{fileName} {
+      allow read: if canReadAuditExport(
+        requesterUserId,
+        exportId,
+        fileName
+      );
+      allow create, update, delete: if false;
     }
 
     match /{allPaths=**} {

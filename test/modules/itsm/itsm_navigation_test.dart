@@ -91,6 +91,43 @@ void main() {
         ),
         '/services/itsm/reporting-administration/audit-logs',
       );
+      expect(
+        ItsmRoutes.incidentReportingDashboard,
+        '/services/itsm/reporting-administration/dashboards/incidents',
+      );
+      expect(
+        ItsmRoutes.operationalDashboard,
+        '/services/itsm/reporting-administration/dashboards/operations',
+      );
+      expect(
+        ItsmRoutes.executiveDashboard,
+        '/services/itsm/reporting-administration/dashboards/executive',
+      );
+    });
+
+    test('reporting administration detail routes encode document IDs', () {
+      expect(
+        ItsmRoutes.slaPolicyVersion('policy / 1', 'version / 2'),
+        '/services/itsm/reporting-administration/sla/policy%20%2F%201/'
+        'versions/version%20%2F%202',
+      );
+      expect(
+        ItsmRoutes.catalogueAdministrationVersion('item / 1', 'version / 2'),
+        '/services/itsm/reporting-administration/service-catalogue/'
+        'item%20%2F%201/versions/version%20%2F%202',
+      );
+      expect(
+        ItsmRoutes.workflowAdministrationVersion(
+          'workflow / 1',
+          'version / 2',
+        ),
+        '/services/itsm/reporting-administration/workflows/'
+        'workflow%20%2F%201/versions/version%20%2F%202',
+      );
+      expect(
+        ItsmRoutes.auditLogDetail('event / 42'),
+        '/services/itsm/reporting-administration/audit-logs/event%20%2F%2042',
+      );
     });
 
     test('security detail routes encode document IDs', () {
@@ -145,6 +182,20 @@ void main() {
         ),
         '/services/itsm/support/knowledge?category=network',
       );
+    });
+
+    test('moves legacy incident dashboards directly to reporting', () {
+      for (final location in const [
+        '/service/incidents/dashboard?period=month#critical',
+        '/service/ticketing/dashboard?period=month#critical',
+        '/service/itsm/support/incidents/dashboard?period=month#critical',
+      ]) {
+        expect(
+          ItsmRoutes.compatibilityRedirect(location),
+          '/services/itsm/reporting-administration/dashboards/incidents'
+          '?period=month#critical',
+        );
+      }
     });
 
     test('does not redirect unrelated routes or lookalike prefixes', () {

@@ -28,6 +28,15 @@ abstract final class ItsmRoutes {
   static const assetCompliance = '$securityCompliance/asset-compliance';
   static const accessReviews = '$securityCompliance/access-reviews';
   static const reportingAdministration = '$root/reporting-administration';
+  static const reportingDashboards = '$reportingAdministration/dashboards';
+  static const operationalDashboard = '$reportingDashboards/operations';
+  static const executiveDashboard = '$reportingDashboards/executive';
+  static const incidentReportingDashboard = '$reportingDashboards/incidents';
+  static const slaPolicies = '$reportingAdministration/sla';
+  static const catalogueAdministration =
+      '$reportingAdministration/service-catalogue';
+  static const workflowAdministration = '$reportingAdministration/workflows';
+  static const auditLogs = '$reportingAdministration/audit-logs';
 
   static String myAssetDetail(String assetId) =>
       '$myAssets/${Uri.encodeComponent(assetId)}';
@@ -50,6 +59,35 @@ abstract final class ItsmRoutes {
   static String accessReviewDetail(String reviewItemId) =>
       '$accessReviews/${Uri.encodeComponent(reviewItemId)}';
 
+  static String slaPolicyDetail(String policyId) =>
+      '$slaPolicies/${Uri.encodeComponent(policyId)}';
+
+  static String slaPolicyVersion(String policyId, String versionId) =>
+      '${slaPolicyDetail(policyId)}/versions/${Uri.encodeComponent(versionId)}';
+
+  static String catalogueAdministrationDetail(String itemId) =>
+      '$catalogueAdministration/${Uri.encodeComponent(itemId)}';
+
+  static String catalogueAdministrationVersion(
+    String itemId,
+    String versionId,
+  ) =>
+      '${catalogueAdministrationDetail(itemId)}/versions/'
+      '${Uri.encodeComponent(versionId)}';
+
+  static String workflowAdministrationDetail(String workflowId) =>
+      '$workflowAdministration/${Uri.encodeComponent(workflowId)}';
+
+  static String workflowAdministrationVersion(
+    String workflowId,
+    String versionId,
+  ) =>
+      '${workflowAdministrationDetail(workflowId)}/versions/'
+      '${Uri.encodeComponent(versionId)}';
+
+  static String auditLogDetail(String eventId) =>
+      '$auditLogs/${Uri.encodeComponent(eventId)}';
+
   static const _legacyPrefixes = <String, String>{
     '/service/itsm': root,
     '/service/incidents': incidents,
@@ -66,6 +104,10 @@ abstract final class ItsmRoutes {
       return null;
     }
 
+    if (_legacyIncidentDashboardPaths.contains(uri.path)) {
+      return uri.replace(path: incidentReportingDashboard).toString();
+    }
+
     for (final entry in _legacyPrefixes.entries) {
       final legacyPrefix = entry.key;
       if (uri.path != legacyPrefix && !uri.path.startsWith('$legacyPrefix/')) {
@@ -77,6 +119,12 @@ abstract final class ItsmRoutes {
 
     return null;
   }
+
+  static const _legacyIncidentDashboardPaths = <String>{
+    '/service/incidents/dashboard',
+    '/service/ticketing/dashboard',
+    '/service/itsm/support/incidents/dashboard',
+  };
 }
 
 List<GoRoute> buildItsmCompatibilityRoutes() {
