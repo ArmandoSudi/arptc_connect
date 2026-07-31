@@ -52,7 +52,7 @@ void main() {
       expect(repository.adminAllCalls, 0);
     });
 
-    test('ADMIN current baseline subscribes to read-only global ticket data',
+    test('ADMIN uses owner-scoped self-service queues, not raw global data',
         () async {
       final repository = _RecordingIncidentRepository();
       final container = _container(
@@ -64,10 +64,12 @@ void main() {
       await container.read(adminAllIncidentTicketsProvider.future);
       await container.read(managerOpenIncidentTicketsProvider.future);
       await container.read(myOpenIncidentTicketsProvider.future);
+      await container.read(myClosedAndArchivedIncidentTicketsProvider.future);
 
-      expect(repository.adminAllCalls, 1);
+      expect(repository.adminAllCalls, 0);
       expect(repository.managerActiveCalls, 0);
-      expect(repository.myActiveEmails, isEmpty);
+      expect(repository.myActiveEmails, ['agent@arptc.cd']);
+      expect(repository.myHistoryEmails, ['agent@arptc.cd']);
     });
 
     test('NONE does not open a protected repository subscription', () async {

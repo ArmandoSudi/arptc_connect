@@ -87,6 +87,15 @@ beforeEach(async () => {
         }),
       ),
       setDoc(
+        doc(firestore, 'incidentTickets/admin-own'),
+        ticket({
+          createdByUserId: 'admin-1',
+          createdByEmail: 'admin@arptc.cd',
+          affectedUserId: 'admin-1',
+          affectedUserEmail: 'admin@arptc.cd',
+        }),
+      ),
+      setDoc(
         doc(
           firestore,
           'incidentTickets/active-own/comments/public-comment',
@@ -193,28 +202,41 @@ test('MANAGER operates active and closed tickets but cannot read archived', asyn
   );
 });
 
-test('ADMIN can read all lifecycle states but remains read-only', async () => {
+test('ADMIN reads only owned raw incidents and remains read-only', async () => {
   const firestore = userFirestore('admin-1', 'admin@arptc.cd');
 
-  await assertSucceeds(getDocs(collection(firestore, 'incidentTickets')));
   await assertSucceeds(
-    getDoc(doc(firestore, 'incidentTickets/archived-other')),
+    getDoc(doc(firestore, 'incidentTickets/admin-own')),
   );
+  await assertFails(getDoc(doc(firestore, 'incidentTickets/active-other')));
+  await assertFails(getDoc(doc(firestore, 'incidentTickets/archived-other')));
+  await assertFails(getDocs(collection(firestore, 'incidentTickets')));
+  const ownQuery = query(
+    collection(firestore, 'incidentTickets'),
+    where('affectedUserEmail', '==', 'admin@arptc.cd'),
+    where('lifecycleState', '==', 'active'),
+    where('isDeleted', '==', false),
+  );
+  await assertSucceeds(getDocs(ownQuery));
   await assertFails(
     updateDoc(doc(firestore, 'incidentTickets/active-other'), {
       categoryId: 'admin-change',
       updatedAt: serverTimestamp(),
     }),
   );
-  await assertFails(
+  await assertSucceeds(
     setDoc(
       doc(firestore, 'incidentTickets/admin-created'),
-      ticket({
-        createdByUserId: 'admin-1',
-        createdByEmail: 'admin@arptc.cd',
-        affectedUserId: 'admin-1',
-        affectedUserEmail: 'admin@arptc.cd',
-      }),
+      {
+        ...ticket({
+          createdByUserId: 'admin-1',
+          createdByEmail: 'admin@arptc.cd',
+          affectedUserId: 'admin-1',
+          affectedUserEmail: 'admin@arptc.cd',
+        }),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      },
     ),
   );
 });

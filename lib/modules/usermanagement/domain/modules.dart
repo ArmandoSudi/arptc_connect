@@ -97,7 +97,7 @@ class Modules {
     ),
     ModuleDefinition(
       key: 'ticketing',
-      name: 'Incident Management',
+      name: 'IT Service Management',
     ),
     ModuleDefinition(
       key: 'meetinghall',
@@ -189,6 +189,10 @@ class Modules {
       'inventory': 'inventory',
       'inventaire': 'inventory',
       'it_support': 'ticketing',
+      'itsm': 'ticketing',
+      'it_service_management': 'ticketing',
+      'it_service_mgmt': 'ticketing',
+      'service_management': 'ticketing',
       'support_it': 'ticketing',
       'support': 'ticketing',
       'helpdesk': 'ticketing',

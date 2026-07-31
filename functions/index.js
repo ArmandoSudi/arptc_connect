@@ -6,6 +6,12 @@ const admin = require('firebase-admin');
 const {
   archiveEligibleIncidents,
 } = require('./src/incident_archival');
+const {
+  ITSM_COMMANDS,
+} = require('./src/itsm_command_validation');
+const {
+  createItsmCallableHandler,
+} = require('./src/itsm_callable_handlers');
 
 admin.initializeApp();
 
@@ -28,6 +34,36 @@ const DEFAULT_MODULE_KEYS = [
   'meetinghall',
   'usermanagement',
 ];
+
+function registerItsmCallable(command) {
+  return onCall(
+    createItsmCallableHandler({
+      expectedCommand: command,
+      db,
+      fieldValue: admin.firestore.FieldValue,
+      findAgent: findCallerAgent,
+      HttpsError,
+      logger,
+    }),
+  );
+}
+
+exports.itsmTransitionWorkItem = registerItsmCallable(
+  ITSM_COMMANDS.transitionWorkItem,
+);
+exports.itsmDecideApproval = registerItsmCallable(
+  ITSM_COMMANDS.decideApproval,
+);
+exports.itsmIndexAuditEvent = registerItsmCallable(
+  ITSM_COMMANDS.indexAuditEvent,
+);
+exports.itsmMaintainWorkItemIndex = registerItsmCallable(
+  ITSM_COMMANDS.maintainWorkItemIndex,
+);
+exports.itsmProcessSla = registerItsmCallable(ITSM_COMMANDS.processSla);
+exports.itsmCreateNotificationEvent = registerItsmCallable(
+  ITSM_COMMANDS.createNotificationEvent,
+);
 
 exports.archiveEligibleIncidents = onSchedule(
   {

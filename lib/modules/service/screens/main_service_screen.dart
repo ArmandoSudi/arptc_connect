@@ -173,11 +173,11 @@ ModuleInfo _localizedModuleInfo(BuildContext context, ModuleInfo moduleInfo) {
         name: l10n.moduleInventoryName,
         description: l10n.moduleInventoryDescription,
       );
-    case AppModule.ticketing:
+    case AppModule.itsm:
       return _withLocalizedModuleText(
         moduleInfo,
-        name: l10n.moduleIncidentName,
-        description: l10n.moduleIncidentDescription,
+        name: l10n.moduleItsmName,
+        description: l10n.moduleItsmDescription,
       );
     case AppModule.usermanagement:
       return _withLocalizedModuleText(
@@ -299,6 +299,12 @@ ModuleInfo _applyConfiguredModuleMetadata(
   ModuleInfo base,
   UserManagementModule configured,
 ) {
+  // ITSM is the product-facing replacement for the legacy Incident module.
+  // Keep Firestore activation and permission data, but do not allow stale
+  // configured labels to restore the old card.
+  if (base.module == AppModule.itsm) {
+    return base;
+  }
   return ModuleInfo(
     module: base.module,
     name: configured.name.trim().isEmpty ? base.name : configured.name.trim(),

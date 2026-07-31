@@ -22,9 +22,9 @@ class IncidentRoleGateScreen extends ConsumerWidget {
       data: (role) {
         switch (role) {
           case IncidentRole.user:
+          case IncidentRole.admin:
             return const UserIncidentHomeScreen();
           case IncidentRole.manager:
-          case IncidentRole.admin:
             return const IncidentDashboardRouter();
           case IncidentRole.none:
             return ContentView(

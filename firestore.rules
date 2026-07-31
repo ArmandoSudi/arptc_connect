@@ -63,55 +63,67 @@ service cloud.firestore {
     }
 
     function isUser() {
-      return incidentRole() in ['USER', 'user', 'User'];
+      return itsmRole() in ['USER', 'user', 'User'];
     }
 
     function isManager() {
-      return incidentRole() in ['MANAGER', 'manager', 'Manager'];
+      return itsmRole() in ['MANAGER', 'manager', 'Manager'];
     }
 
     function isAdmin() {
-      return incidentRole() in ['ADMIN', 'admin', 'Admin'];
+      return itsmRole() in ['ADMIN', 'admin', 'Admin'];
     }
 
     function hasIncidentAccess() {
       return isUser() || isManager() || isAdmin();
     }
 
-    function incidentRole() {
+    function itsmRole() {
       let data = principalData();
       let permissions = data.keys().hasAny(['modulePermissions'])
         ? data.modulePermissions
         : {};
-      return permissions.keys().hasAny(['support'])
-        ? permissions.support
+      return permissions.keys().hasAny(['ticketing'])
+        ? permissions.ticketing
         : (
-          permissions.keys().hasAny(['ticketing'])
-            ? permissions.ticketing
+          permissions.keys().hasAny(['itsm'])
+            ? permissions.itsm
             : (
-              permissions.keys().hasAny(['incident'])
-                ? permissions.incident
+              permissions.keys().hasAny(['it_service_management'])
+                ? permissions.it_service_management
                 : (
-                  permissions.keys().hasAny(['incidents'])
-                    ? permissions.incidents
+                  permissions.keys().hasAny(['itservicemanagement'])
+                    ? permissions.itservicemanagement
                     : (
-                      permissions.keys().hasAny(['incident_management'])
-                        ? permissions.incident_management
+                      permissions.keys().hasAny(['support'])
+                        ? permissions.support
                         : (
-                          permissions.keys().hasAny(['incidentmanagement'])
-                            ? permissions.incidentmanagement
+                          permissions.keys().hasAny(['incident'])
+                            ? permissions.incident
                             : (
-                              permissions.keys().hasAny(['ticket'])
-                                ? permissions.ticket
+                              permissions.keys().hasAny(['incidents'])
+                                ? permissions.incidents
                                 : (
-                                  permissions.keys().hasAny(['tickets'])
-                                    ? permissions.tickets
+                                  permissions.keys().hasAny(['incident_management'])
+                                    ? permissions.incident_management
                                     : (
-                                      data.keys().hasAny(['incidentRole']) &&
-                                      data.incidentRole is string &&
-                                      data.incidentRole != ''
-                                        ? data.incidentRole
-                                        : 'NONE'
+                                      permissions.keys().hasAny(['incidentmanagement'])
+                                        ? permissions.incidentmanagement
+                                        : (
+                                          permissions.keys().hasAny(['ticket'])
+                                            ? permissions.ticket
+                                            : (
+                                              permissions.keys().hasAny(['tickets'])
+                                                ? permissions.tickets
+                                                : (
+                                                  data.keys().hasAny(['incidentRole']) &&
+                                                  data.incidentRole is string &&
+                                                  data.incidentRole != ''
+                                                    ? data.incidentRole
+                                                    : 'NONE'
+                                                )
+                                            )
+                                        )
                                     )
                                 )
                             )
@@ -119,6 +131,192 @@ service cloud.firestore {
                     )
                 )
             )
+        );
+    }
+
+    function isItsmSelfServiceRole() {
+      return isUser() || isAdmin();
+    }
+
+    function isRestrictedItsmData(data) {
+      return (
+          data.keys().hasAny(['confidentiality']) &&
+          data.confidentiality in [
+            'RESTRICTED',
+            'restricted',
+            'SECURITY_RESTRICTED',
+            'security_restricted',
+            'CONFIDENTIAL',
+            'confidential'
+          ]
+        ) ||
+        (
+          data.keys().hasAny(['isRestricted']) &&
+          data.isRestricted == true
+        );
+    }
+
+    function isExplicitlyAuthorizedForRestricted(data) {
+      return signedIn() &&
+        (
+          (
+            data.keys().hasAny(['authorizedUserIds']) &&
+            data.authorizedUserIds is list &&
+            request.auth.uid in data.authorizedUserIds
+          ) ||
+          (
+            data.keys().hasAny(['assignedUserId']) &&
+            data.assignedUserId == request.auth.uid
+          ) ||
+          (
+            data.keys().hasAny(['requesterId']) &&
+            data.requesterId == request.auth.uid
+          )
+        );
+    }
+
+    function isPrincipalWorkItemOwner(data) {
+      return signedIn() &&
+        (
+          (
+            data.keys().hasAny(['requesterId']) &&
+            data.requesterId == request.auth.uid
+          ) ||
+          (
+            data.keys().hasAny(['requesterEmail']) &&
+            data.requesterEmail == request.auth.token.email
+          ) ||
+          (
+            data.keys().hasAny(['createdByUserId']) &&
+            data.createdByUserId == request.auth.uid
+          ) ||
+          (
+            data.keys().hasAny(['createdByEmail']) &&
+            data.createdByEmail == request.auth.token.email
+          ) ||
+          (
+            data.keys().hasAny(['affectedUserId']) &&
+            data.affectedUserId == request.auth.uid
+          ) ||
+          (
+            data.keys().hasAny(['affectedUserEmail']) &&
+            data.affectedUserEmail == request.auth.token.email
+          )
+        );
+    }
+
+    function isSelfServiceVisible(data) {
+      return !data.keys().hasAny(['selfServiceVisible']) ||
+        data.selfServiceVisible == true;
+    }
+
+    function canReadItsmOperationalRecord(data) {
+      return (
+          isManager() &&
+          (
+            !isRestrictedItsmData(data) ||
+            isExplicitlyAuthorizedForRestricted(data)
+          )
+        ) ||
+        (
+          isItsmSelfServiceRole() &&
+          isPrincipalWorkItemOwner(data) &&
+          isSelfServiceVisible(data) &&
+          !isRestrictedItsmData(data)
+        );
+    }
+
+    function canReadRestrictedItsmRecord(data) {
+      return isManager() && isExplicitlyAuthorizedForRestricted(data);
+    }
+
+    function isSharedItsmWorkItemCollection(collectionName) {
+      return collectionName in ['serviceRequests', 'changeRequests'];
+    }
+
+    function isRestrictedItsmWorkItemCollection(collectionName) {
+      return collectionName in ['securityFindings', 'securityExceptions'];
+    }
+
+    function canReadItsmSubresourceParent(collectionName, workItemId) {
+      let parent = get(
+        /databases/$(database)/documents/$(collectionName)/$(workItemId)
+      ).data;
+      return (
+          isSharedItsmWorkItemCollection(collectionName) &&
+          canReadItsmOperationalRecord(parent)
+        ) ||
+        (
+          isRestrictedItsmWorkItemCollection(collectionName) &&
+          canReadRestrictedItsmRecord(parent)
+        );
+    }
+
+    function validSelfServiceRequestCreate() {
+      return isItsmSelfServiceRole() &&
+        request.resource.data.requesterId == request.auth.uid &&
+        request.resource.data.status in ['draft', 'submitted', 'open'] &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time &&
+        !isRestrictedItsmData(request.resource.data) &&
+        !request.resource.data.keys().hasAny([
+          'approvalState',
+          'approvals',
+          'assignedGroupId',
+          'assignedUserId',
+          'audit',
+          'closedAt',
+          'slaState'
+        ]);
+    }
+
+    function isPublishedConfiguration(data) {
+      return data.keys().hasAny(['status']) &&
+        data.status in ['PUBLISHED', 'published'];
+    }
+
+    function canReadItsmConfiguration(data) {
+      return isManager() ||
+        isAdmin() ||
+        (isUser() && isPublishedConfiguration(data));
+    }
+
+    function validManagerDraftCreate() {
+      return isManager() &&
+        request.resource.data.status in ['DRAFT', 'draft'] &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time;
+    }
+
+    function validManagerDraftUpdate() {
+      return isManager() &&
+        resource.data.status in ['DRAFT', 'draft'] &&
+        request.resource.data.status in ['DRAFT', 'draft'] &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.updatedAt == request.time;
+    }
+
+    function canReadItsmReportSnapshot(data) {
+      return !isRestrictedItsmData(data) &&
+        (
+          (
+            isManager() &&
+            data.keys().hasAny(['audience']) &&
+            data.audience in ['MANAGER', 'manager', 'ALL', 'all']
+          ) ||
+          (
+            isAdmin() &&
+            data.keys().hasAny(['audience']) &&
+            data.audience in ['ADMIN', 'admin', 'ALL', 'all']
+          )
+        );
+    }
+
+    function canReadItsmAuditEvent(data) {
+      return (isManager() || isAdmin()) &&
+        (
+          !isRestrictedItsmData(data) ||
+          isExplicitlyAuthorizedForRestricted(data)
         );
     }
 
@@ -438,13 +636,12 @@ service cloud.firestore {
     }
 
     function canReadTicket(ticket) {
-      return isAdmin() ||
-        (isManager() && ticket.lifecycleState in ['active', 'closed']) ||
-        (isUser() && isTicketOwner(ticket));
+      return (isManager() && ticket.lifecycleState in ['active', 'closed']) ||
+        (isItsmSelfServiceRole() && isTicketOwner(ticket));
     }
 
     function validUserCreate() {
-      return isUser() &&
+      return isItsmSelfServiceRole() &&
         request.resource.data.status == 'open' &&
         request.resource.data.lifecycleState == 'active' &&
         (request.resource.data.createdByUserId == request.auth.uid ||
@@ -560,7 +757,7 @@ service cloud.firestore {
       match /comments/{commentId} {
         allow get, list: if signedIn() &&
           canReadTicket(get(/databases/$(database)/documents/incidentTickets/$(ticketId)).data) &&
-          (!resource.data.isInternal || isManager() || isAdmin());
+          (!resource.data.isInternal || isManager());
 
         allow create: if signedIn() &&
           canReadTicket(get(/databases/$(database)/documents/incidentTickets/$(ticketId)).data) &&
@@ -568,7 +765,8 @@ service cloud.firestore {
            request.resource.data.createdByEmail == request.auth.token.email) &&
           request.resource.data.createdAt == request.time &&
           (
-            (isUser() && request.resource.data.isInternal == false) ||
+            (isItsmSelfServiceRole() &&
+             request.resource.data.isInternal == false) ||
             (isManager() && request.resource.data.isInternal == true)
           );
 
@@ -583,7 +781,7 @@ service cloud.firestore {
           canReadTicket(getAfter(/databases/$(database)/documents/incidentTickets/$(ticketId)).data) &&
           request.resource.data.uploadedByUserId == request.auth.uid &&
           request.resource.data.createdAt == request.time &&
-          (isUser() || isManager());
+          (isItsmSelfServiceRole() || isManager());
 
         allow update, delete: if false;
       }
@@ -597,7 +795,7 @@ service cloud.firestore {
           (request.resource.data.actorUserId == request.auth.uid ||
            request.resource.data.actorEmail == request.auth.token.email) &&
           request.resource.data.createdAt == request.time &&
-          (isUser() || isManager());
+          (isItsmSelfServiceRole() || isManager());
 
         allow update, delete: if false;
       }
@@ -619,6 +817,183 @@ service cloud.firestore {
       allow get, list: if signedIn() && hasIncidentAccess();
       allow create, update: if signedIn() && isManager();
       allow delete: if false;
+    }
+
+    match /itsmWorkItemIndex/{workItemId} {
+      allow get, list: if signedIn() &&
+        canReadItsmOperationalRecord(resource.data);
+      allow create, update, delete: if false;
+    }
+
+    match /itsmReportSnapshots/{snapshotId} {
+      allow get, list: if signedIn() &&
+        canReadItsmReportSnapshot(resource.data);
+      allow create, update, delete: if false;
+    }
+
+    match /itsmAuditEvents/{eventId} {
+      allow get, list: if signedIn() &&
+        canReadItsmAuditEvent(resource.data);
+      allow create, update, delete: if false;
+    }
+
+    match /serviceCatalogItems/{catalogItemId} {
+      allow get, list: if signedIn() &&
+        canReadItsmConfiguration(resource.data);
+      allow create: if validManagerDraftCreate();
+      allow update: if validManagerDraftUpdate();
+      allow delete: if false;
+    }
+
+    match /workflowDefinitions/{workflowDefinitionId} {
+      allow get, list: if signedIn() &&
+        canReadItsmConfiguration(resource.data);
+      allow create: if validManagerDraftCreate();
+      allow update: if validManagerDraftUpdate();
+      allow delete: if false;
+
+      match /versions/{versionId} {
+        allow get, list: if signedIn() &&
+          canReadItsmConfiguration(resource.data);
+        allow create: if validManagerDraftCreate();
+        allow update: if validManagerDraftUpdate();
+        allow delete: if false;
+      }
+    }
+
+    match /slaPolicies/{slaPolicyId} {
+      allow get, list: if signedIn() &&
+        canReadItsmConfiguration(resource.data);
+      allow create: if validManagerDraftCreate();
+      allow update: if validManagerDraftUpdate();
+      allow delete: if false;
+
+      match /versions/{versionId} {
+        allow get, list: if signedIn() &&
+          canReadItsmConfiguration(resource.data);
+        allow create: if validManagerDraftCreate();
+        allow update: if validManagerDraftUpdate();
+        allow delete: if false;
+      }
+    }
+
+    match /{workItemCollection}/{workItemId} {
+      allow get, list: if signedIn() &&
+        isSharedItsmWorkItemCollection(workItemCollection) &&
+        canReadItsmOperationalRecord(resource.data);
+      allow create: if workItemCollection == 'serviceRequests' &&
+        validSelfServiceRequestCreate();
+      allow update, delete: if false;
+
+      match /comments/{commentId} {
+        allow get, list: if signedIn() &&
+          canReadItsmSubresourceParent(workItemCollection, workItemId) &&
+          (
+            !resource.data.keys().hasAny(['isInternal']) ||
+            resource.data.isInternal == false ||
+            isManager()
+          );
+
+        allow create: if signedIn() &&
+          canReadItsmSubresourceParent(workItemCollection, workItemId) &&
+          request.resource.data.createdByUserId == request.auth.uid &&
+          request.resource.data.createdAt == request.time &&
+          request.resource.data.isInternal is bool &&
+          (
+            isManager() ||
+            (
+              isItsmSelfServiceRole() &&
+              isPrincipalWorkItemOwner(
+                get(
+                  /databases/$(database)/documents/$(workItemCollection)/$(workItemId)
+                ).data
+              ) &&
+              request.resource.data.isInternal == false
+            )
+          );
+
+        allow update, delete: if false;
+      }
+
+      match /attachments/{attachmentId} {
+        allow get, list: if signedIn() &&
+          canReadItsmSubresourceParent(workItemCollection, workItemId) &&
+          (
+            !resource.data.keys().hasAny(['isInternal']) ||
+            resource.data.isInternal == false ||
+            isManager()
+          );
+
+        allow create: if signedIn() &&
+          canReadItsmSubresourceParent(workItemCollection, workItemId) &&
+          request.resource.data.workItemCollection == workItemCollection &&
+          request.resource.data.workItemId == workItemId &&
+          request.resource.data.uploadedByUserId == request.auth.uid &&
+          request.resource.data.storagePath is string &&
+          request.resource.data.storagePath.size() > 0 &&
+          request.resource.data.isInternal is bool &&
+          request.resource.data.createdAt == request.time &&
+          (
+            isManager() ||
+            (
+              isItsmSelfServiceRole() &&
+              isPrincipalWorkItemOwner(
+                get(
+                  /databases/$(database)/documents/$(workItemCollection)/$(workItemId)
+                ).data
+              ) &&
+              request.resource.data.isInternal == false
+            )
+          );
+
+        allow update, delete: if false;
+      }
+
+      match /auditLogs/{auditLogId} {
+        allow get, list: if signedIn() &&
+          canReadItsmSubresourceParent(workItemCollection, workItemId) &&
+          (
+            !resource.data.keys().hasAny(['isInternal']) ||
+            resource.data.isInternal == false ||
+            isManager()
+          );
+        allow create, update, delete: if false;
+      }
+
+      match /tasks/{taskId} {
+        allow get, list: if signedIn() &&
+          canReadItsmSubresourceParent(workItemCollection, workItemId) &&
+          (
+            !resource.data.keys().hasAny(['isInternal']) ||
+            resource.data.isInternal == false ||
+            isManager()
+          );
+        allow create, update, delete: if false;
+      }
+
+      match /approvals/{approvalId} {
+        allow get, list: if signedIn() &&
+          canReadItsmSubresourceParent(workItemCollection, workItemId);
+        allow create, update, delete: if false;
+      }
+
+      match /workflowInstances/{workflowInstanceId} {
+        allow get, list: if signedIn() &&
+          canReadItsmSubresourceParent(workItemCollection, workItemId);
+        allow create, update, delete: if false;
+      }
+    }
+
+    match /securityFindings/{findingId} {
+      allow get, list: if signedIn() &&
+        canReadRestrictedItsmRecord(resource.data);
+      allow create, update, delete: if false;
+    }
+
+    match /securityExceptions/{exceptionId} {
+      allow get, list: if signedIn() &&
+        canReadRestrictedItsmRecord(resource.data);
+      allow create, update, delete: if false;
     }
 
     match /meeting_halls/{hallId} {
@@ -788,6 +1163,10 @@ service cloud.firestore {
           );
         allow delete: if false;
       }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

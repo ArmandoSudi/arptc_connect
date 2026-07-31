@@ -18,6 +18,12 @@ import 'package:arptc_connect/modules/inventory/presentation/appro_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/inventory_main_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/livraison_screen.dart';
 import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
+import 'package:arptc_connect/modules/itsm/presentation/navigation/itsm_navigation.dart';
+import 'package:arptc_connect/modules/itsm/presentation/navigation/itsm_route_access.dart';
+import 'package:arptc_connect/modules/itsm/presentation/screens/itsm_feature_access_screen.dart';
+import 'package:arptc_connect/modules/itsm/presentation/screens/itsm_landing_screen.dart';
+import 'package:arptc_connect/modules/itsm/presentation/screens/itsm_section_overview_screen.dart';
+import 'package:arptc_connect/modules/itsm/presentation/widgets/itsm_route_guard.dart';
 import 'package:arptc_connect/modules/news/presentation/screens/news_editor_screen.dart';
 import 'package:arptc_connect/modules/news/presentation/screens/news_module_screen.dart';
 import 'package:arptc_connect/modules/news/presentation/screens/news_post_details_screen.dart';
@@ -192,75 +198,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   ],
                 ),
 
-                // Incident Management
-                GoRoute(
-                  path: 'incidents',
-                  builder: (context, state) => const IncidentRoleGateScreen(),
-                  routes: [
-                    GoRoute(
-                      path: 'dashboard',
-                      builder: (context, state) =>
-                          const IncidentDashboardRouter(),
-                    ),
-                    GoRoute(
-                      path: 'create',
-                      builder: (context, state) => const CreateIncidentScreen(),
-                    ),
-                    GoRoute(
-                      path: 'parameters',
-                      builder: (context, state) =>
-                          const ManagerIncidentParametersScreen(),
-                    ),
-                    GoRoute(
-                      path: 'history',
-                      builder: (context, state) =>
-                          const ManagerIncidentHistoryScreen(),
-                    ),
-                    GoRoute(
-                      path: 'queue/:queueKey',
-                      builder: (context, state) => ManagerIncidentQueueScreen(
-                        queueKey: state.pathParameters['queueKey'] as String,
-                      ),
-                    ),
-                    GoRoute(
-                      path: 'my/:ticketId',
-                      builder: (context, state) => MyIncidentDetailsScreen(
-                        ticketId: state.pathParameters['ticketId'] as String,
-                      ),
-                    ),
-                    GoRoute(
-                      path: 'manager/:ticketId',
-                      builder: (context, state) => ManagerIncidentDetailsScreen(
-                        ticketId: state.pathParameters['ticketId'] as String,
-                      ),
-                    ),
-                    GoRoute(
-                      path: 'admin/:ticketId',
-                      builder: (context, state) => MyIncidentDetailsScreen(
-                        ticketId: state.pathParameters['ticketId'] as String,
-                        showInternalNotes: true,
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Legacy Ticketing route kept as a compatibility alias.
-                GoRoute(
-                  path: 'ticketing',
-                  builder: (context, state) => const IncidentRoleGateScreen(),
-                  routes: [
-                    GoRoute(
-                      path: 'add',
-                      builder: (context, state) => const CreateIncidentScreen(),
-                    ),
-                    GoRoute(
-                      path: ':ticketId',
-                      builder: (context, state) => MyIncidentDetailsScreen(
-                        ticketId: state.pathParameters['ticketId'] as String,
-                      ),
-                    ),
-                  ],
-                ),
+                // Preserve legacy deep links while moving callers to the
+                // canonical /services/itsm tree.
+                ...buildItsmCompatibilityRoutes(),
 
                 // Courriers
                 GoRoute(
@@ -463,6 +403,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 ),
               ],
             ),
+            _buildItsmRoute(),
           ]),
 
           // Courriers branch
@@ -562,6 +503,225 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     },
   );
 });
+
+GoRoute _buildItsmRoute() {
+  return GoRoute(
+    path: ItsmRoutes.root,
+    pageBuilder: (context, state) => const NoTransitionPage(
+      child: ItsmRouteGuard(child: ItsmLandingScreen()),
+    ),
+    routes: [
+      GoRoute(
+        path: 'support',
+        builder: (context, state) => const ItsmRouteGuard(
+          section: ItsmSection.support,
+          child: ItsmSectionOverviewScreen(section: ItsmSection.support),
+        ),
+        routes: [
+          _buildCanonicalIncidentRoute(),
+          _buildItsmFeatureRoute(
+            ItsmSection.support,
+            ItsmFeature.serviceRequests,
+          ),
+          _buildItsmFeatureRoute(
+            ItsmSection.support,
+            ItsmFeature.myRequests,
+          ),
+          _buildItsmFeatureRoute(
+            ItsmSection.support,
+            ItsmFeature.knowledgeBase,
+          ),
+        ],
+      ),
+      _buildItsmSectionRoute(
+        ItsmSection.assetsConfiguration,
+        const [
+          ItsmFeature.assets,
+          ItsmFeature.stock,
+          ItsmFeature.licences,
+          ItsmFeature.suppliersWarranties,
+          ItsmFeature.cmdb,
+        ],
+      ),
+      _buildItsmSectionRoute(
+        ItsmSection.changes,
+        const [
+          ItsmFeature.changeRequests,
+          ItsmFeature.approvalsCab,
+          ItsmFeature.changeCalendar,
+        ],
+      ),
+      _buildItsmSectionRoute(
+        ItsmSection.securityCompliance,
+        const [
+          ItsmFeature.securityFindings,
+          ItsmFeature.securityExceptions,
+          ItsmFeature.assetCompliance,
+          ItsmFeature.accessReviews,
+        ],
+      ),
+      _buildItsmSectionRoute(
+        ItsmSection.reportingAdministration,
+        const [
+          ItsmFeature.dashboards,
+          ItsmFeature.sla,
+          ItsmFeature.serviceCatalogue,
+          ItsmFeature.workflowConfiguration,
+          ItsmFeature.auditLogs,
+        ],
+      ),
+    ],
+  );
+}
+
+GoRoute _buildItsmSectionRoute(
+  ItsmSection section,
+  List<ItsmFeature> features,
+) {
+  return GoRoute(
+    path: section.route.substring('${ItsmRoutes.root}/'.length),
+    builder: (context, state) => ItsmRouteGuard(
+      section: section,
+      child: ItsmSectionOverviewScreen(section: section),
+    ),
+    routes: [
+      for (final feature in features) _buildItsmFeatureRoute(section, feature),
+    ],
+  );
+}
+
+GoRoute _buildItsmFeatureRoute(
+  ItsmSection section,
+  ItsmFeature feature,
+) {
+  return GoRoute(
+    path: feature.routeSegment,
+    builder: (context, state) => ItsmRouteGuard(
+      section: section,
+      feature: feature,
+      child: ItsmFeatureAccessScreen(
+        section: section,
+        feature: feature,
+      ),
+    ),
+  );
+}
+
+GoRoute _buildCanonicalIncidentRoute() {
+  return GoRoute(
+    path: ItsmFeature.incidents.routeSegment,
+    builder: (context, state) => const ItsmRouteGuard(
+      section: ItsmSection.support,
+      feature: ItsmFeature.incidents,
+      requirement: ItsmRouteRequirement.selfService,
+      child: IncidentRoleGateScreen(),
+    ),
+    routes: [
+      GoRoute(
+        path: 'dashboard',
+        builder: (context, state) => const ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.incidents,
+          requirement: ItsmRouteRequirement.operationalOrExecutive,
+          child: IncidentDashboardRouter(),
+        ),
+      ),
+      GoRoute(
+        path: 'create',
+        builder: (context, state) => const ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.incidents,
+          requirement: ItsmRouteRequirement.selfService,
+          child: CreateIncidentScreen(),
+        ),
+      ),
+      GoRoute(
+        path: 'parameters',
+        builder: (context, state) => const ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.incidents,
+          requirement: ItsmRouteRequirement.operational,
+          child: ManagerIncidentParametersScreen(),
+        ),
+      ),
+      GoRoute(
+        path: 'history',
+        builder: (context, state) => const ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.incidents,
+          requirement: ItsmRouteRequirement.operational,
+          child: ManagerIncidentHistoryScreen(),
+        ),
+      ),
+      GoRoute(
+        path: 'queue/:queueKey',
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.incidents,
+          requirement: ItsmRouteRequirement.operational,
+          child: ManagerIncidentQueueScreen(
+            queueKey: state.pathParameters['queueKey'] as String,
+          ),
+        ),
+      ),
+      GoRoute(
+        path: 'my/:ticketId',
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.incidents,
+          requirement: ItsmRouteRequirement.selfService,
+          child: MyIncidentDetailsScreen(
+            ticketId: state.pathParameters['ticketId'] as String,
+          ),
+        ),
+      ),
+      GoRoute(
+        path: 'manager/:ticketId',
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.incidents,
+          requirement: ItsmRouteRequirement.operational,
+          child: ManagerIncidentDetailsScreen(
+            ticketId: state.pathParameters['ticketId'] as String,
+          ),
+        ),
+      ),
+      GoRoute(
+        path: 'admin/:ticketId',
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.incidents,
+          requirement: ItsmRouteRequirement.selfService,
+          child: MyIncidentDetailsScreen(
+            ticketId: state.pathParameters['ticketId'] as String,
+          ),
+        ),
+      ),
+      // Preserve the two shapes provided by the former /service/ticketing
+      // route while still converging on canonical incident destinations.
+      GoRoute(
+        path: 'add',
+        redirect: (context, state) => _replacePathPreservingParameters(
+          state.location,
+          '${ItsmRoutes.incidents}/create',
+        ),
+      ),
+      GoRoute(
+        path: ':ticketId',
+        redirect: (context, state) => _replacePathPreservingParameters(
+          state.location,
+          '${ItsmRoutes.incidents}/my/'
+          '${state.pathParameters['ticketId'] as String}',
+        ),
+      ),
+    ],
+  );
+}
+
+String _replacePathPreservingParameters(String location, String path) {
+  final uri = Uri.parse(location);
+  return uri.replace(path: path).toString();
+}
 
 String _postLoginRedirectLocation(GoRouterState state) {
   final from = state.queryParameters['from'];

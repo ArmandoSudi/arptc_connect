@@ -47,6 +47,239 @@ service firebase.storage {
         );
     }
 
+    function itsmRole() {
+      let data = principalData();
+      let permissions = data.keys().hasAny(['modulePermissions'])
+        ? data.modulePermissions
+        : {};
+      return permissions.keys().hasAny(['ticketing'])
+        ? permissions.ticketing
+        : (
+          permissions.keys().hasAny(['itsm'])
+            ? permissions.itsm
+            : (
+              permissions.keys().hasAny(['it_service_management'])
+                ? permissions.it_service_management
+                : (
+                  permissions.keys().hasAny(['itservicemanagement'])
+                    ? permissions.itservicemanagement
+                    : (
+                      permissions.keys().hasAny(['support'])
+                        ? permissions.support
+                        : (
+                          permissions.keys().hasAny(['incident'])
+                            ? permissions.incident
+                            : (
+                              permissions.keys().hasAny(['incidents'])
+                                ? permissions.incidents
+                                : (
+                                  permissions.keys().hasAny(['incident_management'])
+                                    ? permissions.incident_management
+                                    : (
+                                      permissions.keys().hasAny(['incidentmanagement'])
+                                        ? permissions.incidentmanagement
+                                        : (
+                                          permissions.keys().hasAny(['ticket'])
+                                            ? permissions.ticket
+                                            : (
+                                              permissions.keys().hasAny(['tickets'])
+                                                ? permissions.tickets
+                                                : 'NONE'
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        );
+    }
+
+    function isItsmUser() {
+      return itsmRole() in ['USER', 'user', 'User'];
+    }
+
+    function isItsmManager() {
+      return itsmRole() in ['MANAGER', 'manager', 'Manager'];
+    }
+
+    function isItsmAdmin() {
+      return itsmRole() in ['ADMIN', 'admin', 'Admin'];
+    }
+
+    function isRestrictedItsmData(data) {
+      return (
+          data.keys().hasAny(['confidentiality']) &&
+          data.confidentiality in [
+            'RESTRICTED',
+            'restricted',
+            'SECURITY_RESTRICTED',
+            'security_restricted',
+            'CONFIDENTIAL',
+            'confidential'
+          ]
+        ) ||
+        (
+          data.keys().hasAny(['isRestricted']) &&
+          data.isRestricted == true
+        );
+    }
+
+    function isExplicitlyAuthorizedForRestricted(data) {
+      return signedIn() &&
+        (
+          (
+            data.keys().hasAny(['authorizedUserIds']) &&
+            data.authorizedUserIds is list &&
+            request.auth.uid in data.authorizedUserIds
+          ) ||
+          (
+            data.keys().hasAny(['assignedUserId']) &&
+            data.assignedUserId == request.auth.uid
+          ) ||
+          (
+            data.keys().hasAny(['requesterId']) &&
+            data.requesterId == request.auth.uid
+          )
+        );
+    }
+
+    function isPrincipalWorkItemOwner(data) {
+      return signedIn() &&
+        (
+          (
+            data.keys().hasAny(['requesterId']) &&
+            data.requesterId == request.auth.uid
+          ) ||
+          (
+            data.keys().hasAny(['requesterEmail']) &&
+            data.requesterEmail == request.auth.token.email
+          ) ||
+          (
+            data.keys().hasAny(['createdByUserId']) &&
+            data.createdByUserId == request.auth.uid
+          ) ||
+          (
+            data.keys().hasAny(['createdByEmail']) &&
+            data.createdByEmail == request.auth.token.email
+          ) ||
+          (
+            data.keys().hasAny(['affectedUserId']) &&
+            data.affectedUserId == request.auth.uid
+          ) ||
+          (
+            data.keys().hasAny(['affectedUserEmail']) &&
+            data.affectedUserEmail == request.auth.token.email
+          )
+        );
+    }
+
+    function isActiveWorkItem(data) {
+      return (
+          data.keys().hasAny(['lifecycleState']) &&
+          data.lifecycleState in ['active', 'ACTIVE']
+        ) ||
+        (
+          !data.keys().hasAny(['lifecycleState']) &&
+          (
+            !data.keys().hasAny(['status']) ||
+            !(data.status in [
+              'closed',
+              'CLOSED',
+              'archived',
+              'ARCHIVED',
+              'cancelled',
+              'CANCELLED'
+            ])
+          )
+        );
+    }
+
+    function isItsmWorkItemCollection(collectionName) {
+      return collectionName in [
+        'incidentTickets',
+        'serviceRequests',
+        'changeRequests',
+        'securityFindings',
+        'securityExceptions'
+      ];
+    }
+
+    function workItemData(collectionName, workItemId) {
+      return firestore.get(
+        /databases/(default)/documents/$(collectionName)/$(workItemId)
+      ).data;
+    }
+
+    function canReadIncidentStorage(data) {
+      return (
+          isItsmManager() &&
+          data.lifecycleState in ['active', 'closed']
+        ) ||
+        (
+          (isItsmUser() || isItsmAdmin()) &&
+          isPrincipalWorkItemOwner(data)
+        );
+    }
+
+    function canReadItsmStorageParent(collectionName, workItemId) {
+      let data = workItemData(collectionName, workItemId);
+      return isItsmWorkItemCollection(collectionName) &&
+        (
+          (
+            collectionName == 'incidentTickets' &&
+            canReadIncidentStorage(data)
+          ) ||
+          (
+            collectionName in ['serviceRequests', 'changeRequests'] &&
+            (
+              (
+                isItsmManager() &&
+                (
+                  !isRestrictedItsmData(data) ||
+                  isExplicitlyAuthorizedForRestricted(data)
+                )
+              ) ||
+              (
+                (isItsmUser() || isItsmAdmin()) &&
+                isPrincipalWorkItemOwner(data) &&
+                !isRestrictedItsmData(data)
+              )
+            )
+          ) ||
+          (
+            collectionName in ['securityFindings', 'securityExceptions'] &&
+            isItsmManager() &&
+            isExplicitlyAuthorizedForRestricted(data)
+          )
+        );
+    }
+
+    function canCreateItsmAttachment(collectionName, workItemId) {
+      let data = workItemData(collectionName, workItemId);
+      return canReadItsmStorageParent(collectionName, workItemId) &&
+        isActiveWorkItem(data) &&
+        (
+          isItsmManager() ||
+          (
+            collectionName == 'incidentTickets' &&
+            (isItsmUser() || isItsmAdmin()) &&
+            isPrincipalWorkItemOwner(data)
+          ) ||
+          (
+            collectionName in ['serviceRequests', 'changeRequests'] &&
+            (isItsmUser() || isItsmAdmin()) &&
+            isPrincipalWorkItemOwner(data)
+          )
+        ) &&
+        (
+          isItsmManager() ||
+          request.resource.metadata.isInternal == 'false'
+        );
+    }
+
     function taskRole() {
       let data = principalData();
       let permissions = data.keys().hasAny(['modulePermissions'])
@@ -138,6 +371,28 @@ service firebase.storage {
         canManageTasks() &&
         principalDepartmentId() != '' &&
         resource.metadata.departmentId == principalDepartmentId();
+    }
+
+    match /itsm/{workItemCollection}/{workItemId}/attachments/{attachmentId}/{fileName} {
+      allow read: if signedIn() &&
+        canReadItsmStorageParent(workItemCollection, workItemId) &&
+        (
+          !resource.metadata.keys().hasAny(['isInternal']) ||
+          resource.metadata.isInternal == 'false' ||
+          isItsmManager()
+        );
+
+      allow create: if signedIn() &&
+        canCreateItsmAttachment(workItemCollection, workItemId) &&
+        request.resource.size <= 20 * 1024 * 1024 &&
+        hasSupportedContentType(request.resource.contentType) &&
+        request.resource.metadata.workItemCollection == workItemCollection &&
+        request.resource.metadata.workItemId == workItemId &&
+        request.resource.metadata.attachmentId == attachmentId &&
+        request.resource.metadata.uploadedByUserId == request.auth.uid &&
+        request.resource.metadata.isInternal in ['true', 'false'];
+
+      allow update, delete: if false;
     }
 
     match /{allPaths=**} {

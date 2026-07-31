@@ -7,7 +7,7 @@ enum AppModule {
   social,
   news,
   inventory,
-  ticketing,
+  itsm,
   meetinghall,
   usermanagement
   // assets,
@@ -29,8 +29,8 @@ extension AppModuleX on AppModule {
         return 'news';
       case AppModule.inventory:
         return 'inventory';
-      case AppModule.ticketing:
-        return 'incidents';
+      case AppModule.itsm:
+        return 'itsm';
       case AppModule.meetinghall:
         return 'meeting-hall';
       case AppModule.usermanagement:
@@ -50,13 +50,20 @@ extension AppModuleX on AppModule {
         return 'news';
       case AppModule.inventory:
         return 'inventory';
-      case AppModule.ticketing:
+      case AppModule.itsm:
         return 'ticketing';
       case AppModule.meetinghall:
         return 'meetinghall';
       case AppModule.usermanagement:
         return 'usermanagement';
     }
+  }
+
+  String get routePath {
+    if (this == AppModule.itsm) {
+      return '/services/itsm';
+    }
+    return '/service/$routeSegment';
   }
 }
 
@@ -115,9 +122,9 @@ class ModulesConfig {
       color: CorporateBluePalette.inventory,
     ),
     ModuleInfo(
-      module: AppModule.ticketing,
-      name: 'Support',
-      description: 'Gestion des incidents IT',
+      module: AppModule.itsm,
+      name: 'IT Service Management',
+      description: 'Integrated IT services, support, assets, and governance',
       icon: Icons.support_agent_rounded,
       color: CorporateBluePalette.incidents,
     ),

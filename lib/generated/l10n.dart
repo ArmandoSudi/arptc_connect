@@ -189,6 +189,53 @@ class S {
   String get moduleInventoryDescription => _text('moduleInventoryDescription');
   String get moduleIncidentName => _text('moduleIncidentName');
   String get moduleIncidentDescription => _text('moduleIncidentDescription');
+  String get moduleItsmName => _text('moduleItsmName');
+  String get moduleItsmDescription => _text('moduleItsmDescription');
+  String get itsmLandingTitle => _text('itsmLandingTitle');
+  String get itsmLandingDescription => _text('itsmLandingDescription');
+  String get itsmSupport => _text('itsmSupport');
+  String get itsmSupportDescription => _text('itsmSupportDescription');
+  String get itsmAssetsConfiguration => _text('itsmAssetsConfiguration');
+  String get itsmAssetsConfigurationDescription =>
+      _text('itsmAssetsConfigurationDescription');
+  String get itsmChanges => _text('itsmChanges');
+  String get itsmChangesDescription => _text('itsmChangesDescription');
+  String get itsmSecurityCompliance => _text('itsmSecurityCompliance');
+  String get itsmSecurityComplianceDescription =>
+      _text('itsmSecurityComplianceDescription');
+  String get itsmReportingAdministration =>
+      _text('itsmReportingAdministration');
+  String get itsmReportingAdministrationDescription =>
+      _text('itsmReportingAdministrationDescription');
+  String get itsmIncidents => _text('itsmIncidents');
+  String get itsmServiceRequests => _text('itsmServiceRequests');
+  String get itsmMyRequests => _text('itsmMyRequests');
+  String get itsmKnowledgeBase => _text('itsmKnowledgeBase');
+  String get itsmAssets => _text('itsmAssets');
+  String get itsmStock => _text('itsmStock');
+  String get itsmLicences => _text('itsmLicences');
+  String get itsmSuppliersWarranties => _text('itsmSuppliersWarranties');
+  String get itsmCmdb => _text('itsmCmdb');
+  String get itsmChangeRequests => _text('itsmChangeRequests');
+  String get itsmApprovalsCab => _text('itsmApprovalsCab');
+  String get itsmChangeCalendar => _text('itsmChangeCalendar');
+  String get itsmSecurityFindings => _text('itsmSecurityFindings');
+  String get itsmSecurityExceptions => _text('itsmSecurityExceptions');
+  String get itsmAssetCompliance => _text('itsmAssetCompliance');
+  String get itsmAccessReviews => _text('itsmAccessReviews');
+  String get itsmDashboards => _text('itsmDashboards');
+  String get itsmSla => _text('itsmSla');
+  String get itsmServiceCatalogue => _text('itsmServiceCatalogue');
+  String get itsmWorkflowConfiguration => _text('itsmWorkflowConfiguration');
+  String get itsmAuditLogs => _text('itsmAuditLogs');
+  String get itsmFeatureCardDescription => _text('itsmFeatureCardDescription');
+  String get itsmFeatureUnavailableDescription =>
+      _text('itsmFeatureUnavailableDescription');
+  String get itsmAccessDeniedTitle => _text('itsmAccessDeniedTitle');
+  String get itsmAccessDeniedDescription =>
+      _text('itsmAccessDeniedDescription');
+  String get itsmLoadingAccess => _text('itsmLoadingAccess');
+  String get itsmUnableToLoadAccess => _text('itsmUnableToLoadAccess');
   String get moduleUserManagementName => _text('moduleUserManagementName');
   String get moduleUserManagementDescription =>
       _text('moduleUserManagementDescription');
@@ -899,6 +946,56 @@ const _localizedValues = <String, Map<String, String>>{
     'moduleInventoryDescription': "Manage organizational stock and items",
     'moduleIncidentName': "Support",
     'moduleIncidentDescription': "IT incident and support management",
+    'moduleItsmName': "IT Service Management",
+    'moduleItsmDescription':
+        "Integrated IT services, support, assets, and governance",
+    'itsmLandingTitle': "IT Service Management",
+    'itsmLandingDescription':
+        "Access support, assets, changes, security, and IT service governance from one place.",
+    'itsmSupport': "Support",
+    'itsmSupportDescription':
+        "Report incidents, request IT services, follow your requests, and find guidance.",
+    'itsmAssetsConfiguration': "Assets & Configuration",
+    'itsmAssetsConfigurationDescription':
+        "Manage IT assets, stock, licences, suppliers, warranties, and configuration items.",
+    'itsmChanges': "Changes",
+    'itsmChangesDescription':
+        "Plan, approve, schedule, and review controlled changes to IT services.",
+    'itsmSecurityCompliance': "Security & Compliance",
+    'itsmSecurityComplianceDescription':
+        "Track security findings, exceptions, asset compliance, and access reviews.",
+    'itsmReportingAdministration': "Reporting & Administration",
+    'itsmReportingAdministrationDescription':
+        "Monitor service performance and manage ITSM policies, workflows, and audit records.",
+    'itsmIncidents': "Incidents",
+    'itsmServiceRequests': "Service Requests",
+    'itsmMyRequests': "My Requests",
+    'itsmKnowledgeBase': "Knowledge Base",
+    'itsmAssets': "Assets",
+    'itsmStock': "Stock",
+    'itsmLicences': "Licences",
+    'itsmSuppliersWarranties': "Suppliers & Warranties",
+    'itsmCmdb': "CMDB",
+    'itsmChangeRequests': "Change Requests",
+    'itsmApprovalsCab': "Approvals / CAB",
+    'itsmChangeCalendar': "Change Calendar",
+    'itsmSecurityFindings': "Security Findings",
+    'itsmSecurityExceptions': "Security Exceptions",
+    'itsmAssetCompliance': "Asset Compliance",
+    'itsmAccessReviews': "Access Reviews",
+    'itsmDashboards': "Dashboards",
+    'itsmSla': "SLA",
+    'itsmServiceCatalogue': "Service Catalogue",
+    'itsmWorkflowConfiguration': "Workflow Configuration",
+    'itsmAuditLogs': "Audit Logs",
+    'itsmFeatureCardDescription': "Open this ITSM capability.",
+    'itsmFeatureUnavailableDescription':
+        "This capability is part of the staged ITSM rollout and is not available in this phase. No protected data has been loaded.",
+    'itsmAccessDeniedTitle': "ITSM access restricted",
+    'itsmAccessDeniedDescription':
+        "Your current ITSM role does not allow access to this area.",
+    'itsmLoadingAccess': "Loading ITSM access...",
+    'itsmUnableToLoadAccess': "Unable to load ITSM access",
     'moduleUserManagementName': "User Management",
     'moduleUserManagementDescription':
         "Manage departments, services, offices, agents, and modules",
@@ -1578,6 +1675,56 @@ const _localizedValues = <String, Map<String, String>>{
         "Gérer les stocks et les articles de l'organisation",
     'moduleIncidentName': "Support",
     'moduleIncidentDescription': "Gestion des incidents IT et du support",
+    'moduleItsmName': "Gestion des services informatiques",
+    'moduleItsmDescription':
+        "Services IT, support, actifs et gouvernance intégrés",
+    'itsmLandingTitle': "Gestion des services informatiques",
+    'itsmLandingDescription':
+        "Accédez au support, aux actifs, aux changements, à la sécurité et à la gouvernance des services IT depuis un seul espace.",
+    'itsmSupport': "Support",
+    'itsmSupportDescription':
+        "Signalez des incidents, demandez des services IT, suivez vos demandes et trouvez des conseils.",
+    'itsmAssetsConfiguration': "Actifs et configuration",
+    'itsmAssetsConfigurationDescription':
+        "Gérez les actifs IT, le stock, les licences, les fournisseurs, les garanties et les éléments de configuration.",
+    'itsmChanges': "Changements",
+    'itsmChangesDescription':
+        "Planifiez, approuvez, programmez et évaluez les changements contrôlés des services IT.",
+    'itsmSecurityCompliance': "Sécurité et conformité",
+    'itsmSecurityComplianceDescription':
+        "Suivez les constats de sécurité, les exceptions, la conformité des actifs et les revues d'accès.",
+    'itsmReportingAdministration': "Rapports et administration",
+    'itsmReportingAdministrationDescription':
+        "Surveillez la performance des services et gérez les politiques, les workflows et les audits ITSM.",
+    'itsmIncidents': "Incidents",
+    'itsmServiceRequests': "Demandes de service",
+    'itsmMyRequests': "Mes demandes",
+    'itsmKnowledgeBase': "Base de connaissances",
+    'itsmAssets': "Actifs",
+    'itsmStock': "Stock",
+    'itsmLicences': "Licences",
+    'itsmSuppliersWarranties': "Fournisseurs et garanties",
+    'itsmCmdb': "CMDB",
+    'itsmChangeRequests': "Demandes de changement",
+    'itsmApprovalsCab': "Approbations / CAB",
+    'itsmChangeCalendar': "Calendrier des changements",
+    'itsmSecurityFindings': "Constats de sécurité",
+    'itsmSecurityExceptions': "Exceptions de sécurité",
+    'itsmAssetCompliance': "Conformité des actifs",
+    'itsmAccessReviews': "Revues des accès",
+    'itsmDashboards': "Tableaux de bord",
+    'itsmSla': "SLA",
+    'itsmServiceCatalogue': "Catalogue de services",
+    'itsmWorkflowConfiguration': "Configuration des workflows",
+    'itsmAuditLogs': "Journaux d'audit",
+    'itsmFeatureCardDescription': "Ouvrir cette fonctionnalité ITSM.",
+    'itsmFeatureUnavailableDescription':
+        "Cette fonctionnalité fait partie du déploiement progressif de l'ITSM et n'est pas disponible dans cette phase. Aucune donnée protégée n'a été chargée.",
+    'itsmAccessDeniedTitle': "Accès ITSM restreint",
+    'itsmAccessDeniedDescription':
+        "Votre rôle ITSM actuel ne permet pas d'accéder à cet espace.",
+    'itsmLoadingAccess': "Chargement des accès ITSM...",
+    'itsmUnableToLoadAccess': "Impossible de charger les accès ITSM",
     'moduleUserManagementName': "Gestion des utilisateurs",
     'moduleUserManagementDescription':
         "Gérer les départements, services, bureaux, agents et modules",

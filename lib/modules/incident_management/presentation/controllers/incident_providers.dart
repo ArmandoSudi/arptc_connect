@@ -67,7 +67,7 @@ final myOpenIncidentTicketsProvider =
   final user = ref.watch(currentIncidentUserProvider).valueOrNull;
   if (sessionKey == null ||
       user == null ||
-      user.role != IncidentRole.user ||
+      !_isSelfServiceRole(user.role) ||
       user.email.isEmpty) {
     return Stream.value(const <IncidentTicket>[]);
   }
@@ -80,7 +80,7 @@ final myClosedAndArchivedIncidentTicketsProvider =
   final user = ref.watch(currentIncidentUserProvider).valueOrNull;
   if (sessionKey == null ||
       user == null ||
-      user.role != IncidentRole.user ||
+      !_isSelfServiceRole(user.role) ||
       user.email.isEmpty) {
     return Stream.value(const <IncidentTicket>[]);
   }
@@ -133,7 +133,9 @@ final adminAllIncidentTicketsProvider =
   if (sessionKey == null || role != IncidentRole.admin) {
     return Stream.value(const <IncidentTicket>[]);
   }
-  return ref.read(incidentRepositoryProvider).watchAllTicketsForAdmin();
+  // Organisation-wide ADMIN data is served only by trusted report snapshots.
+  // The legacy raw-ticket stream remains intentionally disconnected.
+  return Stream.value(const <IncidentTicket>[]);
 });
 
 final incidentCategoriesProvider =
@@ -233,8 +235,7 @@ final incidentCommentsProvider =
   }
   return ref.read(incidentRepositoryProvider).watchComments(
         ticketId,
-        includeInternal:
-            role == IncidentRole.manager || role == IncidentRole.admin,
+        includeInternal: role == IncidentRole.manager,
       );
 });
 
@@ -348,6 +349,10 @@ bool _hasIncidentAccess(IncidentRole? role) {
   return role == IncidentRole.user ||
       role == IncidentRole.manager ||
       role == IncidentRole.admin;
+}
+
+bool _isSelfServiceRole(IncidentRole role) {
+  return role == IncidentRole.user || role == IncidentRole.admin;
 }
 
 bool _profileMatchesAuthUser(

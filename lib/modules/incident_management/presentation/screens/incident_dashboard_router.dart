@@ -1,8 +1,8 @@
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_enums.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/controllers/incident_providers.dart';
-import 'package:arptc_connect/modules/incident_management/presentation/screens/admin_incident_dashboard_screen.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/screens/manager_incident_dashboard_screen.dart';
+import 'package:arptc_connect/modules/incident_management/presentation/screens/user_incident_home_screen.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
@@ -24,7 +24,7 @@ class IncidentDashboardRouter extends ConsumerWidget {
           case IncidentRole.manager:
             return const ManagerIncidentDashboardScreen();
           case IncidentRole.admin:
-            return const AdminIncidentDashboardScreen();
+            return const UserIncidentHomeScreen();
           case IncidentRole.user:
           case IncidentRole.none:
             return ContentView(

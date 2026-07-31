@@ -73,6 +73,6 @@ class ModuleCard extends StatelessWidget {
   }
 
   void _navigateToModule(BuildContext context, AppModule module) {
-    context.go('/service/${module.routeSegment}');
+    context.go(module.routePath);
   }
 }
