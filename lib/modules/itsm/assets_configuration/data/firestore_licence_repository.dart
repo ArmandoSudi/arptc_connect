@@ -42,10 +42,15 @@ class FirestoreLicenceRepository implements LicenceRepository {
       firestoreQuery =
           firestoreQuery.where('vendor', isEqualTo: query.vendor.trim());
     }
+
+    // Firestore requires an inequality field to lead the ordering. Expiry
+    // searches therefore use an ascending expiry cursor instead of updatedAt.
+    final isExpirySearch = query.expiringBefore != null;
     return fetchFirestorePage(
       query: firestoreQuery,
       page: page,
-      sortField: 'updatedAt',
+      sortField: isExpirySearch ? 'expiryDate' : 'updatedAt',
+      sortDescending: !isExpirySearch,
       parse: SoftwareLicence.fromFirestore,
     );
   }

@@ -541,6 +541,7 @@ GoRoute _buildItsmRoute() {
         ),
         routes: [
           _buildCanonicalIncidentRoute(),
+          _buildServiceCatalogueRoute(),
           _buildServiceRequestsRoute(),
           _buildMyRequestsRoute(),
           _buildKnowledgeBaseRoute(),
@@ -566,8 +567,6 @@ GoRoute _buildReportingAdministrationRoute() {
           ReportingAdministrationDestination.dashboards =>
             ItsmRoutes.reportingDashboards,
           ReportingAdministrationDestination.sla => ItsmRoutes.slaPolicies,
-          ReportingAdministrationDestination.catalogue =>
-            ItsmRoutes.catalogueAdministration,
           ReportingAdministrationDestination.workflows =>
             ItsmRoutes.workflowAdministration,
           ReportingAdministrationDestination.audit => ItsmRoutes.auditLogs,
@@ -640,28 +639,13 @@ GoRoute _buildReportingAdministrationRoute() {
       ),
       GoRoute(
         path: 'service-catalogue',
-        builder: (context, state) => ItsmRouteGuard(
-          section: section,
-          feature: ItsmFeature.serviceCatalogue,
-          requirement: ItsmRouteRequirement.operationalOrExecutive,
-          child: ServiceCatalogueAdministrationScreen(
-            onOpenItem: (itemId) =>
-                context.push(ItsmRoutes.catalogueAdministrationDetail(itemId)),
-          ),
+        redirect: (_, __) => ItsmRoutes.catalogueAdministration,
+      ),
+      GoRoute(
+        path: 'service-catalogue/:itemId',
+        redirect: (_, state) => ItsmRoutes.catalogueAdministrationDetail(
+          state.pathParameters['itemId'] as String,
         ),
-        routes: [
-          GoRoute(
-            path: ':itemId',
-            builder: (context, state) => ItsmRouteGuard(
-              section: section,
-              feature: ItsmFeature.serviceCatalogue,
-              requirement: ItsmRouteRequirement.operationalOrExecutive,
-              child: ServiceCatalogueAdministrationDetailScreen(
-                itemId: state.pathParameters['itemId'] as String,
-              ),
-            ),
-          ),
-        ],
       ),
       GoRoute(
         path: 'workflows',
@@ -952,39 +936,83 @@ String _assetCatalogueRoute(String assetId, AssetCatalogueAction action) {
     AssetCatalogueAction.requestConfiguration => 'asset_configuration',
     AssetCatalogueAction.requestReturn => 'equipment_return_transfer',
   };
-  return '${ItsmRoutes.serviceRequests}/catalogue/$catalogueItemId/create'
+  return '${ItsmRoutes.serviceCatalogue}/$catalogueItemId/create'
       '?assetId=${Uri.encodeQueryComponent(assetId)}'
       '&assetAction=${Uri.encodeQueryComponent(action.name)}';
 }
 
-GoRoute _buildServiceRequestsRoute() {
+GoRoute _buildServiceCatalogueRoute() {
   return GoRoute(
-    path: ItsmFeature.serviceRequests.routeSegment,
+    path: ItsmFeature.serviceCatalogue.routeSegment,
     builder: (context, state) => ItsmRouteGuard(
       section: ItsmSection.support,
-      feature: ItsmFeature.serviceRequests,
+      feature: ItsmFeature.serviceCatalogue,
       requirement: ItsmRouteRequirement.selfService,
       child: ServiceCatalogueScreen(
         onItemSelected: (item) => context.push(
-          '${ItsmRoutes.serviceRequests}/catalogue/'
-          '${Uri.encodeComponent(item.id)}',
+          '${ItsmRoutes.serviceCatalogue}/${Uri.encodeComponent(item.id)}',
         ),
+        onManageCatalogue: () =>
+            context.push(ItsmRoutes.catalogueAdministration),
       ),
     ),
     routes: [
       GoRoute(
-        path: 'catalogue/:catalogueItemId',
+        path: 'manage',
+        builder: (context, state) => ItsmRouteGuard(
+          section: ItsmSection.support,
+          feature: ItsmFeature.serviceCatalogue,
+          requirement: ItsmRouteRequirement.operational,
+          child: ServiceCatalogueAdministrationScreen(
+            onOpenItem: (itemId) => context.push(
+              ItsmRoutes.catalogueAdministrationDetail(itemId),
+            ),
+            onManageParameters: () => context.push(
+              '${ItsmRoutes.catalogueAdministration}/parameters',
+            ),
+          ),
+        ),
+        routes: [
+          GoRoute(
+            path: 'parameters',
+            builder: (context, state) => ItsmRouteGuard(
+              section: ItsmSection.support,
+              feature: ItsmFeature.serviceCatalogue,
+              requirement: ItsmRouteRequirement.operational,
+              child: ServiceCatalogueParametersScreen(
+                onOpenWorkflows: () =>
+                    context.push(ItsmRoutes.workflowAdministration),
+                onOpenSlaPolicies: () => context.push(ItsmRoutes.slaPolicies),
+                onOpenConfigurationItems: () => context.push(ItsmRoutes.cmdb),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: ':itemId',
+            builder: (context, state) => ItsmRouteGuard(
+              section: ItsmSection.support,
+              feature: ItsmFeature.serviceCatalogue,
+              requirement: ItsmRouteRequirement.operational,
+              child: ServiceCatalogueAdministrationDetailScreen(
+                itemId: state.pathParameters['itemId'] as String,
+              ),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: ':catalogueItemId',
         builder: (context, state) {
           final catalogueItemId =
               state.pathParameters['catalogueItemId'] as String;
           return ItsmRouteGuard(
             section: ItsmSection.support,
-            feature: ItsmFeature.serviceRequests,
+            feature: ItsmFeature.serviceCatalogue,
             requirement: ItsmRouteRequirement.selfService,
             child: ServiceCatalogueItemScreen(
               catalogueItemId: catalogueItemId,
               onCreateRequest: (_) => context.push(
-                '${ItsmRoutes.serviceRequests}/catalogue/'
+                '${ItsmRoutes.serviceCatalogue}/'
                 '${Uri.encodeComponent(catalogueItemId)}/create',
               ),
             ),
@@ -995,14 +1023,14 @@ GoRoute _buildServiceRequestsRoute() {
             path: 'create',
             builder: (context, state) => ItsmRouteGuard(
               section: ItsmSection.support,
-              feature: ItsmFeature.serviceRequests,
+              feature: ItsmFeature.serviceCatalogue,
               requirement: ItsmRouteRequirement.selfService,
               child: CreateServiceRequestScreen(
                 catalogueItemId:
                     state.pathParameters['catalogueItemId'] as String,
                 initialResponses: _assetRequestInitialResponses(state),
                 onSubmitted: (receipt) => context.go(
-                  '${ItsmRoutes.myRequests}/'
+                  '${ItsmRoutes.serviceRequests}/'
                   '${Uri.encodeComponent(receipt.requestId)}',
                 ),
               ),
@@ -1010,12 +1038,43 @@ GoRoute _buildServiceRequestsRoute() {
           ),
         ],
       ),
+    ],
+  );
+}
+
+GoRoute _buildServiceRequestsRoute() {
+  return GoRoute(
+    path: ItsmFeature.serviceRequests.routeSegment,
+    builder: (context, state) => ItsmRouteGuard(
+      section: ItsmSection.support,
+      feature: ItsmFeature.serviceRequests,
+      requirement: ItsmRouteRequirement.selfService,
+      child: ServiceRequestQueueScreen(
+        onRequestSelected: (request) => context.push(
+          '${ItsmRoutes.serviceRequests}/${Uri.encodeComponent(request.id)}',
+        ),
+      ),
+    ),
+    routes: [
+      // Keep previously shared catalogue links valid while making the Service
+      // Catalog module the only owner of catalogue browsing and request entry.
+      GoRoute(
+        path: 'catalogue/:catalogueItemId/create',
+        redirect: (_, state) => _catalogueCompatibilityLocation(
+          state,
+          suffix: '/create',
+        ),
+      ),
+      GoRoute(
+        path: 'catalogue/:catalogueItemId',
+        redirect: (_, state) => _catalogueCompatibilityLocation(state),
+      ),
       GoRoute(
         path: 'queue',
         builder: (context, state) => ItsmRouteGuard(
           section: ItsmSection.support,
           feature: ItsmFeature.serviceRequests,
-          requirement: ItsmRouteRequirement.operational,
+          requirement: ItsmRouteRequirement.selfService,
           child: ServiceRequestQueueScreen(
             onRequestSelected: (request) => context.push(
               '${ItsmRoutes.serviceRequests}/'
@@ -1037,6 +1096,20 @@ GoRoute _buildServiceRequestsRoute() {
       ),
     ],
   );
+}
+
+String _catalogueCompatibilityLocation(
+  GoRouterState state, {
+  String suffix = '',
+}) {
+  final itemId = state.pathParameters['catalogueItemId'] as String;
+  final uri = Uri.parse(state.location);
+  return uri
+      .replace(
+        path: '${ItsmRoutes.serviceCatalogue}/'
+            '${Uri.encodeComponent(itemId)}$suffix',
+      )
+      .toString();
 }
 
 Map<String, Object?> _assetRequestInitialResponses(GoRouterState state) {

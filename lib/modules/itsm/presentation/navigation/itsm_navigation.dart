@@ -6,6 +6,7 @@ abstract final class ItsmRoutes {
   static const root = '/services/itsm';
   static const support = '$root/support';
   static const incidents = '$support/incidents';
+  static const serviceCatalogue = '$support/service-catalogue';
   static const serviceRequests = '$support/service-requests';
   static const myRequests = '$support/my-requests';
   static const knowledge = '$support/knowledge';
@@ -33,8 +34,7 @@ abstract final class ItsmRoutes {
   static const executiveDashboard = '$reportingDashboards/executive';
   static const incidentReportingDashboard = '$reportingDashboards/incidents';
   static const slaPolicies = '$reportingAdministration/sla';
-  static const catalogueAdministration =
-      '$reportingAdministration/service-catalogue';
+  static const catalogueAdministration = '$serviceCatalogue/manage';
   static const workflowAdministration = '$reportingAdministration/workflows';
   static const auditLogs = '$reportingAdministration/audit-logs';
 
@@ -238,6 +238,7 @@ extension ItsmSectionPresentation on ItsmSection {
       case ItsmSection.support:
         return const [
           ItsmFeature.incidents,
+          ItsmFeature.serviceCatalogue,
           ItsmFeature.serviceRequests,
           ItsmFeature.myRequests,
           ItsmFeature.knowledgeBase,
@@ -267,7 +268,6 @@ extension ItsmSectionPresentation on ItsmSection {
         return const [
           ItsmFeature.dashboards,
           ItsmFeature.sla,
-          ItsmFeature.serviceCatalogue,
           ItsmFeature.workflowConfiguration,
           ItsmFeature.auditLogs,
         ];

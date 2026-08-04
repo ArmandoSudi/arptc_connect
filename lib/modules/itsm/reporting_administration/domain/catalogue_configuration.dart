@@ -13,6 +13,10 @@ class CatalogueItemConfiguration {
     required this.latestVersion,
     required this.updatedAt,
     this.currentPublishedVersion,
+    this.currentDraftVersion,
+    this.currentDraftVersionDocumentId,
+    this.currentPublishedVersionDocumentId,
+    this.revision = 0,
   });
 
   final String id;
@@ -22,6 +26,10 @@ class CatalogueItemConfiguration {
   final ItsmPublicationState status;
   final int latestVersion;
   final int? currentPublishedVersion;
+  final int? currentDraftVersion;
+  final String? currentDraftVersionDocumentId;
+  final String? currentPublishedVersionDocumentId;
+  final int revision;
   final DateTime updatedAt;
 
   String label(String languageCode) =>
@@ -40,6 +48,16 @@ class CatalogueItemConfiguration {
         currentPublishedVersion: map['currentPublishedVersion'] == null
             ? null
             : configurationInt(map['currentPublishedVersion']),
+        currentDraftVersion: map['currentDraftVersion'] == null
+            ? null
+            : configurationInt(map['currentDraftVersion']),
+        currentDraftVersionDocumentId: _nullable(
+          map['currentDraftVersionDocumentId'],
+        ),
+        currentPublishedVersionDocumentId: _nullable(
+          map['currentPublishedVersionDocumentId'],
+        ),
+        revision: configurationInt(map['revision']),
         updatedAt: configurationDate(map['updatedAt']) ??
             DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
       );
@@ -68,12 +86,14 @@ class CatalogueItemVersionConfiguration {
     this.activeUntil,
     this.publishedAt,
     this.revision = 0,
+    Map<String, Object?> definition = const {},
   })  : name = UnmodifiableMapView(Map<String, String>.from(name)),
         description =
             UnmodifiableMapView(Map<String, String>.from(description)),
         visibleRoles = Set<ItsmRole>.unmodifiable(visibleRoles),
         fieldKeys = List<String>.unmodifiable(fieldKeys),
-        requiredDocumentKeys = List<String>.unmodifiable(requiredDocumentKeys);
+        requiredDocumentKeys = List<String>.unmodifiable(requiredDocumentKeys),
+        definition = UnmodifiableMapView(Map<String, Object?>.from(definition));
 
   final String itemId;
   final String versionId;
@@ -96,6 +116,7 @@ class CatalogueItemVersionConfiguration {
   final String createdBy;
   final DateTime? publishedAt;
   final int revision;
+  final Map<String, Object?> definition;
 
   bool get isImmutable => state != ItsmPublicationState.draft;
 
@@ -198,6 +219,7 @@ class CatalogueItemVersionConfiguration {
       createdBy: configurationString(map['createdBy'], 'unknown'),
       publishedAt: configurationDate(map['publishedAt']),
       revision: configurationInt(map['revision']),
+      definition: Map<String, Object?>.from(definition),
     );
   }
 }

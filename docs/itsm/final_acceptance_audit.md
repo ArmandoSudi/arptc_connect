@@ -43,7 +43,7 @@ Audit date: 2026-07-31
     manager authorization, and export requester tests pass in emulators.
 16. **Pass: bounded/paginated lists.** Repository page limits, stable cursors,
     date windows, rule query limits, and look-ahead pagination are enforced.
-17. **Pass: indexes and Functions documented.** All phase maps/reports, 148
+17. **Pass: indexes and Functions documented.** All phase maps/reports, 190
     unique indexes, callable exports, triggers, and schedules are tracked.
 18. **Pass: Flutter analysis.** `flutter analyze` completes with no issues.
 19. **Pass: Flutter and Firebase tests.** 453 Flutter, 196 Functions, 75

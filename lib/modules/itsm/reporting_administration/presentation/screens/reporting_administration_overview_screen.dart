@@ -6,13 +6,7 @@ import '../reporting_administration_strings.dart';
 import '../widgets/reporting_async_state.dart';
 import '../widgets/reporting_page_shell.dart';
 
-enum ReportingAdministrationDestination {
-  dashboards,
-  sla,
-  catalogue,
-  workflows,
-  audit
-}
+enum ReportingAdministrationDestination { dashboards, sla, workflows, audit }
 
 class ReportingAdministrationOverviewScreen extends ConsumerWidget {
   const ReportingAdministrationOverviewScreen({super.key, this.onOpen});
@@ -50,12 +44,6 @@ class ReportingAdministrationOverviewScreen extends ConsumerWidget {
               Icons.timer_outlined,
               strings.value('sla'),
               strings.value('slaDescription')
-            ),
-            (
-              ReportingAdministrationDestination.catalogue,
-              Icons.menu_book_outlined,
-              strings.value('catalogue'),
-              strings.value('catalogueDescription')
             ),
             (
               ReportingAdministrationDestination.workflows,

@@ -26,6 +26,20 @@ void main() {
         '/services/itsm/support/incidents',
       );
       expect(
+        ItsmRoutes.serviceCatalogue,
+        '/services/itsm/support/service-catalogue',
+      );
+      expect(
+        ItsmSection.support.features,
+        containsAllInOrder(const [
+          ItsmFeature.incidents,
+          ItsmFeature.serviceCatalogue,
+          ItsmFeature.serviceRequests,
+          ItsmFeature.myRequests,
+          ItsmFeature.knowledgeBase,
+        ]),
+      );
+      expect(
         ItsmFeature.cmdb.routeFor(ItsmSection.assetsConfiguration),
         '/services/itsm/assets-configuration/cmdb',
       );
@@ -113,7 +127,7 @@ void main() {
       );
       expect(
         ItsmRoutes.catalogueAdministrationVersion('item / 1', 'version / 2'),
-        '/services/itsm/reporting-administration/service-catalogue/'
+        '/services/itsm/support/service-catalogue/manage/'
         'item%20%2F%201/versions/version%20%2F%202',
       );
       expect(

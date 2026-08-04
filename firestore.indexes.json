@@ -1,6 +1,24 @@
 {
   "indexes": [
     {
+      "collectionGroup": "meeting_hall_reservations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "hallId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "startTime",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "incidentTickets",
       "queryScope": "COLLECTION",
       "fields": [
@@ -1511,20 +1529,6 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "expirationDate",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "warranties",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
           "fieldPath": "isActive",
           "order": "ASCENDING"
         },
@@ -1795,20 +1799,6 @@
         {
           "fieldPath": "__name__",
           "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "changeCalendarEntries",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "plannedStartAt",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "ASCENDING"
         }
       ]
     },
@@ -2867,20 +2857,6 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "itsmAuditEvents",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
           "fieldPath": "isRestricted",
           "order": "ASCENDING"
         },
@@ -3171,7 +3147,51 @@
           "order": "DESCENDING"
         }
       ]
-    }
+    },
+    {"collectionGroup":"assets","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"assets","queryScope":"COLLECTION","fields":[{"fieldPath":"categoryId","order":"ASCENDING"},{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"assets","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"categoryId","order":"ASCENDING"},{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"assets","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"searchTokens","arrayConfig":"CONTAINS"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"assets","queryScope":"COLLECTION","fields":[{"fieldPath":"categoryId","order":"ASCENDING"},{"fieldPath":"searchTokens","arrayConfig":"CONTAINS"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"assets","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"categoryId","order":"ASCENDING"},{"fieldPath":"searchTokens","arrayConfig":"CONTAINS"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"assets","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"searchTokens","arrayConfig":"CONTAINS"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"assets","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"searchTokens","arrayConfig":"CONTAINS"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"assets","queryScope":"COLLECTION","fields":[{"fieldPath":"categoryId","order":"ASCENDING"},{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"searchTokens","arrayConfig":"CONTAINS"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"assets","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"categoryId","order":"ASCENDING"},{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"searchTokens","arrayConfig":"CONTAINS"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"stockItems","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"stockItems","queryScope":"COLLECTION","fields":[{"fieldPath":"isLowStock","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"stockItems","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"isLowStock","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"stockItems","queryScope":"COLLECTION","fields":[{"fieldPath":"kind","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"stockItems","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"kind","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"stockItems","queryScope":"COLLECTION","fields":[{"fieldPath":"isLowStock","order":"ASCENDING"},{"fieldPath":"kind","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"stockItems","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"isLowStock","order":"ASCENDING"},{"fieldPath":"kind","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"ciType","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"operationalStatus","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"ciType","order":"ASCENDING"},{"fieldPath":"operationalStatus","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"criticality","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"ciType","order":"ASCENDING"},{"fieldPath":"criticality","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"operationalStatus","order":"ASCENDING"},{"fieldPath":"criticality","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"ciType","order":"ASCENDING"},{"fieldPath":"operationalStatus","order":"ASCENDING"},{"fieldPath":"criticality","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"supportGroupId","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"ciType","order":"ASCENDING"},{"fieldPath":"supportGroupId","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"operationalStatus","order":"ASCENDING"},{"fieldPath":"supportGroupId","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"ciType","order":"ASCENDING"},{"fieldPath":"operationalStatus","order":"ASCENDING"},{"fieldPath":"supportGroupId","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"criticality","order":"ASCENDING"},{"fieldPath":"supportGroupId","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"ciType","order":"ASCENDING"},{"fieldPath":"criticality","order":"ASCENDING"},{"fieldPath":"supportGroupId","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"operationalStatus","order":"ASCENDING"},{"fieldPath":"criticality","order":"ASCENDING"},{"fieldPath":"supportGroupId","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"configurationItems","queryScope":"COLLECTION","fields":[{"fieldPath":"ciType","order":"ASCENDING"},{"fieldPath":"operationalStatus","order":"ASCENDING"},{"fieldPath":"criticality","order":"ASCENDING"},{"fieldPath":"supportGroupId","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"assetSelfServiceProjections","queryScope":"COLLECTION","fields":[{"fieldPath":"assignedUserId","order":"ASCENDING"},{"fieldPath":"isCurrent","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"assetSelfServiceProjections","queryScope":"COLLECTION","fields":[{"fieldPath":"assignedUserId","order":"ASCENDING"},{"fieldPath":"assetId","order":"ASCENDING"},{"fieldPath":"isCurrent","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"assetAssignments","queryScope":"COLLECTION","fields":[{"fieldPath":"assetId","order":"ASCENDING"},{"fieldPath":"assignedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"assetAssignments","queryScope":"COLLECTION","fields":[{"fieldPath":"assignedUserId","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"assignedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"softwareLicences","queryScope":"COLLECTION","fields":[{"fieldPath":"complianceStatus","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"softwareLicences","queryScope":"COLLECTION","fields":[{"fieldPath":"vendor","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"softwareLicences","queryScope":"COLLECTION","fields":[{"fieldPath":"complianceStatus","order":"ASCENDING"},{"fieldPath":"vendor","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"softwareLicences","queryScope":"COLLECTION","fields":[{"fieldPath":"vendor","order":"ASCENDING"},{"fieldPath":"expiryDate","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"softwareLicences","queryScope":"COLLECTION","fields":[{"fieldPath":"complianceStatus","order":"ASCENDING"},{"fieldPath":"vendor","order":"ASCENDING"},{"fieldPath":"expiryDate","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"suppliers","queryScope":"COLLECTION","fields":[{"fieldPath":"isActive","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"supplierContracts","queryScope":"COLLECTION","fields":[{"fieldPath":"supplierId","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"warranties","queryScope":"COLLECTION","fields":[{"fieldPath":"supplierId","order":"ASCENDING"},{"fieldPath":"expirationDate","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]}
   ],
   "fieldOverrides": []
 }

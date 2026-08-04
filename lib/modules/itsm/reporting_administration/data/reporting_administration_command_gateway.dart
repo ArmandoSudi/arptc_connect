@@ -16,6 +16,8 @@ enum ReportingAdministrationCommandType {
   validateWorkflowDraft('itsmValidateWorkflowDraft'),
   publishWorkflowVersion('itsmPublishWorkflowVersion'),
   retireWorkflowVersion('itsmRetireWorkflowVersion'),
+  saveReferenceData('itsmSaveReferenceData'),
+  deactivateReferenceData('itsmDeactivateReferenceData'),
   requestAuditExport('itsmRequestAuditExport');
 
   const ReportingAdministrationCommandType(this.functionName);

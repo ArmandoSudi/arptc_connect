@@ -99,6 +99,8 @@ test('catalogue definitions require unique fields and immutable references', () 
   const value = validateCatalogueDefinition(validCatalogue());
   assert.equal(value.workflow.versionDocumentId, 'v2');
   assert.deepEqual(value.visibleRoles, ['USER', 'MANAGER', 'ADMIN']);
+  assert.equal(value.serviceOwner.teamName, 'Cloud Infrastructure');
+  assert.equal(value.underlyingCis[0].id, 'm365-tenant');
   assert.throws(
     () => validateCatalogueDefinition({
       ...validCatalogue(),
@@ -113,6 +115,12 @@ test('catalogue definitions require unique fields and immutable references', () 
       activeUntil: '2026-08-01T00:00:00Z',
     }),
     /activeFrom/,
+  );
+  const missingOwner = { ...validCatalogue() };
+  delete missingOwner.serviceOwner;
+  assert.throws(
+    () => validateCatalogueDefinition(missingOwner),
+    /serviceOwner/,
   );
 });
 
@@ -241,6 +249,8 @@ function validCatalogue() {
       userIds: [],
       departmentIds: [],
       serviceIds: [],
+      locationIds: [],
+      positionValues: [],
       excludedUserIds: [],
     },
     visibleRoles: ['USER', 'MANAGER', 'ADMIN'],
@@ -248,6 +258,36 @@ function validCatalogue() {
     requiredDocuments: [{ key: 'approval', required: true }],
     workflow: { definitionId: 'asset-request', version: 2, versionDocumentId: 'v2' },
     approvalPolicyId: 'manager-approval',
+    serviceOwner: {
+      displayName: 'Cloud Infrastructure Team Lead',
+      userId: 'owner-1',
+      teamName: 'Cloud Infrastructure',
+    },
+    eligibilitySummary: {
+      en: 'All active employees and verified contractors.',
+      fr: 'Tous les agents actifs et prestataires verifies.',
+    },
+    costModel: {
+      en: 'Department funded',
+      fr: 'Finance par le departement',
+    },
+    availabilityTarget: {
+      en: '99.9% uptime',
+      fr: 'Disponibilite de 99,9 %',
+    },
+    fulfilmentSla: {
+      en: 'Standard access: 4 hours',
+      fr: 'Acces standard : 4 heures',
+    },
+    underlyingCis: [{ id: 'm365-tenant', name: 'Microsoft 365 Azure Tenant' }],
+    securityCompliance: {
+      en: 'Encryption at rest; external sharing blocked by default.',
+      fr: 'Chiffrement au repos ; partage externe bloque par defaut.',
+    },
+    fulfilmentWorkflow: {
+      en: 'Manager approval, then automated AD script.',
+      fr: 'Approbation du manager, puis script AD automatise.',
+    },
     fulfilmentGroupId: 'asset-team',
     slaPolicy: { definitionId: 'asset-sla', version: 1, versionDocumentId: 'v1' },
     activeFrom: '2026-08-01T00:00:00Z',

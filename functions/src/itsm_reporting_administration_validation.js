@@ -23,6 +23,8 @@ const REPORTING_ADMINISTRATION_COMMANDS = Object.freeze({
   validateWorkflowDraft: 'reporting.workflow.validate_draft',
   publishWorkflowVersion: 'reporting.workflow.publish_version',
   retireWorkflowVersion: 'reporting.workflow.retire_version',
+  saveReferenceData: 'reporting.reference.save',
+  deactivateReferenceData: 'reporting.reference.deactivate',
   requestAuditExport: 'reporting.audit.request_export',
 });
 
@@ -56,6 +58,11 @@ const CONFIGURATION_ROLES = Object.freeze([
   ITSM_ROLES.user,
   ITSM_ROLES.manager,
   ITSM_ROLES.admin,
+]);
+const REFERENCE_DATA_TYPES = Object.freeze([
+  'catalogue_category',
+  'assignment_group',
+  'approval_policy',
 ]);
 const SOURCE_COLLECTIONS = Object.freeze([
   'incidentTickets',
@@ -91,6 +98,20 @@ function validateReportingAdministrationCommand(raw, expectedCommand) {
 
 function validatePayload(command, payload) {
   const C = REPORTING_ADMINISTRATION_COMMANDS;
+  if (command === C.saveReferenceData) {
+    exactKeys(payload, ['referenceId', 'type', 'label'], 'payload');
+    return freeze({
+      referenceId: requiredId(payload.referenceId, 'referenceId'),
+      type: enumValue(payload.type, 'type', REFERENCE_DATA_TYPES),
+      label: localizedRequired(payload.label, 'label'),
+    });
+  }
+  if (command === C.deactivateReferenceData) {
+    exactKeys(payload, ['referenceId'], 'payload');
+    return freeze({
+      referenceId: requiredId(payload.referenceId, 'referenceId'),
+    });
+  }
   if ([
     C.createSlaPolicyDraft,
     C.createCatalogueItemDraft,
@@ -318,6 +339,9 @@ function validateCatalogueDefinition(raw) {
     'code', 'name', 'description', 'categoryId', 'categoryName', 'iconKey',
     'eligibility', 'visibleRoles', 'formFields', 'requiredDocuments',
     'workflow', 'approvalPolicyId', 'fulfilmentGroupId', 'slaPolicy',
+    'serviceOwner', 'eligibilitySummary', 'costModel', 'availabilityTarget',
+    'fulfilmentSla', 'underlyingCis', 'securityCompliance',
+    'fulfilmentWorkflow',
     'activeFrom', 'activeUntil', 'allowManagerRequestOnBehalf',
     'workflowAllowsCancellation', 'sortOrder',
   ], 'catalogue item');
@@ -350,6 +374,26 @@ function validateCatalogueDefinition(raw) {
     requiredDocuments,
     workflow: configurationReference(raw.workflow, 'workflow'),
     approvalPolicyId: optionalId(raw.approvalPolicyId, 'approvalPolicyId'),
+    serviceOwner: validateCatalogueServiceOwner(raw.serviceOwner),
+    eligibilitySummary: localizedRequired(
+      raw.eligibilitySummary,
+      'eligibilitySummary',
+    ),
+    costModel: localizedRequired(raw.costModel, 'costModel'),
+    availabilityTarget: localizedRequired(
+      raw.availabilityTarget,
+      'availabilityTarget',
+    ),
+    fulfilmentSla: localizedRequired(raw.fulfilmentSla, 'fulfilmentSla'),
+    underlyingCis: validateCatalogueConfigurationItems(raw.underlyingCis),
+    securityCompliance: localizedRequired(
+      raw.securityCompliance,
+      'securityCompliance',
+    ),
+    fulfilmentWorkflow: localizedRequired(
+      raw.fulfilmentWorkflow,
+      'fulfilmentWorkflow',
+    ),
     fulfilmentGroupId: requiredId(raw.fulfilmentGroupId, 'fulfilmentGroupId'),
     slaPolicy: configurationReference(raw.slaPolicy, 'slaPolicy'),
     activeFrom,
@@ -596,7 +640,7 @@ function validateCatalogueEligibility(raw) {
   const value = object(raw, 'eligibility');
   exactKeys(value, [
     'allEmployees', 'userIds', 'departmentIds', 'serviceIds',
-    'excludedUserIds',
+    'locationIds', 'positionValues', 'excludedUserIds',
   ], 'eligibility');
   const result = freeze({
     allEmployees: boolean(value.allEmployees, 'eligibility.allEmployees', true),
@@ -616,6 +660,18 @@ function validateCatalogueEligibility(raw) {
       maximum: 200,
       normalize: (entry) => requiredId(entry, 'eligibility.serviceId'),
     }),
+    locationIds: uniqueStrings(value.locationIds || [], 'eligibility.locationIds', {
+      maximum: 200,
+      normalize: (entry) => requiredId(entry, 'eligibility.locationId'),
+    }),
+    positionValues: uniqueStrings(
+      value.positionValues || [],
+      'eligibility.positionValues',
+      {
+        maximum: 100,
+        normalize: (entry) => requiredId(entry, 'eligibility.positionValue'),
+      },
+    ),
     excludedUserIds: uniqueStrings(
       value.excludedUserIds || [],
       'eligibility.excludedUserIds',
@@ -626,10 +682,34 @@ function validateCatalogueEligibility(raw) {
     ),
   });
   if (!result.allEmployees && result.userIds.length === 0 &&
-      result.departmentIds.length === 0 && result.serviceIds.length === 0) {
-    invalid('Restricted eligibility requires a user, department, or service.');
+      result.departmentIds.length === 0 && result.serviceIds.length === 0 &&
+      result.locationIds.length === 0 && result.positionValues.length === 0) {
+    invalid(
+      'Restricted eligibility requires a user, department, service, location, or organisation position.',
+    );
   }
   return result;
+}
+
+function validateCatalogueServiceOwner(raw) {
+  const value = object(raw, 'serviceOwner');
+  exactKeys(value, ['displayName', 'userId', 'teamName'], 'serviceOwner');
+  return freeze({
+    displayName: requiredString(value.displayName, 'serviceOwner.displayName', 160),
+    userId: optionalId(value.userId, 'serviceOwner.userId'),
+    teamName: optionalString(value.teamName, 'serviceOwner.teamName', 160),
+  });
+}
+
+function validateCatalogueConfigurationItems(raw) {
+  return array(raw, 'underlyingCis', 30).map((entry, index) => {
+    const value = object(entry, `underlyingCis[${index}]`);
+    exactKeys(value, ['id', 'name'], `underlyingCis[${index}]`);
+    return freeze({
+      id: requiredId(value.id, `underlyingCis[${index}].id`),
+      name: requiredString(value.name, `underlyingCis[${index}].name`, 160),
+    });
+  });
 }
 
 function configurationReference(raw, name) {
@@ -834,6 +914,7 @@ module.exports = {
   AUDIT_EXPORT_MAX_ROWS,
   REPORTING_ADMINISTRATION_ALLOWED_ROLES,
   REPORTING_ADMINISTRATION_COMMANDS,
+  REFERENCE_DATA_TYPES,
   SOURCE_COLLECTIONS,
   WORK_ITEM_TYPES,
   validateAuditExportRequest,

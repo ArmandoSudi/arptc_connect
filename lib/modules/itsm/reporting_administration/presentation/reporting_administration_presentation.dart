@@ -8,6 +8,7 @@ export 'screens/manager_itsm_dashboard_screen.dart';
 export 'screens/reporting_administration_overview_screen.dart';
 export 'screens/service_catalogue_administration_detail_screen.dart';
 export 'screens/service_catalogue_administration_screen.dart';
+export 'screens/service_catalogue_parameters_screen.dart';
 export 'screens/sla_policies_screen.dart';
 export 'screens/sla_policy_detail_screen.dart';
 export 'screens/workflow_definition_detail_screen.dart';

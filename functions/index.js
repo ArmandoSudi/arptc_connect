@@ -436,6 +436,10 @@ const reportingAdministrationCallables = {
     REPORTING_ADMINISTRATION_COMMANDS.publishWorkflowVersion,
   itsmRetireWorkflowVersion:
     REPORTING_ADMINISTRATION_COMMANDS.retireWorkflowVersion,
+  itsmSaveReferenceData:
+    REPORTING_ADMINISTRATION_COMMANDS.saveReferenceData,
+  itsmDeactivateReferenceData:
+    REPORTING_ADMINISTRATION_COMMANDS.deactivateReferenceData,
   itsmRequestAuditExport:
     REPORTING_ADMINISTRATION_COMMANDS.requestAuditExport,
 };

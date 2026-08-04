@@ -30,6 +30,8 @@ class ServiceRequestController {
     required DateTime at,
     String? departmentId,
     String? serviceId,
+    String? locationId,
+    String? positionValue,
   }) {
     _validateContext(command.context);
     final validation = _accessPolicy.validateCreate(
@@ -47,6 +49,8 @@ class ServiceRequestController {
       ),
       departmentId: departmentId,
       serviceId: serviceId,
+      locationId: locationId,
+      positionValue: positionValue,
     );
     if (!validation.isValid) {
       throw ServiceRequestValidationException(

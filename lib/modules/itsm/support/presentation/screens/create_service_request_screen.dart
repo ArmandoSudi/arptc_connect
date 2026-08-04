@@ -71,6 +71,8 @@ class _CreateServiceRequestScreenState
       at: _effectiveAt,
       departmentId: catalogueContext?.departmentId,
       serviceId: catalogueContext?.serviceId,
+      locationId: catalogueContext?.locationId,
+      positionValue: catalogueContext?.positionValue,
     );
     final itemAsync =
         ref.watch(publishedServiceCatalogueItemProvider(itemRequest));
@@ -210,10 +212,14 @@ class _CreateServiceRequestScreenState
     final now = DateTime.now().toUtc();
     final validation = form.state.validate(
       principal: CataloguePrincipal(
-        userId: session.userId,
+        userId: form.state.requestedFor.userId,
         role: session.role,
-        departmentId: catalogueContext?.departmentId,
-        serviceId: catalogueContext?.serviceId,
+        departmentId: form.state.requestedFor.departmentId ??
+            catalogueContext?.departmentId,
+        serviceId:
+            form.state.requestedFor.serviceId ?? catalogueContext?.serviceId,
+        locationId: catalogueContext?.locationId,
+        positionValue: catalogueContext?.positionValue,
       ),
       at: now,
     );
@@ -246,6 +252,8 @@ class _CreateServiceRequestScreenState
         at: now,
         departmentId: catalogueContext?.departmentId,
         serviceId: catalogueContext?.serviceId,
+        locationId: catalogueContext?.locationId,
+        positionValue: catalogueContext?.positionValue,
       );
       widget.onSubmitted?.call(receipt);
     } catch (error) {

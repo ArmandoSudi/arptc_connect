@@ -254,17 +254,24 @@ class CatalogueEligibility {
     Iterable<String> userIds = const [],
     Iterable<String> departmentIds = const [],
     Iterable<String> serviceIds = const [],
+    Iterable<String> locationIds = const [],
+    Iterable<String> positionValues = const [],
     Iterable<String> excludedUserIds = const [],
   })  : userIds = _normalizedSet(userIds),
         departmentIds = _normalizedSet(departmentIds),
         serviceIds = _normalizedSet(serviceIds),
+        locationIds = _normalizedSet(locationIds),
+        positionValues = _normalizedSet(positionValues),
         excludedUserIds = _normalizedSet(excludedUserIds) {
     if (!allEmployees &&
         this.userIds.isEmpty &&
         this.departmentIds.isEmpty &&
-        this.serviceIds.isEmpty) {
+        this.serviceIds.isEmpty &&
+        this.locationIds.isEmpty &&
+        this.positionValues.isEmpty) {
       throw ArgumentError(
-        'Restricted eligibility needs a user, department, or service.',
+        'Restricted eligibility needs a user, department, service, location, '
+        'or organisation position.',
       );
     }
   }
@@ -275,6 +282,8 @@ class CatalogueEligibility {
       userIds: supportStringList(map['userIds']),
       departmentIds: supportStringList(map['departmentIds']),
       serviceIds: supportStringList(map['serviceIds']),
+      locationIds: supportStringList(map['locationIds']),
+      positionValues: supportStringList(map['positionValues']),
       excludedUserIds: supportStringList(map['excludedUserIds']),
     );
   }
@@ -283,6 +292,8 @@ class CatalogueEligibility {
   final Set<String> userIds;
   final Set<String> departmentIds;
   final Set<String> serviceIds;
+  final Set<String> locationIds;
+  final Set<String> positionValues;
   final Set<String> excludedUserIds;
 
   bool allows(CataloguePrincipal principal) {
@@ -292,7 +303,11 @@ class CatalogueEligibility {
         (principal.departmentId != null &&
             departmentIds.contains(principal.departmentId)) ||
         (principal.serviceId != null &&
-            serviceIds.contains(principal.serviceId));
+            serviceIds.contains(principal.serviceId)) ||
+        (principal.locationId != null &&
+            locationIds.contains(principal.locationId)) ||
+        (principal.positionValue != null &&
+            positionValues.contains(principal.positionValue));
   }
 
   Map<String, Object?> toFirestore() => {
@@ -300,6 +315,8 @@ class CatalogueEligibility {
         'userIds': userIds.toList(growable: false),
         'departmentIds': departmentIds.toList(growable: false),
         'serviceIds': serviceIds.toList(growable: false),
+        'locationIds': locationIds.toList(growable: false),
+        'positionValues': positionValues.toList(growable: false),
         'excludedUserIds': excludedUserIds.toList(growable: false),
       };
 }
@@ -310,6 +327,8 @@ class CataloguePrincipal {
     required this.role,
     this.departmentId,
     this.serviceId,
+    this.locationId,
+    this.positionValue,
   }) {
     supportRequire(userId, 'userId');
   }
@@ -318,6 +337,68 @@ class CataloguePrincipal {
   final ItsmRole role;
   final String? departmentId;
   final String? serviceId;
+  final String? locationId;
+  final String? positionValue;
+}
+
+/// Identifies the accountable business or technical owner of a catalogue
+/// service. The optional user ID can later be used for escalations while the
+/// display name remains useful when the owner is an external team.
+class CatalogueServiceOwner {
+  CatalogueServiceOwner({
+    required this.displayName,
+    this.userId,
+    this.teamName,
+  }) {
+    supportRequire(displayName, 'displayName');
+  }
+
+  factory CatalogueServiceOwner.fromMap(Map<String, Object?> map) {
+    return CatalogueServiceOwner(
+      displayName: supportString(map['displayName'] ?? map['name']),
+      userId: supportNullableString(map['userId']),
+      teamName: supportNullableString(map['teamName']),
+    );
+  }
+
+  final String displayName;
+  final String? userId;
+  final String? teamName;
+
+  Map<String, Object?> toFirestore() => {
+        'displayName': displayName.trim(),
+        if (userId != null) 'userId': userId!.trim(),
+        if (teamName != null) 'teamName': teamName!.trim(),
+      };
+}
+
+/// A CMDB reference deliberately keeps only an identifier and a display name.
+/// Self-service users are not given the linked CI records themselves.
+class CatalogueConfigurationItemReference {
+  CatalogueConfigurationItemReference({
+    required this.id,
+    required this.name,
+  }) {
+    supportRequire(id, 'id');
+    supportRequire(name, 'name');
+  }
+
+  factory CatalogueConfigurationItemReference.fromMap(
+    Map<String, Object?> map,
+  ) {
+    return CatalogueConfigurationItemReference(
+      id: supportString(map['id']),
+      name: supportString(map['name']),
+    );
+  }
+
+  final String id;
+  final String name;
+
+  Map<String, Object?> toFirestore() => {
+        'id': id.trim(),
+        'name': name.trim(),
+      };
 }
 
 class VersionedConfigurationReference {
@@ -368,14 +449,25 @@ class ServiceCatalogueItem {
     required this.updatedAt,
     required this.updatedBy,
     this.approvalPolicyId,
+    this.serviceOwner,
+    this.eligibilitySummary,
+    this.costModel,
+    this.availabilityTarget,
+    this.fulfilmentSla,
+    this.securityCompliance,
+    this.fulfilmentWorkflow,
     this.activeFrom,
     this.activeUntil,
     this.allowManagerRequestOnBehalf = true,
     this.workflowAllowsCancellation = true,
     this.sortOrder = 0,
+    Iterable<CatalogueConfigurationItemReference> underlyingCis = const [],
     Iterable<CatalogueFieldSchema> formFields = const [],
     Iterable<CatalogueRequiredDocument> requiredDocuments = const [],
   })  : visibleRoles = Set<ItsmRole>.unmodifiable(visibleRoles),
+        underlyingCis = List<CatalogueConfigurationItemReference>.unmodifiable(
+          underlyingCis,
+        ),
         formFields = List<CatalogueFieldSchema>.unmodifiable(formFields),
         requiredDocuments =
             List<CatalogueRequiredDocument>.unmodifiable(requiredDocuments) {
@@ -415,6 +507,7 @@ class ServiceCatalogueItem {
   ) {
     final workflowMap = supportMapFromValue(map['workflow']);
     final slaMap = supportMapFromValue(map['slaPolicy']);
+    final serviceOwnerMap = supportMapFromValue(map['serviceOwner']);
     return ServiceCatalogueItem(
       id: id,
       code: supportString(map['code']),
@@ -431,6 +524,19 @@ class ServiceCatalogueItem {
           .whereType<ItsmRole>(),
       workflow: VersionedConfigurationReference.fromMap(workflowMap),
       approvalPolicyId: supportNullableString(map['approvalPolicyId']),
+      serviceOwner: serviceOwnerMap.isEmpty
+          ? null
+          : CatalogueServiceOwner.fromMap(serviceOwnerMap),
+      eligibilitySummary: _localizedNullable(map['eligibilitySummary']),
+      costModel: _localizedNullable(map['costModel']),
+      availabilityTarget: _localizedNullable(map['availabilityTarget']),
+      fulfilmentSla: _localizedNullable(map['fulfilmentSla']),
+      underlyingCis: supportListFromValue(map['underlyingCis'])
+          .map(supportMapFromValue)
+          .where((reference) => reference.isNotEmpty)
+          .map(CatalogueConfigurationItemReference.fromMap),
+      securityCompliance: _localizedNullable(map['securityCompliance']),
+      fulfilmentWorkflow: _localizedNullable(map['fulfilmentWorkflow']),
       fulfilmentGroupId: supportString(map['fulfilmentGroupId']),
       slaPolicy: VersionedConfigurationReference.fromMap(slaMap),
       status: _publicationState(map['status']),
@@ -472,6 +578,14 @@ class ServiceCatalogueItem {
   final List<CatalogueRequiredDocument> requiredDocuments;
   final VersionedConfigurationReference workflow;
   final String? approvalPolicyId;
+  final CatalogueServiceOwner? serviceOwner;
+  final LocalizedValue? eligibilitySummary;
+  final LocalizedValue? costModel;
+  final LocalizedValue? availabilityTarget;
+  final LocalizedValue? fulfilmentSla;
+  final List<CatalogueConfigurationItemReference> underlyingCis;
+  final LocalizedValue? securityCompliance;
+  final LocalizedValue? fulfilmentWorkflow;
   final String fulfilmentGroupId;
   final VersionedConfigurationReference slaPolicy;
   final DateTime? activeFrom;
@@ -519,6 +633,21 @@ class ServiceCatalogueItem {
         'workflow': workflow.toFirestore(),
         if (approvalPolicyId != null)
           'approvalPolicyId': approvalPolicyId!.trim(),
+        if (serviceOwner != null) 'serviceOwner': serviceOwner!.toFirestore(),
+        if (eligibilitySummary != null)
+          'eligibilitySummary': eligibilitySummary!.toFirestore(),
+        if (costModel != null) 'costModel': costModel!.toFirestore(),
+        if (availabilityTarget != null)
+          'availabilityTarget': availabilityTarget!.toFirestore(),
+        if (fulfilmentSla != null)
+          'fulfilmentSla': fulfilmentSla!.toFirestore(),
+        'underlyingCis': underlyingCis
+            .map((reference) => reference.toFirestore())
+            .toList(growable: false),
+        if (securityCompliance != null)
+          'securityCompliance': securityCompliance!.toFirestore(),
+        if (fulfilmentWorkflow != null)
+          'fulfilmentWorkflow': fulfilmentWorkflow!.toFirestore(),
         'fulfilmentGroupId': fulfilmentGroupId.trim(),
         'slaPolicy': slaPolicy.toFirestore(),
         if (activeFrom != null) 'activeFrom': activeFrom,
@@ -553,4 +682,10 @@ ItsmPublicationState _publicationState(Object? value) {
     (state) => state.value == normalized,
     orElse: () => ItsmPublicationState.draft,
   );
+}
+
+LocalizedValue? _localizedNullable(Object? value) {
+  final map = supportMapFromValue(value);
+  if (map.isEmpty && supportString(value).isEmpty) return null;
+  return LocalizedValue.fromValue(value);
 }

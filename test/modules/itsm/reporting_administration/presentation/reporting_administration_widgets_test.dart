@@ -27,7 +27,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Reporting & Administration'), findsOneWidget);
     expect(find.text('Dashboards'), findsOneWidget);
-    expect(find.text('Read-only'), findsNWidgets(5));
+    expect(find.text('Read-only'), findsNWidgets(4));
     expect(tester.takeException(), isNull);
   });
 
@@ -111,6 +111,28 @@ void main() {
       ),
     ));
     expect(find.text('Save draft'), findsNothing);
+  });
+
+  testWidgets('catalogue form uses one input for each localized value',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: const [S.delegate],
+      supportedLocales: const [Locale('en'), Locale('fr')],
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: CatalogueItemForm(
+            readOnly: true,
+            onSubmit: (_) {},
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Name'), findsOneWidget);
+    expect(find.text('Description'), findsOneWidget);
+    expect(find.text('Name (English)'), findsNothing);
+    expect(find.text('Name (French)'), findsNothing);
   });
 }
 

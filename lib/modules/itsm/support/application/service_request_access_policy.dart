@@ -32,12 +32,16 @@ class ServiceRequestAccessPolicy {
     ItsmSession session, {
     String? departmentId,
     String? serviceId,
+    String? locationId,
+    String? positionValue,
   }) {
     return CataloguePrincipal(
       userId: session.userId,
       role: session.role,
       departmentId: departmentId,
       serviceId: serviceId,
+      locationId: locationId,
+      positionValue: positionValue,
     );
   }
 
@@ -50,6 +54,8 @@ class ServiceRequestAccessPolicy {
     Iterable<SubmittedDocument> documents = const [],
     String? departmentId,
     String? serviceId,
+    String? locationId,
+    String? positionValue,
   }) {
     final isSelf = target.userId == session.userId;
     if (!isSelf && session.role != ItsmRole.manager) {
@@ -71,6 +77,8 @@ class ServiceRequestAccessPolicy {
         role: session.role,
         departmentId: target.departmentId ?? departmentId,
         serviceId: target.serviceId ?? serviceId,
+        locationId: locationId,
+        positionValue: positionValue,
       ),
       at: at,
       responses: responses,

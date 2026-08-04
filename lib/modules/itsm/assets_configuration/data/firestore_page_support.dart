@@ -39,6 +39,7 @@ Future<PageResult<T>> fetchFirestorePage<T>({
   required Query<Map<String, dynamic>> query,
   required PageRequest page,
   required String sortField,
+  bool sortDescending = true,
   required T Function(QueryDocumentSnapshot<Map<String, dynamic>>) parse,
 }) async {
   if (page.direction != PageDirection.forward) {
@@ -48,8 +49,8 @@ Future<PageResult<T>> fetchFirestorePage<T>({
   }
   final codec = FirestorePageCursorCodec(sortField: sortField);
   var ordered = query
-      .orderBy(sortField, descending: true)
-      .orderBy(FieldPath.documentId, descending: true);
+      .orderBy(sortField, descending: sortDescending)
+      .orderBy(FieldPath.documentId, descending: sortDescending);
   if (page.cursor != null) {
     ordered = ordered.startAfter(codec.decode(page.cursor!));
   }

@@ -50,6 +50,41 @@ ServiceCatalogueItem fixtureCatalogueItem({
       version: 3,
     ),
     approvalPolicyId: 'line-manager',
+    serviceOwner: CatalogueServiceOwner(
+      displayName: 'Cloud Infrastructure Team Lead',
+      userId: 'manager-1',
+      teamName: 'Cloud Infrastructure',
+    ),
+    eligibilitySummary: LocalizedValue(
+      en: 'All active employees and verified contractors.',
+      fr: 'Tous les agents actifs et prestataires verifies.',
+    ),
+    costModel: LocalizedValue(
+      en: 'Department funded',
+      fr: 'Finance par le departement',
+    ),
+    availabilityTarget: LocalizedValue(
+      en: '99.9% uptime',
+      fr: 'Disponibilite de 99,9 %',
+    ),
+    fulfilmentSla: LocalizedValue(
+      en: 'Standard access: 4 hours',
+      fr: 'Acces standard : 4 heures',
+    ),
+    underlyingCis: [
+      CatalogueConfigurationItemReference(
+        id: 'm365-tenant',
+        name: 'Microsoft 365 Azure Tenant',
+      ),
+    ],
+    securityCompliance: LocalizedValue(
+      en: 'Data is encrypted at rest.',
+      fr: 'Les donnees sont chiffrees au repos.',
+    ),
+    fulfilmentWorkflow: LocalizedValue(
+      en: 'Manager approval then automated fulfilment.',
+      fr: 'Approbation du manager puis execution automatisee.',
+    ),
     fulfilmentGroupId: 'service-desk',
     slaPolicy: VersionedConfigurationReference(
       id: 'request-standard',

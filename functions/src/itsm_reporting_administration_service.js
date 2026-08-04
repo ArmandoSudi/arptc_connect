@@ -59,6 +59,10 @@ async function executeReportingAdministrationCommand({
       let result;
       if (command.command === C.requestAuditExport) {
         result = await requestAuditExport(context);
+      } else if (command.command === C.saveReferenceData) {
+        result = await saveReferenceData(context);
+      } else if (command.command === C.deactivateReferenceData) {
+        result = await deactivateReferenceData(context);
       } else if (command.command === C.recalculateSla) {
         result = await requestSlaRecalculation(context);
       } else if (command.command.includes('.create_draft')) {
@@ -147,6 +151,7 @@ async function createConfigurationDraft(context) {
     transaction.create(parentRef, {
       schemaVersion: 1,
       id: definitionId,
+      ...draftParentSummary(type, definition),
       status: 'draft',
       latestVersion: version,
       currentDraftVersion: version,
@@ -451,6 +456,63 @@ async function requestAuditExport(context) {
   return { exportId, status: 'queued', maxRows: payload.maxRows };
 }
 
+async function saveReferenceData(context) {
+  const { db, fieldValue, transaction, actor, command, receiptId } = context;
+  const payload = command.payload;
+  const reference = db.collection('itsmReferenceData').doc(payload.referenceId);
+  const existingSnapshot = await transaction.get(reference);
+  const existing = existingSnapshot.exists ? existingSnapshot.data() || {} : {};
+  const now = fieldValue.serverTimestamp();
+  transaction.set(reference, {
+    schemaVersion: 1,
+    id: payload.referenceId,
+    type: payload.type,
+    label: payload.label,
+    active: true,
+    revision: Number(existing.revision || 0) + 1,
+    createdAt: existingSnapshot.exists ? existing.createdAt || now : now,
+    createdBy: existingSnapshot.exists ? existing.createdBy || actor.uid : actor.uid,
+    updatedAt: now,
+    updatedBy: actor.uid,
+  }, { merge: false });
+  writeConfigurationAudit({
+    ...context,
+    type: CONFIGURATION_TYPES.catalogue,
+    parentRef: reference,
+    definitionId: payload.referenceId,
+    entityType: 'itsm_reference_data',
+    action: existingSnapshot.exists ? 'reference_updated' : 'reference_created',
+    before: { type: existing.type || null, active: existing.active ?? null },
+    after: { type: payload.type, active: true },
+  });
+  return { definitionId: payload.referenceId, status: 'active', receiptId };
+}
+
+async function deactivateReferenceData(context) {
+  const { db, fieldValue, transaction, actor, command } = context;
+  const reference = db.collection('itsmReferenceData').doc(command.payload.referenceId);
+  const snapshot = await transaction.get(reference);
+  if (!snapshot.exists) throw notFound('The reference data does not exist.');
+  const existing = snapshot.data() || {};
+  transaction.update(reference, {
+    active: false,
+    updatedAt: fieldValue.serverTimestamp(),
+    updatedBy: actor.uid,
+    revision: Number(existing.revision || 0) + 1,
+  });
+  writeConfigurationAudit({
+    ...context,
+    type: CONFIGURATION_TYPES.catalogue,
+    parentRef: reference,
+    definitionId: command.payload.referenceId,
+    entityType: 'itsm_reference_data',
+    action: 'reference_deactivated',
+    before: { type: existing.type || null, active: existing.active ?? null },
+    after: { type: existing.type || null, active: false },
+  });
+  return { definitionId: command.payload.referenceId, status: 'inactive' };
+}
+
 async function validateConfigurationReferences({ db, transaction, type, definition }) {
   const issues = type === CONFIGURATION_TYPES.workflow
     ? [...workflowValidationIssues(definition)]
@@ -620,6 +682,15 @@ function materializedParent(type, definition, versionData) {
     id: versionData.definitionId,
     version: versionData.version,
     slaPolicyVersionDocumentId: versionData.versionDocumentId,
+  };
+}
+
+function draftParentSummary(type, definition) {
+  if (type !== CONFIGURATION_TYPES.catalogue) return {};
+  return {
+    code: definition.code,
+    name: definition.name,
+    categoryId: definition.categoryId,
   };
 }
 

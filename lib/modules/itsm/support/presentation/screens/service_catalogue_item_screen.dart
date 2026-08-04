@@ -44,10 +44,12 @@ class _ServiceCatalogueItemScreenState
       at: _effectiveAt,
       departmentId: catalogueContext?.departmentId,
       serviceId: catalogueContext?.serviceId,
+      locationId: catalogueContext?.locationId,
+      positionValue: catalogueContext?.positionValue,
     );
     final item = ref.watch(publishedServiceCatalogueItemProvider(request));
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.itsmServiceCatalogue)),
+      appBar: AppBar(title: Text(l10n.serviceCatalogueTitle)),
       body: item.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => ErrorStateView(
@@ -77,6 +79,35 @@ class _ServiceCatalogueItemScreenState
                   children: [
                     Chip(label: Text(value.code)),
                     Chip(label: Text(value.categoryName.resolve(locale))),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              CorporateSurfaceCard(
+                title: l10n.serviceCatalogueTitle,
+                child: Column(
+                  children: [
+                    _CatalogueInformationRow(
+                      icon: Icons.groups_outlined,
+                      label: l10n.eligibility,
+                      value: value.eligibilitySummary?.resolve(locale) ??
+                          _fallbackEligibility(value, l10n),
+                    ),
+                    _CatalogueInformationRow(
+                      icon: Icons.schedule_outlined,
+                      label: l10n.estimatedDelivery,
+                      value: value.fulfilmentSla?.resolve(locale) ?? '—',
+                    ),
+                    _CatalogueInformationRow(
+                      icon: Icons.payments_outlined,
+                      label: l10n.costModel,
+                      value: value.costModel?.resolve(locale) ?? '—',
+                    ),
+                    _CatalogueInformationRow(
+                      icon: Icons.verified_outlined,
+                      label: l10n.availabilityTarget,
+                      value: value.availabilityTarget?.resolve(locale) ?? '—',
+                    ),
                   ],
                 ),
               ),
@@ -127,12 +158,40 @@ class _ServiceCatalogueItemScreenState
                     ? null
                     : () => widget.onCreateRequest!(value),
                 icon: const Icon(Icons.add_task),
-                label: Text(l10n.create),
+                label: Text(l10n.requestThisService),
               ),
             ],
           );
         },
       ),
+    );
+  }
+
+  String _fallbackEligibility(ServiceCatalogueItem item, S l10n) {
+    return item.eligibility.allEmployees
+        ? l10n.allActiveEmployees
+        : l10n.restrictedEligibility;
+  }
+}
+
+class _CatalogueInformationRow extends StatelessWidget {
+  const _CatalogueInformationRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon),
+      title: Text(label),
+      subtitle: Text(value),
     );
   }
 }

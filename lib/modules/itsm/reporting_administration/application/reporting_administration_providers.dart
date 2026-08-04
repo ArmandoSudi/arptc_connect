@@ -1,13 +1,18 @@
 import 'package:arptc_connect/core/firebase_providers.dart';
+import 'package:arptc_connect/modules/itsm/assets_configuration/application/assets_configuration_contracts.dart';
+import 'package:arptc_connect/modules/itsm/assets_configuration/application/assets_configuration_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/application/itsm_providers.dart';
 import '../../shared/application/itsm_session.dart';
+import '../../shared/domain/itsm_common.dart';
 import '../../shared/domain/pagination.dart';
 import '../data/reporting_administration_data.dart';
 import '../domain/reporting_administration_domain.dart';
+import '../domain/catalogue_form_parameters.dart';
 import 'audit_log_controller.dart';
 import 'catalogue_configuration_controller.dart';
+import 'catalogue_parameter_controller.dart';
 import 'dashboard_controller.dart';
 import 'reporting_administration_access_policy.dart';
 import 'reporting_administration_command_controller.dart';
@@ -30,6 +35,123 @@ final catalogueAdministrationRepositoryProvider =
   (ref) =>
       FirestoreCatalogueAdministrationRepository(ref.watch(fireStoreProvider)),
 );
+
+class CatalogueReferenceData {
+  const CatalogueReferenceData({
+    required this.id,
+    required this.type,
+    required this.label,
+  });
+
+  final String id;
+  final String type;
+  final String label;
+}
+
+final catalogueReferenceDataProvider =
+    StreamProvider.autoDispose<List<CatalogueReferenceData>>((ref) {
+  final firestore = ref.watch(fireStoreProvider);
+  return ref.watch(itsmSessionProvider).when(
+        loading: _pending,
+        error: (error, stack) => Stream.error(error, stack),
+        data: (session) {
+          if (session == null) {
+            return Stream.error(const ItsmSessionRequiredException());
+          }
+          if (session.role != ItsmRole.manager) {
+            return const Stream.empty();
+          }
+          return firestore
+              .collection('itsmReferenceData')
+              .where('active', isEqualTo: true)
+              .limit(100)
+              .snapshots()
+              .map(
+                (snapshot) => snapshot.docs
+                    .map((document) {
+                      final data = document.data();
+                      final label = _referenceLabel(data['label']);
+                      return CatalogueReferenceData(
+                        id: document.id,
+                        type: data['type']?.toString().trim() ?? '',
+                        label: label.isEmpty ? document.id : label,
+                      );
+                    })
+                    .where((value) => value.type.isNotEmpty)
+                    .toList(growable: false),
+              );
+        },
+      );
+});
+
+final catalogueFormParametersProvider =
+    Provider.autoDispose<AsyncValue<CatalogueFormParameters>>((ref) {
+  final references = ref.watch(catalogueReferenceDataProvider);
+  final workflows = ref.watch(
+    workflowDefinitionsPageProvider(
+      WorkflowDefinitionsPageRequest(
+        query: const WorkflowConfigurationQuery(
+          status: ItsmPublicationState.published,
+          workItemType: ItsmWorkItemType.serviceRequest,
+        ),
+        page: PageRequest(limit: 100),
+      ),
+    ),
+  );
+  final slaPolicies = ref.watch(
+    slaPoliciesPageProvider(
+      SlaPoliciesPageRequest(
+        query: const SlaPolicyQuery(
+          status: ItsmPublicationState.published,
+          workItemType: ItsmWorkItemType.serviceRequest,
+        ),
+        page: PageRequest(limit: 100),
+      ),
+    ),
+  );
+  final configurationItems = ref.watch(configurationItemsProvider(100));
+
+  final states = [references, workflows, slaPolicies, configurationItems];
+  for (final state in states) {
+    if (state.hasError) {
+      return AsyncError(state.error!, state.stackTrace!);
+    }
+  }
+  if (states.any((state) => state.isLoading)) return const AsyncLoading();
+
+  final referenceValues = references.valueOrNull ?? const [];
+  Iterable<CatalogueFormOption> optionsForType(String type) => referenceValues
+      .where((reference) => reference.type == type)
+      .map((reference) => CatalogueFormOption(
+            id: reference.id,
+            label: reference.label,
+          ));
+  return AsyncData(
+    CatalogueFormParameters(
+      categories: optionsForType('catalogue_category'),
+      fulfilmentGroups: optionsForType('assignment_group'),
+      approvalPolicies: optionsForType('approval_policy'),
+      workflows: (workflows.valueOrNull?.items ?? const [])
+          .map((workflow) => CatalogueFormOption(
+                id: workflow.id,
+                label: workflow.name,
+                version: workflow.currentPublishedVersion,
+              )),
+      slaPolicies: (slaPolicies.valueOrNull?.items ?? const [])
+          .map((policy) => CatalogueFormOption(
+                id: policy.id,
+                label: policy.name,
+                version: policy.currentPublishedVersion,
+              )),
+      configurationItems:
+          (configurationItems.valueOrNull ?? const <ConfigurationItemSummary>[])
+              .map((item) => CatalogueFormOption(
+                    id: item.id,
+                    label: item.name,
+                  )),
+    ),
+  );
+});
 final workflowDefinitionRepositoryProvider =
     Provider<WorkflowDefinitionRepository>(
   (ref) => FirestoreWorkflowDefinitionRepository(ref.watch(fireStoreProvider)),
@@ -347,6 +469,12 @@ final catalogueConfigurationControllerProvider =
     await ref.watch(reportingAdministrationCommandControllerProvider.future),
   ),
 );
+final catalogueParameterControllerProvider =
+    FutureProvider.autoDispose<CatalogueParameterController>(
+  (ref) async => CatalogueParameterController(
+    await ref.watch(reportingAdministrationCommandControllerProvider.future),
+  ),
+);
 final workflowConfigurationControllerProvider =
     FutureProvider.autoDispose<WorkflowConfigurationController>(
   (ref) async => WorkflowConfigurationController(
@@ -365,6 +493,15 @@ final auditLogControllerProvider =
     );
   },
 );
+
+String _referenceLabel(Object? value) {
+  if (value is Map) {
+    final english = value['en']?.toString().trim() ?? '';
+    if (english.isNotEmpty) return english;
+    return value['fr']?.toString().trim() ?? '';
+  }
+  return value?.toString().trim() ?? '';
+}
 
 Future<T> _withSession<T>(
   Ref ref,

@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/support_providers.dart';
 import '../../data/service_request_repository.dart';
 import '../../domain/service_request.dart';
+import '../../../shared/application/itsm_providers.dart';
+import '../../../shared/domain/itsm_common.dart';
 import '../widgets/service_request_list_view.dart';
 
 class ServiceRequestQueueScreen extends ConsumerStatefulWidget {
@@ -25,9 +27,12 @@ class _ServiceRequestQueueScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final session = ref.watch(itsmSessionProvider).valueOrNull;
     final request = ServiceRequestFirstPageRequest(
       query: ServiceRequestQuery(
-        scope: ServiceRequestScope.managerActive,
+        scope: session?.role == ItsmRole.manager
+            ? ServiceRequestScope.managerActive
+            : ServiceRequestScope.myActive,
         searchTerm: _search,
       ),
     );
@@ -45,7 +50,7 @@ class _ServiceRequestQueueScreenState
         data: (values) => ServiceRequestListView(
           requests: values,
           searchQuery: _search,
-          showRequester: true,
+          showRequester: session?.role == ItsmRole.manager,
           onSearchChanged: (value) => setState(() => _search = value),
           onSelected: widget.onRequestSelected ?? (_) {},
         ),

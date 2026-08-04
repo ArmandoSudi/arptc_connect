@@ -64,7 +64,12 @@ class ItsmSessionResolver {
     }
 
     final profileId = _string(profile['id']);
-    if (profileId.isNotEmpty && profileId != userId) {
+    // Some legacy agent documents were created with an email or generated ID.
+    // The authenticated email is still a safe identity match in that case.
+    final profileMatchesAuthEmail = knownProfileEmails.contains(email);
+    if (profileId.isNotEmpty &&
+        profileId != userId &&
+        !profileMatchesAuthEmail) {
       return null;
     }
 

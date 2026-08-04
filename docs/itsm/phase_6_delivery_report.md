@@ -53,7 +53,8 @@
 - `firestore.rules`, `storage.rules`: audience isolation, trusted-only writes,
   bounded reads, confidentiality, and export ownership.
 - `firestore.indexes.json`: Phase 6 reporting, SLA, audit, and configuration
-  indexes; 148 unique composite indexes in total.
+  indexes; 190 unique composite indexes in total, including the preserved
+  meeting-hall reservation index.
 - `test/modules/itsm/reporting_administration/` and
   `functions/test/itsm_reporting_administration_*`: unit, provider,
   presentation, rules, Storage, export, and callable-emulator coverage.
@@ -104,7 +105,7 @@
 - Phase 6 Firestore/Storage emulator suite: 13/13 passed.
 - Complete cross-phase ITSM Firestore/Storage emulator suite: 75/75 passed.
 - Phase 6 Auth/Firestore/Functions callable emulator suite: 1/1 passed.
-- Firestore index integrity: 148/148 unique.
+- Firestore index integrity: 190/190 unique.
 - `git diff --check`: passed.
 - Failed required gates: none.
 

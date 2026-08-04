@@ -11,7 +11,9 @@ class ServiceCatalogueView extends StatelessWidget {
     required this.items,
     required this.languageCode,
     required this.searchQuery,
+    required this.selectedCategoryId,
     required this.onSearchChanged,
+    required this.onCategorySelected,
     required this.onItemSelected,
     super.key,
   });
@@ -19,12 +21,25 @@ class ServiceCatalogueView extends StatelessWidget {
   final List<ServiceCatalogueItem> items;
   final String languageCode;
   final String searchQuery;
+  final String? selectedCategoryId;
   final ValueChanged<String> onSearchChanged;
+  final ValueChanged<String?> onCategorySelected;
   final ValueChanged<ServiceCatalogueItem> onItemSelected;
 
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
+    final categories = <String, String>{
+      for (final item in items)
+        item.categoryId: item.categoryName.resolve(languageCode),
+    };
+    final visibleItems = items
+        .where(
+          (item) =>
+              selectedCategoryId == null ||
+              item.categoryId == selectedCategoryId,
+        )
+        .toList(growable: false);
     return LayoutBuilder(
       builder: (context, constraints) {
         final columns = constraints.maxWidth >= 1180
@@ -37,21 +52,50 @@ class ServiceCatalogueView extends StatelessWidget {
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
               sliver: SliverToBoxAdapter(
-                child: CommonTextInput(
-                  label: l10n.search,
-                  hintText: l10n.itsmServiceCatalogue,
-                  prefixIcon: const Icon(Icons.search),
-                  onChanged: onSearchChanged,
+                child: CorporateSurfaceCard(
+                  accentColor: Theme.of(context).colorScheme.primary,
+                  title: l10n.serviceCatalogueTitle,
+                  subtitle: l10n.serviceCatalogueDescription,
+                  child: CommonTextInput(
+                    label: l10n.search,
+                    hintText: l10n.serviceCatalogueSearchHint,
+                    prefixIcon: const Icon(Icons.search),
+                    onChanged: onSearchChanged,
+                  ),
                 ),
               ),
             ),
-            if (items.isEmpty)
+            if (categories.isNotEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                sliver: SliverToBoxAdapter(
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ChoiceChip(
+                        label: Text(l10n.allCatalogueCategories),
+                        selected: selectedCategoryId == null,
+                        onSelected: (_) => onCategorySelected(null),
+                      ),
+                      ...categories.entries.map(
+                        (entry) => ChoiceChip(
+                          label: Text(entry.value),
+                          selected: selectedCategoryId == entry.key,
+                          onSelected: (_) => onCategorySelected(entry.key),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            if (visibleItems.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: EmptyStateView(
                   icon: Icons.inventory_2_outlined,
-                  title: l10n.noDataAvailable,
-                  description: l10n.noDataDescription,
+                  title: l10n.serviceCatalogueEmpty,
+                  description: l10n.serviceCatalogueEmptyDescription,
                 ),
               )
             else
@@ -62,11 +106,11 @@ class ServiceCatalogueView extends StatelessWidget {
                     crossAxisCount: columns,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
-                    mainAxisExtent: 250,
+                    mainAxisExtent: 270,
                   ),
-                  itemCount: items.length,
+                  itemCount: visibleItems.length,
                   itemBuilder: (context, index) {
-                    final item = items[index];
+                    final item = visibleItems[index];
                     return _CatalogueCard(
                       item: item,
                       languageCode: languageCode,
@@ -138,10 +182,20 @@ class _CatalogueCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
+          Text(
+            item.fulfilmentSla?.resolve(languageCode) ??
+                S.of(context).estimatedDelivery,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
           Row(
             children: [
               Text(item.code, style: theme.textTheme.labelMedium),
-              const Spacer(),
+              const SizedBox(width: 8),
               Icon(Icons.arrow_forward, color: theme.colorScheme.primary),
             ],
           ),

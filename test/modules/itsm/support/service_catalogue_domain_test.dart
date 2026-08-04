@@ -31,6 +31,9 @@ void main() {
       expect(restored.visibleRoles, containsAll(ItsmRole.values));
       expect(restored.requiredDocuments.single.key, 'approval');
       expect(restored.formFields.single.required, isTrue);
+      expect(restored.serviceOwner?.teamName, 'Cloud Infrastructure');
+      expect(restored.costModel?.resolve('en'), 'Department funded');
+      expect(restored.underlyingCis.single.id, 'm365-tenant');
     });
 
     test('enforces unique dynamic field and document keys', () {
@@ -68,6 +71,8 @@ void main() {
         eligibility: CatalogueEligibility(
           allEmployees: false,
           departmentIds: const ['department-1'],
+          locationIds: const ['head-office'],
+          positionValues: const ['BUREAU_ATTACHE'],
           excludedUserIds: const ['excluded-user'],
         ),
       );
@@ -90,6 +95,38 @@ void main() {
       expect(item.isAvailableTo(allowed, at: fixtureTime), isTrue);
       expect(item.isAvailableTo(wrongRole, at: fixtureTime), isFalse);
       expect(item.isAvailableTo(excluded, at: fixtureTime), isFalse);
+    });
+
+    test('matches location and organisation-position entitlement filters', () {
+      final item = fixtureCatalogueItem(
+        eligibility: CatalogueEligibility(
+          allEmployees: false,
+          locationIds: const ['head-office'],
+          positionValues: const ['BUREAU_ATTACHE'],
+        ),
+      );
+      expect(
+        item.isAvailableTo(
+          CataloguePrincipal(
+            userId: 'user-1',
+            role: ItsmRole.user,
+            locationId: 'head-office',
+          ),
+          at: fixtureTime,
+        ),
+        isTrue,
+      );
+      expect(
+        item.isAvailableTo(
+          CataloguePrincipal(
+            userId: 'user-2',
+            role: ItsmRole.user,
+            positionValue: 'BUREAU_ATTACHE',
+          ),
+          at: fixtureTime,
+        ),
+        isTrue,
+      );
     });
 
     test('rejects an empty restricted eligibility definition', () {
@@ -205,5 +242,10 @@ void main() {
         isTrue);
     expect(items.every((item) => item.workflow.version == 1), isTrue);
     expect(items.every((item) => item.slaPolicy.version == 1), isTrue);
+    expect(
+      items.every((item) => item.serviceOwner?.displayName.isNotEmpty == true),
+      isTrue,
+    );
+    expect(items.every((item) => item.fulfilmentSla != null), isTrue);
   });
 }

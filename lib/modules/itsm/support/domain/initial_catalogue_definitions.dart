@@ -563,6 +563,34 @@ class _Seed {
         version: 1,
       ),
       approvalPolicyId: approvalPolicyId,
+      serviceOwner: CatalogueServiceOwner(
+        displayName: 'IT Service Management',
+        teamName: groupId,
+      ),
+      eligibilitySummary: LocalizedValue(
+        en: 'All active employees and verified contractors.',
+        fr: 'Tous les agents actifs et prestataires verifies.',
+      ),
+      costModel: LocalizedValue(
+        en: 'Department funded',
+        fr: 'Finance par le departement',
+      ),
+      availabilityTarget: LocalizedValue(
+        en: 'Availability is governed by the published service target.',
+        fr: 'La disponibilite est definie par la cible de service publiee.',
+      ),
+      fulfilmentSla: LocalizedValue(
+        en: 'Delivery target is governed by the published SLA policy.',
+        fr: 'Le delai est defini par la politique SLA publiee.',
+      ),
+      securityCompliance: LocalizedValue(
+        en: 'Handled according to ARPTC information-security controls.',
+        fr: 'Traite selon les controles de securite de l\'ARPTC.',
+      ),
+      fulfilmentWorkflow: LocalizedValue(
+        en: 'Fulfilled through the published ITSM workflow.',
+        fr: 'Execute via le workflow ITSM publie.',
+      ),
       fulfilmentGroupId: groupId,
       slaPolicy: VersionedConfigurationReference(id: slaId, version: 1),
       status: ItsmPublicationState.published,

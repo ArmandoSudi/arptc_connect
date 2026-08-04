@@ -41,6 +41,8 @@ class PublishedCataloguePageRequest {
     this.languageCode = 'en',
     this.departmentId,
     this.serviceId,
+    this.locationId,
+    this.positionValue,
   });
 
   final ServiceCatalogueQuery query;
@@ -48,6 +50,8 @@ class PublishedCataloguePageRequest {
   final String languageCode;
   final String? departmentId;
   final String? serviceId;
+  final String? locationId;
+  final String? positionValue;
 
   @override
   bool operator ==(Object other) {
@@ -59,7 +63,9 @@ class PublishedCataloguePageRequest {
             page.direction == other.page.direction &&
             languageCode == other.languageCode &&
             departmentId == other.departmentId &&
-            serviceId == other.serviceId;
+            serviceId == other.serviceId &&
+            locationId == other.locationId &&
+            positionValue == other.positionValue;
   }
 
   @override
@@ -71,6 +77,8 @@ class PublishedCataloguePageRequest {
         languageCode,
         departmentId,
         serviceId,
+        locationId,
+        positionValue,
       );
 }
 
@@ -86,6 +94,8 @@ final publishedServiceCataloguePageProvider = FutureProvider.autoDispose
         session,
         departmentId: request.departmentId,
         serviceId: request.serviceId,
+        locationId: request.locationId,
+        positionValue: request.positionValue,
       ),
       query: request.query,
       page: request.page,
@@ -101,6 +111,8 @@ class PublishedCatalogueFirstPageRequest {
     this.languageCode = 'en',
     this.departmentId,
     this.serviceId,
+    this.locationId,
+    this.positionValue,
   });
 
   final ServiceCatalogueQuery query;
@@ -108,6 +120,8 @@ class PublishedCatalogueFirstPageRequest {
   final String languageCode;
   final String? departmentId;
   final String? serviceId;
+  final String? locationId;
+  final String? positionValue;
 
   @override
   bool operator ==(Object other) {
@@ -117,7 +131,9 @@ class PublishedCatalogueFirstPageRequest {
             limit == other.limit &&
             languageCode == other.languageCode &&
             departmentId == other.departmentId &&
-            serviceId == other.serviceId;
+            serviceId == other.serviceId &&
+            locationId == other.locationId &&
+            positionValue == other.positionValue;
   }
 
   @override
@@ -127,6 +143,8 @@ class PublishedCatalogueFirstPageRequest {
         languageCode,
         departmentId,
         serviceId,
+        locationId,
+        positionValue,
       );
 }
 
@@ -152,6 +170,8 @@ final publishedServiceCatalogueFirstPageProvider = StreamProvider.autoDispose
                 session,
                 departmentId: request.departmentId,
                 serviceId: request.serviceId,
+                locationId: request.locationId,
+                positionValue: request.positionValue,
               ),
               query: request.query,
               limit: request.limit,
@@ -168,12 +188,16 @@ class PublishedCatalogueItemRequest {
     required this.at,
     this.departmentId,
     this.serviceId,
+    this.locationId,
+    this.positionValue,
   });
 
   final String id;
   final DateTime at;
   final String? departmentId;
   final String? serviceId;
+  final String? locationId;
+  final String? positionValue;
 
   @override
   bool operator ==(Object other) {
@@ -182,11 +206,20 @@ class PublishedCatalogueItemRequest {
             id == other.id &&
             at == other.at &&
             departmentId == other.departmentId &&
-            serviceId == other.serviceId;
+            serviceId == other.serviceId &&
+            locationId == other.locationId &&
+            positionValue == other.positionValue;
   }
 
   @override
-  int get hashCode => Object.hash(id, at, departmentId, serviceId);
+  int get hashCode => Object.hash(
+        id,
+        at,
+        departmentId,
+        serviceId,
+        locationId,
+        positionValue,
+      );
 }
 
 final publishedServiceCatalogueItemProvider = FutureProvider.autoDispose
@@ -201,6 +234,8 @@ final publishedServiceCatalogueItemProvider = FutureProvider.autoDispose
         session,
         departmentId: request.departmentId,
         serviceId: request.serviceId,
+        locationId: request.locationId,
+        positionValue: request.positionValue,
       ),
       id: request.id,
       at: request.at,
@@ -332,10 +367,14 @@ class ServiceRequestCatalogueContext {
   const ServiceRequestCatalogueContext({
     this.departmentId,
     this.serviceId,
+    this.locationId,
+    this.positionValue,
   });
 
   final String? departmentId;
   final String? serviceId;
+  final String? locationId;
+  final String? positionValue;
 }
 
 final serviceRequestCatalogueContextProvider =
@@ -343,9 +382,13 @@ final serviceRequestCatalogueContextProvider =
   return ref.watch(liveAgentProfileProvider).whenData((profile) {
     final departmentId = profile['departmentId']?.toString().trim();
     final serviceId = profile['serviceId']?.toString().trim();
+    final locationId = profile['locationId']?.toString().trim();
+    final positionValue = profile['position']?.toString().trim();
     return ServiceRequestCatalogueContext(
       departmentId: departmentId?.isEmpty == true ? null : departmentId,
       serviceId: serviceId?.isEmpty == true ? null : serviceId,
+      locationId: locationId?.isEmpty == true ? null : locationId,
+      positionValue: positionValue?.isEmpty == true ? null : positionValue,
     );
   });
 });

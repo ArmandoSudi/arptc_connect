@@ -66,7 +66,7 @@ class ServiceRequestFormView extends StatelessWidget {
           if (canRequestOnBehalf) ...[
             const SizedBox(height: 16),
             CorporateSurfaceCard(
-              title: l10n.affectedAgent,
+              title: l10n.requestOnBehalfOf,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -93,7 +93,8 @@ class ServiceRequestFormView extends StatelessWidget {
                   const SizedBox(height: 8),
                   ListTile(
                     leading: const Icon(Icons.check_circle_outline),
-                    title: Text(state.requestedFor.name),
+                    title: Text(
+                        '${l10n.requestedFor}: ${state.requestedFor.name}'),
                     subtitle: Text(state.requestedFor.email),
                   ),
                 ],

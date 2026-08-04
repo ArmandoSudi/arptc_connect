@@ -39,6 +39,22 @@ void main() {
     expect(session?.role, ItsmRole.admin);
   });
 
+  test('accepts a legacy agent document ID when its email matches', () {
+    final session = resolver.resolve(
+      authUserId: 'firebase-auth-uid',
+      authEmail: 'agent@example.com',
+      profile: const {
+        'id': 'legacy-agent-document-id',
+        'emailLower': 'agent@example.com',
+        'modulePermissions': {'ticketing': 'USER'},
+      },
+    );
+
+    expect(session, isNotNull);
+    expect(session?.userId, 'firebase-auth-uid');
+    expect(session?.role, ItsmRole.user);
+  });
+
   test('rejects stale profile data from a previous account', () {
     final session = resolver.resolve(
       authUserId: 'user-2',
