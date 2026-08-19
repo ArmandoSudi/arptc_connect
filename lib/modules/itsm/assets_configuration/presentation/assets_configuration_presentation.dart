@@ -1,6 +1,8 @@
+export 'assets_configuration_error_message.dart';
 export 'assets_configuration_strings.dart';
 export 'assets_attachment_picker.dart';
 export 'screens/asset_detail_screen.dart';
+export 'screens/asset_parameters_screen.dart';
 export 'screens/asset_register_screen.dart';
 export 'screens/assets_configuration_overview_screen.dart';
 export 'screens/cmdb_screen.dart';
@@ -9,6 +11,8 @@ export 'screens/my_assets_screen.dart';
 export 'screens/stock_screen.dart';
 export 'screens/suppliers_warranties_screen.dart';
 export 'widgets/asset_views.dart';
+export 'widgets/asset_register_dialogs.dart';
+export 'widgets/asset_status_dialog.dart';
 export 'widgets/assets_configuration_overview_view.dart';
 export 'widgets/assets_configuration_shell.dart';
 export 'widgets/assets_configuration_state.dart';

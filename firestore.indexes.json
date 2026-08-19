@@ -1449,6 +1449,24 @@
       ]
     },
     {
+      "collectionGroup": "assetStateEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "assetId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "changedAt",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "stockItems",
       "queryScope": "COLLECTION",
       "fields": [
@@ -3191,7 +3209,31 @@
     {"collectionGroup":"softwareLicences","queryScope":"COLLECTION","fields":[{"fieldPath":"complianceStatus","order":"ASCENDING"},{"fieldPath":"vendor","order":"ASCENDING"},{"fieldPath":"expiryDate","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
     {"collectionGroup":"suppliers","queryScope":"COLLECTION","fields":[{"fieldPath":"isActive","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
     {"collectionGroup":"supplierContracts","queryScope":"COLLECTION","fields":[{"fieldPath":"supplierId","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"updatedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
-    {"collectionGroup":"warranties","queryScope":"COLLECTION","fields":[{"fieldPath":"supplierId","order":"ASCENDING"},{"fieldPath":"expirationDate","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]}
+    {"collectionGroup":"warranties","queryScope":"COLLECTION","fields":[{"fieldPath":"supplierId","order":"ASCENDING"},{"fieldPath":"expirationDate","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"organizations","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"nameLower","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"organizationDirectory","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"nameLower","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"organizationUnits","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"nameLower","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"organizationUnits","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"nameLower","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"organizationUnits","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"parentUnitId","order":"ASCENDING"},{"fieldPath":"nameLower","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"organizationUnits","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"type","order":"ASCENDING"},{"fieldPath":"nameLower","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"organizationUnits","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"type","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"nameLower","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"organizationAssignments","queryScope":"COLLECTION","fields":[{"fieldPath":"agentId","order":"ASCENDING"},{"fieldPath":"startsAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"organizationAssignments","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"agentId","order":"ASCENDING"},{"fieldPath":"startsAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"organizationAssignments","queryScope":"COLLECTION","fields":[{"fieldPath":"agentId","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"startsAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"organizationAssignments","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"agentId","order":"ASCENDING"},{"fieldPath":"assignmentType","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"organizationAssignments","queryScope":"COLLECTION","fields":[{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"startsAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"organizationAssignments","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"startsAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"organizationAssignments","queryScope":"COLLECTION","fields":[{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"assignmentType","order":"ASCENDING"},{"fieldPath":"startsAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]},
+    {"collectionGroup":"organizationAssignments","queryScope":"COLLECTION","fields":[{"fieldPath":"pathUnitIds","arrayConfig":"CONTAINS"},{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"organizationAssignments","queryScope":"COLLECTION","fields":[{"fieldPath":"assignmentType","order":"ASCENDING"},{"fieldPath":"isActing","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"endsAt","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"agentDirectory","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"displayNameLower","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"agentDirectory","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"isActive","order":"ASCENDING"},{"fieldPath":"displayNameLower","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"agentDirectory","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"scopeKeys","arrayConfig":"CONTAINS"},{"fieldPath":"displayNameLower","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"agentDirectory","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"scopeKeys","arrayConfig":"CONTAINS"},{"fieldPath":"isActive","order":"ASCENDING"},{"fieldPath":"displayNameLower","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"agentDirectory","queryScope":"COLLECTION","fields":[{"fieldPath":"scopeKeys","arrayConfig":"CONTAINS"},{"fieldPath":"isActive","order":"ASCENDING"},{"fieldPath":"displayNameLower","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"agentAuthorizationIndex","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"isActive","order":"ASCENDING"},{"fieldPath":"scopeKeys","arrayConfig":"CONTAINS"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"agentAuthorizationIndex","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"isActive","order":"ASCENDING"},{"fieldPath":"scopeRoleKeys","arrayConfig":"CONTAINS"},{"fieldPath":"__name__","order":"ASCENDING"}]},
+    {"collectionGroup":"organizationAuditEvents","queryScope":"COLLECTION","fields":[{"fieldPath":"organizationId","order":"ASCENDING"},{"fieldPath":"createdAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]}
   ],
   "fieldOverrides": []
 }

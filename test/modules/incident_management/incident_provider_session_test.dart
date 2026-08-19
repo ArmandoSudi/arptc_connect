@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
+import 'package:arptc_connect/modules/authentication/application/authorized_session.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:arptc_connect/modules/incident_management/data/firestore_incident_repository.dart';
 import 'package:arptc_connect/modules/incident_management/data/incident_repository.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_enums.dart';
@@ -9,7 +10,10 @@ import 'package:arptc_connect/modules/incident_management/presentation/controlle
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final _testSessionKeyProvider = StateProvider<String?>((ref) => null);
+final _testAuthorizedSessionProvider =
+    StateProvider<AuthorizedSessionState>((ref) {
+  return const AuthorizedSessionState.unauthenticated();
+});
 final _testIncidentRoleProvider =
     StateProvider<IncidentRole>((ref) => IncidentRole.none);
 
@@ -19,8 +23,8 @@ void main() {
     final repository = _TrackingIncidentRepository();
     final container = ProviderContainer(
       overrides: [
-        currentAuthSessionKeyProvider.overrideWith(
-          (ref) => ref.watch(_testSessionKeyProvider),
+        authorizedSessionProvider.overrideWith(
+          (ref) => ref.watch(_testAuthorizedSessionProvider),
         ),
         currentUserIncidentRoleProvider.overrideWith(
           (ref) => AsyncValue.data(ref.watch(_testIncidentRoleProvider)),
@@ -38,8 +42,8 @@ void main() {
     expect(repository.watchCallCount, 0);
     expect(repository.activeListenerCount, 0);
 
-    container.read(_testSessionKeyProvider.notifier).state =
-        'manager-a|manager-a@test.cd';
+    container.read(_testAuthorizedSessionProvider.notifier).state =
+        AuthorizedSessionState.authenticated(_session('manager-a'));
     await container.pump();
     expect(repository.watchCallCount, 0);
 
@@ -49,12 +53,13 @@ void main() {
     expect(repository.watchCallCount, 1);
     expect(repository.activeListenerCount, 1);
 
-    container.read(_testSessionKeyProvider.notifier).state = null;
+    container.read(_testAuthorizedSessionProvider.notifier).state =
+        const AuthorizedSessionState.unauthenticated();
     await container.pump();
     expect(repository.activeListenerCount, 0);
 
-    container.read(_testSessionKeyProvider.notifier).state =
-        'manager-b|manager-b@test.cd';
+    container.read(_testAuthorizedSessionProvider.notifier).state =
+        AuthorizedSessionState.authenticated(_session('manager-b'));
     await container.pump();
     expect(repository.watchCallCount, 2);
     expect(repository.activeListenerCount, 1);
@@ -63,6 +68,22 @@ void main() {
     container.dispose();
     await repository.dispose();
   });
+}
+
+AuthorizedSession _session(String userId) {
+  return AuthorizedSession(
+    sessionKey: '$userId|$userId@test.cd',
+    userId: userId,
+    email: '$userId@test.cd',
+    displayName: userId,
+    profile: {
+      'id': userId,
+      'email': '$userId@test.cd',
+      'isActive': true,
+      'modulePermissions': const {'ticketing': 'MANAGER'},
+    },
+    modulePermissions: const {'ticketing': 'MANAGER'},
+  );
 }
 
 class _TrackingIncidentRepository implements IncidentRepository {

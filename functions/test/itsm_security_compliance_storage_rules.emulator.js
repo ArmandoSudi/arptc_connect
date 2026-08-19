@@ -385,7 +385,10 @@ test('registered metadata must match exactly and attachment objects are immutabl
 
 function storageFor(uid) {
   return environment
-    .authenticatedContext(uid, { email: `${uid}@arptc.cd` })
+    .authenticatedContext(uid, {
+      email: `${uid}@arptc.cd`,
+      email_verified: true,
+    })
     .storage();
 }
 

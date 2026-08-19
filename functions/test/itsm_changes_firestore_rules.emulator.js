@@ -361,7 +361,10 @@ test('CAB configuration and maintenance windows are MANAGER-read/trusted-write o
 
 function firestoreFor(uid) {
   return environment
-    .authenticatedContext(uid, { email: `${uid}@arptc.cd` })
+    .authenticatedContext(uid, {
+      email: `${uid}@arptc.cd`,
+      email_verified: true,
+    })
     .firestore();
 }
 

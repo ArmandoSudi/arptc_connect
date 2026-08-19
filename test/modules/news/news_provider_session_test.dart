@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
+import 'package:arptc_connect/modules/authentication/application/authorized_session.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:arptc_connect/modules/news/data/firestore_news_repository.dart';
 import 'package:arptc_connect/modules/news/data/news_repository.dart';
 import 'package:arptc_connect/modules/news/domain/news_post.dart';
@@ -8,7 +9,10 @@ import 'package:arptc_connect/modules/news/presentation/controllers/news_provide
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final _testSessionKeyProvider = StateProvider<String?>((ref) => null);
+final _testAuthorizedSessionProvider =
+    StateProvider<AuthorizedSessionState>((ref) {
+  return const AuthorizedSessionState.unauthenticated();
+});
 
 void main() {
   test('published news subscription follows the authenticated session',
@@ -16,8 +20,8 @@ void main() {
     final repository = _TrackingNewsRepository();
     final container = ProviderContainer(
       overrides: [
-        currentAuthSessionKeyProvider.overrideWith(
-          (ref) => ref.watch(_testSessionKeyProvider),
+        authorizedSessionProvider.overrideWith(
+          (ref) => ref.watch(_testAuthorizedSessionProvider),
         ),
         newsRepositoryProvider.overrideWithValue(repository),
       ],
@@ -32,16 +36,19 @@ void main() {
     expect(repository.watchCallCount, 0);
     expect(repository.activeListenerCount, 0);
 
-    container.read(_testSessionKeyProvider.notifier).state = 'user-a|a@test.cd';
+    container.read(_testAuthorizedSessionProvider.notifier).state =
+        AuthorizedSessionState.authenticated(_session('user-a'));
     await container.pump();
     expect(repository.watchCallCount, 1);
     expect(repository.activeListenerCount, 1);
 
-    container.read(_testSessionKeyProvider.notifier).state = null;
+    container.read(_testAuthorizedSessionProvider.notifier).state =
+        const AuthorizedSessionState.unauthenticated();
     await container.pump();
     expect(repository.activeListenerCount, 0);
 
-    container.read(_testSessionKeyProvider.notifier).state = 'user-b|b@test.cd';
+    container.read(_testAuthorizedSessionProvider.notifier).state =
+        AuthorizedSessionState.authenticated(_session('user-b'));
     await container.pump();
     expect(repository.watchCallCount, 2);
     expect(repository.activeListenerCount, 1);
@@ -50,6 +57,22 @@ void main() {
     container.dispose();
     await repository.dispose();
   });
+}
+
+AuthorizedSession _session(String userId) {
+  return AuthorizedSession(
+    sessionKey: '$userId|$userId@test.cd',
+    userId: userId,
+    email: '$userId@test.cd',
+    displayName: userId,
+    profile: {
+      'id': userId,
+      'email': '$userId@test.cd',
+      'isActive': true,
+      'modulePermissions': const {'news': 'USER'},
+    },
+    modulePermissions: const {'news': 'USER'},
+  );
 }
 
 class _TrackingNewsRepository implements NewsRepository {

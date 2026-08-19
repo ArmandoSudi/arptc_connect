@@ -48,11 +48,30 @@ beforeEach(async () => {
       setDoc(doc(firestore, 'agents/user-2'), agent('USER')),
       setDoc(doc(firestore, 'agents/manager-1'), agent('MANAGER')),
       setDoc(
+        doc(firestore, 'agents/user-management-manager'),
+        agent('USER', { usermanagement: 'MANAGER' }),
+      ),
+      setDoc(
         doc(firestore, 'agents/manager-alias'),
         aliasAgent('support', 'MANAGER'),
       ),
       setDoc(doc(firestore, 'agents/admin-1'), agent('ADMIN')),
       setDoc(doc(firestore, 'agents/none-1'), agent('NONE')),
+      setDoc(
+        doc(firestore, 'agents/legacy-user@arptc.cd'),
+        agent('MANAGER'),
+      ),
+      setDoc(
+        doc(firestore, 'agents/inactive-1'),
+        {
+          ...agent('MANAGER'),
+          isActive: false,
+        },
+      ),
+      setDoc(doc(firestore, 'agents/unverified-1'), agent('MANAGER')),
+      setDoc(doc(firestore, 'agents/missing-active-1'), {
+        modulePermissions: { ticketing: 'MANAGER' },
+      }),
       setDoc(
         doc(firestore, 'itsmWorkItemIndex/own-summary'),
         workItem({ requesterId: 'user-1' }),
@@ -176,6 +195,59 @@ beforeEach(async () => {
       }),
     ]);
   });
+});
+
+test('rules require an active profile at the authenticated UID', async () => {
+  const legacyProfileFirestore = environment
+    .authenticatedContext('legacy-uid', { email: 'legacy-user@arptc.cd' })
+    .firestore();
+  const inactiveProfileFirestore = userFirestore('inactive-1');
+  const missingActiveProfileFirestore = userFirestore('missing-active-1');
+  const unverifiedProfileFirestore = environment
+    .authenticatedContext('unverified-1', {
+      email: 'unverified-1@arptc.cd',
+      email_verified: false,
+    })
+    .firestore();
+
+  await assertFails(
+    getDoc(doc(legacyProfileFirestore, 'serviceCatalogItems/published-item')),
+  );
+  await assertFails(
+    getDoc(doc(inactiveProfileFirestore, 'serviceCatalogItems/published-item')),
+  );
+  await assertFails(
+    getDoc(
+      doc(
+        missingActiveProfileFirestore,
+        'serviceCatalogItems/published-item',
+      ),
+    ),
+  );
+  await assertFails(
+    getDoc(
+      doc(unverifiedProfileFirestore, 'serviceCatalogItems/published-item'),
+    ),
+  );
+});
+
+test('agent parent documents can only be mutated by trusted Functions', async () => {
+  const managerFirestore = userFirestore('user-management-manager');
+
+  await assertFails(
+    setDoc(doc(managerFirestore, 'agents/new-agent@example.com'), {
+      ...agent('USER'),
+      email: 'new-agent@example.com',
+    }),
+  );
+  await assertFails(
+    updateDoc(doc(managerFirestore, 'agents/user-2'), {
+      department: 'Changed by client',
+    }),
+  );
+  await assertFails(
+    deleteDoc(doc(managerFirestore, 'agents/user-2')),
+  );
 });
 
 after(async () => {
@@ -516,13 +588,17 @@ test('unknown collections and unauthenticated reads remain denied', async () => 
 
 function userFirestore(uid) {
   return environment
-    .authenticatedContext(uid, { email: `${uid}@arptc.cd` })
+    .authenticatedContext(uid, {
+      email: `${uid}@arptc.cd`,
+      email_verified: true,
+    })
     .firestore();
 }
 
 function agent(role, aliases = {}) {
   return {
     email: `${role.toLowerCase()}@arptc.cd`,
+    isActive: true,
     modulePermissions: { ticketing: role, ...aliases },
   };
 }
@@ -530,6 +606,7 @@ function agent(role, aliases = {}) {
 function aliasAgent(key, role) {
   return {
     email: `${key}-${role.toLowerCase()}@arptc.cd`,
+    isActive: true,
     modulePermissions: { [key]: role },
   };
 }

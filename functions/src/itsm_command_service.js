@@ -763,7 +763,6 @@ function buildTransitionPatch({
 async function readActorGroupIds({ db, transaction, actor }) {
   const paths = [
     db.collection('agents').doc(actor.uid),
-    ...(actor.email ? [db.collection('agents').doc(actor.email)] : []),
     db.collection('users').doc(actor.uid),
   ];
   const groups = new Set();

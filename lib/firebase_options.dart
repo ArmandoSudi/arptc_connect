@@ -49,7 +49,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '618367534949',
     projectId: 'arptc-connect',
     authDomain: 'arptc-connect.firebaseapp.com',
-    storageBucket: 'arptc-connect.appspot.com',
+    storageBucket: 'arptc-connect.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -57,7 +57,7 @@ class DefaultFirebaseOptions {
     appId: '1:618367534949:android:b1e583e95a5bd85118438c',
     messagingSenderId: '618367534949',
     projectId: 'arptc-connect',
-    storageBucket: 'arptc-connect.appspot.com',
+    storageBucket: 'arptc-connect.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -65,7 +65,7 @@ class DefaultFirebaseOptions {
     appId: '1:618367534949:ios:92b98be19772654b18438c',
     messagingSenderId: '618367534949',
     projectId: 'arptc-connect',
-    storageBucket: 'arptc-connect.appspot.com',
+    storageBucket: 'arptc-connect.firebasestorage.app',
     iosBundleId: 'com.sugar.arptcConnect',
   );
 
@@ -74,7 +74,7 @@ class DefaultFirebaseOptions {
     appId: '1:618367534949:ios:a237d1b49462edf018438c',
     messagingSenderId: '618367534949',
     projectId: 'arptc-connect',
-    storageBucket: 'arptc-connect.appspot.com',
+    storageBucket: 'arptc-connect.firebasestorage.app',
     iosBundleId: 'com.sugar.arptcConnect.RunnerTests',
   );
 }

@@ -140,19 +140,23 @@ function notificationEventsForSupportChange({
   const timestamp = fieldValue.serverTimestamp();
   const events = [];
 
-  if (
-    type === 'service_request' &&
+  const isServiceRequestSubmission = type === 'service_request' &&
     ((!previous && normalizeString(current.status) !== 'draft') ||
       (previous && normalizeString(previous.status) === 'draft' &&
-        normalizeString(current.status) !== 'draft'))
-  ) {
+        normalizeString(current.status) !== 'draft'));
+  const isUserIncidentSubmission = type === 'incident' &&
+    !previous &&
+    normalizeString(current.createdByRole).toUpperCase() === 'USER';
+  if (isServiceRequestSubmission || isUserIncidentSubmission) {
     events.push(buildNotificationEvent({
       type,
       workItemId,
       sourceEventId,
       eventKind: 'submitted',
-      eventType: 'service_request.submitted',
-      title: 'New service request',
+      eventType: type === 'incident'
+        ? 'incident.created'
+        : 'service_request.submitted',
+      title: type === 'incident' ? 'New IT incident' : 'New service request',
       body: `${displayReference(current, workItemId)} requires attention.`,
       route,
       target: {
@@ -172,25 +176,29 @@ function notificationEventsForSupportChange({
     previous && (previous.assignedUserId || previous.assignedToUserId),
   );
   if (previous && assignedUserId && assignedUserId !== previousAssignedUserId) {
-    events.push(buildNotificationEvent({
-      type,
-      workItemId,
-      sourceEventId,
-      eventKind: `assigned:${assignedUserId}`,
-      eventType: type === 'incident'
-        ? 'incident.assigned'
-        : 'service_request.assigned',
-      title: type === 'incident' ? 'Incident assigned' : 'Service request assigned',
-      body: `${displayReference(current, workItemId)} was assigned to you.`,
-      route,
-      target: {
-        type: 'USERS',
-        userIds: [assignedUserId],
-        userEmails: [],
-      },
+    const target = withoutCurrentActor(
+      uniqueRecipients([assignedUserId], []),
       current,
-      timestamp,
-    }));
+    );
+    if (target.userIds.length > 0 || target.userEmails.length > 0) {
+      events.push(buildNotificationEvent({
+        type,
+        workItemId,
+        sourceEventId,
+        eventKind: `assigned:${assignedUserId}`,
+        eventType: type === 'incident'
+          ? 'incident.assigned'
+          : 'service_request.assigned',
+        title: type === 'incident'
+          ? 'Incident assigned'
+          : 'Service request assigned',
+        body: `${displayReference(current, workItemId)} was assigned to you.`,
+        route,
+        target: { type: 'USERS', ...target },
+        current,
+        timestamp,
+      }));
+    }
   }
 
   const status = normalizeString(current.status).toLowerCase();
@@ -241,7 +249,10 @@ function notificationEventsForSupportChange({
         }));
       }
     } else {
-      const recipients = statusNotificationRecipients(current);
+      const recipients = withoutCurrentActor(
+        statusNotificationRecipients(current),
+        current,
+      );
       if (recipients.userIds.length === 0 && recipients.userEmails.length === 0) {
         return events;
       }
@@ -264,6 +275,43 @@ function notificationEventsForSupportChange({
   }
 
   return events;
+}
+
+function notificationEventsForIncidentComment({
+  ticketId,
+  ticket,
+  comment,
+  sourceEventId,
+  fieldValue,
+}) {
+  const current = snapshotData(ticket);
+  const activity = snapshotData(comment);
+  if (!current || !activity || activity.isInternal !== true) return [];
+  const recipients = uniqueRecipients(
+    [current.assignedToUserId],
+    [current.assignedToEmail],
+  );
+  const actor = {
+    lastActionByUserId: activity.createdByUserId,
+    lastActionByName: activity.createdByName,
+    lastActionByEmail: activity.createdByEmail,
+  };
+  const target = withoutCurrentActor(recipients, actor);
+  if (target.userIds.length === 0 && target.userEmails.length === 0) return [];
+  return [buildNotificationEvent({
+    type: 'incident',
+    workItemId: ticketId,
+    sourceEventId,
+    eventKind: 'internal_note_added',
+    eventType: 'incident.internal_note_added',
+    title: 'New activity on assigned incident',
+    body: `${normalizeString(activity.createdByName) || 'IT support'} added ` +
+      `an internal note to ${displayReference(current, ticketId)}.`,
+    route: canonicalSupportRoute('incident', ticketId),
+    target: { type: 'USERS', ...target },
+    current: { ...current, ...actor },
+    timestamp: fieldValue.serverTimestamp(),
+  })];
 }
 
 async function writeSupportNotificationEvents({ db, events }) {
@@ -733,6 +781,24 @@ function uniqueRecipients(userIds, userEmails) {
   };
 }
 
+function withoutCurrentActor(recipients, data) {
+  const actorId = normalizeString(
+    data.lastActionByUserId || data.updatedByUserId,
+  );
+  const actorEmail = normalizeString(
+    data.lastActionByEmail || data.updatedByEmail,
+  ).toLowerCase();
+  return {
+    userIds: recipients.userIds.filter((value) => value !== actorId),
+    userEmails: recipients.userEmails.filter((value) => value !== actorEmail),
+  };
+}
+
+function snapshotData(snapshot) {
+  if (!snapshot || snapshot.exists === false) return null;
+  return typeof snapshot.data === 'function' ? snapshot.data() || {} : snapshot;
+}
+
 function displayReference(data, fallback) {
   return normalizeString(
     data.reference || data.requestNumber || data.ticketNumber,
@@ -962,6 +1028,7 @@ module.exports = {
   canonicalSupportRoute,
   deterministicId,
   maintainSupportWorkItemIndex,
+  notificationEventsForIncidentComment,
   notificationEventsForSupportChange,
   parseServiceRequestAttachmentPath,
   parseKnowledgeAttachmentPath,

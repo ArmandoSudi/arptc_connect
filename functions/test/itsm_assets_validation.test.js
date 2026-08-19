@@ -8,6 +8,102 @@ const {
   validateAssetsCommand,
 } = require('../src/itsm_assets_validation');
 
+test('asset registration derives status from an optional initial assignment', () => {
+  const registration = validate(ITSM_ASSETS_COMMANDS.registerAsset, {
+    assetId: 'asset-1',
+    assetTag: 'ARPTC-001',
+    categoryId: 'laptop',
+    categoryName: 'Laptop',
+    type: 'Laptop',
+    brand: 'Dell',
+    model: 'Latitude 7450',
+    serialNumber: 'SN-001',
+    stateId: 'good',
+    stateName: 'Good',
+    acquisitionDate: '2026-08-01',
+    status: 'assigned',
+  });
+  assert.equal(registration.payload.status, 'in_stock');
+  assert.equal(registration.payload.locationId, '');
+  assert.equal(registration.payload.locationName, '');
+  const assigned = validate(ITSM_ASSETS_COMMANDS.registerAsset, {
+    assetId: 'asset-2',
+    assetTag: 'ARPTC-002',
+    categoryId: 'laptop',
+    categoryName: 'Laptop',
+    type: 'Laptop',
+    brand: 'Dell',
+    model: 'Latitude 7450',
+    serialNumber: 'SN-002',
+    stateId: 'good',
+    stateName: 'Good',
+    acquisitionDate: '2026-08-01',
+    assignedUserId: 'agent-1',
+    assignedAt: '2026-08-14',
+  });
+  assert.equal(assigned.payload.status, 'assigned');
+  assert.equal(assigned.payload.assignedUserId, 'agent-1');
+  assert.equal(assigned.payload.assignedAt, '2026-08-14T00:00:00.000Z');
+  assert.throws(
+    () => validate(ITSM_ASSETS_COMMANDS.registerAsset, {
+      assetId: 'asset-3',
+      assetTag: 'ARPTC-003',
+      categoryId: 'laptop',
+      categoryName: 'Laptop',
+      type: 'Laptop',
+      brand: 'Dell',
+      model: 'Latitude 7450',
+      serialNumber: 'SN-003',
+      stateId: 'good',
+      stateName: 'Good',
+      acquisitionDate: '2026-08-01',
+      assignedAt: '2026-08-14',
+    }),
+    /assignedAt requires assignedUserId/,
+  );
+});
+
+test('asset assignment accepts a UID without client-supplied identity fields', () => {
+  const assignment = validate(ITSM_ASSETS_COMMANDS.assignAsset, {
+    assetId: 'asset-1',
+    expectedRevision: 2,
+    assignedUserId: 'agent-42',
+    assignedAt: '2026-08-14',
+  });
+
+  assert.equal(assignment.payload.assignedUserId, 'agent-42');
+  assert.equal(assignment.payload.assignedUserName, '');
+  assert.equal(assignment.payload.assignedUserEmail, '');
+});
+
+test('asset state changes and decommissioning require observations', () => {
+  assert.throws(
+    () => validate(ITSM_ASSETS_COMMANDS.changeAssetState, {
+      assetId: 'asset-1',
+      expectedRevision: 1,
+      stateId: 'damaged',
+      stateName: 'Damaged',
+      observation: ' ',
+    }),
+    /observation must contain 1-4000 characters/,
+  );
+  const stateChange = validate(ITSM_ASSETS_COMMANDS.changeAssetState, {
+    assetId: 'asset-1',
+    expectedRevision: 1,
+    stateId: 'damaged',
+    stateName: 'Damaged',
+    observation: 'Screen cracked.',
+  });
+  assert.equal(stateChange.payload.observation, 'Screen cracked.');
+  assert.throws(
+    () => validate(ITSM_ASSETS_COMMANDS.decommissionAsset, {
+      assetId: 'asset-1',
+      expectedRevision: 2,
+    }),
+    /observation (is required|must contain)/,
+  );
+});
+
 test('stock validation rejects zero, fractional, and negative movement quantities', () => {
   for (const quantity of [0, -1, 1.5]) {
     assert.throws(

@@ -233,7 +233,10 @@ test('request uploads require canonical metadata and an accessible active parent
 
 function storageFor(uid) {
   return environment
-    .authenticatedContext(uid, { email: `${uid}@arptc.cd` })
+    .authenticatedContext(uid, {
+      email: `${uid}@arptc.cd`,
+      email_verified: true,
+    })
     .storage();
 }
 

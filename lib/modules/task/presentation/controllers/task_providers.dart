@@ -1,6 +1,5 @@
-import 'package:arptc_connect/core/firebase_providers.dart';
-import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
-import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
+import 'package:arptc_connect/modules/authentication/application/authorized_session.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:arptc_connect/modules/task/data/task_repository.dart';
 import 'package:arptc_connect/modules/task/domain/task.dart';
 import 'package:arptc_connect/modules/task/domain/task_access.dart';
@@ -30,21 +29,23 @@ class TaskFilters {
 
 final currentTaskPrincipalProvider =
     Provider.autoDispose<AsyncValue<TaskPrincipal>>((ref) {
-  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
-  final authUser = ref.watch(authStateProvider).valueOrNull ??
-      ref.read(firebaseAuthProvider).currentUser;
-  if (sessionKey == null || authUser == null) {
-    return const AsyncValue.loading();
+  final sessionState = ref.watch(authorizedSessionProvider);
+  final session = sessionState.session;
+  if (session == null) {
+    if (sessionState.status == AuthenticationStatus.initializing ||
+        sessionState.status == AuthenticationStatus.profileLoading) {
+      return const AsyncValue.loading();
+    }
+    return const AsyncValue.data(_unauthorizedTaskPrincipal);
   }
 
-  final profileAsync = ref.watch(liveAgentProfileProvider);
-  return profileAsync.whenData((profile) {
-    return TaskPrincipal.fromProfile(
-      profile: profile,
-      authUserId: authUser.uid,
-      authEmail: authUser.email ?? '',
-    );
-  });
+  return AsyncValue.data(
+    TaskPrincipal.fromProfile(
+      profile: Map<String, dynamic>.from(session.profile),
+      authUserId: session.userId,
+      authEmail: session.email,
+    ),
+  );
 });
 
 final taskFiltersProvider = StateProvider.autoDispose<TaskFilters>((ref) {
@@ -52,7 +53,7 @@ final taskFiltersProvider = StateProvider.autoDispose<TaskFilters>((ref) {
 });
 
 final departmentTasksProvider = StreamProvider.autoDispose<List<Task>>((ref) {
-  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final sessionKey = ref.watch(currentAuthorizedSessionKeyProvider);
   final principal = ref.watch(currentTaskPrincipalProvider).valueOrNull;
   if (sessionKey == null ||
       principal == null ||
@@ -73,13 +74,23 @@ final filteredDepartmentTasksProvider =
 
 final taskDetailsProvider =
     StreamProvider.autoDispose.family<Task?, String>((ref, taskId) {
-  final sessionKey = ref.watch(currentAuthSessionKeyProvider);
+  final sessionKey = ref.watch(currentAuthorizedSessionKeyProvider);
   final principal = ref.watch(currentTaskPrincipalProvider).valueOrNull;
   if (sessionKey == null || principal == null || !principal.role.canRead) {
     return Stream.value(null);
   }
   return ref.read(taskRepositoryProvider).watchTask(taskId);
 });
+
+const _unauthorizedTaskPrincipal = TaskPrincipal(
+  userId: '',
+  profileId: '',
+  displayName: '',
+  email: '',
+  departmentId: '',
+  departmentName: '',
+  role: TaskRole.none,
+);
 
 List<Task> filterTasks(List<Task> tasks, TaskFilters filters) {
   return tasks.where((task) {

@@ -253,18 +253,19 @@ Future<void> showReturnAssetDialog(
 Future<void> showAssetLifecycleTransitionDialog(
   BuildContext context,
   WidgetRef ref,
-  AssetDetail detail,
-) async {
+  AssetDetail detail, {
+  List<AssetLifecycleStatus>? validTransitions,
+}) async {
   final strings = AssetsConfigurationStrings.of(context);
-  final validTransitions = _assetLifecycleTransitions[detail.summary.status] ??
-      const <AssetLifecycleStatus>[];
-  if (validTransitions.isEmpty) return;
+  final transitions =
+      validTransitions ?? availableAssetLifecycleTransitions(detail);
+  if (transitions.isEmpty) return;
   final selected = await showDialog<AssetLifecycleStatus>(
     context: context,
     builder: (dialogContext) => SimpleDialog(
       title: Text(strings.transitionAsset),
       children: [
-        for (final status in validTransitions)
+        for (final status in transitions)
           SimpleDialogOption(
             onPressed: () => Navigator.pop(dialogContext, status),
             child: Text(strings.lifecycleStatus(status)),
@@ -273,6 +274,33 @@ Future<void> showAssetLifecycleTransitionDialog(
     ),
   );
   if (selected == null || !context.mounted) return;
+  if (_isExceptionalAssetStatus(selected)) {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        icon: Icon(
+          Icons.warning_amber_rounded,
+          color: Theme.of(dialogContext).colorScheme.error,
+        ),
+        title: Text(
+          '${strings.confirmExceptionalAssetStatus}: '
+          '${strings.lifecycleStatus(selected)}',
+        ),
+        content: Text(strings.exceptionalAssetStatusWarning),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(strings.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(strings.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+  }
   await _showAssetRecordDialog(
     context,
     ref,
@@ -307,6 +335,32 @@ Future<void> showAssetLifecycleTransitionDialog(
       ),
     ],
   );
+}
+
+List<AssetLifecycleStatus> availableAssetLifecycleTransitions(
+  AssetDetail detail,
+) {
+  final hasAssignment = detail.summary.assignedUserName.isNotEmpty;
+  final transitions = _assetLifecycleTransitions[detail.summary.status] ??
+      const <AssetLifecycleStatus>[];
+  return transitions.where((status) {
+    if (const {
+      AssetLifecycleStatus.assigned,
+      AssetLifecycleStatus.returned,
+      AssetLifecycleStatus.retired,
+    }.contains(status)) {
+      return false;
+    }
+    if (hasAssignment &&
+        !const {
+          AssetLifecycleStatus.inMaintenance,
+          AssetLifecycleStatus.lost,
+          AssetLifecycleStatus.stolen,
+        }.contains(status)) {
+      return false;
+    }
+    return true;
+  }).toList(growable: false);
 }
 
 Future<void> showRegisterLicenceDialog(
@@ -1315,11 +1369,9 @@ const _assetLifecycleTransitions =
     <AssetLifecycleStatus, List<AssetLifecycleStatus>>{
   AssetLifecycleStatus.planned: [
     AssetLifecycleStatus.ordered,
-    AssetLifecycleStatus.retired,
   ],
   AssetLifecycleStatus.ordered: [
     AssetLifecycleStatus.received,
-    AssetLifecycleStatus.retired,
   ],
   AssetLifecycleStatus.received: [
     AssetLifecycleStatus.inStock,
@@ -1330,14 +1382,11 @@ const _assetLifecycleTransitions =
     AssetLifecycleStatus.configured,
     AssetLifecycleStatus.assigned,
     AssetLifecycleStatus.inMaintenance,
-    AssetLifecycleStatus.retired,
-    AssetLifecycleStatus.disposed,
   ],
   AssetLifecycleStatus.configured: [
     AssetLifecycleStatus.assigned,
     AssetLifecycleStatus.inStock,
     AssetLifecycleStatus.inMaintenance,
-    AssetLifecycleStatus.retired,
   ],
   AssetLifecycleStatus.assigned: [
     AssetLifecycleStatus.inMaintenance,
@@ -1349,27 +1398,25 @@ const _assetLifecycleTransitions =
     AssetLifecycleStatus.configured,
     AssetLifecycleStatus.assigned,
     AssetLifecycleStatus.returned,
-    AssetLifecycleStatus.retired,
   ],
   AssetLifecycleStatus.returned: [
     AssetLifecycleStatus.inStock,
     AssetLifecycleStatus.configured,
     AssetLifecycleStatus.inMaintenance,
-    AssetLifecycleStatus.retired,
   ],
   AssetLifecycleStatus.retired: [AssetLifecycleStatus.disposed],
   AssetLifecycleStatus.disposed: [],
   AssetLifecycleStatus.lost: [
-    AssetLifecycleStatus.inStock,
-    AssetLifecycleStatus.retired,
-    AssetLifecycleStatus.disposed,
+    AssetLifecycleStatus.returned,
   ],
   AssetLifecycleStatus.stolen: [
-    AssetLifecycleStatus.inStock,
-    AssetLifecycleStatus.retired,
-    AssetLifecycleStatus.disposed,
+    AssetLifecycleStatus.returned,
   ],
 };
+
+bool _isExceptionalAssetStatus(AssetLifecycleStatus status) =>
+    status == AssetLifecycleStatus.lost ||
+    status == AssetLifecycleStatus.stolen;
 
 _FieldSpec _requiredId(
   String key,

@@ -14,6 +14,7 @@ abstract final class ItsmRoutes {
   static const assets = '$assetsConfiguration/assets';
   static const myAssets = '$assets/my';
   static const assetRegister = '$assets/register';
+  static const assetParameters = '$assetRegister/parameters';
   static const stock = '$assetsConfiguration/stock';
   static const licences = '$assetsConfiguration/licences';
   static const suppliersWarranties =

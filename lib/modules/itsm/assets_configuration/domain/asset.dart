@@ -49,6 +49,8 @@ enum AssetTransitionIssue { transitionNotAllowed, assigneeRequired }
 
 abstract final class AssetLifecyclePolicy {
   static const Map<AssetStatus, Set<AssetStatus>> _allowed = {
+    // These procurement states are retained for existing records. Assets
+    // registered by the current workflow start directly in stock.
     AssetStatus.planned: {AssetStatus.ordered},
     AssetStatus.ordered: {AssetStatus.received},
     AssetStatus.received: {AssetStatus.inStock, AssetStatus.configured},
@@ -71,8 +73,8 @@ abstract final class AssetLifecyclePolicy {
       AssetStatus.retired,
     },
     AssetStatus.retired: {AssetStatus.disposed},
-    AssetStatus.lost: {AssetStatus.returned, AssetStatus.retired},
-    AssetStatus.stolen: {AssetStatus.returned, AssetStatus.retired},
+    AssetStatus.lost: {AssetStatus.returned},
+    AssetStatus.stolen: {AssetStatus.returned},
     AssetStatus.disposed: {},
   };
 
@@ -114,7 +116,9 @@ class Asset {
     required DateTime updatedAt,
     this.qrBarcode = '',
     this.serialNumber = '',
+    this.productNumber = '',
     this.description = '',
+    this.observation = '',
     this.acquisitionDate,
     this.acquisitionCost,
     this.currencyCode = '',
@@ -125,10 +129,13 @@ class Asset {
     this.siteName = '',
     this.locationId = '',
     this.locationName = '',
+    this.stateId = '',
+    this.stateName = '',
     this.departmentId = '',
     this.departmentName = '',
     this.assignedUserId = '',
     this.assignedUserName = '',
+    this.isInStock = false,
     this.stockLocationId = '',
     this.securityBaselineId = '',
     Iterable<String> attachmentIds = const [],
@@ -166,7 +173,9 @@ class Asset {
   final String brand;
   final String model;
   final String serialNumber;
+  final String productNumber;
   final String description;
+  final String observation;
   final DateTime? acquisitionDate;
   final double? acquisitionCost;
   final String currencyCode;
@@ -179,10 +188,13 @@ class Asset {
   final String siteName;
   final String locationId;
   final String locationName;
+  final String stateId;
+  final String stateName;
   final String departmentId;
   final String departmentName;
   final String assignedUserId;
   final String assignedUserName;
+  final bool isInStock;
   final String stockLocationId;
   final String securityBaselineId;
   final List<String> attachmentIds;
@@ -207,7 +219,9 @@ class Asset {
         brand: itsmAssetString(data, 'brand'),
         model: itsmAssetString(data, 'model'),
         serialNumber: itsmAssetString(data, 'serialNumber'),
+        productNumber: itsmAssetString(data, 'productNumber'),
         description: itsmAssetString(data, 'description'),
+        observation: itsmAssetString(data, 'observation'),
         acquisitionDate: itsmAssetDate(data['acquisitionDate']),
         acquisitionCost: data['acquisitionCost'] == null
             ? null
@@ -224,10 +238,15 @@ class Asset {
         siteName: itsmAssetString(data, 'siteName'),
         locationId: itsmAssetString(data, 'locationId'),
         locationName: itsmAssetString(data, 'locationName'),
+        stateId: itsmAssetString(data, 'stateId'),
+        stateName: itsmAssetString(data, 'stateName'),
         departmentId: itsmAssetString(data, 'departmentId'),
         departmentName: itsmAssetString(data, 'departmentName'),
         assignedUserId: itsmAssetString(data, 'assignedUserId'),
         assignedUserName: itsmAssetString(data, 'assignedUserName'),
+        isInStock: data['isInStock'] is bool
+            ? data['isInStock'] == true
+            : _legacyIsInStock(data),
         stockLocationId: itsmAssetString(data, 'stockLocationId'),
         securityBaselineId: itsmAssetString(data, 'securityBaselineId'),
         attachmentIds: itsmAssetStrings(data['attachmentIds']),
@@ -247,7 +266,9 @@ class Asset {
         'brand': brand,
         'model': model,
         'serialNumber': serialNumber,
+        'productNumber': productNumber,
         'description': description,
+        'observation': observation,
         'acquisitionDate': itsmAssetTimestamp(acquisitionDate),
         'acquisitionCost': acquisitionCost,
         'currencyCode': currencyCode,
@@ -260,10 +281,13 @@ class Asset {
         'siteName': siteName,
         'locationId': locationId,
         'locationName': locationName,
+        'stateId': stateId,
+        'stateName': stateName,
         'departmentId': departmentId,
         'departmentName': departmentName,
         'assignedUserId': assignedUserId,
         'assignedUserName': assignedUserName,
+        'isInStock': isInStock,
         'stockLocationId': stockLocationId,
         'securityBaselineId': securityBaselineId,
         'attachmentIds': attachmentIds,
@@ -271,4 +295,11 @@ class Asset {
         'createdAt': itsmAssetTimestamp(createdAt),
         'updatedAt': itsmAssetTimestamp(updatedAt),
       };
+}
+
+bool _legacyIsInStock(Map<String, Object?> data) {
+  final status = AssetStatus.fromValue(data['status']);
+  final assignedUserId = itsmAssetString(data, 'assignedUserId');
+  return assignedUserId.isEmpty &&
+      (status == AssetStatus.inStock || status == AssetStatus.configured);
 }

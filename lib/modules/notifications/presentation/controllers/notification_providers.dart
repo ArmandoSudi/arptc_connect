@@ -1,22 +1,16 @@
 import 'package:arptc_connect/modules/notifications/data/firestore_notification_repository.dart';
 import 'package:arptc_connect/modules/notifications/domain/app_notification.dart';
-import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
-import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
+import 'package:arptc_connect/modules/authentication/application/authorized_session.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final currentNotificationAgentIdProvider = Provider<AsyncValue<String>>((ref) {
-  final authState = ref.watch(authStateProvider);
-  if (authState.isLoading) {
+  final sessionState = ref.watch(authorizedSessionProvider);
+  if (sessionState.status == AuthenticationStatus.initializing ||
+      sessionState.status == AuthenticationStatus.profileLoading) {
     return const AsyncValue.loading();
   }
-  if (authState.valueOrNull == null) {
-    return const AsyncValue.data('');
-  }
-
-  final profileAsync = ref.watch(liveAgentProfileProvider);
-  return profileAsync.whenData((profile) {
-    return _string(profile['id']);
-  });
+  return AsyncValue.data(sessionState.session?.userId ?? '');
 });
 
 final personalNotificationsProvider =
@@ -32,8 +26,8 @@ final personalNotificationsProvider =
 
 final globalNotificationsProvider =
     StreamProvider<List<AppNotification>>((ref) {
-  final authState = ref.watch(authStateProvider);
-  if (authState.isLoading || authState.valueOrNull == null) {
+  final sessionKey = ref.watch(currentAuthorizedSessionKeyProvider);
+  if (sessionKey == null) {
     return Stream.value(const <AppNotification>[]);
   }
 
@@ -115,8 +109,6 @@ int _compareNotifications(AppNotification left, AppNotification right) {
   final rightDate = right.createdAt ?? DateTime(1900);
   return rightDate.compareTo(leftDate);
 }
-
-String _string(dynamic value) => value?.toString().trim() ?? '';
 
 class _AsyncError {
   const _AsyncError(this.error, this.stackTrace);

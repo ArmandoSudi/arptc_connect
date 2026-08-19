@@ -3,6 +3,7 @@ import 'package:arptc_connect/widgets/corporate_components.dart';
 import 'package:flutter/material.dart';
 
 import '../../application/assets_configuration_contracts.dart';
+import '../../domain/asset_parameter.dart';
 import '../assets_configuration_strings.dart';
 import 'assets_configuration_shell.dart';
 import 'assets_configuration_state.dart';
@@ -85,80 +86,154 @@ class AssetRegisterView extends StatelessWidget {
   const AssetRegisterView({
     required this.assets,
     required this.onSelected,
+    required this.categoryOptions,
+    required this.brandOptions,
     super.key,
-    this.searchQuery = '',
     this.onSearchChanged,
-    this.onPreviousPage,
-    this.onNextPage,
+    this.selectedCategoryId,
+    this.selectedBrand,
+    this.selectedAvailability,
+    this.onCategoryChanged,
+    this.onBrandChanged,
+    this.onAvailabilityChanged,
   });
 
   final List<AssetSummary> assets;
   final ValueChanged<AssetSummary> onSelected;
-  final String searchQuery;
+  final Map<String, String> categoryOptions;
+  final List<String> brandOptions;
   final ValueChanged<String>? onSearchChanged;
-  final VoidCallback? onPreviousPage;
-  final VoidCallback? onNextPage;
+  final String? selectedCategoryId;
+  final String? selectedBrand;
+  final AssetAvailability? selectedAvailability;
+  final ValueChanged<String?>? onCategoryChanged;
+  final ValueChanged<String?>? onBrandChanged;
+  final ValueChanged<AssetAvailability?>? onAvailabilityChanged;
 
   @override
   Widget build(BuildContext context) {
     final strings = AssetsConfigurationStrings.of(context);
-    if (assets.isEmpty) {
-      return Column(
-        children: [
-          AppSearchBar(
-            hintText: strings.searchAssets,
-            onChanged: onSearchChanged,
-          ),
-          AssetsConfigurationEmptyState(
-            title: strings.noAssets,
-            description: strings.noDataDescription,
-          ),
-        ],
-      );
-    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        AppSearchBar(
-          hintText: strings.searchAssets,
-          onChanged: onSearchChanged,
-        ),
-        const SizedBox(height: 16),
         LayoutBuilder(
           builder: (context, constraints) {
-            if (constraints.maxWidth < 760) {
+            final stacked = constraints.maxWidth < 760;
+            final fields = <Widget>[
+              AppSearchBar(
+                hintText: strings.searchAssetSerialOrProduct,
+                onChanged: onSearchChanged,
+              ),
+              DropdownButtonFormField<String?>(
+                value: selectedCategoryId,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: strings.filterByAssetCategory,
+                ),
+                items: [
+                  DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text(strings.allAssetCategories),
+                  ),
+                  for (final option in categoryOptions.entries)
+                    DropdownMenuItem<String?>(
+                      value: option.key,
+                      child: Text(option.value),
+                    ),
+                ],
+                onChanged: onCategoryChanged,
+              ),
+              DropdownButtonFormField<String?>(
+                value: selectedBrand,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: strings.filterByAssetBrand,
+                ),
+                items: [
+                  DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text(strings.allAssetBrands),
+                  ),
+                  for (final brand in brandOptions)
+                    DropdownMenuItem<String?>(
+                      value: brand,
+                      child: Text(brand),
+                    ),
+                ],
+                onChanged: onBrandChanged,
+              ),
+              DropdownButtonFormField<AssetAvailability?>(
+                value: selectedAvailability,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: strings.filterByAssetAvailability,
+                ),
+                items: [
+                  DropdownMenuItem<AssetAvailability?>(
+                    value: null,
+                    child: Text(strings.allAssetAvailability),
+                  ),
+                  for (final availability in AssetAvailability.values)
+                    DropdownMenuItem<AssetAvailability?>(
+                      value: availability,
+                      child: Text(strings.assetAvailabilityName(availability)),
+                    ),
+                ],
+                onChanged: onAvailabilityChanged,
+              ),
+            ];
+            if (stacked) {
               return Column(
                 children: [
-                  for (final asset in assets) ...[
-                    AssetSummaryCard(
-                      asset: asset,
-                      onTap: () => onSelected(asset),
-                    ),
+                  for (final field in fields) ...[
+                    field,
                     const SizedBox(height: 12),
                   ],
                 ],
               );
             }
-            return _AssetRegisterTable(assets: assets, onSelected: onSelected);
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(flex: 2, child: fields[0]),
+                const SizedBox(width: 12),
+                Expanded(child: fields[1]),
+                const SizedBox(width: 12),
+                Expanded(child: fields[2]),
+                const SizedBox(width: 12),
+                Expanded(child: fields[3]),
+              ],
+            );
           },
         ),
         const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            OutlinedButton.icon(
-              onPressed: onPreviousPage,
-              icon: const Icon(Icons.chevron_left),
-              label: Text(strings.previous),
-            ),
-            const SizedBox(width: 8),
-            FilledButton.tonalIcon(
-              onPressed: onNextPage,
-              icon: const Icon(Icons.chevron_right),
-              label: Text(strings.next),
-            ),
-          ],
-        ),
+        if (assets.isEmpty)
+          AssetsConfigurationEmptyState(
+            title: strings.noAssets,
+            description: strings.noDataDescription,
+          )
+        else
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth < 760) {
+                return Column(
+                  children: [
+                    for (final asset in assets) ...[
+                      AssetSummaryCard(
+                        asset: asset,
+                        onTap: () => onSelected(asset),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ],
+                );
+              }
+              return _AssetRegisterTable(
+                assets: assets,
+                onSelected: onSelected,
+              );
+            },
+          ),
       ],
     );
   }
@@ -222,8 +297,27 @@ class AssetSummaryCard extends StatelessWidget {
                     ),
                   ),
                 ],
+                if (asset.serialNumber.isNotEmpty ||
+                    asset.productNumber.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    [asset.serialNumber, asset.productNumber]
+                        .where((value) => value.isNotEmpty)
+                        .join(' • '),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 10),
-                _StatusChip(status: asset.status),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _AvailabilityBadge(availability: asset.availability),
+                    _StatusChip(status: asset.status),
+                  ],
+                ),
               ],
             ),
           ),
@@ -243,7 +337,7 @@ class AssetDetailView extends StatelessWidget {
     this.onEdit,
     this.onAssign,
     this.onReturn,
-    this.onTransition,
+    this.onUpdateStatus,
     this.onUploadAttachment,
     this.onUploadPhotograph,
     this.isUploading = false,
@@ -255,7 +349,7 @@ class AssetDetailView extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onAssign;
   final VoidCallback? onReturn;
-  final VoidCallback? onTransition;
+  final VoidCallback? onUpdateStatus;
   final VoidCallback? onUploadAttachment;
   final VoidCallback? onUploadPhotograph;
   final bool isUploading;
@@ -263,6 +357,18 @@ class AssetDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final summary = detail.summary;
+    final hasActiveAssignment = summary.assignedUserName.isNotEmpty ||
+        summary.status == AssetLifecycleStatus.assigned ||
+        summary.status == AssetLifecycleStatus.inMaintenance ||
+        summary.status == AssetLifecycleStatus.lost ||
+        summary.status == AssetLifecycleStatus.stolen;
+    final hasExceptionalStatus = summary.status == AssetLifecycleStatus.lost ||
+        summary.status == AssetLifecycleStatus.stolen;
+    final conditionName = detail.stateName.isNotEmpty
+        ? detail.stateName
+        : summary.stateName.isNotEmpty
+            ? summary.stateName
+            : summary.condition;
     final strings = AssetsConfigurationStrings.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -285,16 +391,30 @@ class AssetDetailView extends StatelessWidget {
                     value: summary.serialNumber,
                   ),
                   _DetailBlock(
+                    label: strings.productNumber,
+                    value: detail.productNumber,
+                  ),
+                  _DetailBlock(label: strings.brand, value: summary.brand),
+                  _DetailBlock(label: strings.model, value: summary.model),
+                  _DetailBlock(
                       label: strings.category, value: summary.categoryName),
-                  _DetailBlock(label: strings.type, value: detail.typeName),
                   _DetailBlock(
                       label: strings.location, value: summary.locationName),
+                  _DetailBlock(
+                    label: strings.assetCondition,
+                    value: conditionName,
+                  ),
+                  _DetailBlock(
+                    label: strings.acquisitionDate,
+                    value: detail.acquisitionDate == null
+                        ? ''
+                        : MaterialLocalizations.of(context)
+                            .formatMediumDate(detail.acquisitionDate!),
+                  ),
                   _DetailBlock(
                     label: strings.custodian,
                     value: summary.assignedUserName,
                   ),
-                  _DetailBlock(
-                      label: strings.condition, value: summary.condition),
                   _DetailBlock(
                     label: strings.compliance,
                     value: strings.complianceState(detail.complianceState),
@@ -305,6 +425,15 @@ class AssetDetailView extends StatelessWidget {
                 const Divider(height: 32),
                 Text(detail.description),
               ],
+              if (detail.observation.isNotEmpty) ...[
+                const Divider(height: 32),
+                Text(
+                  strings.observation,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                const SizedBox(height: 6),
+                Text(detail.observation),
+              ],
             ],
           ),
         ),
@@ -312,38 +441,56 @@ class AssetDetailView extends StatelessWidget {
         if (isManager)
           CorporateSurfaceCard(
             title: strings.operational,
-            subtitle: summary.assignedUserName.isEmpty
-                ? null
-                : strings.assignedAssetReturnHint,
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.end,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: onEdit,
-                  icon: const Icon(Icons.edit_outlined),
-                  label: Text(strings.editAsset),
-                ),
-                FilledButton.tonalIcon(
-                  onPressed: onAssign,
-                  icon: const Icon(Icons.person_add_alt_1_outlined),
-                  label: Text(strings.assignAsset),
-                ),
-                if (summary.assignedUserName.isNotEmpty ||
-                    summary.status == AssetLifecycleStatus.assigned ||
-                    summary.status == AssetLifecycleStatus.inMaintenance)
-                  FilledButton.tonalIcon(
-                    onPressed: onReturn,
-                    icon: const Icon(Icons.keyboard_return_outlined),
-                    label: Text(strings.returnAsset),
+            subtitle: hasExceptionalStatus
+                ? strings.exceptionalAssetReturnHint
+                : summary.assignedUserName.isEmpty
+                    ? null
+                    : strings.assignedAssetReturnHint,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final actions = <Widget>[
+                  OutlinedButton.icon(
+                    onPressed: onEdit,
+                    icon: const Icon(Icons.edit_outlined),
+                    label: Text(strings.editAsset),
                   ),
-                FilledButton.icon(
-                  onPressed: onTransition,
-                  icon: const Icon(Icons.alt_route_rounded),
-                  label: Text(strings.transitionAsset),
-                ),
-              ],
+                  if (!hasActiveAssignment && onAssign != null)
+                    FilledButton.tonalIcon(
+                      onPressed: onAssign,
+                      icon: const Icon(Icons.person_add_alt_1_outlined),
+                      label: Text(strings.newAssignment),
+                    ),
+                  if (hasActiveAssignment)
+                    FilledButton.tonalIcon(
+                      onPressed: onReturn,
+                      icon: const Icon(Icons.keyboard_return_outlined),
+                      label: Text(strings.returnAsset),
+                    ),
+                  FilledButton.icon(
+                    onPressed: onUpdateStatus,
+                    icon: const Icon(Icons.tune_rounded),
+                    label: Text(strings.updateAssetStatus),
+                  ),
+                ];
+                if (constraints.maxWidth < 560) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var index = 0; index < actions.length; index++) ...[
+                        actions[index],
+                        if (index != actions.length - 1)
+                          const SizedBox(height: 8),
+                      ],
+                    ],
+                  );
+                }
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.end,
+                  children: actions,
+                );
+              },
             ),
           )
         else
@@ -408,6 +555,81 @@ class AssetDetailView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class AssetAssignmentHistoryPanel extends StatelessWidget {
+  const AssetAssignmentHistoryPanel({required this.entries, super.key});
+
+  final List<AssetAssignmentHistoryEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AssetsConfigurationStrings.of(context);
+    return CorporateSurfaceCard(
+      title: strings.assignmentHistory,
+      child: entries.isEmpty
+          ? Text(strings.noAssignmentHistory)
+          : Column(
+              children: [
+                for (final entry in entries)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      child: Icon(
+                        entry.isCurrent
+                            ? Icons.person_pin_circle_outlined
+                            : Icons.history_outlined,
+                      ),
+                    ),
+                    title: Text(entry.assignedUserName),
+                    subtitle: Text(
+                      '${entry.isCurrent ? strings.currentAssignment : strings.previousAssignment}'
+                      ' • ${MaterialLocalizations.of(context).formatMediumDate(entry.assignedAt)}'
+                      '${entry.returnedAt == null ? '' : ' → ${MaterialLocalizations.of(context).formatMediumDate(entry.returnedAt!)}'}'
+                      '${entry.assignmentReason.isEmpty ? '' : '\n${entry.assignmentReason}'}',
+                    ),
+                  ),
+              ],
+            ),
+    );
+  }
+}
+
+class AssetStateHistoryPanel extends StatelessWidget {
+  const AssetStateHistoryPanel({required this.entries, super.key});
+
+  final List<AssetStateHistoryEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AssetsConfigurationStrings.of(context);
+    return CorporateSurfaceCard(
+      title: strings.stateHistory,
+      child: entries.isEmpty
+          ? Text(strings.noStateHistory)
+          : Column(
+              children: [
+                for (final entry in entries)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const CircleAvatar(
+                      child: Icon(Icons.fact_check_outlined),
+                    ),
+                    title: Text(
+                      entry.isInitial
+                          ? entry.toStateName
+                          : '${entry.fromStateName} → ${entry.toStateName}',
+                    ),
+                    subtitle: Text(
+                      '${entry.actorName} • '
+                      '${MaterialLocalizations.of(context).formatMediumDate(entry.changedAt)}'
+                      '\n${entry.observation}',
+                    ),
+                  ),
+              ],
+            ),
     );
   }
 }
@@ -477,24 +699,53 @@ class _AssetRegisterTable extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: DataTable(
           columns: [
-            DataColumn(label: Text(strings.assetTag)),
-            DataColumn(label: Text(strings.assetRegister)),
+            DataColumn(label: Text(strings.assetAvailability)),
+            DataColumn(label: Text(strings.serialNumber)),
+            DataColumn(label: Text(strings.productNumber)),
+            DataColumn(label: Text(strings.brand)),
+            DataColumn(label: Text(strings.model)),
             DataColumn(label: Text(strings.category)),
-            DataColumn(label: Text(strings.status)),
+            DataColumn(
+                label: Text(strings.assetParameterType(
+              AssetParameterType.state,
+            ))),
             DataColumn(label: Text(strings.custodian)),
             DataColumn(label: Text(strings.location)),
           ],
           rows: [
             for (final asset in assets)
               DataRow(
-                onSelectChanged: (_) => onSelected(asset),
                 cells: [
-                  DataCell(Text(asset.assetTag)),
-                  DataCell(Text(asset.name)),
-                  DataCell(Text(asset.categoryName)),
-                  DataCell(_StatusChip(status: asset.status)),
-                  DataCell(Text(asset.assignedUserName)),
-                  DataCell(Text(asset.locationName)),
+                  DataCell(
+                    _AvailabilityBadge(availability: asset.availability),
+                    onTap: () => onSelected(asset),
+                  ),
+                  DataCell(
+                    Text(asset.serialNumber),
+                    onTap: () => onSelected(asset),
+                  ),
+                  DataCell(
+                    Text(asset.productNumber),
+                    onTap: () => onSelected(asset),
+                  ),
+                  DataCell(Text(asset.brand), onTap: () => onSelected(asset)),
+                  DataCell(Text(asset.model), onTap: () => onSelected(asset)),
+                  DataCell(
+                    Text(asset.categoryName),
+                    onTap: () => onSelected(asset),
+                  ),
+                  DataCell(
+                    Text(asset.stateName),
+                    onTap: () => onSelected(asset),
+                  ),
+                  DataCell(
+                    Text(asset.assignedUserName),
+                    onTap: () => onSelected(asset),
+                  ),
+                  DataCell(
+                    Text(asset.locationName),
+                    onTap: () => onSelected(asset),
+                  ),
                 ],
               ),
           ],
@@ -621,6 +872,53 @@ class _StatusChip extends StatelessWidget {
       label: Text(
         strings.lifecycleStatus(status),
         style: TextStyle(color: color, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+}
+
+class _AvailabilityBadge extends StatelessWidget {
+  const _AvailabilityBadge({required this.availability});
+
+  final AssetAvailability availability;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AssetsConfigurationStrings.of(context);
+    final (icon, color) = switch (availability) {
+      AssetAvailability.inStock => (
+          Icons.inventory_2_outlined,
+          Colors.green.shade700
+        ),
+      AssetAvailability.assigned => (
+          Icons.person_pin_circle_outlined,
+          Colors.blue.shade700
+        ),
+      AssetAvailability.decommissioned => (
+          Icons.archive_outlined,
+          Colors.grey.shade700
+        ),
+      AssetAvailability.unavailable => (
+          Icons.warning_amber_rounded,
+          Colors.orange.shade800
+        ),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 6),
+          Text(
+            strings.assetAvailabilityName(availability),
+            style: TextStyle(color: color, fontWeight: FontWeight.w700),
+          ),
+        ],
       ),
     );
   }

@@ -170,7 +170,10 @@ test('change evidence is immutable and unknown storage paths are denied', async 
 
 function storageFor(uid) {
   return environment
-    .authenticatedContext(uid, { email: `${uid}@arptc.cd` })
+    .authenticatedContext(uid, {
+      email: `${uid}@arptc.cd`,
+      email_verified: true,
+    })
     .storage();
 }
 

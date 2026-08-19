@@ -7,7 +7,7 @@ firebase.initializeApp({
   messagingSenderId: '618367534949',
   projectId: 'arptc-connect',
   authDomain: 'arptc-connect.firebaseapp.com',
-  storageBucket: 'arptc-connect.appspot.com',
+  storageBucket: 'arptc-connect.firebasestorage.app',
 });
 
 const messaging = firebase.messaging();

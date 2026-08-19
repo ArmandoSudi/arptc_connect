@@ -1,5 +1,4 @@
 import 'package:arptc_connect/core/firebase_providers.dart';
-import 'package:arptc_connect/modules/incident_management/application/incident_notification_factory.dart';
 import 'package:arptc_connect/modules/incident_management/data/incident_actor.dart';
 import 'package:arptc_connect/modules/incident_management/data/incident_repository.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_audit_log.dart';
@@ -11,22 +10,26 @@ import 'package:arptc_connect/modules/incident_management/domain/incident_ticket
 import 'package:arptc_connect/modules/incident_management/domain/incident_ticket_page.dart';
 import 'package:arptc_connect/modules/incident_management/domain/incident_user.dart';
 import 'package:arptc_connect/modules/incident_management/domain/it_service.dart';
-import 'package:arptc_connect/modules/notifications/domain/notification_event.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final incidentRepositoryProvider = Provider<IncidentRepository>((ref) {
-  return FirestoreIncidentRepository(ref.read(fireStoreProvider));
+  return FirestoreIncidentRepository(
+    ref.read(fireStoreProvider),
+    ref.read(firebaseFunctionsProvider),
+  );
 });
 
 class FirestoreIncidentRepository implements IncidentRepository {
-  FirestoreIncidentRepository(this.firestore);
+  FirestoreIncidentRepository(this.firestore, this.firebaseFunctions);
 
   static const operationalLiveLimit = 250;
   static const dashboardCompatibilityLimit = 1000;
   static const childResourceLimit = 250;
 
   final FirebaseFirestore firestore;
+  final FirebaseFunctions firebaseFunctions;
 
   CollectionReference<Map<String, dynamic>> get _tickets =>
       firestore.collection('incidentTickets');
@@ -40,11 +43,8 @@ class FirestoreIncidentRepository implements IncidentRepository {
   CollectionReference<Map<String, dynamic>> get _resolutionCodes =>
       firestore.collection('incidentResolutionCodes');
 
-  CollectionReference<Map<String, dynamic>> get _agents =>
-      firestore.collection('agents');
-
-  CollectionReference<Map<String, dynamic>> get _notificationEvents =>
-      firestore.collection('notificationEvents');
+  CollectionReference<Map<String, dynamic>> get _agentDirectory =>
+      firestore.collection('agentDirectory');
 
   @override
   Future<IncidentTicketPage> fetchMyActiveTicketsPage(
@@ -288,37 +288,45 @@ class FirestoreIncidentRepository implements IncidentRepository {
 
   @override
   Stream<List<IncidentUser>> watchItStaffUsers() {
-    return _agents
-        .where('isActive', isEqualTo: true)
-        .snapshots()
-        .map((snapshot) {
-      final users = snapshot.docs
-          .map(IncidentUser.fromFirestore)
-          .where((user) => user.role == IncidentRole.manager)
-          .toList()
-        ..sort(
-          (left, right) => left.displayName
-              .toLowerCase()
-              .compareTo(right.displayName.toLowerCase()),
-        );
-      return users;
-    });
+    return Stream.fromFuture(_fetchIncidentManagerDirectory());
   }
 
   @override
-  Stream<List<IncidentUser>> watchAgents() {
-    return _agents
+  Stream<List<IncidentUser>> watchAgents(String organizationId) {
+    return _agentDirectory
+        .where('organizationId', isEqualTo: organizationId.trim())
         .where('isActive', isEqualTo: true)
+        .orderBy('displayNameLower')
+        .orderBy(FieldPath.documentId)
+        .limit(100)
         .snapshots()
         .map((snapshot) {
-      final agents = snapshot.docs.map(IncidentUser.fromFirestore).toList()
-        ..sort(
-          (left, right) => left.displayName
-              .toLowerCase()
-              .compareTo(right.displayName.toLowerCase()),
-        );
-      return agents;
+      return snapshot.docs
+          .map(IncidentUser.fromDirectoryFirestore)
+          .toList(growable: false);
     });
+  }
+
+  Future<List<IncidentUser>> _fetchIncidentManagerDirectory() async {
+    final callable = firebaseFunctions.httpsCallable(
+      'listIncidentManagerDirectory',
+    );
+    final response = await callable.call<Map<String, dynamic>>(
+      const {'limit': 100},
+    );
+    final rawItems = response.data['items'];
+    if (rawItems is! Iterable) return const [];
+    final users = rawItems
+        .whereType<Map>()
+        .map((item) => IncidentUser.fromDirectoryMap(
+              Map<String, dynamic>.from(item),
+            ))
+        .where((user) => user.id.isNotEmpty)
+        .toList();
+    users.sort((left, right) => left.displayName
+        .toLowerCase()
+        .compareTo(right.displayName.toLowerCase()));
+    return users;
   }
 
   @override
@@ -398,18 +406,10 @@ class FirestoreIncidentRepository implements IncidentRepository {
     data['createdAt'] = FieldValue.serverTimestamp();
     data['updatedAt'] = FieldValue.serverTimestamp();
     data['lastStatusChangedAt'] = FieldValue.serverTimestamp();
+    data['createdByRole'] = actor.role.value;
 
     final batch = firestore.batch();
     batch.set(doc, data);
-    if (actor.role == IncidentRole.user) {
-      batch.set(
-        _notificationEvents.doc(),
-        IncidentNotificationFactory.submittedForManagers(
-          ticket: ticket.copyWith(id: doc.id, ticketNumber: ticketNumber),
-          actor: actor,
-        ).toFirestore(),
-      );
-    }
     _addAuditLogToBatch(
       batch: batch,
       ticketRef: doc,
@@ -486,6 +486,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
       update['priority'] =
           calculateIncidentPriority(impact: impact, urgency: urgency).value;
       update['updatedAt'] = FieldValue.serverTimestamp();
+      update.addAll(_lastActionData(actor));
 
       final newStatus = update['status']?.toString();
       if (newStatus != null && newStatus != current.status) {
@@ -501,38 +502,6 @@ class FirestoreIncidentRepository implements IncidentRepository {
         message: 'Incident ticket updated',
         changes: update,
       );
-
-      final assignedToUserId =
-          (update['assignedToUserId'] ?? current.assignedToUserId).toString();
-      final assignedToEmail =
-          (update['assignedToEmail'] ?? current.assignedToEmail).toString();
-      final assignmentChanged =
-          assignedToUserId.trim() != current.assignedToUserId.trim() ||
-              assignedToEmail.trim().toLowerCase() !=
-                  current.assignedToEmail.trim().toLowerCase();
-      final isAssignmentOperation = fields.keys.any(
-        const {
-          'assignedToUserId',
-          'assignedToName',
-          'assignedToEmail',
-        }.contains,
-      );
-      final notification = assignmentChanged
-          ? IncidentNotificationFactory.assignedToManager(
-              ticket: current,
-              actor: actor,
-              assignedToUserId: assignedToUserId,
-              assignedToEmail: assignedToEmail,
-            )
-          : isAssignmentOperation
-              ? null
-              : IncidentNotificationFactory.updatedForAssignee(
-                  ticket: current,
-                  actor: actor,
-                  assignedToUserId: assignedToUserId,
-                  assignedToEmail: assignedToEmail,
-                );
-      _addNotificationToTransaction(transaction, notification);
     });
   }
 
@@ -543,7 +512,6 @@ class FirestoreIncidentRepository implements IncidentRepository {
     required IncidentActor actor,
   }) async {
     final ticketRef = _tickets.doc(ticketId);
-    final ticket = IncidentTicket.fromFirestore(await ticketRef.get());
     final commentRef = ticketRef.collection('comments').doc();
     final batch = firestore.batch();
 
@@ -560,6 +528,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
       'commentCount': FieldValue.increment(1),
       'lastCommentAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
+      ..._lastActionData(actor),
     });
     _addAuditLogToBatch(
       batch: batch,
@@ -568,14 +537,6 @@ class FirestoreIncidentRepository implements IncidentRepository {
       action: 'internal_note_added',
       message: 'Internal note added',
     );
-    _addNotificationToBatch(
-      batch,
-      IncidentNotificationFactory.internalNoteForAssignee(
-        ticket: ticket,
-        actor: actor,
-      ),
-    );
-
     await batch.commit();
   }
 
@@ -588,7 +549,6 @@ class FirestoreIncidentRepository implements IncidentRepository {
     Iterable<String> suggestedKnowledgeArticleIds = const [],
   }) async {
     final ticketRef = _tickets.doc(ticketId);
-    final ticket = IncidentTicket.fromFirestore(await ticketRef.get());
     final batch = firestore.batch();
 
     batch.update(ticketRef, {
@@ -603,6 +563,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
           .toList(growable: false),
       'updatedAt': FieldValue.serverTimestamp(),
       'lastStatusChangedAt': FieldValue.serverTimestamp(),
+      ..._lastActionData(actor),
     });
     _addAuditLogToBatch(
       batch: batch,
@@ -618,14 +579,6 @@ class FirestoreIncidentRepository implements IncidentRepository {
             .toList(growable: false),
       },
     );
-    _addNotificationToBatch(
-      batch,
-      IncidentNotificationFactory.resolvedForAssignee(
-        ticket: ticket,
-        actor: actor,
-      ),
-    );
-
     await batch.commit();
   }
 
@@ -638,7 +591,6 @@ class FirestoreIncidentRepository implements IncidentRepository {
   }) async {
     final now = DateTime.now().toUtc();
     final ticketRef = _tickets.doc(ticketId);
-    final ticket = IncidentTicket.fromFirestore(await ticketRef.get());
     final batch = firestore.batch();
 
     batch.update(ticketRef, {
@@ -652,6 +604,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
       'archiveEligibleAt': Timestamp.fromDate(now.add(const Duration(days: 7))),
       'updatedAt': FieldValue.serverTimestamp(),
       'lastStatusChangedAt': FieldValue.serverTimestamp(),
+      ..._lastActionData(actor),
     });
     _addAuditLogToBatch(
       batch: batch,
@@ -663,14 +616,6 @@ class FirestoreIncidentRepository implements IncidentRepository {
         'resolutionCode': resolutionCode.trim(),
       },
     );
-    _addNotificationToBatch(
-      batch,
-      IncidentNotificationFactory.closedForAssignee(
-        ticket: ticket,
-        actor: actor,
-      ),
-    );
-
     await batch.commit();
   }
 
@@ -680,7 +625,6 @@ class FirestoreIncidentRepository implements IncidentRepository {
     required IncidentActor actor,
   }) async {
     final ticketRef = _tickets.doc(ticketId);
-    final ticket = IncidentTicket.fromFirestore(await ticketRef.get());
     final batch = firestore.batch();
 
     batch.update(ticketRef, {
@@ -688,6 +632,7 @@ class FirestoreIncidentRepository implements IncidentRepository {
       'lifecycleState': IncidentLifecycleState.closed.value,
       'updatedAt': FieldValue.serverTimestamp(),
       'lastStatusChangedAt': FieldValue.serverTimestamp(),
+      ..._lastActionData(actor),
     });
     _addAuditLogToBatch(
       batch: batch,
@@ -696,14 +641,6 @@ class FirestoreIncidentRepository implements IncidentRepository {
       action: 'cancelled',
       message: 'Incident ticket cancelled as a false alarm',
     );
-    _addNotificationToBatch(
-      batch,
-      IncidentNotificationFactory.cancelledForAssignee(
-        ticket: ticket,
-        actor: actor,
-      ),
-    );
-
     await batch.commit();
   }
 
@@ -823,26 +760,6 @@ class FirestoreIncidentRepository implements IncidentRepository {
         ));
   }
 
-  void _addNotificationToBatch(
-    WriteBatch batch,
-    NotificationEvent? notification,
-  ) {
-    if (notification == null) {
-      return;
-    }
-    batch.set(_notificationEvents.doc(), notification.toFirestore());
-  }
-
-  void _addNotificationToTransaction(
-    Transaction transaction,
-    NotificationEvent? notification,
-  ) {
-    if (notification == null) {
-      return;
-    }
-    transaction.set(_notificationEvents.doc(), notification.toFirestore());
-  }
-
   Map<String, dynamic> _auditLogData({
     required IncidentActor actor,
     required String action,
@@ -858,6 +775,14 @@ class FirestoreIncidentRepository implements IncidentRepository {
       'actorRole': actor.role.value,
       'changes': _serializableChanges(changes),
       'createdAt': FieldValue.serverTimestamp(),
+    };
+  }
+
+  Map<String, dynamic> _lastActionData(IncidentActor actor) {
+    return {
+      'lastActionByUserId': actor.userId.trim(),
+      'lastActionByName': actor.name.trim(),
+      'lastActionByEmail': actor.email.trim().toLowerCase(),
     };
   }
 

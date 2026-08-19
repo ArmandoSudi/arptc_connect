@@ -77,48 +77,70 @@ test('asset register, lifecycle, assignment, and return persist atomically and r
     brand: 'Framework',
     model: 'Laptop 13',
     serialNumber: 'FW-0001',
-    status: 'planned',
+    productNumber: 'FW13-2026',
+    locationId: 'kinshasa-hq',
+    locationName: 'Kinshasa HQ',
+    stateId: 'new',
+    stateName: 'New',
+    acquisitionDate: '2026-08-01',
     condition: 'new',
   });
   const registered = await execute(register);
   assert.deepEqual(registered, {
     assetId: 'asset-laptop-1',
-    status: 'planned',
+    assignmentId: null,
+    status: 'in_stock',
     revision: 0,
   });
 
-  const transitions = [
-    ['ordered', 'Purchase order approved'],
-    ['received', 'Delivery inspected'],
-    ['configured', 'Security baseline applied'],
-  ];
-  let revision = 0;
-  for (const [status, reason] of transitions) {
-    const result = await execute(command(
+  const stateChanged = await execute(command(
+    ITSM_ASSETS_COMMANDS.changeAssetState,
+    'emulator-asset-state-change',
+    {
+      assetId: 'asset-laptop-1',
+      expectedRevision: 0,
+      stateId: 'ready-for-use',
+      stateName: 'Ready for use',
+      observation: 'Acceptance inspection and diagnostics passed.',
+    },
+  ));
+  assert.equal(stateChanged.revision, 1);
+
+  await assert.rejects(
+    () => execute(command(
       ITSM_ASSETS_COMMANDS.transitionAsset,
-      `emulator-asset-transition-${status}`,
+      'emulator-asset-transition-assigned-bypass',
       {
         assetId: 'asset-laptop-1',
-        expectedRevision: revision,
-        toStatus: status,
-        reason,
-        relatedRequestId: 'request-asset-1',
+        expectedRevision: 1,
+        toStatus: 'assigned',
+        reason: 'Attempt to bypass the assignment workflow',
       },
-    ));
-    revision += 1;
-    assert.equal(result.revision, revision);
-    assert.equal(result.status, status);
-  }
+    )),
+    (error) => error.code === 'failed-precondition',
+  );
+
+  const configured = await execute(command(
+    ITSM_ASSETS_COMMANDS.transitionAsset,
+    'emulator-asset-transition-configured',
+    {
+      assetId: 'asset-laptop-1',
+      expectedRevision: 1,
+      toStatus: 'configured',
+      reason: 'Security baseline applied',
+      relatedRequestId: 'request-asset-1',
+    },
+  ));
+  assert.equal(configured.revision, 2);
+  assert.equal(configured.status, 'configured');
 
   const assignment = await execute(command(
     ITSM_ASSETS_COMMANDS.assignAsset,
     'emulator-asset-assign',
     {
       assetId: 'asset-laptop-1',
-      expectedRevision: 3,
+      expectedRevision: 2,
       assignedUserId: 'agent-custodian-1',
-      assignedUserName: 'Spoofed Custodian',
-      assignedUserEmail: 'spoofed@example.test',
       departmentId: 'department-finance',
       locationId: 'kinshasa-hq',
       relatedRequestId: 'request-asset-1',
@@ -126,7 +148,7 @@ test('asset register, lifecycle, assignment, and return persist atomically and r
     },
   ));
   assert.equal(assignment.status, 'assigned');
-  assert.equal(assignment.revision, 4);
+  assert.equal(assignment.revision, 3);
   const activeProjection = await read(
     'assetSelfServiceProjections/agent-custodian-1_asset-laptop-1',
   );
@@ -136,6 +158,40 @@ test('asset register, lifecycle, assignment, and return persist atomically and r
   assert.equal(activeProjection.supplierId, undefined);
   assert.equal(activeProjection.securityBaselineId, undefined);
   assert.equal(activeProjection.attachmentIds, undefined);
+
+  const lost = await execute(command(
+    ITSM_ASSETS_COMMANDS.transitionAsset,
+    'emulator-asset-report-lost',
+    {
+      assetId: 'asset-laptop-1',
+      expectedRevision: 3,
+      toStatus: 'lost',
+      reason: 'Custodian reported the assigned device missing.',
+    },
+  ));
+  assert.equal(lost.status, 'lost');
+  assert.equal(lost.revision, 4);
+  assert.equal((await read('assets/asset-laptop-1')).assignedUserId, 'agent-custodian-1');
+  assert.equal(
+    (await read('assetSelfServiceProjections/agent-custodian-1_asset-laptop-1'))
+      .isCurrent,
+    true,
+  );
+  assert.equal((await read(`assetAssignments/${assignment.assignmentId}`)).assetStatus, 'lost');
+
+  await assert.rejects(
+    () => execute(command(
+      ITSM_ASSETS_COMMANDS.transitionAsset,
+      'emulator-asset-transition-returned-bypass',
+      {
+        assetId: 'asset-laptop-1',
+        expectedRevision: 4,
+        toStatus: 'returned',
+        reason: 'Attempt to bypass the return workflow',
+      },
+    )),
+    (error) => error.code === 'failed-precondition',
+  );
 
   const returnCommand = command(ITSM_ASSETS_COMMANDS.returnAsset, 'emulator-asset-return', {
     assetId: 'asset-laptop-1',
@@ -150,9 +206,22 @@ test('asset register, lifecycle, assignment, and return persist atomically and r
   const returned = await execute(returnCommand);
   assert.deepEqual(await execute(returnCommand), returned);
 
+  const decommissioned = await execute(command(
+    ITSM_ASSETS_COMMANDS.decommissionAsset,
+    'emulator-asset-decommission',
+    {
+      assetId: 'asset-laptop-1',
+      expectedRevision: 5,
+      observation: 'Device is beyond economical repair.',
+    },
+  ));
+  assert.equal(decommissioned.status, 'retired');
+  assert.equal(decommissioned.revision, 6);
+
   const asset = await read('assets/asset-laptop-1');
-  assert.equal(asset.status, 'returned');
-  assert.equal(asset.revision, 5);
+  assert.equal(asset.status, 'retired');
+  assert.equal(asset.revision, 6);
+  assert.equal(asset.isInStock, false);
   assert.equal(asset.assignedUserId, null);
   assert.equal(asset.condition, 'good');
   assert.equal(asset.updatedBy, manager.uid);
@@ -184,13 +253,161 @@ test('asset register, lifecycle, assignment, and return persist atomically and r
   assert.equal(lifecycle.length, 6);
   assert.deepEqual(
     lifecycle.map((entry) => entry.toStatus).sort(),
-    ['assigned', 'configured', 'ordered', 'planned', 'received', 'returned'],
+    ['assigned', 'configured', 'in_stock', 'lost', 'retired', 'returned'],
   );
   assert.ok(lifecycle.every((entry) => entry.assetId === 'asset-laptop-1'));
   assert.ok(lifecycle.every((entry) => entry.actor.userId === manager.uid));
 
-  await assertTrustedArtifacts({ receipts: 6, audits: 6 });
-  assert.equal((await documents('assets/asset-laptop-1/auditLogs')).length, 6);
+  const stateHistory = await documents('assetStateEvents');
+  assert.equal(stateHistory.length, 2);
+  assert.deepEqual(
+    stateHistory.map((entry) => entry.toStateId).sort(),
+    ['new', 'ready-for-use'],
+  );
+  assert.ok(stateHistory.every((entry) => entry.observation));
+
+  await assertTrustedArtifacts({ receipts: 7, audits: 7 });
+  assert.equal((await documents('assets/asset-laptop-1/auditLogs')).length, 7);
+});
+
+test('asset registration can assign an active agent in one atomic command', async () => {
+  const result = await execute(command(
+    ITSM_ASSETS_COMMANDS.registerAsset,
+    'emulator-register-with-assignment',
+    {
+      assetId: 'asset-direct-assignment',
+      assetTag: 'ARPTC-DIRECT-001',
+      categoryId: 'computers',
+      categoryName: 'Computers',
+      type: 'laptop',
+      brand: 'Dell',
+      model: 'Latitude 7450',
+      serialNumber: 'DIRECT-0001',
+      productNumber: 'LAT-7450',
+      locationId: 'kinshasa-hq',
+      locationName: 'Kinshasa HQ',
+      stateId: 'new',
+      stateName: 'New',
+      condition: 'good',
+      acquisitionDate: '2026-08-01',
+      assignedUserId: 'agent-custodian-1',
+      assignedAt: '2026-08-14',
+    },
+  ));
+
+  assert.equal(result.status, 'assigned');
+  assert.equal(result.revision, 0);
+  assert.ok(result.assignmentId);
+  const asset = await read('assets/asset-direct-assignment');
+  assert.equal(asset.status, 'assigned');
+  assert.equal(asset.isInStock, false);
+  assert.equal(asset.assignedUserId, 'agent-custodian-1');
+  assert.equal(asset.assignedUserName, 'Authoritative Custodian Agent');
+  assert.equal(asset.currentAssignmentId, result.assignmentId);
+  const assignment = await read(`assetAssignments/${result.assignmentId}`);
+  assert.equal(assignment.status, 'current');
+  assert.equal(assignment.isCurrent, true);
+  assertTimestamp(assignment.assignedAt);
+  assert.equal(
+    (await read('assetAssignmentLocks/asset-direct-assignment')).isActive,
+    true,
+  );
+  const projection = await read(
+    'assetSelfServiceProjections/agent-custodian-1_asset-direct-assignment',
+  );
+  assert.equal(projection.status, 'assigned');
+  assert.equal(projection.isCurrent, true);
+  assert.equal(projection.assignmentId, result.assignmentId);
+  const lifecycle = await documents('assetLifecycleEvents');
+  assert.equal(lifecycle.length, 1);
+  assert.equal(lifecycle[0].toStatus, 'assigned');
+  assert.equal((await documents('notificationEvents')).length, 1);
+  await assertTrustedArtifacts({receipts: 1, audits: 1});
+  assert.equal(
+    (await documents('assets/asset-direct-assignment/auditLogs')).length,
+    1,
+  );
+});
+
+test('asset identifiers stay unique and location remains optional in Firestore', async () => {
+  const registration = (assetId, serialNumber, productNumber) => command(
+    ITSM_ASSETS_COMMANDS.registerAsset,
+    `emulator-register-${assetId}`,
+    {
+      assetId,
+      assetTag: serialNumber,
+      categoryId: 'computers',
+      categoryName: 'Computers',
+      type: 'laptop',
+      brand: 'Dell',
+      model: 'Latitude 7450',
+      serialNumber,
+      productNumber,
+      stateId: 'new',
+      stateName: 'New',
+      acquisitionDate: '2026-08-01',
+    },
+  );
+
+  await execute(registration('asset-unique-1', 'SN-UNIQUE-1', 'PN-UNIQUE-1'));
+  const asset = await read('assets/asset-unique-1');
+  assert.equal(asset.locationId, undefined);
+  assert.equal(asset.locationName, undefined);
+  assert.equal(asset.serialNumberNormalized, 'sn-unique-1');
+  assert.equal(asset.productNumberNormalized, 'pn-unique-1');
+
+  await assert.rejects(
+    () => execute(registration('asset-duplicate-serial', 'sn-unique-1', 'PN-OTHER')),
+    (error) => error.code === 'already-exists',
+  );
+  await assert.rejects(
+    () => execute(registration('asset-duplicate-product', 'SN-OTHER', 'pn-unique-1')),
+    (error) => error.code === 'already-exists',
+  );
+
+  assert.equal((await documents('assets')).length, 1);
+  assert.equal((await documents('assetIdentifierLocks')).length, 2);
+  await assertTrustedArtifacts({ receipts: 1, audits: 1 });
+});
+
+test('legacy assets without normalized fields or locks still reject duplicates', async () => {
+  await db.doc('assets/legacy-asset').set({
+    assetTag: 'LEGACY-SN-1',
+    serialNumber: 'LEGACY-SN-1',
+    productNumber: 'LEGACY-PN-1',
+    status: 'in_stock',
+    revision: 0,
+  });
+  const registration = (assetId, serialNumber, productNumber) => command(
+    ITSM_ASSETS_COMMANDS.registerAsset,
+    `emulator-legacy-${assetId}`,
+    {
+      assetId,
+      assetTag: serialNumber,
+      categoryId: 'computers',
+      categoryName: 'Computers',
+      type: 'laptop',
+      brand: 'Dell',
+      model: 'Latitude 7450',
+      serialNumber,
+      productNumber,
+      stateId: 'new',
+      stateName: 'New',
+      acquisitionDate: '2026-08-01',
+    },
+  );
+
+  await assert.rejects(
+    () => execute(registration('duplicate-serial', 'legacy-sn-1', 'NEW-PN')),
+    (error) => error.code === 'already-exists',
+  );
+  await assert.rejects(
+    () => execute(registration('duplicate-product', 'NEW-SN', 'legacy-pn-1')),
+    (error) => error.code === 'already-exists',
+  );
+  assert.equal((await documents('assets')).length, 1);
+  assert.equal((await documents('assetIdentifierLocks')).length, 0);
+  await assertTrustedArtifacts({ receipts: 0, audits: 0 });
 });
 
 test('all stock movement types preserve exact movement history and quantity consistency', async () => {
@@ -547,8 +764,16 @@ test('supplier, contract, warranty, and claim commands enforce references and pr
     assetId: 'asset-warranty-1',
     assetTag: 'ARPTC-WAR-001',
     categoryId: 'computers',
+    categoryName: 'Computers',
     type: 'laptop',
-    status: 'received',
+    brand: 'Dell',
+    model: 'Latitude',
+    serialNumber: 'WAR-001',
+    locationId: 'kinshasa-hq',
+    locationName: 'Kinshasa HQ',
+    stateId: 'new',
+    stateName: 'New',
+    acquisitionDate: '2026-08-01',
   }));
   await execute(command(ITSM_ASSETS_COMMANDS.saveSupplier, 'emulator-supplier-save', {
     id: 'supplier-hardware',
@@ -642,8 +867,16 @@ test('CMDB relationships enforce direction, preserve links, retire once, and aud
     assetId: 'asset-server-1',
     assetTag: 'ARPTC-SRV-001',
     categoryId: 'servers',
+    categoryName: 'Servers',
     type: 'server',
-    status: 'configured',
+    brand: 'Dell',
+    model: 'PowerEdge',
+    serialNumber: 'SRV-001',
+    locationId: 'data-centre',
+    locationName: 'Data centre',
+    stateId: 'new',
+    stateName: 'New',
+    acquisitionDate: '2026-08-01',
   }));
   await execute(command(ITSM_ASSETS_COMMANDS.saveConfigurationItem, 'emulator-ci-server', {
     ciId: 'ci-server-1',

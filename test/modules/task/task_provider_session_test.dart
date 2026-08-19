@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
+import 'package:arptc_connect/modules/authentication/application/authorized_session.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:arptc_connect/modules/task/data/task_repository.dart';
 import 'package:arptc_connect/modules/task/domain/task.dart';
 import 'package:arptc_connect/modules/task/domain/task_access.dart';
@@ -8,7 +9,9 @@ import 'package:arptc_connect/modules/task/presentation/controllers/task_provide
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final _sessionProvider = StateProvider<String?>((ref) => null);
+final _sessionProvider = StateProvider<AuthorizedSessionState>((ref) {
+  return const AuthorizedSessionState.unauthenticated();
+});
 final _principalProvider = StateProvider<AsyncValue<TaskPrincipal>>((ref) {
   return const AsyncValue.loading();
 });
@@ -18,7 +21,7 @@ void main() {
     final repository = _TrackingTaskRepository();
     final container = ProviderContainer(
       overrides: [
-        currentAuthSessionKeyProvider.overrideWith(
+        authorizedSessionProvider.overrideWith(
           (ref) => ref.watch(_sessionProvider),
         ),
         currentTaskPrincipalProvider.overrideWith(
@@ -36,7 +39,8 @@ void main() {
     await container.pump();
     expect(repository.watchCallCount, 0);
 
-    container.read(_sessionProvider.notifier).state = 'user-a|a@example.test';
+    container.read(_sessionProvider.notifier).state =
+        AuthorizedSessionState.authenticated(_session('user-a'));
     container.read(_principalProvider.notifier).state =
         AsyncValue.data(_principal('user-a', 'department-a'));
     await container.pump();
@@ -44,13 +48,15 @@ void main() {
     expect(repository.principalIds, ['user-a']);
     expect(repository.activeListenerCount, 1);
 
-    container.read(_sessionProvider.notifier).state = null;
+    container.read(_sessionProvider.notifier).state =
+        const AuthorizedSessionState.unauthenticated();
     container.read(_principalProvider.notifier).state =
         const AsyncValue.loading();
     await container.pump();
     expect(repository.activeListenerCount, 0);
 
-    container.read(_sessionProvider.notifier).state = 'user-b|b@example.test';
+    container.read(_sessionProvider.notifier).state =
+        AuthorizedSessionState.authenticated(_session('user-b'));
     container.read(_principalProvider.notifier).state =
         AsyncValue.data(_principal('user-b', 'department-b'));
     await container.pump();
@@ -62,6 +68,22 @@ void main() {
     container.dispose();
     await repository.dispose();
   });
+}
+
+AuthorizedSession _session(String userId) {
+  return AuthorizedSession(
+    sessionKey: '$userId|$userId@example.test',
+    userId: userId,
+    email: '$userId@example.test',
+    displayName: userId,
+    profile: {
+      'id': userId,
+      'email': '$userId@example.test',
+      'isActive': true,
+      'modulePermissions': const {'tasks': 'USER'},
+    },
+    modulePermissions: const {'tasks': 'USER'},
+  );
 }
 
 class _TrackingTaskRepository implements TaskRepository {

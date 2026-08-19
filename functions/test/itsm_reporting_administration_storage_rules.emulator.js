@@ -153,7 +153,10 @@ test('configuration and report-internal storage prefixes stay deny-by-default', 
 
 function storageFor(uid) {
   return environment
-    .authenticatedContext(uid, { email: `${uid}@arptc.cd` })
+    .authenticatedContext(uid, {
+      email: `${uid}@arptc.cd`,
+      email_verified: true,
+    })
     .storage();
 }
 

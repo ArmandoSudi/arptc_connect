@@ -10,6 +10,8 @@ import '../../application/assets_configuration_contracts.dart';
 import '../../application/assets_configuration_providers.dart';
 import '../assets_attachment_picker.dart';
 import '../assets_configuration_strings.dart';
+import '../widgets/asset_register_dialogs.dart';
+import '../widgets/asset_status_dialog.dart';
 import '../widgets/asset_views.dart';
 import '../widgets/assets_configuration_shell.dart';
 import '../widgets/assets_configuration_state.dart';
@@ -48,6 +50,12 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
       selfService: widget.selfService,
     );
     final detail = ref.watch(assetDetailProvider(identity));
+    final assignmentHistory = widget.selfService
+        ? null
+        : ref.watch(assetAssignmentHistoryProvider(widget.assetId));
+    final stateHistory = widget.selfService
+        ? null
+        : ref.watch(assetStateHistoryProvider(widget.assetId));
     final strings = AssetsConfigurationStrings.of(context);
     return AssetsConfigurationShell(
       title: strings.assetDetails,
@@ -63,40 +71,83 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
                 title: strings.noAssets,
                 description: strings.noDataDescription,
               )
-            : AssetDetailView(
-                detail: value,
-                isManager: !widget.selfService,
-                isUploading: _uploading,
-                onCatalogueAction: widget.selfService
-                    ? (action) =>
-                        widget.onCatalogueAction?.call(widget.assetId, action)
-                    : null,
-                onEdit: widget.selfService
-                    ? null
-                    : () => showEditAssetDialog(context, ref, value),
-                onAssign: widget.selfService
-                    ? null
-                    : () => showAssignAssetDialog(context, ref, value),
-                onReturn: widget.selfService
-                    ? null
-                    : () => showReturnAssetDialog(context, ref, value),
-                onTransition: widget.selfService
-                    ? null
-                    : () => showAssetLifecycleTransitionDialog(
-                          context,
-                          ref,
-                          value,
-                        ),
-                onUploadAttachment: widget.selfService || _uploading
-                    ? null
-                    : () => _upload(value, AssetsAttachmentKind.assetFile),
-                onUploadPhotograph: widget.selfService || _uploading
-                    ? null
-                    : () =>
-                        _upload(value, AssetsAttachmentKind.assetPhotograph),
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AssetDetailView(
+                    detail: value,
+                    isManager: !widget.selfService,
+                    isUploading: _uploading,
+                    onCatalogueAction: widget.selfService
+                        ? (action) => widget.onCatalogueAction
+                            ?.call(widget.assetId, action)
+                        : null,
+                    onEdit: widget.selfService
+                        ? null
+                        : () => showEditAssetDialog(context, ref, value),
+                    onAssign: widget.selfService || !_canAssign(value)
+                        ? null
+                        : () => showAssignAssetToAgentDialog(
+                              context,
+                              ref,
+                              value,
+                            ),
+                    onReturn: widget.selfService
+                        ? null
+                        : () => showReturnAssetDialog(context, ref, value),
+                    onUpdateStatus:
+                        widget.selfService || !canUpdateAssetStatus(value)
+                            ? null
+                            : () => showUpdateAssetStatusDialog(
+                                  context,
+                                  ref,
+                                  value,
+                                ),
+                    onUploadAttachment: widget.selfService || _uploading
+                        ? null
+                        : () => _upload(value, AssetsAttachmentKind.assetFile),
+                    onUploadPhotograph: widget.selfService || _uploading
+                        ? null
+                        : () => _upload(
+                              value,
+                              AssetsAttachmentKind.assetPhotograph,
+                            ),
+                  ),
+                  if (assignmentHistory != null) ...[
+                    const SizedBox(height: 16),
+                    AssetsConfigurationAsyncView<
+                        List<AssetAssignmentHistoryEntry>>(
+                      value: assignmentHistory,
+                      onRetry: () => ref.invalidate(
+                        assetAssignmentHistoryProvider(widget.assetId),
+                      ),
+                      data: (entries) =>
+                          AssetAssignmentHistoryPanel(entries: entries),
+                    ),
+                  ],
+                  if (stateHistory != null) ...[
+                    const SizedBox(height: 16),
+                    AssetsConfigurationAsyncView<List<AssetStateHistoryEntry>>(
+                      value: stateHistory,
+                      onRetry: () => ref.invalidate(
+                        assetStateHistoryProvider(widget.assetId),
+                      ),
+                      data: (entries) =>
+                          AssetStateHistoryPanel(entries: entries),
+                    ),
+                  ],
+                ],
               ),
       ),
     );
+  }
+
+  bool _canAssign(AssetDetail detail) {
+    if (detail.summary.assignedUserName.isNotEmpty) return false;
+    return const {
+      AssetLifecycleStatus.inStock,
+      AssetLifecycleStatus.configured,
+    }.contains(detail.summary.status);
   }
 
   Future<void> _upload(

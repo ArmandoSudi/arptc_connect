@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:arptc_connect/modules/itsm/assets_configuration/application/assets_configuration_application.dart';
+import 'package:arptc_connect/modules/itsm/assets_configuration/domain/asset_assignee.dart';
+import 'package:arptc_connect/modules/itsm/assets_configuration/domain/asset_parameter.dart';
 import 'package:arptc_connect/modules/itsm/shared/application/itsm_session.dart';
 import 'package:arptc_connect/modules/itsm/shared/data/trusted_command_gateways.dart';
 import 'package:arptc_connect/modules/itsm/shared/domain/itsm_common.dart';
@@ -66,6 +68,11 @@ class RecordingAssetsReadPort implements AssetsConfigurationReadPort {
   List<AssetSummary> myAssets = [assetSummary()];
   List<AssetSummary> assets = [assetSummary()];
   AssetDetail? detail = assetDetail();
+  List<AssetAssignmentHistoryEntry> assignmentHistory = const [];
+  List<AssetStateHistoryEntry> stateHistory = const [];
+  List<AssetParameter> assetParameters = const [];
+  List<AssetAssignee> assetAssignees = const [];
+  final assigneeSearches = <String>[];
   List<StockItemSummary> stockItems = const [];
   List<StockMovementSummary> stockMovements = const [];
 
@@ -115,6 +122,57 @@ class RecordingAssetsReadPort implements AssetsConfigurationReadPort {
   }) {
     principals.add(principal);
     return Stream.value(myAssets);
+  }
+
+  @override
+  Stream<List<AssetAssignmentHistoryEntry>> watchAssetAssignmentHistory({
+    required AssetConfigurationPrincipal principal,
+    required String assetId,
+    required int limit,
+  }) {
+    principals.add(principal);
+    return Stream.value(assignmentHistory);
+  }
+
+  @override
+  Stream<List<AssetStateHistoryEntry>> watchAssetStateHistory({
+    required AssetConfigurationPrincipal principal,
+    required String assetId,
+    required int limit,
+  }) {
+    principals.add(principal);
+    return Stream.value(stateHistory);
+  }
+
+  @override
+  Stream<List<AssetParameter>> watchAssetParameters({
+    required AssetConfigurationPrincipal principal,
+    required int limit,
+  }) {
+    principals.add(principal);
+    return Stream.value(assetParameters);
+  }
+
+  @override
+  Stream<List<AssetAssignee>> watchAssetAssignees({
+    required AssetConfigurationPrincipal principal,
+    required int limit,
+    String search = '',
+  }) {
+    principals.add(principal);
+    assigneeSearches.add(search);
+    final normalized = search.trim().toLowerCase();
+    return Stream.value(
+      assetAssignees
+          .where(
+            (agent) =>
+                normalized.isEmpty ||
+                agent.displayName.toLowerCase().contains(normalized) ||
+                agent.email.toLowerCase().contains(normalized),
+          )
+          .take(limit)
+          .toList(growable: false),
+    );
   }
 
   @override

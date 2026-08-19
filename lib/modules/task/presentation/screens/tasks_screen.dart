@@ -1,5 +1,5 @@
 import 'package:arptc_connect/generated/l10n.dart';
-import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:arptc_connect/modules/task/domain/task_access.dart';
 import 'package:arptc_connect/modules/task/presentation/controllers/task_providers.dart';
 import 'package:arptc_connect/modules/task/presentation/widgets/task_list_view.dart';
@@ -24,7 +24,7 @@ class TasksScreen extends ConsumerWidget {
           error: (error, _) => ErrorStateView(
             title: l10n.taskLoadFailed,
             description: error.toString(),
-            onRetry: () => ref.invalidate(liveAgentProfileProvider),
+            onRetry: () => ref.invalidate(authorizedSessionProvider),
           ),
           data: (principal) {
             if (!principal.role.canRead) {

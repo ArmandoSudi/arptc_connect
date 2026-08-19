@@ -5,7 +5,7 @@ import 'package:arptc_connect/modules/itsm/shared/application/itsm_session.dart'
 import 'package:arptc_connect/modules/itsm/shared/application/itsm_providers.dart';
 import 'package:arptc_connect/modules/itsm/shared/data/trusted_command_gateways.dart';
 import 'package:arptc_connect/modules/itsm/shared/domain/itsm_common.dart';
-import 'package:arptc_connect/modules/usermanagement/domain/user_management_agent.dart';
+import 'package:arptc_connect/modules/usermanagement/domain/agent_directory_entry.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,8 +84,8 @@ class _CreateServiceRequestScreenState
                   ),
                 )
                 .valueOrNull ??
-            const <UserManagementAgent>[]
-        : const <UserManagementAgent>[];
+            const <AgentDirectoryEntry>[]
+        : const <AgentDirectoryEntry>[];
     return Scaffold(
       appBar: AppBar(title: Text(l10n.itsmServiceRequests)),
       body: itemAsync.when(
@@ -167,7 +167,7 @@ class _CreateServiceRequestScreenState
     );
   }
 
-  ServiceRequestTargetUser _targetFromAgent(UserManagementAgent agent) {
+  ServiceRequestTargetUser _targetFromAgent(AgentDirectoryEntry agent) {
     return ServiceRequestTargetUser(
       userId: agent.id,
       name: agent.displayName,

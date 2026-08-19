@@ -9,9 +9,12 @@ const {
 const ITSM_ASSETS_COMMANDS = Object.freeze({
   registerAsset: 'asset.register',
   updateAsset: 'asset.update',
+  changeAssetState: 'asset.state.change',
   transitionAsset: 'asset.lifecycle.transition',
   assignAsset: 'asset.assign',
   returnAsset: 'asset.return',
+  decommissionAsset: 'asset.decommission',
+  saveAssetParameter: 'asset.parameter.save',
   saveStockLocation: 'stock.location.save',
   saveStockItem: 'stock.item.save',
   receiveStock: 'stock.receive',
@@ -106,14 +109,18 @@ const PAYLOAD_FIELDS = Object.freeze({
     'assetId', 'assetTag', 'barcode', 'categoryId', 'categoryName', 'type',
     'brand', 'model', 'serialNumber', 'description', 'acquisitionDate',
     'acquisitionCost', 'currency', 'supplierId', 'warrantyId', 'status',
-    'condition', 'siteId', 'locationId', 'departmentId', 'stockLocationId',
+    'condition', 'siteId', 'locationId', 'locationName', 'stateId',
+    'stateName', 'departmentId', 'stockLocationId', 'productNumber',
+    'observation',
     'securityBaselineId', 'attachmentIds', 'photoAttachmentIds',
+    'assignedUserId', 'assignedAt',
   ]),
   [ITSM_ASSETS_COMMANDS.updateAsset]: new Set([
     'assetId', 'expectedRevision', 'assetTag', 'barcode', 'categoryId',
     'categoryName', 'type', 'brand', 'model', 'serialNumber', 'description',
     'acquisitionDate', 'acquisitionCost', 'currency', 'supplierId',
-    'warrantyId', 'condition', 'siteId', 'locationId', 'departmentId',
+    'warrantyId', 'condition', 'siteId', 'locationId', 'locationName',
+    'stateId', 'stateName', 'departmentId', 'productNumber', 'observation',
     'stockLocationId', 'securityBaselineId', 'attachmentIds',
     'photoAttachmentIds',
   ]),
@@ -121,14 +128,23 @@ const PAYLOAD_FIELDS = Object.freeze({
     'assetId', 'expectedRevision', 'toStatus', 'reason', 'relatedRequestId',
     'locationId', 'stockLocationId', 'condition', 'evidence',
   ]),
+  [ITSM_ASSETS_COMMANDS.changeAssetState]: new Set([
+    'assetId', 'expectedRevision', 'stateId', 'stateName', 'observation',
+  ]),
   [ITSM_ASSETS_COMMANDS.assignAsset]: new Set([
     'assetId', 'expectedRevision', 'assignedUserId', 'assignedUserName',
     'assignedUserEmail', 'departmentId', 'locationId', 'relatedRequestId',
-    'evidence',
+    'assignedAt', 'evidence',
   ]),
   [ITSM_ASSETS_COMMANDS.returnAsset]: new Set([
     'assetId', 'expectedRevision', 'condition', 'locationId',
     'stockLocationId', 'reason', 'relatedRequestId', 'evidence',
+  ]),
+  [ITSM_ASSETS_COMMANDS.decommissionAsset]: new Set([
+    'assetId', 'expectedRevision', 'observation',
+  ]),
+  [ITSM_ASSETS_COMMANDS.saveAssetParameter]: new Set([
+    'id', 'expectedRevision', 'type', 'name', 'isActive', 'sortOrder',
   ]),
   [ITSM_ASSETS_COMMANDS.saveStockLocation]: new Set([
     'id', 'expectedRevision', 'name', 'description', 'siteId', 'siteName',
@@ -251,6 +267,17 @@ function validatePayload(command, payload) {
       return validateAsset(payload, false);
     case ITSM_ASSETS_COMMANDS.updateAsset:
       return validateAsset(payload, true);
+    case ITSM_ASSETS_COMMANDS.changeAssetState:
+      return {
+        assetId: requireIdentifier(payload.assetId, 'assetId'),
+        expectedRevision: requireNonNegativeInteger(
+          payload.expectedRevision,
+          'expectedRevision',
+        ),
+        stateId: requireIdentifier(payload.stateId, 'stateId'),
+        stateName: requireText(payload.stateName, 'stateName', 240),
+        observation: requireText(payload.observation, 'observation', 4000),
+      };
     case ITSM_ASSETS_COMMANDS.transitionAsset:
       return {
         assetId: requireIdentifier(payload.assetId, 'assetId'),
@@ -271,11 +298,12 @@ function validatePayload(command, payload) {
         assetId: requireIdentifier(payload.assetId, 'assetId'),
         expectedRevision: requireNonNegativeInteger(payload.expectedRevision, 'expectedRevision'),
         assignedUserId: requireIdentifier(payload.assignedUserId, 'assignedUserId'),
-        assignedUserName: requireText(payload.assignedUserName, 'assignedUserName', 240),
+        assignedUserName: optionalText(payload.assignedUserName, 240),
         assignedUserEmail: optionalEmail(payload.assignedUserEmail),
         departmentId: optionalIdentifier(payload.departmentId, 'departmentId'),
         locationId: optionalIdentifier(payload.locationId, 'locationId'),
         relatedRequestId: optionalIdentifier(payload.relatedRequestId, 'relatedRequestId'),
+        assignedAt: optionalDateString(payload.assignedAt, 'assignedAt'),
         evidence: validateEvidence(payload.evidence),
       };
     case ITSM_ASSETS_COMMANDS.returnAsset:
@@ -289,6 +317,17 @@ function validatePayload(command, payload) {
         relatedRequestId: optionalIdentifier(payload.relatedRequestId, 'relatedRequestId'),
         evidence: validateEvidence(payload.evidence),
       };
+    case ITSM_ASSETS_COMMANDS.decommissionAsset:
+      return {
+        assetId: requireIdentifier(payload.assetId, 'assetId'),
+        expectedRevision: requireNonNegativeInteger(
+          payload.expectedRevision,
+          'expectedRevision',
+        ),
+        observation: requireText(payload.observation, 'observation', 4000),
+      };
+    case ITSM_ASSETS_COMMANDS.saveAssetParameter:
+      return validateAssetParameter(payload);
     case ITSM_ASSETS_COMMANDS.saveStockLocation:
       return validateStockLocation(payload);
     case ITSM_ASSETS_COMMANDS.saveStockItem:
@@ -409,11 +448,21 @@ function validateAsset(payload, isUpdate) {
     type: isUpdate
       ? optionalText(payload.type, 120)
       : requireText(payload.type, 'type', 120),
-    brand: optionalText(payload.brand, 120),
-    model: optionalText(payload.model, 120),
-    serialNumber: optionalText(payload.serialNumber, 200),
+    brand: isUpdate
+      ? optionalText(payload.brand, 120)
+      : requireText(payload.brand, 'brand', 120),
+    model: isUpdate
+      ? optionalText(payload.model, 120)
+      : requireText(payload.model, 'model', 120),
+    serialNumber: isUpdate
+      ? optionalText(payload.serialNumber, 200)
+      : requireText(payload.serialNumber, 'serialNumber', 200),
+    productNumber: optionalText(payload.productNumber, 200),
     description: optionalText(payload.description, 4000),
-    acquisitionDate: optionalDateString(payload.acquisitionDate, 'acquisitionDate'),
+    observation: optionalText(payload.observation, 4000),
+    acquisitionDate: isUpdate
+      ? optionalDateString(payload.acquisitionDate, 'acquisitionDate')
+      : requireDateString(payload.acquisitionDate, 'acquisitionDate'),
     acquisitionCost: optionalNonNegativeNumber(payload.acquisitionCost, 'acquisitionCost'),
     currency: optionalCurrency(payload.currency),
     supplierId: optionalIdentifier(payload.supplierId, 'supplierId'),
@@ -421,6 +470,13 @@ function validateAsset(payload, isUpdate) {
     condition: optionalText(payload.condition, 200),
     siteId: optionalIdentifier(payload.siteId, 'siteId'),
     locationId: optionalIdentifier(payload.locationId, 'locationId'),
+    locationName: optionalText(payload.locationName, 240),
+    stateId: isUpdate
+      ? optionalIdentifier(payload.stateId, 'stateId')
+      : requireIdentifier(payload.stateId, 'stateId'),
+    stateName: isUpdate
+      ? optionalText(payload.stateName, 240)
+      : requireText(payload.stateName, 'stateName', 240),
     departmentId: optionalIdentifier(payload.departmentId, 'departmentId'),
     stockLocationId: optionalIdentifier(payload.stockLocationId, 'stockLocationId'),
     securityBaselineId: optionalIdentifier(payload.securityBaselineId, 'securityBaselineId'),
@@ -432,13 +488,25 @@ function validateAsset(payload, isUpdate) {
     ),
   };
   if (!isUpdate) {
-    result.status = requireEnum(
-      payload.status || 'planned',
-      'status',
-      ASSET_LIFECYCLE_STATES,
-    );
+    result.assignedUserId = optionalIdentifier(payload.assignedUserId, 'assignedUserId');
+    result.assignedAt = optionalDateString(payload.assignedAt, 'assignedAt');
+    if (result.assignedAt && !result.assignedUserId) {
+      throw invalid('assignedAt requires assignedUserId.');
+    }
+    result.status = result.assignedUserId ? 'assigned' : 'in_stock';
   }
   return result;
+}
+
+function validateAssetParameter(payload) {
+  return {
+    id: optionalIdentifier(payload.id, 'id'),
+    expectedRevision: optionalRevision(payload.expectedRevision),
+    type: requireEnum(payload.type, 'type', ['category', 'location', 'state']),
+    name: requireText(payload.name, 'name', 240),
+    isActive: optionalBoolean(payload.isActive, true, 'isActive'),
+    sortOrder: requireNonNegativeInteger(payload.sortOrder ?? 0, 'sortOrder'),
+  };
 }
 
 function validateStockMovement(command, payload) {

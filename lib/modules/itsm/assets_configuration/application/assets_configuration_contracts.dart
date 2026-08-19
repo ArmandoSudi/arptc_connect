@@ -4,6 +4,8 @@ import '../../shared/application/itsm_session.dart';
 import '../../shared/data/trusted_command_gateways.dart';
 import '../../shared/domain/itsm_common.dart';
 import '../../shared/domain/pagination.dart';
+import '../domain/asset_assignee.dart';
+import '../domain/asset_parameter.dart';
 
 enum AssetLifecycleStatus {
   planned,
@@ -19,6 +21,8 @@ enum AssetLifecycleStatus {
   lost,
   stolen,
 }
+
+enum AssetAvailability { inStock, assigned, decommissioned, unavailable }
 
 enum AssetCatalogueAction {
   reportFault,
@@ -47,6 +51,7 @@ class AssetConfigurationPrincipal {
     required this.sessionKey,
     required this.userId,
     required this.role,
+    this.organizationId = '',
   });
 
   factory AssetConfigurationPrincipal.fromSession(ItsmSession session) {
@@ -54,12 +59,14 @@ class AssetConfigurationPrincipal {
       sessionKey: session.sessionKey,
       userId: session.userId,
       role: session.role,
+      organizationId: session.organizationId,
     );
   }
 
   final String sessionKey;
   final String userId;
   final ItsmRole role;
+  final String organizationId;
 }
 
 class AssetListQuery {
@@ -68,12 +75,14 @@ class AssetListQuery {
     this.statuses = const {},
     this.categoryId,
     this.locationId,
+    this.brand,
   });
 
   final String search;
   final Set<AssetLifecycleStatus> statuses;
   final String? categoryId;
   final String? locationId;
+  final String? brand;
 
   @override
   bool operator ==(Object other) {
@@ -81,7 +90,8 @@ class AssetListQuery {
         other.search == search &&
         _sameSet(other.statuses, statuses) &&
         other.categoryId == categoryId &&
-        other.locationId == locationId;
+        other.locationId == locationId &&
+        other.brand == brand;
   }
 
   @override
@@ -90,6 +100,7 @@ class AssetListQuery {
         Object.hashAllUnordered(statuses),
         categoryId,
         locationId,
+        brand,
       );
 }
 
@@ -124,11 +135,15 @@ class AssetSummary {
     required this.name,
     required this.categoryName,
     required this.status,
+    this.categoryId = '',
     this.brand = '',
     this.model = '',
     this.serialNumber = '',
+    this.productNumber = '',
     this.locationName = '',
+    this.stateName = '',
     this.assignedUserName = '',
+    this.isInStock = false,
     this.condition = '',
     this.photoUrl,
     this.updatedAt,
@@ -137,16 +152,38 @@ class AssetSummary {
   final String id;
   final String assetTag;
   final String name;
+  final String categoryId;
   final String categoryName;
   final AssetLifecycleStatus status;
   final String brand;
   final String model;
   final String serialNumber;
+  final String productNumber;
   final String locationName;
+  final String stateName;
   final String assignedUserName;
+  final bool isInStock;
   final String condition;
   final String? photoUrl;
   final DateTime? updatedAt;
+
+  AssetAvailability get availability {
+    if (status == AssetLifecycleStatus.lost ||
+        status == AssetLifecycleStatus.stolen) {
+      return AssetAvailability.unavailable;
+    }
+    if (status == AssetLifecycleStatus.retired ||
+        status == AssetLifecycleStatus.disposed) {
+      return AssetAvailability.decommissioned;
+    }
+    if (assignedUserName.isNotEmpty ||
+        status == AssetLifecycleStatus.assigned ||
+        status == AssetLifecycleStatus.inMaintenance) {
+      return AssetAvailability.assigned;
+    }
+    if (isInStock) return AssetAvailability.inStock;
+    return AssetAvailability.unavailable;
+  }
 }
 
 class AssetLifecycleEntry {
@@ -172,6 +209,9 @@ class AssetDetail {
     this.barcode = '',
     this.typeName = '',
     this.description = '',
+    this.observation = '',
+    this.productNumber = '',
+    this.stateName = '',
     this.acquisitionDate,
     this.acquisitionCost,
     this.supplierName = '',
@@ -192,6 +232,9 @@ class AssetDetail {
   final String barcode;
   final String typeName;
   final String description;
+  final String observation;
+  final String productNumber;
+  final String stateName;
   final DateTime? acquisitionDate;
   final num? acquisitionCost;
   final String supplierName;
@@ -203,6 +246,48 @@ class AssetDetail {
   final List<String> attachmentNames;
   final List<String> photographIds;
   final List<AssetLifecycleEntry> lifecycle;
+}
+
+class AssetAssignmentHistoryEntry {
+  const AssetAssignmentHistoryEntry({
+    required this.id,
+    required this.assignedUserName,
+    required this.assignedAt,
+    required this.status,
+    this.returnedAt,
+    this.assignmentReason = '',
+  });
+
+  final String id;
+  final String assignedUserName;
+  final DateTime assignedAt;
+  final DateTime? returnedAt;
+  final String status;
+  final String assignmentReason;
+
+  bool get isCurrent => status == 'current';
+}
+
+class AssetStateHistoryEntry {
+  const AssetStateHistoryEntry({
+    required this.id,
+    required this.toStateName,
+    required this.observation,
+    required this.actorName,
+    required this.changedAt,
+    required this.revision,
+    this.fromStateName = '',
+  });
+
+  final String id;
+  final String fromStateName;
+  final String toStateName;
+  final String observation;
+  final String actorName;
+  final DateTime changedAt;
+  final int revision;
+
+  bool get isInitial => fromStateName.isEmpty;
 }
 
 class StockItemSummary {
@@ -425,6 +510,29 @@ abstract interface class AssetsConfigurationReadPort {
   Stream<AssetDetail?> watchMyAssetDetail({
     required AssetConfigurationPrincipal principal,
     required String assetId,
+  });
+
+  Stream<List<AssetAssignmentHistoryEntry>> watchAssetAssignmentHistory({
+    required AssetConfigurationPrincipal principal,
+    required String assetId,
+    required int limit,
+  });
+
+  Stream<List<AssetStateHistoryEntry>> watchAssetStateHistory({
+    required AssetConfigurationPrincipal principal,
+    required String assetId,
+    required int limit,
+  });
+
+  Stream<List<AssetParameter>> watchAssetParameters({
+    required AssetConfigurationPrincipal principal,
+    required int limit,
+  });
+
+  Stream<List<AssetAssignee>> watchAssetAssignees({
+    required AssetConfigurationPrincipal principal,
+    required int limit,
+    String search = '',
   });
 
   Stream<List<StockItemSummary>> watchStockItems({

@@ -289,7 +289,10 @@ test('all governed files are immutable after upload', async () => {
 
 function storageFor(uid) {
   return environment
-    .authenticatedContext(uid, { email: `${uid}@arptc.cd` })
+    .authenticatedContext(uid, {
+      email: `${uid}@arptc.cd`,
+      email_verified: true,
+    })
     .storage();
 }
 
@@ -373,5 +376,8 @@ async function writeTrustedMetadata(documentPath, data) {
 }
 
 function agent(role) {
-  return { modulePermissions: { ticketing: role } };
+  return {
+    isActive: true,
+    modulePermissions: { ticketing: role },
+  };
 }

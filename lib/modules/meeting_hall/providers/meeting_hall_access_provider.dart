@@ -1,5 +1,5 @@
-import 'package:arptc_connect/core/firebase_providers.dart';
-import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
+import 'package:arptc_connect/modules/authentication/application/authorized_session.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:arptc_connect/modules/usermanagement/domain/modules.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -50,26 +50,40 @@ class MeetingHallUser {
 
 final currentMeetingHallRoleProvider =
     Provider<AsyncValue<MeetingHallRole>>((ref) {
-  final profileAsync = ref.watch(liveAgentProfileProvider);
-  return profileAsync.whenData(_roleFromProfile);
+  return ref
+      .watch(currentMeetingHallUserProvider)
+      .whenData((user) => user.role);
 });
 
 final currentMeetingHallUserProvider =
     Provider<AsyncValue<MeetingHallUser>>((ref) {
-  final profileAsync = ref.watch(liveAgentProfileProvider);
-  return profileAsync.whenData((profile) {
-    final authUser = ref.read(firebaseAuthProvider).currentUser;
-    final profileId = _string(profile['id']);
-    final displayName = _displayNameFromProfile(profile);
-    return MeetingHallUser(
-      id: profileId.isNotEmpty ? profileId : authUser?.uid ?? '',
-      displayName: displayName.isNotEmpty ? displayName : 'Agent',
-      email: _string(profile['email']).isNotEmpty
-          ? _string(profile['email'])
-          : authUser?.email ?? '',
-      role: _roleFromProfile(profile),
+  final appSession = ref.watch(authorizedSessionProvider);
+  final session = appSession.session;
+  if (session == null) {
+    if (appSession.status == AuthenticationStatus.initializing ||
+        appSession.status == AuthenticationStatus.profileLoading) {
+      return const AsyncValue.loading();
+    }
+    return const AsyncValue.data(
+      MeetingHallUser(
+        id: '',
+        displayName: '',
+        email: '',
+        role: MeetingHallRole.none,
+      ),
     );
-  });
+  }
+
+  final profile = Map<String, dynamic>.from(session.profile);
+  final displayName = _displayNameFromProfile(profile);
+  return AsyncValue.data(
+    MeetingHallUser(
+      id: session.userId,
+      displayName: displayName.isNotEmpty ? displayName : 'Agent',
+      email: session.email,
+      role: _roleFromProfile(profile),
+    ),
+  );
 });
 
 MeetingHallRole _roleFromProfile(Map<String, dynamic> profile) {

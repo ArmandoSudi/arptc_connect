@@ -3,6 +3,7 @@ import 'package:arptc_connect/core/shared_preferences_provider.dart';
 import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
 import 'package:arptc_connect/utils/firebase_constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final cachedAgentProfileProvider = FutureProvider<Map<String, dynamic>>(
@@ -14,19 +15,23 @@ final cachedAgentProfileProvider = FutureProvider<Map<String, dynamic>>(
     final cached = sharedPref.getAgentProfile();
 
     if (authState.isLoading && authUser == null) {
-      return cached;
+      return <String, dynamic>{};
     }
 
     if (authState.hasValue && authUser == null) {
       await sharedPref.clearAgentProfile();
       return <String, dynamic>{};
     }
+    if (authUser == null) {
+      await sharedPref.clearAgentProfile();
+      return <String, dynamic>{};
+    }
 
     final cachedEmail = (await sharedPref.getEmail()).trim();
-    final authEmail = authUser?.email?.trim() ?? '';
+    final authEmail = authUser.email?.trim() ?? '';
     final email = authEmail.isNotEmpty ? authEmail : cachedEmail;
 
-    if (cached.isNotEmpty && _profileMatchesEmail(cached, email)) {
+    if (cached.isNotEmpty && _profileMatchesIdentity(cached, authUser)) {
       return cached;
     }
 
@@ -48,12 +53,8 @@ final liveAgentProfileProvider = StreamProvider<Map<String, dynamic>>(
     final authState = ref.watch(authStateProvider);
     final authUser =
         authState.valueOrNull ?? ref.read(firebaseAuthProvider).currentUser;
-    final cached = sharedPref.getAgentProfile();
 
     if (authState.isLoading && authUser == null) {
-      if (cached.isNotEmpty) {
-        yield cached;
-      }
       return;
     }
 
@@ -62,19 +63,18 @@ final liveAgentProfileProvider = StreamProvider<Map<String, dynamic>>(
       yield <String, dynamic>{};
       return;
     }
-
-    final cachedEmail = (await sharedPref.getEmail()).trim();
-    final authEmail = authUser?.email?.trim() ?? '';
-    final email = authEmail.isNotEmpty ? authEmail : cachedEmail;
-
-    if (cached.isNotEmpty && _profileMatchesEmail(cached, email)) {
-      yield cached;
+    if (authUser == null) {
+      await sharedPref.clearAgentProfile();
+      yield <String, dynamic>{};
+      return;
     }
 
+    final cachedEmail = (await sharedPref.getEmail()).trim();
+    final authEmail = authUser.email?.trim() ?? '';
+    final email = authEmail.isNotEmpty ? authEmail : cachedEmail;
+
     if (email.isEmpty) {
-      if (cached.isEmpty) {
-        yield <String, dynamic>{};
-      }
+      yield <String, dynamic>{};
       return;
     }
 
@@ -83,22 +83,10 @@ final liveAgentProfileProvider = StreamProvider<Map<String, dynamic>>(
     }
 
     final firestore = ref.read(fireStoreProvider);
-    final normalizedEmail = email.toLowerCase();
     final collection = firestore.collection(FirebaseConstants.agentsCollection);
 
-    final byEmailLowerQuery =
-        collection.where('emailLower', isEqualTo: normalizedEmail);
-    final byEmailQuery = collection.where('email', isEqualTo: email);
-
-    final initialByEmailLower = await byEmailLowerQuery.get();
-    final sourceStream = initialByEmailLower.docs.isNotEmpty
-        ? byEmailLowerQuery.snapshots()
-        : byEmailQuery.snapshots();
-
-    await for (final snapshot in sourceStream) {
-      final document = _pickPreferredAgentDoc(snapshot.docs,
-          normalizedEmail: normalizedEmail);
-      if (document == null) {
+    await for (final document in collection.doc(authUser.uid).snapshots()) {
+      if (!document.exists || document.data() == null) {
         await sharedPref.clearAgentProfile();
         yield <String, dynamic>{};
         continue;
@@ -146,49 +134,6 @@ dynamic _toSerializableValue(dynamic value) {
   return value.toString();
 }
 
-QueryDocumentSnapshot<Object?>? _pickPreferredAgentDoc(
-  List<QueryDocumentSnapshot<Object?>> docs, {
-  required String normalizedEmail,
-}) {
-  if (docs.isEmpty) {
-    return null;
-  }
-
-  final sorted = [...docs];
-  sorted.sort((left, right) {
-    final leftData = _docDataAsMap(left.data());
-    final rightData = _docDataAsMap(right.data());
-
-    final emailMatchComparison = _emailMatchScore(rightData, normalizedEmail)
-        .compareTo(_emailMatchScore(leftData, normalizedEmail));
-    if (emailMatchComparison != 0) {
-      return emailMatchComparison;
-    }
-
-    final activeComparison =
-        _activeScore(rightData).compareTo(_activeScore(leftData));
-    if (activeComparison != 0) {
-      return activeComparison;
-    }
-
-    final updatedComparison = _dateScore(rightData, 'updatedAt')
-        .compareTo(_dateScore(leftData, 'updatedAt'));
-    if (updatedComparison != 0) {
-      return updatedComparison;
-    }
-
-    final createdComparison = _dateScore(rightData, 'createdAt')
-        .compareTo(_dateScore(leftData, 'createdAt'));
-    if (createdComparison != 0) {
-      return createdComparison;
-    }
-
-    return right.id.compareTo(left.id);
-  });
-
-  return sorted.first;
-}
-
 Map<String, dynamic> _docDataAsMap(Object? raw) {
   if (raw is Map<String, dynamic>) {
     return raw;
@@ -199,13 +144,19 @@ Map<String, dynamic> _docDataAsMap(Object? raw) {
   return <String, dynamic>{};
 }
 
-bool _profileMatchesEmail(Map<String, dynamic> profile, String email) {
-  final normalizedEmail = email.trim().toLowerCase();
-  if (normalizedEmail.isEmpty) {
-    return true;
+bool _profileMatchesIdentity(
+  Map<String, dynamic> profile,
+  Object? authUser,
+) {
+  if (authUser is! User) {
+    return false;
   }
 
-  return _emailMatchScore(profile, normalizedEmail) > 0;
+  final normalizedEmail = authUser.email?.trim().toLowerCase() ?? '';
+  final cachedId = profile['id']?.toString().trim() ?? '';
+  return normalizedEmail.isNotEmpty &&
+      cachedId == authUser.uid &&
+      _emailMatchScore(profile, normalizedEmail) > 0;
 }
 
 int _emailMatchScore(Map<String, dynamic> data, String normalizedEmail) {
@@ -221,30 +172,5 @@ int _emailMatchScore(Map<String, dynamic> data, String normalizedEmail) {
     }
   }
 
-  return 0;
-}
-
-int _activeScore(Map<String, dynamic> data) {
-  final raw = data['isActive'];
-  if (raw is bool) {
-    return raw ? 1 : 0;
-  }
-  return 1;
-}
-
-int _dateScore(Map<String, dynamic> data, String key) {
-  final value = data[key];
-  if (value is Timestamp) {
-    return value.millisecondsSinceEpoch;
-  }
-  if (value is DateTime) {
-    return value.millisecondsSinceEpoch;
-  }
-  if (value is String) {
-    final parsed = DateTime.tryParse(value);
-    if (parsed != null) {
-      return parsed.millisecondsSinceEpoch;
-    }
-  }
   return 0;
 }

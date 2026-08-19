@@ -65,7 +65,7 @@ abstract class IncidentRepository {
 
   Stream<List<IncidentUser>> watchItStaffUsers();
 
-  Stream<List<IncidentUser>> watchAgents();
+  Stream<List<IncidentUser>> watchAgents(String organizationId);
 
   Stream<List<IncidentComment>> watchComments(
     String ticketId, {

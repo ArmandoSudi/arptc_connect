@@ -641,7 +641,10 @@ test('all repository filter shapes use updatedAt pagination and remain authorize
 
 function firestoreFor(uid) {
   return environment
-    .authenticatedContext(uid, { email: `${uid}@arptc.cd` })
+    .authenticatedContext(uid, {
+      email: `${uid}@arptc.cd`,
+      email_verified: true,
+    })
     .firestore();
 }
 

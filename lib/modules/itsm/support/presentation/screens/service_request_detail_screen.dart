@@ -5,7 +5,7 @@ import 'package:arptc_connect/modules/itsm/shared/data/trusted_command_gateways.
 import 'package:arptc_connect/modules/itsm/shared/domain/approval.dart';
 import 'package:arptc_connect/modules/itsm/shared/domain/collaboration.dart';
 import 'package:arptc_connect/modules/itsm/shared/domain/itsm_common.dart';
-import 'package:arptc_connect/modules/usermanagement/domain/user_management_agent.dart';
+import 'package:arptc_connect/modules/usermanagement/domain/agent_directory_entry.dart';
 import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/empty_state_view.dart';
 import 'package:arptc_connect/widgets/error_state_view.dart';
@@ -113,7 +113,7 @@ class ServiceRequestDetailScreen extends ConsumerWidget {
     ItsmSession? session,
   ) async {
     if (session == null) return;
-    final agent = await showDialog<UserManagementAgent>(
+    final agent = await showDialog<AgentDirectoryEntry>(
       context: context,
       builder: (_) => const _AssignmentDialog(),
     );

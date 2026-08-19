@@ -8,6 +8,7 @@ const {
   buildServiceRequestAttachmentMetadata,
   buildSupportWorkItemIndex,
   canonicalSupportRoute,
+  notificationEventsForIncidentComment,
   notificationEventsForSupportChange,
   registerKnowledgeAttachment,
   registerServiceRequestAttachment,
@@ -101,6 +102,81 @@ test('draft creation is silent and submission emits one deduplicated manager eve
   assert.equal(
     first[0].data.route,
     '/services/itsm/support/service-requests/request-1',
+  );
+});
+
+test('USER incident submission notifies managers but MANAGER creation stays silent', () => {
+  const userSubmission = notificationEventsForSupportChange({
+    collectionName: 'incidentTickets',
+    workItemId: 'incident-1',
+    before: missingSnapshot(),
+    after: snapshot({
+      ticketNumber: 'INC-1',
+      status: 'open',
+      createdByRole: 'USER',
+      createdByUserId: 'user-1',
+    }),
+    sourceEventId: 'incident-created',
+    fieldValue,
+  });
+  assert.equal(userSubmission.length, 1);
+  assert.equal(userSubmission[0].data.eventType, 'incident.created');
+  assert.deepEqual(userSubmission[0].data.target.roles, ['MANAGER']);
+
+  const managerCreation = notificationEventsForSupportChange({
+    collectionName: 'incidentTickets',
+    workItemId: 'incident-2',
+    before: missingSnapshot(),
+    after: snapshot({
+      ticketNumber: 'INC-2',
+      status: 'in_progress',
+      createdByRole: 'MANAGER',
+    }),
+    sourceEventId: 'manager-created',
+    fieldValue,
+  });
+  assert.deepEqual(managerCreation, []);
+});
+
+test('incident updates exclude the acting assignee and internal notes notify peers', () => {
+  const selfAssignment = notificationEventsForSupportChange({
+    collectionName: 'incidentTickets',
+    workItemId: 'incident-1',
+    before: snapshot({ status: 'open', assignedToUserId: '' }),
+    after: snapshot({
+      status: 'in_progress',
+      assignedToUserId: 'manager-1',
+      lastActionByUserId: 'manager-1',
+    }),
+    sourceEventId: 'self-assigned',
+    fieldValue,
+  });
+  assert.equal(
+    selfAssignment.some((event) => event.data.eventType === 'incident.assigned'),
+    false,
+  );
+
+  const note = notificationEventsForIncidentComment({
+    ticketId: 'incident-1',
+    ticket: snapshot({
+      ticketNumber: 'INC-1',
+      assignedToUserId: 'manager-1',
+      assignedToEmail: 'manager@example.com',
+    }),
+    comment: snapshot({
+      isInternal: true,
+      createdByUserId: 'manager-2',
+      createdByName: 'Second Manager',
+      createdByEmail: 'manager2@example.com',
+    }),
+    sourceEventId: 'comment-1',
+    fieldValue,
+  });
+  assert.equal(note.length, 1);
+  assert.deepEqual(note[0].data.target.userIds, ['manager-1']);
+  assert.equal(
+    note[0].data.route,
+    '/services/itsm/support/incidents/incident-1',
   );
 });
 

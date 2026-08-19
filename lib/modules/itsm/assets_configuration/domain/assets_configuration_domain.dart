@@ -1,7 +1,10 @@
 export 'asset.dart';
+export 'asset_assignee.dart';
 export 'asset_assignment.dart';
 export 'asset_lifecycle_event.dart';
+export 'asset_parameter.dart';
 export 'asset_self_service_projection.dart';
+export 'asset_state_event.dart';
 export 'assets_configuration_serialization.dart';
 export 'configuration_item.dart';
 export 'software_licence.dart';

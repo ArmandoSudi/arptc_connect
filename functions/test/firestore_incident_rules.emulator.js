@@ -233,6 +233,7 @@ test('ADMIN reads only owned raw incidents and remains read-only', async () => {
           createdByEmail: 'admin@arptc.cd',
           affectedUserId: 'admin-1',
           affectedUserEmail: 'admin@arptc.cd',
+          createdByRole: 'ADMIN',
         }),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -340,12 +341,15 @@ test('ticket deletion is denied for every incident role', async () => {
 });
 
 function userFirestore(uid, email) {
-  return environment.authenticatedContext(uid, { email }).firestore();
+  return environment
+    .authenticatedContext(uid, { email, email_verified: true })
+    .firestore();
 }
 
 function agent(role) {
   return {
     email: `${role.toLowerCase()}@arptc.cd`,
+    isActive: true,
     modulePermissions: { ticketing: role },
   };
 }
@@ -355,6 +359,7 @@ function ticket({
   createdByEmail,
   affectedUserId,
   affectedUserEmail,
+  createdByRole = 'USER',
   status = 'open',
   lifecycleState = 'active',
 }) {
@@ -365,6 +370,7 @@ function ticket({
     description: 'Unable to connect',
     status,
     lifecycleState,
+    createdByRole,
     createdByUserId,
     createdByEmail,
     affectedUserId,

@@ -28,8 +28,16 @@ test('service rejects USER and ADMIN even when called without the callable handl
           assetId: `asset-${role}`,
           assetTag: `TAG-${role}`,
           categoryId: 'computer',
+          categoryName: 'Computer',
           type: 'laptop',
-          status: 'planned',
+          brand: 'Dell',
+          model: 'Latitude',
+          serialNumber: `SERIAL-${role}`,
+          locationId: 'head-office',
+          locationName: 'Head office',
+          stateId: 'good',
+          stateName: 'Good',
+          acquisitionDate: '2026-08-01',
         }),
       }),
       (error) => error.code === 'permission-denied',
@@ -45,14 +53,22 @@ test('asset lifecycle commands are replay-safe, revision checked, and audited', 
     categoryId: 'computer',
     categoryName: 'Computer',
     type: 'laptop',
-    status: 'planned',
+    brand: 'Dell',
+    model: 'Latitude',
+    serialNumber: 'SERIAL-001',
+    locationId: 'head-office',
+    locationName: 'Head office',
+    stateId: 'good',
+    stateName: 'Good',
+    acquisitionDate: '2026-08-01',
   });
   const created = await execute(db, register);
   assert.deepEqual(await execute(db, register), created);
-  assert.equal(db.document('assets/asset-1').status, 'planned');
+  assert.equal(db.document('assets/asset-1').status, 'in_stock');
+  assert.equal(db.document('assets/asset-1').isInStock, true);
   assert.deepEqual(
     db.document('assets/asset-1').searchTokens,
-    ['arptc', '001', 'computer', 'laptop'],
+    ['arptc', '001', 'computer', 'laptop', 'dell', 'latitude', 'serial'],
   );
   assert.equal(db.pathsMatching(/^assetLifecycleEvents\//).length, 1);
 
@@ -62,14 +78,15 @@ test('asset lifecycle commands are replay-safe, revision checked, and audited', 
     {
       assetId: 'asset-1',
       expectedRevision: 0,
-      toStatus: 'ordered',
-      reason: 'Purchase order approved',
+      toStatus: 'configured',
+      reason: 'Security baseline applied',
       relatedRequestId: 'request-1',
     },
   );
   const transitioned = await execute(db, transition);
   assert.equal(transitioned.revision, 1);
-  assert.equal(db.document('assets/asset-1').status, 'ordered');
+  assert.equal(db.document('assets/asset-1').status, 'configured');
+  assert.equal(db.document('assets/asset-1').isInStock, true);
   assert.equal(db.pathsMatching(/^assetLifecycleEvents\//).length, 2);
   assert.equal(db.pathsMatching(/^itsmAuditEvents\//).length, 2);
 
@@ -80,13 +97,13 @@ test('asset lifecycle commands are replay-safe, revision checked, and audited', 
       {
         assetId: 'asset-1',
         expectedRevision: 1,
-        toStatus: 'assigned',
-        reason: 'Skip receiving',
+        toStatus: 'ordered',
+        reason: 'Invalid backwards transition',
       },
     )),
     (error) => error.code === 'failed-precondition',
   );
-  assert.equal(db.document('assets/asset-1').status, 'ordered');
+  assert.equal(db.document('assets/asset-1').status, 'configured');
   assert.equal(db.pathsMatching(/^assetLifecycleEvents\//).length, 2);
 
   await assert.rejects(
@@ -97,6 +114,423 @@ test('asset lifecycle commands are replay-safe, revision checked, and audited', 
     )),
     (error) => error.code === 'aborted',
   );
+});
+
+test('generic lifecycle transitions cannot bypass assignment or return workflows', async () => {
+  const unassigned = {
+    assetTag: 'ASSET-SAFE-1',
+    serialNumber: 'ASSET-SAFE-1',
+    status: 'in_stock',
+    isInStock: true,
+    revision: 0,
+  };
+  const assigned = {
+    ...unassigned,
+    status: 'assigned',
+    isInStock: false,
+    assignedUserId: 'user-1',
+    assignedUserName: 'First Agent ARPTC',
+    currentAssignmentId: 'assignment-1',
+  };
+  for (const finalCase of [
+    {
+      db: fakeDatabase({'assets/unassigned': unassigned}),
+      assetId: 'unassigned',
+      toStatus: 'assigned',
+    },
+    {
+      db: fakeDatabase({'assets/assigned': assigned}),
+      assetId: 'assigned',
+      toStatus: 'returned',
+    },
+  ]) {
+    await assert.rejects(
+      () => execute(finalCase.db, command(
+        ITSM_ASSETS_COMMANDS.transitionAsset,
+        `safe-transition-${finalCase.assetId}-${finalCase.toStatus}`,
+        {
+          assetId: finalCase.assetId,
+          expectedRevision: 0,
+          toStatus: finalCase.toStatus,
+          reason: 'Workflow ownership test',
+        },
+      )),
+      (error) => error.code === 'failed-precondition',
+    );
+  }
+});
+
+test('lost and stolen states preserve custody until recovery is returned', async () => {
+  for (const exceptionalStatus of ['lost', 'stolen']) {
+    const db = fakeDatabase({
+      'assets/asset-1': {
+        assetTag: 'ASSET-EXCEPTION-1',
+        type: 'laptop',
+        status: 'assigned',
+        condition: 'good',
+        isInStock: false,
+        assignedUserId: 'user-1',
+        assignedUserName: 'First Agent ARPTC',
+        currentAssignmentId: 'assignment-1',
+        revision: 0,
+      },
+      'assetAssignments/assignment-1': {
+        assetId: 'asset-1',
+        assignedUserId: 'user-1',
+        assignedUserName: 'First Agent ARPTC',
+        status: 'current',
+        isCurrent: true,
+      },
+    });
+
+    const reported = await execute(db, command(
+      ITSM_ASSETS_COMMANDS.transitionAsset,
+      `asset-report-${exceptionalStatus}-1234`,
+      {
+        assetId: 'asset-1',
+        expectedRevision: 0,
+        toStatus: exceptionalStatus,
+        reason: `Asset reported ${exceptionalStatus}`,
+      },
+    ));
+
+    assert.equal(reported.status, exceptionalStatus);
+    assert.equal(db.document('assets/asset-1').assignedUserId, 'user-1');
+    assert.equal(db.document('assets/asset-1').currentAssignmentId, 'assignment-1');
+    assert.equal(db.document('assetAssignments/assignment-1').status, 'current');
+    assert.equal(
+      db.document('assetAssignments/assignment-1').assetStatus,
+      exceptionalStatus,
+    );
+    assert.equal(
+      db.document('assetSelfServiceProjections/user-1_asset-1').isCurrent,
+      true,
+    );
+
+    const recovered = await execute(db, command(
+      ITSM_ASSETS_COMMANDS.returnAsset,
+      `asset-recover-${exceptionalStatus}-1234`,
+      {
+        assetId: 'asset-1',
+        expectedRevision: 1,
+        condition: 'good',
+        reason: `Recovered after being ${exceptionalStatus}`,
+      },
+    ));
+
+    assert.equal(recovered.status, 'returned');
+    assert.equal(db.document('assets/asset-1').assignedUserId, null);
+    assert.equal(db.document('assetAssignments/assignment-1').status, 'returned');
+    assert.equal(
+      db.document('assetSelfServiceProjections/user-1_asset-1').isCurrent,
+      false,
+    );
+  }
+});
+
+test('asset registration accepts an omitted location and starts in stock', async () => {
+  const db = fakeDatabase();
+  const result = await execute(db, command(
+    ITSM_ASSETS_COMMANDS.registerAsset,
+    'asset-initial-assignment-1234',
+    {
+      assetId: 'asset-registered',
+      assetTag: 'SN-REGISTERED',
+      categoryId: 'laptop',
+      categoryName: 'Laptop',
+      type: 'Laptop',
+      brand: 'Dell',
+      model: 'Latitude 7450',
+      serialNumber: 'SN-REGISTERED',
+      productNumber: 'PN-7450',
+      stateId: 'good',
+      stateName: 'Good',
+      acquisitionDate: '2026-08-01',
+      observation: 'New workstation',
+    },
+  ));
+
+  const asset = db.document('assets/asset-registered');
+  assert.equal(result.status, 'in_stock');
+  assert.equal(asset.status, 'in_stock');
+  assert.equal(asset.isInStock, true);
+  assert.equal(asset.productNumber, 'PN-7450');
+  assert.equal(asset.locationId, undefined);
+  assert.equal(asset.locationName, undefined);
+  assert.equal(asset.stateName, 'Good');
+  assert.equal(asset.assignedUserId, null);
+  assert.equal(db.pathsMatching(/^assetAssignments\//).length, 0);
+  const stateEvents = db.documentsMatching(/^assetStateEvents\//);
+  assert.equal(stateEvents.length, 1);
+  assert.equal(stateEvents[0].fromStateId, null);
+  assert.equal(stateEvents[0].toStateId, 'good');
+  assert.equal(stateEvents[0].observation, 'New workstation');
+});
+
+test('asset registration can create an authoritative initial assignment atomically', async () => {
+  const db = fakeDatabase({
+    'agents/agent-1': {
+      firstName: 'Armando',
+      name: 'Sudi',
+      email: 'armando@arptc.cd',
+      departmentId: 'it',
+      departmentName: 'Information Technology',
+      isActive: true,
+    },
+  });
+  const result = await execute(db, command(
+    ITSM_ASSETS_COMMANDS.registerAsset,
+    'asset-register-assigned-1234',
+    {
+      assetId: 'asset-assigned',
+      assetTag: 'SN-ASSIGNED',
+      categoryId: 'laptop',
+      categoryName: 'Laptop',
+      type: 'Laptop',
+      brand: 'Dell',
+      model: 'Latitude 7450',
+      serialNumber: 'SN-ASSIGNED',
+      stateId: 'good',
+      stateName: 'Good',
+      condition: 'good',
+      acquisitionDate: '2026-08-01',
+      assignedUserId: 'agent-1',
+      assignedAt: '2026-08-14',
+    },
+  ));
+
+  const asset = db.document('assets/asset-assigned');
+  assert.equal(result.status, 'assigned');
+  assert.equal(result.revision, 0);
+  assert.ok(result.assignmentId);
+  assert.equal(asset.status, 'assigned');
+  assert.equal(asset.isInStock, false);
+  assert.equal(asset.assignedUserId, 'agent-1');
+  assert.equal(asset.assignedUserName, 'Armando Sudi');
+  assert.equal(asset.assignedUserEmail, 'armando@arptc.cd');
+  assert.equal(asset.departmentId, 'it');
+  assert.equal(asset.currentAssignmentId, result.assignmentId);
+  const assignment = db.document(`assetAssignments/${result.assignmentId}`);
+  assert.equal(assignment.status, 'current');
+  assert.equal(assignment.isCurrent, true);
+  assert.equal(assignment.assignedUserId, 'agent-1');
+  assert.equal(assignment.assignedAt.toISOString(), '2026-08-14T00:00:00.000Z');
+  assert.equal(db.document('assetAssignmentLocks/asset-assigned').isActive, true);
+  const projection = db.document(
+    'assetSelfServiceProjections/agent-1_asset-assigned',
+  );
+  assert.equal(projection.status, 'assigned');
+  assert.equal(projection.isCurrent, true);
+  assert.equal(projection.assignmentId, result.assignmentId);
+  assert.equal(db.pathsMatching(/^notificationEvents\//).length, 1);
+  assert.equal(db.pathsMatching(/^assetLifecycleEvents\//).length, 1);
+  assert.equal(db.pathsMatching(/^assetStateEvents\//).length, 1);
+  assert.equal(db.pathsMatching(/^itsmAuditEvents\//).length, 1);
+});
+
+test('invalid initial assignee rolls back asset registration', async () => {
+  const db = fakeDatabase({
+    'agents/disabled-agent': {
+      name: 'Disabled Agent',
+      email: 'disabled@arptc.cd',
+      isActive: false,
+    },
+  });
+  await assert.rejects(
+    () => execute(db, command(
+      ITSM_ASSETS_COMMANDS.registerAsset,
+      'asset-register-disabled-1234',
+      {
+        assetId: 'asset-disabled',
+        assetTag: 'SN-DISABLED',
+        categoryId: 'laptop',
+        categoryName: 'Laptop',
+        type: 'Laptop',
+        brand: 'Dell',
+        model: 'Latitude 7450',
+        serialNumber: 'SN-DISABLED',
+        stateId: 'good',
+        stateName: 'Good',
+        acquisitionDate: '2026-08-01',
+        assignedUserId: 'disabled-agent',
+      },
+    )),
+    (error) => error.code === 'failed-precondition',
+  );
+
+  assert.equal(db.document('assets/asset-disabled'), undefined);
+  assert.equal(db.pathsMatching(/^assetAssignments\//).length, 0);
+  assert.equal(db.pathsMatching(/^assetIdentifierLocks\//).length, 0);
+  assert.equal(db.pathsMatching(/^itsmCommandReceipts\//).length, 0);
+});
+
+test('serial and product numbers are unique across asset registration and updates', async () => {
+  const db = fakeDatabase();
+  const registration = (assetId, serialNumber, productNumber) => command(
+    ITSM_ASSETS_COMMANDS.registerAsset,
+    `asset-register-${assetId}-1234`,
+    {
+      assetId,
+      assetTag: serialNumber,
+      categoryId: 'laptop',
+      categoryName: 'Laptop',
+      type: 'Laptop',
+      brand: 'Dell',
+      model: 'Latitude',
+      serialNumber,
+      productNumber,
+      stateId: 'good',
+      stateName: 'Good',
+      acquisitionDate: '2026-08-01',
+    },
+  );
+
+  await execute(db, registration('asset-a', ' SN-UNIQUE-1 ', 'PN-UNIQUE-1'));
+  await execute(db, registration('asset-b', 'SN-UNIQUE-2', 'PN-UNIQUE-2'));
+
+  await assert.rejects(
+    () => execute(db, registration('asset-c', 'sn-unique-1', 'PN-UNIQUE-3')),
+    (error) => error.code === 'already-exists' && /serial number/.test(error.message),
+  );
+  await assert.rejects(
+    () => execute(db, registration('asset-d', 'SN-UNIQUE-4', 'pn-unique-1')),
+    (error) => error.code === 'already-exists' && /product number/.test(error.message),
+  );
+  await assert.rejects(
+    () => execute(db, command(
+      ITSM_ASSETS_COMMANDS.updateAsset,
+      'asset-update-duplicate-serial-1234',
+      {
+        assetId: 'asset-b',
+        expectedRevision: 0,
+        serialNumber: 'SN-UNIQUE-1',
+      },
+    )),
+    (error) => error.code === 'already-exists',
+  );
+
+  assert.equal(db.document('assets/asset-b').serialNumber, 'SN-UNIQUE-2');
+  assert.equal(db.pathsMatching(/^assetIdentifierLocks\//).length, 4);
+});
+
+test('legacy assets without identifier locks still prevent duplicate identifiers', async () => {
+  const db = fakeDatabase({
+    'assets/legacy-asset': {
+      assetTag: 'LEGACY-SN-1',
+      serialNumber: 'LEGACY-SN-1',
+      productNumber: 'LEGACY-PN-1',
+      status: 'in_stock',
+      revision: 0,
+    },
+  });
+  const registration = (assetId, serialNumber, productNumber) => command(
+    ITSM_ASSETS_COMMANDS.registerAsset,
+    `legacy-register-${assetId}-1234`,
+    {
+      assetId,
+      assetTag: serialNumber,
+      categoryId: 'laptop',
+      categoryName: 'Laptop',
+      type: 'Laptop',
+      brand: 'Dell',
+      model: 'Latitude',
+      serialNumber,
+      productNumber,
+      stateId: 'good',
+      stateName: 'Good',
+      acquisitionDate: '2026-08-01',
+    },
+  );
+
+  await assert.rejects(
+    () => execute(db, registration('duplicate-serial', 'legacy-sn-1', 'NEW-PN')),
+    (error) => error.code === 'already-exists' && /serial number/.test(error.message),
+  );
+  await assert.rejects(
+    () => execute(db, registration('duplicate-product', 'NEW-SN', 'legacy-pn-1')),
+    (error) => error.code === 'already-exists' && /product number/.test(error.message),
+  );
+  assert.equal(db.pathsMatching(/^assetIdentifierLocks\//).length, 0);
+  assert.equal(db.pathsMatching(/^assets\//).length, 1);
+});
+
+test('asset state changes require a new state and preserve immutable observations', async () => {
+  const db = fakeDatabase({
+    'assets/asset-state-1': {
+      assetTag: 'ARPTC-STATE-1',
+      type: 'laptop',
+      status: 'in_stock',
+      isInStock: true,
+      stateId: 'good',
+      stateName: 'Good',
+      revision: 3,
+    },
+  });
+  const result = await execute(db, command(
+    ITSM_ASSETS_COMMANDS.changeAssetState,
+    'asset-state-change-1234',
+    {
+      assetId: 'asset-state-1',
+      expectedRevision: 3,
+      stateId: 'damaged',
+      stateName: 'Damaged',
+      observation: 'Screen cracked during inspection.',
+    },
+  ));
+  assert.equal(result.revision, 4);
+  assert.equal(db.document('assets/asset-state-1').stateId, 'damaged');
+  assert.equal(db.document('assets/asset-state-1').isInStock, true);
+  const events = db.documentsMatching(/^assetStateEvents\//);
+  assert.equal(events.length, 1);
+  assert.deepEqual(
+    {
+      fromStateId: events[0].fromStateId,
+      toStateId: events[0].toStateId,
+      observation: events[0].observation,
+      revision: events[0].revision,
+    },
+    {
+      fromStateId: 'good',
+      toStateId: 'damaged',
+      observation: 'Screen cracked during inspection.',
+      revision: 4,
+    },
+  );
+  await assert.rejects(
+    () => execute(db, command(
+      ITSM_ASSETS_COMMANDS.changeAssetState,
+      'asset-state-same-1234',
+      {
+        assetId: 'asset-state-1',
+        expectedRevision: 4,
+        stateId: 'damaged',
+        stateName: 'Damaged',
+        observation: 'No actual state change.',
+      },
+    )),
+    (error) => error.code === 'failed-precondition',
+  );
+  assert.equal(db.pathsMatching(/^assetStateEvents\//).length, 1);
+});
+
+test('asset parameter commands use Firestore-generated IDs for new values', async () => {
+  const db = fakeDatabase();
+  const result = await execute(db, command(
+    ITSM_ASSETS_COMMANDS.saveAssetParameter,
+    'asset-parameter-create-1234',
+    {
+      type: 'category',
+      name: 'Laptop',
+      isActive: true,
+      sortOrder: 1,
+    },
+  ));
+
+  const parameter = db.document(`assetParameters/${result.id}`);
+  assert.match(result.id, /^generated-/);
+  assert.equal(parameter.type, 'category');
+  assert.equal(parameter.name, 'Laptop');
+  assert.equal(parameter.revision, 0);
 });
 
 test('assignment and return create immutable custodianship and lifecycle events', async () => {
@@ -124,6 +558,7 @@ test('assignment and return create immutable custodianship and lifecycle events'
   ));
   assert.equal(assigned.status, 'assigned');
   assert.equal(db.document('assets/asset-1').assignedUserId, 'user-1');
+  assert.equal(db.document('assets/asset-1').isInStock, false);
   assert.equal(db.document('assets/asset-1').assignedUserName, 'First Agent ARPTC');
   assert.equal(db.document('assets/asset-1').assignedUserEmail, 'authoritative@arptc.cd');
   assert.equal(db.pathsMatching(/^assetAssignments\//).length, 1);
@@ -167,6 +602,7 @@ test('assignment and return create immutable custodianship and lifecycle events'
   ));
   assert.equal(returned.status, 'returned');
   assert.equal(db.document('assets/asset-1').assignedUserId, null);
+  assert.equal(db.document('assets/asset-1').isInStock, false);
   assert.equal(db.pathsMatching(/^assetAssignments\//).length, 1);
   const assignment = db.document(assigned.assignmentId
     ? `assetAssignments/${assigned.assignmentId}`
@@ -180,6 +616,70 @@ test('assignment and return create immutable custodianship and lifecycle events'
     false,
   );
   assert.equal(db.document('assetAssignmentLocks/asset-1').isActive, false);
+});
+
+test('decommissioning rejects active custody and retires an unassigned asset', async () => {
+  const activeDb = fakeDatabase({
+    'assets/asset-active': {
+      assetTag: 'ACTIVE-1',
+      type: 'laptop',
+      status: 'assigned',
+      isInStock: false,
+      assignedUserId: 'user-1',
+      currentAssignmentId: 'assignment-active',
+      revision: 2,
+    },
+    'assetAssignmentLocks/asset-active': {
+      assetId: 'asset-active',
+      assignmentId: 'assignment-active',
+      assignedUserId: 'user-1',
+      isActive: true,
+    },
+  });
+  await assert.rejects(
+    () => execute(activeDb, command(
+      ITSM_ASSETS_COMMANDS.decommissionAsset,
+      'asset-decommission-active-1234',
+      {
+        assetId: 'asset-active',
+        expectedRevision: 2,
+        observation: 'Device reached end of useful life.',
+      },
+    )),
+    (error) => error.code === 'failed-precondition',
+  );
+  assert.equal(activeDb.document('assets/asset-active').status, 'assigned');
+
+  const db = fakeDatabase({
+    'assets/asset-stock': {
+      assetTag: 'STOCK-1',
+      type: 'laptop',
+      status: 'in_stock',
+      isInStock: true,
+      assignedUserId: null,
+      currentAssignmentId: null,
+      revision: 5,
+    },
+  });
+  const result = await execute(db, command(
+    ITSM_ASSETS_COMMANDS.decommissionAsset,
+    'asset-decommission-stock-1234',
+    {
+      assetId: 'asset-stock',
+      expectedRevision: 5,
+      observation: 'Mainboard failure is beyond economical repair.',
+    },
+  ));
+  const asset = db.document('assets/asset-stock');
+  assert.equal(result.status, 'retired');
+  assert.equal(asset.status, 'retired');
+  assert.equal(asset.isInStock, false);
+  assert.equal(asset.decommissionedBy, manager.uid);
+  assert.equal(
+    asset.decommissionReason,
+    'Mainboard failure is beyond economical repair.',
+  );
+  assert.equal(db.pathsMatching(/^assetLifecycleEvents\//).length, 1);
 });
 
 test('assignment rejects missing, disabled, and duplicate active custodians atomically', async () => {
@@ -956,6 +1456,7 @@ function fakeDatabase(seed = {}) {
     }).map(([path, value]) => [path, clone(value)]),
   );
 
+  let generatedId = 0;
   class Reference {
     constructor(path) {
       this.path = path;
@@ -965,7 +1466,30 @@ function fakeDatabase(seed = {}) {
   }
   class Collection {
     constructor(path) { this.path = path; }
-    doc(id) { return new Reference(`${this.path}/${id}`); }
+    doc(id) {
+      const resolvedId = id || `generated-${++generatedId}`;
+      return new Reference(`${this.path}/${resolvedId}`);
+    }
+    where(field, operator, value) {
+      return new Query(this.path, [{ field, operator, value }]);
+    }
+  }
+  class Query {
+    constructor(path, filters = [], maximum = null) {
+      this.path = path;
+      this.filters = filters;
+      this.maximum = maximum;
+    }
+    where(field, operator, value) {
+      return new Query(
+        this.path,
+        [...this.filters, { field, operator, value }],
+        this.maximum,
+      );
+    }
+    limit(maximum) {
+      return new Query(this.path, this.filters, maximum);
+    }
   }
   const snapshot = (reference) => {
     const value = documents.get(reference.path);
@@ -989,7 +1513,26 @@ function fakeDatabase(seed = {}) {
     async runTransaction(callback) {
       const writes = [];
       const transaction = {
-        get: async (reference) => snapshot(reference),
+        get: async (target) => {
+          if (target instanceof Reference) return snapshot(target);
+          const prefix = `${target.path}/`;
+          const values = [...documents.entries()]
+            .filter(([path]) =>
+              path.startsWith(prefix) && !path.substring(prefix.length).includes('/'),
+            )
+            .filter(([, value]) => target.filters.every((filter) => {
+              if (filter.operator === '==') {
+                return value[filter.field] === filter.value;
+              }
+              if (filter.operator === 'in') {
+                return filter.value.includes(value[filter.field]);
+              }
+              throw new Error(`Unsupported query operator: ${filter.operator}`);
+            }))
+            .slice(0, target.maximum || undefined)
+            .map(([path]) => snapshot(new Reference(path)));
+          return { docs: values, empty: values.length === 0, size: values.length };
+        },
         create: (reference, value) => writes.push({ kind: 'create', reference, value }),
         set: (reference, value, options) => writes.push({
           kind: 'set',
@@ -998,6 +1541,7 @@ function fakeDatabase(seed = {}) {
           options,
         }),
         update: (reference, value) => writes.push({ kind: 'update', reference, value }),
+        delete: (reference) => writes.push({ kind: 'delete', reference }),
       };
       const result = await callback(transaction);
       const next = new Map([...documents.entries()].map(([path, value]) => [
@@ -1016,6 +1560,8 @@ function fakeDatabase(seed = {}) {
           next.set(path, write.options && write.options.merge
             ? { ...(next.get(path) || {}), ...clone(write.value) }
             : clone(write.value));
+        } else if (write.kind === 'delete') {
+          next.delete(path);
         }
       }
       documents.clear();

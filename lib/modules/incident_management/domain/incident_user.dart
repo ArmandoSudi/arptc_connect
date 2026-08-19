@@ -79,6 +79,43 @@ class IncidentUser {
     );
   }
 
+  factory IncidentUser.fromDirectoryFirestore(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+  ) {
+    return IncidentUser.fromDirectoryMap({
+      'id': snapshot.id,
+      ...?snapshot.data(),
+    });
+  }
+
+  factory IncidentUser.fromDirectoryMap(Map<String, dynamic> data) {
+    final pathNames = data['organizationPathNames'] is Iterable
+        ? (data['organizationPathNames'] as Iterable)
+            .map((value) => value.toString().trim())
+            .where((value) => value.isNotEmpty)
+            .toList(growable: false)
+        : const <String>[];
+    final departmentId = stringFromFirestore(data, 'departmentId');
+    final serviceId = stringFromFirestore(data, 'serviceId');
+    final departmentName =
+        departmentId.isNotEmpty && pathNames.isNotEmpty ? pathNames.first : '';
+    final serviceName =
+        serviceId.isNotEmpty && pathNames.length > 1 ? pathNames[1] : '';
+    return IncidentUser(
+      id: stringFromFirestore(data, 'id'),
+      displayName: stringFromFirestore(data, 'displayName'),
+      email: stringFromFirestore(data, 'email'),
+      departmentId: departmentId,
+      departmentName: departmentName,
+      serviceId: serviceId,
+      serviceName: serviceName,
+      matricule: '',
+      role: IncidentRole.fromValue(
+        stringFromFirestore(data, 'incidentRole'),
+      ),
+    );
+  }
+
   Map<String, dynamic> toFirestore() {
     return {
       'displayName': displayName.trim(),

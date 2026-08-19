@@ -3,10 +3,8 @@ import 'package:arptc_connect/modules/administration/data/bureau_provider.dart';
 import 'package:arptc_connect/modules/administration/data/directions_provider.dart';
 import 'package:arptc_connect/modules/administration/data/providers.dart';
 import 'package:arptc_connect/modules/administration/data/service_provider.dart';
-import 'package:arptc_connect/modules/administration/domain/models/agent.dart';
 import 'package:arptc_connect/modules/administration/domain/models/direction.dart';
 import 'package:arptc_connect/modules/administration/domain/models/service.dart';
-import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
 import 'package:arptc_connect/widgets/custom_filledbutton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -534,29 +532,7 @@ class _AddAgentScreenState extends ConsumerState<AddAgentScreen> {
     );
   }
 
-  Agent getAgent() {
-    return Agent(
-      name: nomController.text,
-      email: emailController.text,
-      dob: dobDate.formatedDate,
-      matricule: matriculeController.text,
-      genre: selectedGenre,
-      direction: directionDropdownValue,
-      service: directionDropdownValue,
-      bureau: directionDropdownValue,
-      category: '',
-      roles: ['DSI'],
-    );
-  }
-
   void registerAgent() {
-    Agent agent = getAgent();
-    ref.read(authServiceProvider).createAgent(agent);
-  }
-
-  void signupWithEmailAndPassword(String email, String password) async {
-    ref
-        .read(authServiceProvider)
-        .signInWithEmailAndPassword(email, password, context);
+    context.go('/service/usermanagement/agents/add');
   }
 }

@@ -157,6 +157,24 @@ class S {
   String get navigationAccount => _text('navigationAccount');
   String get navigationAdministration => _text('navigationAdministration');
   String get signIn => _text('signIn');
+  String get initialPasswordChangeTitle => _text('initialPasswordChangeTitle');
+  String get initialPasswordChangeDescription => _text('initialPasswordChangeDescription');
+  String get newPassword => _text('newPassword');
+  String get confirmNewPassword => _text('confirmNewPassword');
+  String get newPasswordMinimumLength => _text('newPasswordMinimumLength');
+  String get newPasswordMustDiffer => _text('newPasswordMustDiffer');
+  String get passwordsDoNotMatch => _text('passwordsDoNotMatch');
+  String get saveNewPassword => _text('saveNewPassword');
+  String get verifyEmailTitle => _text('verifyEmailTitle');
+  String get verifyEmailDescription => _text('verifyEmailDescription');
+  String get resendVerificationEmail => _text('resendVerificationEmail');
+  String get checkVerificationStatus => _text('checkVerificationStatus');
+  String get accountAccessTitle => _text('accountAccessTitle');
+  String get accountAccessDisabled => _text('accountAccessDisabled');
+  String get accountAccessProfileMissing => _text('accountAccessProfileMissing');
+  String get accountAccessRetry => _text('accountAccessRetry');
+  String get verificationEmailSent => _text('verificationEmailSent');
+  String get unableToCompleteAction => _text('unableToCompleteAction');
   String get signOut => _text('signOut');
   String get signingIn => _text('signingIn');
   String get emailOrPasswordIncorrect => _text('emailOrPasswordIncorrect');
@@ -1101,6 +1119,18 @@ class S {
   String get assetStatusDisposed => _text('assetStatusDisposed');
   String get assetStatusLost => _text('assetStatusLost');
   String get assetStatusStolen => _text('assetStatusStolen');
+  String get assetAvailability => _text('assetAvailability');
+  String get allAssetAvailability => _text('allAssetAvailability');
+  String get filterByAssetAvailability => _text('filterByAssetAvailability');
+  String get assetAvailabilityDecommissioned => _text('assetAvailabilityDecommissioned');
+  String get assetAvailabilityUnavailable => _text('assetAvailabilityUnavailable');
+  String get assetStateHistory => _text('assetStateHistory');
+  String get noAssetStateHistory => _text('noAssetStateHistory');
+  String get assetStateChangeObservation => _text('assetStateChangeObservation');
+  String get decommissionAsset => _text('decommissionAsset');
+  String get decommissionAssetConfirmation => _text('decommissionAssetConfirmation');
+  String get decommissionObservation => _text('decommissionObservation');
+  String get assetDecommissionedSuccessfully => _text('assetDecommissionedSuccessfully');
   String get uploadAssetAttachment => _text('uploadAssetAttachment');
   String get uploadAssetPhotograph => _text('uploadAssetPhotograph');
   String get scanStockBarcode => _text('scanStockBarcode');
@@ -1546,6 +1576,214 @@ class S {
   String get itsmReportingCataloguePublished => _text('itsmReportingCataloguePublished');
   String get itsmReportingRetirementReason => _text('itsmReportingRetirementReason');
   String get itsmReportingCatalogueRetired => _text('itsmReportingCatalogueRetired');
+  String get assetParameters => _text('assetParameters');
+  String get assetParametersDescription => _text('assetParametersDescription');
+  String get addAssetParameter => _text('addAssetParameter');
+  String get editAssetParameter => _text('editAssetParameter');
+  String get assetParameterCategory => _text('assetParameterCategory');
+  String get assetParameterLocation => _text('assetParameterLocation');
+  String get assetParameterState => _text('assetParameterState');
+  String get assetParameterSortOrder => _text('assetParameterSortOrder');
+  String get assetParameterLocations => _text('assetParameterLocations');
+  String get assetParameterCategories => _text('assetParameterCategories');
+  String get assetParameterStates => _text('assetParameterStates');
+  String get addAssetLocation => _text('addAssetLocation');
+  String get addAssetCategory => _text('addAssetCategory');
+  String get addAssetState => _text('addAssetState');
+  String get noAssetLocations => _text('noAssetLocations');
+  String get noAssetCategories => _text('noAssetCategories');
+  String get noAssetStates => _text('noAssetStates');
+  String get deleteAssetParameterTitle => _text('deleteAssetParameterTitle');
+  String get deleteAssetParameterMessage => _text('deleteAssetParameterMessage');
+  String get assetParameterDeleted => _text('assetParameterDeleted');
+  String get assetCommandServiceUnavailable => _text('assetCommandServiceUnavailable');
+  String get productNumber => _text('productNumber');
+  String get observation => _text('observation');
+  String get assignmentDate => _text('assignmentDate');
+  String get assignmentHistory => _text('assignmentHistory');
+  String get noAssignmentHistory => _text('noAssignmentHistory');
+  String get currentAssignment => _text('currentAssignment');
+  String get previousAssignment => _text('previousAssignment');
+  String get changeAssetState => _text('changeAssetState');
+  String get updateAssetStatus => _text('updateAssetStatus');
+  String get updateAssetStatusDescription => _text('updateAssetStatusDescription');
+  String get assetCondition => _text('assetCondition');
+  String get assetConditionDescription => _text('assetConditionDescription');
+  String get assetLifecycle => _text('assetLifecycle');
+  String get assetLifecycleDescription => _text('assetLifecycleDescription');
+  String get confirmExceptionalAssetStatus => _text('confirmExceptionalAssetStatus');
+  String get exceptionalAssetStatusWarning => _text('exceptionalAssetStatusWarning');
+  String get exceptionalAssetReturnHint => _text('exceptionalAssetReturnHint');
+  String get noAssetConditionUpdates => _text('noAssetConditionUpdates');
+  String get noLifecycleTransitions => _text('noLifecycleTransitions');
+  String get decommissionUnavailable => _text('decommissionUnavailable');
+  String get newAssignment => _text('newAssignment');
+  String get selectAgent => _text('selectAgent');
+  String get noActiveAgents => _text('noActiveAgents');
+  String get allAssetCategories => _text('allAssetCategories');
+  String get allAssetBrands => _text('allAssetBrands');
+  String get filterByAssetCategory => _text('filterByAssetCategory');
+  String get filterByAssetBrand => _text('filterByAssetBrand');
+  String get searchAssetSerialOrProduct => _text('searchAssetSerialOrProduct');
+  String get configureAssetParametersFirst => _text('configureAssetParametersFirst');
+  String get assetRegisteredSuccessfully => _text('assetRegisteredSuccessfully');
+  String get assetParameterSaved => _text('assetParameterSaved');
+  String get assetAssignedSuccessfully => _text('assetAssignedSuccessfully');
+  String get assetStateUpdated => _text('assetStateUpdated');
+  String get selectAssetCategory => _text('selectAssetCategory');
+  String get selectAssetLocation => _text('selectAssetLocation');
+  String get selectAssetState => _text('selectAssetState');
+  String get optionalInitialAssignment => _text('optionalInitialAssignment');
+  String get optionalInitialAssignmentHint => _text('optionalInitialAssignmentHint');
+  String get selectAgentFromResults => _text('selectAgentFromResults');
+  String get deactivateAssetParameter => _text('deactivateAssetParameter');
+  String get assetAssignmentRequiresReturn => _text('assetAssignmentRequiresReturn');
+  String get umTitle => _text('umTitle');
+  String get umSubtitle => _text('umSubtitle');
+  String get umOrganizations => _text('umOrganizations');
+  String get umOrganizationsDescription => _text('umOrganizationsDescription');
+  String get umStructure => _text('umStructure');
+  String get umStructureDescription => _text('umStructureDescription');
+  String get umAgents => _text('umAgents');
+  String get umAgentsDescription => _text('umAgentsDescription');
+  String get umModules => _text('umModules');
+  String get umModulesDescription => _text('umModulesDescription');
+  String get umAddModule => _text('umAddModule');
+  String get umEditModule => _text('umEditModule');
+  String get umModuleKey => _text('umModuleKey');
+  String get umModuleName => _text('umModuleName');
+  String get umModuleDescription => _text('umModuleDescription');
+  String get umAvailableRoles => _text('umAvailableRoles');
+  String get umNoModuleKeyAvailable => _text('umNoModuleKeyAvailable');
+  String get umNoModuleKeyAvailableDescription => _text('umNoModuleKeyAvailableDescription');
+  String get umModuleCreated => _text('umModuleCreated');
+  String get umModuleUpdated => _text('umModuleUpdated');
+  String get umNoModules => _text('umNoModules');
+  String get umNoModulesDescription => _text('umNoModulesDescription');
+  String get umUnableToLoadModules => _text('umUnableToLoadModules');
+  String get umAccessDenied => _text('umAccessDenied');
+  String get umReadOnlyAccess => _text('umReadOnlyAccess');
+  String get umReadOnlyDescription => _text('umReadOnlyDescription');
+  String get umCreateOrganization => _text('umCreateOrganization');
+  String get umEditOrganization => _text('umEditOrganization');
+  String get umOrganizationCode => _text('umOrganizationCode');
+  String get umOrganizationName => _text('umOrganizationName');
+  String get umOrganizationDescription => _text('umOrganizationDescription');
+  String get umNoOrganizations => _text('umNoOrganizations');
+  String get umSelectOrganization => _text('umSelectOrganization');
+  String get umOrganizationCreated => _text('umOrganizationCreated');
+  String get umOrganizationUpdated => _text('umOrganizationUpdated');
+  String get umArchiveOrganization => _text('umArchiveOrganization');
+  String get umArchiveOrganizationDescription => _text('umArchiveOrganizationDescription');
+  String get umArchiveReason => _text('umArchiveReason');
+  String get umOrganizationArchived => _text('umOrganizationArchived');
+  String get umCreateRootDepartment => _text('umCreateRootDepartment');
+  String get umCreateChildUnit => _text('umCreateChildUnit');
+  String get umEditUnit => _text('umEditUnit');
+  String get umMoveUnit => _text('umMoveUnit');
+  String get umMoveUnitDescription => _text('umMoveUnitDescription');
+  String get umNewParentUnit => _text('umNewParentUnit');
+  String get umMoveReason => _text('umMoveReason');
+  String get umUnitCode => _text('umUnitCode');
+  String get umUnitName => _text('umUnitName');
+  String get umUnitType => _text('umUnitType');
+  String get umParentUnit => _text('umParentUnit');
+  String get umDepartment => _text('umDepartment');
+  String get umService => _text('umService');
+  String get umBureau => _text('umBureau');
+  String get umNoUnits => _text('umNoUnits');
+  String get umExpandUnit => _text('umExpandUnit');
+  String get umCollapseUnit => _text('umCollapseUnit');
+  String get umUnitCreated => _text('umUnitCreated');
+  String get umUnitUpdated => _text('umUnitUpdated');
+  String get umUnitMoved => _text('umUnitMoved');
+  String get umArchiveUnit => _text('umArchiveUnit');
+  String get umArchiveUnitDescription => _text('umArchiveUnitDescription');
+  String get umUnitArchived => _text('umUnitArchived');
+  String get umHierarchy => _text('umHierarchy');
+  String get umSearchAgents => _text('umSearchAgents');
+  String get umNoAgents => _text('umNoAgents');
+  String get umCreateAgent => _text('umCreateAgent');
+  String get umAssignExistingAgent => _text('umAssignExistingAgent');
+  String get umSelectUnplacedAgent => _text('umSelectUnplacedAgent');
+  String get umUnplacedAgentsAvailable => _text('umUnplacedAgentsAvailable');
+  String get umExistingAgentAssigned => _text('umExistingAgentAssigned');
+  String get umAgentCreated => _text('umAgentCreated');
+  String get umAgentProfile => _text('umAgentProfile');
+  String get umAgentDetails => _text('umAgentDetails');
+  String get umAgentProfileUpdated => _text('umAgentProfileUpdated');
+  String get umCurrentPlacement => _text('umCurrentPlacement');
+  String get umAccessPermissions => _text('umAccessPermissions');
+  String get umCurrent => _text('umCurrent');
+  String get umDeactivateAgentDescription => _text('umDeactivateAgentDescription');
+  String get umJobTitle => _text('umJobTitle');
+  String get umOrganizationUnit => _text('umOrganizationUnit');
+  String get umOrganizationPath => _text('umOrganizationPath');
+  String get umAssignmentHistory => _text('umAssignmentHistory');
+  String get umNoAssignmentHistory => _text('umNoAssignmentHistory');
+  String get umTransferAgent => _text('umTransferAgent');
+  String get umAssignmentStartDate => _text('umAssignmentStartDate');
+  String get umAssignmentReason => _text('umAssignmentReason');
+  String get umAgentTransferred => _text('umAgentTransferred');
+  String get umLeadership => _text('umLeadership');
+  String get umPermanentHead => _text('umPermanentHead');
+  String get umActingHead => _text('umActingHead');
+  String get umAssignHead => _text('umAssignHead');
+  String get umEndLeadership => _text('umEndLeadership');
+  String get umLeadershipReason => _text('umLeadershipReason');
+  String get umLeadershipEndDate => _text('umLeadershipEndDate');
+  String get umLeadershipUpdated => _text('umLeadershipUpdated');
+  String get umDeactivateAgent => _text('umDeactivateAgent');
+  String get umDeactivateReason => _text('umDeactivateReason');
+  String get umAgentDeactivated => _text('umAgentDeactivated');
+  String get umDefaultPasswordNotice => _text('umDefaultPasswordNotice');
+  String get umActive => _text('umActive');
+  String get umInactive => _text('umInactive');
+  String get umArchived => _text('umArchived');
+  String get umLoading => _text('umLoading');
+  String get umCommandFailed => _text('umCommandFailed');
+  String get umOrganizationServiceUnavailable => _text('umOrganizationServiceUnavailable');
+  String get umRequiredField => _text('umRequiredField');
+  String get umSelectUnit => _text('umSelectUnit');
+  String get umSelectBureauOrLeadership => _text('umSelectBureauOrLeadership');
+  String get umSelectDifferentOrganizationUnit => _text('umSelectDifferentOrganizationUnit');
+  String get umSelectAgent => _text('umSelectAgent');
+  String get umNoAvailableChildren => _text('umNoAvailableChildren');
+  String get umNoEligibleParentUnits => _text('umNoEligibleParentUnits');
+  String get umAllUnits => _text('umAllUnits');
+  String get umSearchOrganizations => _text('umSearchOrganizations');
+  String get umSearchUnits => _text('umSearchUnits');
+  String get umStatusFilter => _text('umStatusFilter');
+  String get umLoadMore => _text('umLoadMore');
+  String get umArchitectureAudit => _text('umArchitectureAudit');
+  String get umAuditTruncated => _text('umAuditTruncated');
+  String get umAuditIssues => _text('umAuditIssues');
+  String get umMoreIssues => _text('umMoreIssues');
+  String get umRepairedProjections => _text('umRepairedProjections');
+  String get umSkippedAgents => _text('umSkippedAgents');
+  String get umRepairProjections => _text('umRepairProjections');
+  String get umAuditClean => _text('umAuditClean');
+  String get umAuditIssuesFound => _text('umAuditIssuesFound');
+  String get umRepairProjectionsDescription => _text('umRepairProjectionsDescription');
+  String get umRepairReason => _text('umRepairReason');
+  String get umAuditHistory => _text('umAuditHistory');
+  String get umAuditHistoryDescription => _text('umAuditHistoryDescription');
+  String get umNoAuditEvents => _text('umNoAuditEvents');
+  String get umActor => _text('umActor');
+  String get umBefore => _text('umBefore');
+  String get umAfter => _text('umAfter');
+  String get umNotFound => _text('umNotFound');
+  String get umOrganizationDetails => _text('umOrganizationDetails');
+  String get umOpenStructure => _text('umOpenStructure');
+  String get umOpenAgents => _text('umOpenAgents');
+  String get umTreeView => _text('umTreeView');
+  String get umListView => _text('umListView');
+  String get umMigrateLegacyAgent => _text('umMigrateLegacyAgent');
+  String get umLegacyAgentMigrated => _text('umLegacyAgentMigrated');
+  String get umCurrentRecords => _text('umCurrentRecords');
+  String get umSex => _text('umSex');
+  String get umMale => _text('umMale');
+  String get umFemale => _text('umFemale');
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -1672,6 +1910,24 @@ const _localizedValues = <String, Map<String, String>>{
     'navigationAccount': "Account",
     'navigationAdministration': "Administration",
     'signIn': "Sign in",
+    'initialPasswordChangeTitle': "Create your password",
+    'initialPasswordChangeDescription': "This is your first sign-in. Replace the temporary password before accessing ARPTC Connect. You will then sign in again with your new password.",
+    'newPassword': "New password",
+    'confirmNewPassword': "Confirm new password",
+    'newPasswordMinimumLength': "Use at least 8 characters.",
+    'newPasswordMustDiffer': "Choose a password different from the temporary password.",
+    'passwordsDoNotMatch': "The passwords do not match.",
+    'saveNewPassword': "Save password and return to sign in",
+    'verifyEmailTitle': "Verify your email address",
+    'verifyEmailDescription': "We sent a verification link to your professional email address. Verify it, then return here to continue.",
+    'resendVerificationEmail': "Resend verification email",
+    'checkVerificationStatus': "I have verified my email",
+    'accountAccessTitle': "Account access unavailable",
+    'accountAccessDisabled': "This agent account has been disabled. Please contact an administrator.",
+    'accountAccessProfileMissing': "No active agent profile is associated with this account. Please contact an administrator.",
+    'accountAccessRetry': "Retry account verification",
+    'verificationEmailSent': "Verification email sent.",
+    'unableToCompleteAction': "Unable to complete this action.",
     'signOut': "Sign out",
     'signingIn': "Signing in...",
     'emailOrPasswordIncorrect': "Email or password is incorrect",
@@ -2041,14 +2297,14 @@ const _localizedValues = <String, Map<String, String>>{
     'deleteModule': "Delete module",
     'selectDepartment': "Select department",
     'selectService': "Select service",
-    'selectBureau': "Select office",
+    'selectBureau': "Select bureau",
     'searchAgents': "Search agents",
     'searchDepartments': "Search departments",
     'searchServices': "Search services",
     'searchBureaux': "Search offices",
     'headOfDepartment': "Head of department",
     'headOfService': "Head of service",
-    'headOfBureau': "Head of office",
+    'headOfBureau': "Head of bureau",
     'bureauAttache': "Office attaché",
     'inventory': "Inventory",
     'cart': "Cart",
@@ -2583,6 +2839,18 @@ const _localizedValues = <String, Map<String, String>>{
     'assetStatusDisposed': "Disposed",
     'assetStatusLost': "Lost",
     'assetStatusStolen': "Stolen",
+    'assetAvailability': "Availability",
+    'allAssetAvailability': "All availability",
+    'filterByAssetAvailability': "Filter by availability",
+    'assetAvailabilityDecommissioned': "Decommissioned",
+    'assetAvailabilityUnavailable': "Unavailable",
+    'assetStateHistory': "Condition change history",
+    'noAssetStateHistory': "No condition changes have been recorded.",
+    'assetStateChangeObservation': "Reason for the condition change",
+    'decommissionAsset': "Decommission asset",
+    'decommissionAssetConfirmation': "This ends the asset's active lifecycle. The asset must not have an active assignment.",
+    'decommissionObservation': "Decommissioning reason and observation",
+    'assetDecommissionedSuccessfully': "The asset was decommissioned.",
     'uploadAssetAttachment': "Upload attachment",
     'uploadAssetPhotograph': "Upload photograph",
     'scanStockBarcode': "Scan barcode",
@@ -3028,6 +3296,214 @@ const _localizedValues = <String, Map<String, String>>{
     'itsmReportingCataloguePublished': "Service published to the catalogue.",
     'itsmReportingRetirementReason': "Reason for retirement",
     'itsmReportingCatalogueRetired': "Service retired from the catalogue.",
+    'assetParameters': "Asset parameters",
+    'assetParametersDescription': "Manage the categories, locations, and physical conditions available in the asset register.",
+    'addAssetParameter': "Add parameter",
+    'editAssetParameter': "Edit parameter",
+    'assetParameterCategory': "Category",
+    'assetParameterLocation': "Location",
+    'assetParameterState': "Condition",
+    'assetParameterSortOrder': "Display order",
+    'assetParameterLocations': "Locations",
+    'assetParameterCategories': "Categories",
+    'assetParameterStates': "Conditions",
+    'addAssetLocation': "Add location",
+    'addAssetCategory': "Add category",
+    'addAssetState': "Add condition",
+    'noAssetLocations': "No locations configured.",
+    'noAssetCategories': "No categories configured.",
+    'noAssetStates': "No conditions configured.",
+    'deleteAssetParameterTitle': "Delete parameter?",
+    'deleteAssetParameterMessage': "This value will no longer be available for new assets. Existing asset records will keep their current value.",
+    'assetParameterDeleted': "The asset parameter was deleted.",
+    'assetCommandServiceUnavailable': "The asset service is not available on the server. Deploy the latest Firebase Functions, then try again.",
+    'productNumber': "Product number",
+    'observation': "Observation",
+    'assignmentDate': "Assignment date",
+    'assignmentHistory': "Assignment history",
+    'noAssignmentHistory': "No assignment has been recorded for this asset.",
+    'currentAssignment': "Current assignment",
+    'previousAssignment': "Previous assignment",
+    'changeAssetState': "Update condition",
+    'updateAssetStatus': "Update asset status",
+    'updateAssetStatusDescription': "Choose the type of status update to record for this asset.",
+    'assetCondition': "Asset condition",
+    'assetConditionDescription': "Record the asset's current physical or technical condition with an observation.",
+    'assetLifecycle': "Asset lifecycle",
+    'assetLifecycleDescription': "Move the asset to one of its valid next lifecycle stages.",
+    'confirmExceptionalAssetStatus': "Confirm exceptional status",
+    'exceptionalAssetStatusWarning': "The current custodian will remain linked and responsible for this asset until its recovery and return are recorded.",
+    'exceptionalAssetReturnHint': "This asset remains linked to its current custodian. Use Return asset when it is recovered to close the assignment safely.",
+    'noAssetConditionUpdates': "No other active conditions are available for this asset.",
+    'noLifecycleTransitions': "No lifecycle transition is currently available.",
+    'decommissionUnavailable': "The asset must be unassigned and in an active lifecycle stage before decommissioning.",
+    'newAssignment': "New assignment",
+    'selectAgent': "Select an agent",
+    'noActiveAgents': "No active agents are available.",
+    'allAssetCategories': "All categories",
+    'allAssetBrands': "All brands",
+    'filterByAssetCategory': "Filter by category",
+    'filterByAssetBrand': "Filter by brand",
+    'searchAssetSerialOrProduct': "Search by serial or product number",
+    'configureAssetParametersFirst': "Configure at least one category and condition before registering an asset.",
+    'assetRegisteredSuccessfully': "The asset was registered successfully.",
+    'assetParameterSaved': "The asset parameter was saved.",
+    'assetAssignedSuccessfully': "The asset assignment was recorded.",
+    'assetStateUpdated': "The asset condition was updated.",
+    'selectAssetCategory': "Select a category",
+    'selectAssetLocation': "Select a location",
+    'selectAssetState': "Select a condition",
+    'optionalInitialAssignment': "Initial assignment (optional)",
+    'optionalInitialAssignmentHint': "Leave this field empty to register the asset in stock. Select an agent to register it as assigned.",
+    'selectAgentFromResults': "Select an agent from the search results.",
+    'deactivateAssetParameter': "Deactivate parameter",
+    'assetAssignmentRequiresReturn': "Return the current assignment before assigning this asset to another agent.",
+    'umTitle': "Organization & access",
+    'umSubtitle': "Manage the enterprise structure, agents, leadership and module access.",
+    'umOrganizations': "Organizations",
+    'umOrganizationsDescription': "Create and maintain enterprise boundaries.",
+    'umStructure': "Structure",
+    'umStructureDescription': "Build departments, services and bureaux in one hierarchy.",
+    'umAgents': "Agents",
+    'umAgentsDescription': "Manage profiles, placement, transfers and permissions.",
+    'umModules': "Modules",
+    'umModulesDescription': "Configure application modules and their roles.",
+    'umAddModule': "Add module",
+    'umEditModule': "Edit module",
+    'umModuleKey': "Module key",
+    'umModuleName': "Module name",
+    'umModuleDescription': "Description (optional)",
+    'umAvailableRoles': "Available roles",
+    'umNoModuleKeyAvailable': "No module key available",
+    'umNoModuleKeyAvailableDescription': "All default module keys are already used. Delete one before adding another.",
+    'umModuleCreated': "Module created.",
+    'umModuleUpdated': "Module updated.",
+    'umNoModules': "No modules configured",
+    'umNoModulesDescription': "Add a module to configure its available roles.",
+    'umUnableToLoadModules': "Unable to load modules",
+    'umAccessDenied': "You do not have access to User Management.",
+    'umReadOnlyAccess': "Read-only supervision",
+    'umReadOnlyDescription': "You can inspect organization data, but only a User Management manager can change it.",
+    'umCreateOrganization': "Create organization",
+    'umEditOrganization': "Edit organization",
+    'umOrganizationCode': "Organization code",
+    'umOrganizationName': "Organization name",
+    'umOrganizationDescription': "Description",
+    'umNoOrganizations': "No organization has been configured yet.",
+    'umSelectOrganization': "Select an organization",
+    'umOrganizationCreated': "Organization created.",
+    'umOrganizationUpdated': "Organization updated.",
+    'umArchiveOrganization': "Archive organization",
+    'umArchiveOrganizationDescription': "Active units and assignments must be ended before this organization can be archived.",
+    'umArchiveReason': "Archive reason",
+    'umOrganizationArchived': "Organization archived.",
+    'umCreateRootDepartment': "Create department",
+    'umCreateChildUnit': "Create child unit",
+    'umEditUnit': "Edit unit",
+    'umMoveUnit': "Move unit",
+    'umMoveUnitDescription': "Select the new parent for this organization unit. Descendant scopes and current agent projections will be updated safely.",
+    'umNewParentUnit': "New parent unit",
+    'umMoveReason': "Move reason",
+    'umUnitCode': "Unit code",
+    'umUnitName': "Unit name",
+    'umUnitType': "Unit type",
+    'umParentUnit': "Parent unit",
+    'umDepartment': "Department",
+    'umService': "Service",
+    'umBureau': "Bureau",
+    'umNoUnits': "This organization does not have any active units yet.",
+    'umExpandUnit': "Expand organization unit",
+    'umCollapseUnit': "Collapse organization unit",
+    'umUnitCreated': "Organization unit created.",
+    'umUnitUpdated': "Organization unit updated.",
+    'umUnitMoved': "Organization unit moved.",
+    'umArchiveUnit': "Archive unit",
+    'umArchiveUnitDescription': "Active children, members or leadership assignments must be ended first.",
+    'umUnitArchived': "Organization unit archived.",
+    'umHierarchy': "Organization hierarchy",
+    'umSearchAgents': "Search agents by name",
+    'umNoAgents': "No agents match the current filters.",
+    'umCreateAgent': "Create agent",
+    'umAssignExistingAgent': "Assign existing agent",
+    'umSelectUnplacedAgent': "Existing unplaced agent",
+    'umUnplacedAgentsAvailable': "Existing accounts need an organization assignment before they can use organization-scoped features.",
+    'umExistingAgentAssigned': "Existing agent assigned to the organization.",
+    'umAgentCreated': "Agent account created.",
+    'umAgentProfile': "Agent profile",
+    'umAgentDetails': "Agent details",
+    'umAgentProfileUpdated': "Agent profile and permissions updated.",
+    'umCurrentPlacement': "Current placement",
+    'umAccessPermissions': "Module permissions",
+    'umCurrent': "Current",
+    'umDeactivateAgentDescription': "This ends active assignments and disables the Firebase account without deleting its history.",
+    'umJobTitle': "Job title",
+    'umOrganizationUnit': "Organization unit",
+    'umOrganizationPath': "Organization path",
+    'umAssignmentHistory': "Assignment history",
+    'umNoAssignmentHistory': "No organization assignment has been recorded.",
+    'umTransferAgent': "Transfer agent",
+    'umAssignmentStartDate': "Effective date",
+    'umAssignmentReason': "Assignment or transfer reason",
+    'umAgentTransferred': "Agent placement updated.",
+    'umLeadership': "Leadership",
+    'umPermanentHead': "Permanent head",
+    'umActingHead': "Acting head",
+    'umAssignHead': "Assign unit head",
+    'umEndLeadership': "End leadership assignment",
+    'umLeadershipReason': "Appointment reason",
+    'umLeadershipEndDate': "Acting end date",
+    'umLeadershipUpdated': "Leadership updated.",
+    'umDeactivateAgent': "Deactivate agent",
+    'umDeactivateReason': "Deactivation reason",
+    'umAgentDeactivated': "Agent deactivated.",
+    'umDefaultPasswordNotice': "The Firebase account will use the default password Arptc@1234. The agent should change it after signing in.",
+    'umActive': "Active",
+    'umInactive': "Inactive",
+    'umArchived': "Archived",
+    'umLoading': "Loading organization data...",
+    'umCommandFailed': "The organization action could not be completed.",
+    'umOrganizationServiceUnavailable': "The organization management service is not available on the server. Deploy the latest Firebase Functions, then try again.",
+    'umRequiredField': "This field is required.",
+    'umSelectUnit': "Select an organization unit",
+    'umSelectBureauOrLeadership': "Select a bureau for the agent, or assign leadership at the selected level.",
+    'umSelectDifferentOrganizationUnit': "Select a different organization unit for the transfer.",
+    'umSelectAgent': "Select an agent",
+    'umNoAvailableChildren': "No child unit can be created below this level.",
+    'umNoEligibleParentUnits': "No eligible parent unit is available.",
+    'umAllUnits': "All organization units",
+    'umSearchOrganizations': "Search organizations by name",
+    'umSearchUnits': "Search organization units by name",
+    'umStatusFilter': "Status filter",
+    'umLoadMore': "Load more",
+    'umArchitectureAudit': "Architecture integrity audit",
+    'umAuditTruncated': "This bounded audit reached its limit. Repair is disabled until the data can be reviewed in complete pages.",
+    'umAuditIssues': "Integrity issues",
+    'umMoreIssues': "More issues are not shown in this summary.",
+    'umRepairedProjections': "Repaired projections",
+    'umSkippedAgents': "Skipped agents",
+    'umRepairProjections': "Repair safe projections",
+    'umAuditClean': "No integrity issue was found.",
+    'umAuditIssuesFound': "integrity issues found",
+    'umRepairProjectionsDescription': "Only directory, authorization and current-placement projections will be rebuilt. Missing placements will not be invented.",
+    'umRepairReason': "Reason for the repair",
+    'umAuditHistory': "Organization audit history",
+    'umAuditHistoryDescription': "Review immutable organization, hierarchy, placement and leadership changes.",
+    'umNoAuditEvents': "No organization audit event has been recorded.",
+    'umActor': "Actor",
+    'umBefore': "Before",
+    'umAfter': "After",
+    'umNotFound': "The requested organization record was not found.",
+    'umOrganizationDetails': "Organization details",
+    'umOpenStructure': "Open structure",
+    'umOpenAgents': "Open agent directory",
+    'umTreeView': "Tree",
+    'umListView': "List",
+    'umMigrateLegacyAgent': "Migrate legacy identity",
+    'umLegacyAgentMigrated': "The Firebase Auth identity was migrated. Assign the agent to an organization unit next.",
+    'umCurrentRecords': "Active & inactive",
+    'umSex': "Sex",
+    'umMale': "Male",
+    'umFemale': "Female",
   },
   'fr': <String, String>{
     'appName': "ARPTC Connect",
@@ -3131,6 +3607,24 @@ const _localizedValues = <String, Map<String, String>>{
     'navigationAccount': "Compte",
     'navigationAdministration': "Administration",
     'signIn': "Se connecter",
+    'initialPasswordChangeTitle': "Créez votre mot de passe",
+    'initialPasswordChangeDescription': "Il s'agit de votre première connexion. Remplacez le mot de passe temporaire avant d'accéder à ARPTC Connect. Vous vous reconnecterez ensuite avec votre nouveau mot de passe.",
+    'newPassword': "Nouveau mot de passe",
+    'confirmNewPassword': "Confirmer le nouveau mot de passe",
+    'newPasswordMinimumLength': "Utilisez au moins 8 caractères.",
+    'newPasswordMustDiffer': "Choisissez un mot de passe différent du mot de passe temporaire.",
+    'passwordsDoNotMatch': "Les mots de passe ne correspondent pas.",
+    'saveNewPassword': "Enregistrer et revenir à la connexion",
+    'verifyEmailTitle': "Vérifiez votre adresse e-mail",
+    'verifyEmailDescription': "Un lien de vérification a été envoyé à votre adresse e-mail professionnelle. Vérifiez votre adresse puis revenez ici pour continuer.",
+    'resendVerificationEmail': "Renvoyer l'e-mail de vérification",
+    'checkVerificationStatus': "J'ai vérifié mon adresse e-mail",
+    'accountAccessTitle': "Accès au compte indisponible",
+    'accountAccessDisabled': "Ce compte agent a été désactivé. Veuillez contacter un administrateur.",
+    'accountAccessProfileMissing': "Aucun profil agent actif n'est associé à ce compte. Veuillez contacter un administrateur.",
+    'accountAccessRetry': "Réessayer la vérification du compte",
+    'verificationEmailSent': "E-mail de vérification envoyé.",
+    'unableToCompleteAction': "Impossible d'effectuer cette action.",
     'signOut': "Se déconnecter",
     'signingIn': "Connexion...",
     'emailOrPasswordIncorrect': "L'e-mail ou le mot de passe est incorrect",
@@ -4042,6 +4536,18 @@ const _localizedValues = <String, Map<String, String>>{
     'assetStatusDisposed': "Mis au rebut",
     'assetStatusLost': "Perdu",
     'assetStatusStolen': "Volé",
+    'assetAvailability': "Disponibilité",
+    'allAssetAvailability': "Toutes les disponibilités",
+    'filterByAssetAvailability': "Filtrer par disponibilité",
+    'assetAvailabilityDecommissioned': "Décommissionné",
+    'assetAvailabilityUnavailable': "Indisponible",
+    'assetStateHistory': "Historique des états physiques",
+    'noAssetStateHistory': "Aucun changement d'état physique n'a été enregistré.",
+    'assetStateChangeObservation': "Motif du changement d'état physique",
+    'decommissionAsset': "Décommissionner l'actif",
+    'decommissionAssetConfirmation': "Cette action met fin au cycle de vie actif de l'actif. L'actif ne doit avoir aucune affectation en cours.",
+    'decommissionObservation': "Motif et observation du décommissionnement",
+    'assetDecommissionedSuccessfully': "L'actif a été décommissionné.",
     'uploadAssetAttachment': "Téléverser une pièce jointe",
     'uploadAssetPhotograph': "Téléverser une photographie",
     'scanStockBarcode': "Scanner le code-barres",
@@ -4487,5 +4993,213 @@ const _localizedValues = <String, Map<String, String>>{
     'itsmReportingCataloguePublished': "Service publié dans le catalogue.",
     'itsmReportingRetirementReason': "Motif du retrait",
     'itsmReportingCatalogueRetired': "Service retiré du catalogue.",
+    'assetParameters': "Paramètres des actifs",
+    'assetParametersDescription': "Gérez les catégories, emplacements et états physiques disponibles dans le registre des actifs.",
+    'addAssetParameter': "Ajouter un paramètre",
+    'editAssetParameter': "Modifier le paramètre",
+    'assetParameterCategory': "Catégorie",
+    'assetParameterLocation': "Emplacement",
+    'assetParameterState': "État physique",
+    'assetParameterSortOrder': "Ordre d'affichage",
+    'assetParameterLocations': "Emplacements",
+    'assetParameterCategories': "Catégories",
+    'assetParameterStates': "États physiques",
+    'addAssetLocation': "Ajouter un emplacement",
+    'addAssetCategory': "Ajouter une catégorie",
+    'addAssetState': "Ajouter un état physique",
+    'noAssetLocations': "Aucun emplacement configuré.",
+    'noAssetCategories': "Aucune catégorie configurée.",
+    'noAssetStates': "Aucun état physique configuré.",
+    'deleteAssetParameterTitle': "Supprimer le paramètre ?",
+    'deleteAssetParameterMessage': "Cette valeur ne sera plus disponible pour les nouveaux actifs. Les actifs existants conserveront leur valeur actuelle.",
+    'assetParameterDeleted': "Le paramètre de l'actif a été supprimé.",
+    'assetCommandServiceUnavailable': "Le service de gestion des actifs n'est pas disponible sur le serveur. Déployez les dernières fonctions Firebase, puis réessayez.",
+    'productNumber': "Numéro de produit",
+    'observation': "Observation",
+    'assignmentDate': "Date d'affectation",
+    'assignmentHistory': "Historique des affectations",
+    'noAssignmentHistory': "Aucune affectation n'a été enregistrée pour cet actif.",
+    'currentAssignment': "Affectation actuelle",
+    'previousAssignment': "Affectation précédente",
+    'changeAssetState': "Mettre à jour l'état physique",
+    'updateAssetStatus': "Mettre à jour le statut de l'actif",
+    'updateAssetStatusDescription': "Choisissez le type de mise à jour à enregistrer pour cet actif.",
+    'assetCondition': "État physique de l'actif",
+    'assetConditionDescription': "Enregistrez l'état physique ou technique actuel de l'actif avec une observation.",
+    'assetLifecycle': "Cycle de vie de l'actif",
+    'assetLifecycleDescription': "Faites évoluer l'actif vers l'une des prochaines étapes autorisées.",
+    'confirmExceptionalAssetStatus': "Confirmer le statut exceptionnel",
+    'exceptionalAssetStatusWarning': "Le détenteur actuel restera lié à cet actif et en demeurera responsable jusqu'à l'enregistrement de sa récupération et de sa restitution.",
+    'exceptionalAssetReturnHint': "Cet actif reste lié à son détenteur actuel. Utilisez Restituer l'actif après sa récupération afin de clôturer l'affectation en toute sécurité.",
+    'noAssetConditionUpdates': "Aucun autre état physique actif n'est disponible pour cet actif.",
+    'noLifecycleTransitions': "Aucune transition de cycle de vie n'est actuellement disponible.",
+    'decommissionUnavailable': "L'actif doit être sans affectation et dans une étape active de son cycle de vie avant le décommissionnement.",
+    'newAssignment': "Nouvelle affectation",
+    'selectAgent': "Sélectionner un agent",
+    'noActiveAgents': "Aucun agent actif n'est disponible.",
+    'allAssetCategories': "Toutes les catégories",
+    'allAssetBrands': "Toutes les marques",
+    'filterByAssetCategory': "Filtrer par catégorie",
+    'filterByAssetBrand': "Filtrer par marque",
+    'searchAssetSerialOrProduct': "Rechercher par numéro de série ou de produit",
+    'configureAssetParametersFirst': "Configurez au moins une catégorie et un état physique avant d'enregistrer un actif.",
+    'assetRegisteredSuccessfully': "L'actif a été enregistré avec succès.",
+    'assetParameterSaved': "Le paramètre de l'actif a été enregistré.",
+    'assetAssignedSuccessfully': "L'affectation de l'actif a été enregistrée.",
+    'assetStateUpdated': "L'état physique de l'actif a été mis à jour.",
+    'selectAssetCategory': "Sélectionner une catégorie",
+    'selectAssetLocation': "Sélectionner un emplacement",
+    'selectAssetState': "Sélectionner un état physique",
+    'optionalInitialAssignment': "Affectation initiale (facultative)",
+    'optionalInitialAssignmentHint': "Laissez ce champ vide pour enregistrer l'actif en stock. Sélectionnez un agent pour l'enregistrer comme affecté.",
+    'selectAgentFromResults': "Sélectionnez un agent dans les résultats de recherche.",
+    'deactivateAssetParameter': "Désactiver le paramètre",
+    'assetAssignmentRequiresReturn': "Retournez l'affectation actuelle avant d'attribuer cet actif à un autre agent.",
+    'umTitle': "Organisation et accès",
+    'umSubtitle': "Gérez la structure de l'entreprise, les agents, la hiérarchie et les accès aux modules.",
+    'umOrganizations': "Organisations",
+    'umOrganizationsDescription': "Créez et gérez les périmètres de l'entreprise.",
+    'umStructure': "Structure",
+    'umStructureDescription': "Organisez les départements, services et bureaux dans une seule hiérarchie.",
+    'umAgents': "Agents",
+    'umAgentsDescription': "Gérez les profils, affectations, mutations et permissions.",
+    'umModules': "Modules",
+    'umModulesDescription': "Configurez les modules de l'application et leurs rôles.",
+    'umAddModule': "Ajouter un module",
+    'umEditModule': "Modifier le module",
+    'umModuleKey': "Clé du module",
+    'umModuleName': "Nom du module",
+    'umModuleDescription': "Description (facultative)",
+    'umAvailableRoles': "Rôles disponibles",
+    'umNoModuleKeyAvailable': "Aucune clé de module disponible",
+    'umNoModuleKeyAvailableDescription': "Toutes les clés de module par défaut sont déjà utilisées. Supprimez-en une avant d'en ajouter une autre.",
+    'umModuleCreated': "Module créé.",
+    'umModuleUpdated': "Module mis à jour.",
+    'umNoModules': "Aucun module configuré",
+    'umNoModulesDescription': "Ajoutez un module pour configurer ses rôles disponibles.",
+    'umUnableToLoadModules': "Impossible de charger les modules",
+    'umAccessDenied': "Vous n'avez pas accès à la gestion des utilisateurs.",
+    'umReadOnlyAccess': "Supervision en lecture seule",
+    'umReadOnlyDescription': "Vous pouvez consulter les données de l'organisation, mais seul un gestionnaire du module peut les modifier.",
+    'umCreateOrganization': "Créer une organisation",
+    'umEditOrganization': "Modifier l'organisation",
+    'umOrganizationCode': "Code de l'organisation",
+    'umOrganizationName': "Nom de l'organisation",
+    'umOrganizationDescription': "Description",
+    'umNoOrganizations': "Aucune organisation n'a encore été configurée.",
+    'umSelectOrganization': "Sélectionner une organisation",
+    'umOrganizationCreated': "Organisation créée.",
+    'umOrganizationUpdated': "Organisation mise à jour.",
+    'umArchiveOrganization': "Archiver l'organisation",
+    'umArchiveOrganizationDescription': "Les unités et affectations actives doivent être clôturées avant l'archivage.",
+    'umArchiveReason': "Motif de l'archivage",
+    'umOrganizationArchived': "Organisation archivée.",
+    'umCreateRootDepartment': "Créer un département",
+    'umCreateChildUnit': "Créer une unité enfant",
+    'umEditUnit': "Modifier l'unité",
+    'umMoveUnit': "Déplacer l'unité",
+    'umMoveUnitDescription': "Sélectionnez le nouveau parent de cette unité organisationnelle. Les portées descendantes et les projections actuelles des agents seront mises à jour en toute sécurité.",
+    'umNewParentUnit': "Nouvelle unité parente",
+    'umMoveReason': "Motif du déplacement",
+    'umUnitCode': "Code de l'unité",
+    'umUnitName': "Nom de l'unité",
+    'umUnitType': "Type d'unité",
+    'umParentUnit': "Unité parente",
+    'umDepartment': "Département",
+    'umService': "Service",
+    'umBureau': "Bureau",
+    'umNoUnits': "Cette organisation ne contient encore aucune unité active.",
+    'umExpandUnit': "Développer l'unité organisationnelle",
+    'umCollapseUnit': "Réduire l'unité organisationnelle",
+    'umUnitCreated': "Unité organisationnelle créée.",
+    'umUnitUpdated': "Unité organisationnelle mise à jour.",
+    'umUnitMoved': "Unité organisationnelle déplacée.",
+    'umArchiveUnit': "Archiver l'unité",
+    'umArchiveUnitDescription': "Les unités enfants, membres ou responsabilités actives doivent d'abord être clôturés.",
+    'umUnitArchived': "Unité organisationnelle archivée.",
+    'umHierarchy': "Hiérarchie de l'organisation",
+    'umSearchAgents': "Rechercher un agent par nom",
+    'umNoAgents': "Aucun agent ne correspond aux filtres actuels.",
+    'umCreateAgent': "Créer un agent",
+    'umAssignExistingAgent': "Affecter un agent existant",
+    'umSelectUnplacedAgent': "Agent existant sans affectation",
+    'umUnplacedAgentsAvailable': "Des comptes existants doivent recevoir une affectation organisationnelle avant d’utiliser les fonctions limitées à l’organisation.",
+    'umExistingAgentAssigned': "Agent existant affecté à l’organisation.",
+    'umAgentCreated': "Compte agent créé.",
+    'umAgentProfile': "Profil de l’agent",
+    'umAgentDetails': "Détails de l’agent",
+    'umAgentProfileUpdated': "Profil et autorisations de l’agent mis à jour.",
+    'umCurrentPlacement': "Affectation actuelle",
+    'umAccessPermissions': "Autorisations par module",
+    'umCurrent': "En cours",
+    'umDeactivateAgentDescription': "Cette action clôt les affectations actives et désactive le compte Firebase sans supprimer son historique.",
+    'umJobTitle': "Fonction",
+    'umOrganizationUnit': "Unité organisationnelle",
+    'umOrganizationPath': "Chemin organisationnel",
+    'umAssignmentHistory': "Historique des affectations",
+    'umNoAssignmentHistory': "Aucune affectation organisationnelle n'a été enregistrée.",
+    'umTransferAgent': "Muter l'agent",
+    'umAssignmentStartDate': "Date d'effet",
+    'umAssignmentReason': "Motif de l'affectation ou de la mutation",
+    'umAgentTransferred': "Affectation de l'agent mise à jour.",
+    'umLeadership': "Responsabilités hiérarchiques",
+    'umPermanentHead': "Responsable permanent",
+    'umActingHead': "Responsable intérimaire",
+    'umAssignHead': "Désigner le responsable de l'unité",
+    'umEndLeadership': "Mettre fin à la responsabilité",
+    'umLeadershipReason': "Motif de la désignation",
+    'umLeadershipEndDate': "Fin de l'intérim",
+    'umLeadershipUpdated': "Responsabilité hiérarchique mise à jour.",
+    'umDeactivateAgent': "Désactiver l'agent",
+    'umDeactivateReason': "Motif de la désactivation",
+    'umAgentDeactivated': "Agent désactivé.",
+    'umDefaultPasswordNotice': "Le compte Firebase utilisera le mot de passe par défaut Arptc@1234. L'agent devra le modifier après sa connexion.",
+    'umActive': "Actif",
+    'umInactive': "Inactif",
+    'umArchived': "Archivé",
+    'umLoading': "Chargement des données de l'organisation...",
+    'umCommandFailed': "L'action organisationnelle n'a pas pu être exécutée.",
+    'umOrganizationServiceUnavailable': "Le service de gestion de l'organisation n'est pas disponible sur le serveur. Déployez les dernières Firebase Functions, puis réessayez.",
+    'umRequiredField': "Ce champ est obligatoire.",
+    'umSelectUnit': "Sélectionner une unité organisationnelle",
+    'umSelectBureauOrLeadership': "Sélectionnez un bureau pour l'agent ou attribuez-lui la responsabilité du niveau sélectionné.",
+    'umSelectDifferentOrganizationUnit': "Sélectionnez une autre unité organisationnelle pour la mutation.",
+    'umSelectAgent': "Sélectionner un agent",
+    'umNoAvailableChildren': "Aucune unité enfant ne peut être créée sous ce niveau.",
+    'umNoEligibleParentUnits': "Aucune unité parente admissible n'est disponible.",
+    'umAllUnits': "Toutes les unités organisationnelles",
+    'umSearchOrganizations': "Rechercher une organisation par nom",
+    'umSearchUnits': "Rechercher une unité organisationnelle par nom",
+    'umStatusFilter': "Filtrer par statut",
+    'umLoadMore': "Afficher plus",
+    'umArchitectureAudit': "Audit d'intégrité de l'architecture",
+    'umAuditTruncated': "Cet audit limité a atteint sa capacité maximale. La réparation est désactivée tant que les données ne peuvent pas être examinées intégralement par pages.",
+    'umAuditIssues': "Problèmes d'intégrité",
+    'umMoreIssues': "D'autres problèmes ne sont pas affichés dans ce résumé.",
+    'umRepairedProjections': "Projections réparées",
+    'umSkippedAgents': "Agents ignorés",
+    'umRepairProjections': "Réparer les projections sûres",
+    'umAuditClean': "Aucun problème d'intégrité n'a été détecté.",
+    'umAuditIssuesFound': "problèmes d'intégrité détectés",
+    'umRepairProjectionsDescription': "Seules les projections de l'annuaire, des autorisations et de l'affectation actuelle seront reconstruites. Aucune affectation manquante ne sera inventée.",
+    'umRepairReason': "Motif de la réparation",
+    'umAuditHistory': "Historique d'audit de l'organisation",
+    'umAuditHistoryDescription': "Consultez les modifications immuables de l'organisation, de la hiérarchie, des affectations et des responsabilités.",
+    'umNoAuditEvents': "Aucun événement d'audit organisationnel n'a été enregistré.",
+    'umActor': "Acteur",
+    'umBefore': "Avant",
+    'umAfter': "Après",
+    'umNotFound': "L’élément organisationnel demandé est introuvable.",
+    'umOrganizationDetails': "Détails de l’organisation",
+    'umOpenStructure': "Ouvrir la structure",
+    'umOpenAgents': "Ouvrir l’annuaire des agents",
+    'umTreeView': "Arborescence",
+    'umListView': "Liste",
+    'umMigrateLegacyAgent': "Migrer l’identité historique",
+    'umLegacyAgentMigrated': "L’identité Firebase Auth a été migrée. Affectez maintenant l’agent à une unité organisationnelle.",
+    'umCurrentRecords': "Actifs et inactifs",
+    'umSex': "Sexe",
+    'umMale': "Masculin",
+    'umFemale': "Féminin",
   },
 };

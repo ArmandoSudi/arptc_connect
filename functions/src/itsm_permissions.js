@@ -83,6 +83,15 @@ function requireAuthentication(auth) {
       'You must be signed in to perform this ITSM command.',
     );
   }
+  // Firebase-issued tokens contain this claim. Test doubles and legacy custom
+  // tokens that omit it remain compatible, but an explicit unverified token is
+  // never allowed to execute an ITSM command.
+  if (auth.token && auth.token.email_verified === false) {
+    throw new ItsmCommandError(
+      'permission-denied',
+      'Verify your email address before using IT Service Management.',
+    );
+  }
   return auth;
 }
 
@@ -93,10 +102,10 @@ function requireActiveAgent(agent) {
       'No active agent profile is associated with this account.',
     );
   }
-  if (agent.isActive === false) {
+  if (agent.isActive !== true) {
     throw new ItsmCommandError(
       'permission-denied',
-      'This agent account is disabled.',
+      'This agent account is inactive or incomplete.',
     );
   }
   return agent;

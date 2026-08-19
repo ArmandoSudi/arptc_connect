@@ -1,5 +1,6 @@
 import 'package:arptc_connect/generated/l10n.dart';
-import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
+import 'package:arptc_connect/modules/authentication/application/authorized_session.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:arptc_connect/modules/service/module_config.dart';
 import 'package:arptc_connect/modules/usermanagement/domain/modules.dart';
 import 'package:arptc_connect/modules/usermanagement/domain/user_management_module.dart';
@@ -16,26 +17,27 @@ class MainServiceScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
-    final profileAsync = ref.watch(liveAgentProfileProvider);
+    final sessionState = ref.watch(authorizedSessionProvider);
+    final profile = sessionState.session == null
+        ? null
+        : Map<String, dynamic>.from(sessionState.session!.profile);
     final modulesAsync = ref.watch(umModulesProvider);
     final configuredModules =
         modulesAsync.valueOrNull ?? const <UserManagementModule>[];
-    final agentDisplayName = profileAsync.maybeWhen(
-      data: (profile) => _buildAgentDisplayName(
-        profile,
-        fallback: l10n.agent,
-      ),
-      orElse: () => l10n.agent,
-    );
-    final permittedModules = profileAsync.maybeWhen(
-      data: (profile) => _resolvePermittedModules(
-        profile,
-        configuredModules: configuredModules,
-      ),
-      orElse: () => const <ModuleInfo>[],
-    );
+    final agentDisplayName = profile == null
+        ? l10n.agent
+        : _buildAgentDisplayName(profile, fallback: l10n.agent);
+    final permittedModules = profile == null
+        ? const <ModuleInfo>[]
+        : _resolvePermittedModules(
+            profile,
+            configuredModules: configuredModules,
+          );
     final loadingPermissions =
-        profileAsync.isLoading && permittedModules.isEmpty;
+        (sessionState.status == AuthenticationStatus.initializing ||
+                sessionState.status == AuthenticationStatus.profileLoading ||
+                modulesAsync.isLoading) &&
+            permittedModules.isEmpty;
 
     return CustomScrollView(
       slivers: [

@@ -10,46 +10,37 @@ service firebase.storage {
       return /databases/(default)/documents/agents/$(request.auth.uid);
     }
 
-    function authAgentEmailPath() {
-      return /databases/(default)/documents/agents/$(request.auth.token.email);
-    }
-
-    function userPath() {
-      return /databases/(default)/documents/users/$(request.auth.uid);
-    }
-
     function hasAuthAgentDocument() {
       return signedIn() && firestore.exists(authAgentPath());
     }
 
-    function hasAuthAgentEmailDocument() {
+    function hasVerifiedAuthEmail() {
       return signedIn() &&
-        request.auth.token.email is string &&
-        request.auth.token.email != '' &&
-        firestore.exists(authAgentEmailPath());
-    }
-
-    function hasUserDocument() {
-      return signedIn() && firestore.exists(userPath());
+        (
+          !request.auth.token.keys().hasAny(['email_verified']) ||
+          request.auth.token.email_verified == true
+        );
     }
 
     function principalData() {
-      return hasAuthAgentDocument()
+      return hasVerifiedAuthEmail() && hasAuthAgentDocument()
         ? firestore.get(authAgentPath()).data
-        : (
-          hasAuthAgentEmailDocument()
-            ? firestore.get(authAgentEmailPath()).data
-            : (
-              hasUserDocument()
-                ? firestore.get(userPath()).data
-                : request.auth.token
-            )
+        : {};
+    }
+
+    function isActiveAgentProfile(data) {
+      return data.keys().hasAny(['isActive']) &&
+        data.isActive == true &&
+        (
+          !data.keys().hasAny(['mustChangePassword']) ||
+          data.mustChangePassword != true
         );
     }
 
     function itsmRole() {
       let data = principalData();
-      let permissions = data.keys().hasAny(['modulePermissions'])
+      let permissions = isActiveAgentProfile(data) &&
+        data.keys().hasAny(['modulePermissions'])
         ? data.modulePermissions
         : {};
       return permissions.keys().hasAny(['ticketing'])
@@ -300,45 +291,45 @@ service firebase.storage {
       ).data;
     }
 
-    function canReadIncidentStorage(data) {
-      return (
-          isItsmManager() &&
-          data.lifecycleState in ['active', 'closed']
-        ) ||
-        (
-          (isItsmUser() || isItsmAdmin()) &&
-          isPrincipalWorkItemOwner(data)
-        );
+    function isItsmSelfServiceRole(role) {
+      return role in [
+        'USER',
+        'user',
+        'User',
+        'ADMIN',
+        'admin',
+        'Admin'
+      ];
     }
 
-    function canReadChangeStorage(data) {
-      return isItsmManager() ||
-        (
-          (isItsmUser() || isItsmAdmin()) &&
-          isPrincipalWorkItemOwner(data)
-        );
-    }
-
-    function canReadItsmStorageParent(collectionName, workItemId) {
-      let data = workItemData(collectionName, workItemId);
-      return isItsmWorkItemCollection(collectionName) &&
+    function canAccessItsmStorageParent(collectionName, data, role) {
+      return
         (
           (
             collectionName == 'incidentTickets' &&
-            canReadIncidentStorage(data)
+            (
+              (
+                role in ['MANAGER', 'manager', 'Manager'] &&
+                data.lifecycleState in ['active', 'closed']
+              ) ||
+              (
+                isItsmSelfServiceRole(role) &&
+                isPrincipalWorkItemOwner(data)
+              )
+            )
           ) ||
           (
             collectionName == 'serviceRequests' &&
             (
               (
-                isItsmManager() &&
+                role in ['MANAGER', 'manager', 'Manager'] &&
                 (
                   !isRestrictedItsmData(data) ||
                   isExplicitlyAuthorizedForRestricted(data)
                 )
               ) ||
               (
-                (isItsmUser() || isItsmAdmin()) &&
+                isItsmSelfServiceRole(role) &&
                 isPrincipalWorkItemOwner(data) &&
                 !isRestrictedItsmData(data)
               )
@@ -346,36 +337,46 @@ service firebase.storage {
           ) ||
           (
             collectionName == 'changeRequests' &&
-            canReadChangeStorage(data)
+            (
+              role in ['MANAGER', 'manager', 'Manager'] ||
+              (
+                isItsmSelfServiceRole(role) &&
+                isPrincipalWorkItemOwner(data)
+              )
+            )
           )
         );
     }
 
+    function canReadItsmStorageParent(collectionName, workItemId) {
+      let data = workItemData(collectionName, workItemId);
+      let role = itsmRole();
+      return isItsmWorkItemCollection(collectionName) &&
+        canAccessItsmStorageParent(collectionName, data, role);
+    }
+
     function canCreateItsmAttachment(collectionName, workItemId) {
       let data = workItemData(collectionName, workItemId);
-      return canReadItsmStorageParent(collectionName, workItemId) &&
+      let role = itsmRole();
+      return isItsmWorkItemCollection(collectionName) &&
+        canAccessItsmStorageParent(collectionName, data, role) &&
         isActiveWorkItem(data) &&
         (
-          isItsmManager() ||
+          role in ['MANAGER', 'manager', 'Manager'] ||
           (
-            collectionName == 'incidentTickets' &&
-            (isItsmUser() || isItsmAdmin()) &&
-            isPrincipalWorkItemOwner(data)
-          ) ||
-          (
-            collectionName == 'serviceRequests' &&
-            (isItsmUser() || isItsmAdmin()) &&
-            isPrincipalWorkItemOwner(data) &&
-            data.status == 'draft'
-          ) ||
-          (
-            collectionName == 'changeRequests' &&
-            (isItsmUser() || isItsmAdmin()) &&
-            isPrincipalWorkItemOwner(data)
+            isItsmSelfServiceRole(role) &&
+            (
+              collectionName == 'incidentTickets' ||
+              (
+                collectionName == 'serviceRequests' &&
+                data.status == 'draft'
+              ) ||
+              collectionName == 'changeRequests'
+            )
           )
         ) &&
         (
-          isItsmManager() ||
+          role in ['MANAGER', 'manager', 'Manager'] ||
           request.resource.metadata.isInternal == 'false'
         );
     }
@@ -698,7 +699,8 @@ service firebase.storage {
 
     function taskRole() {
       let data = principalData();
-      let permissions = data.keys().hasAny(['modulePermissions'])
+      let permissions = isActiveAgentProfile(data) &&
+        data.keys().hasAny(['modulePermissions'])
         ? data.modulePermissions
         : {};
       return permissions.keys().hasAny(['tasks'])

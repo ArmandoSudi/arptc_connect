@@ -1,0 +1,421 @@
+# Organization Architecture Implementation Plan
+
+## Objective
+
+Replace the separate `departments`, `services`, and `bureaux` hierarchy with a
+query-driven organization model that supports future organization shapes,
+effective-dated agent placement, authoritative leadership, scoped security and
+notifications, and bounded directory queries.
+
+The organization data will be recreated. No legacy department, service, or
+bureau document needs to be copied. Existing ERP features still receive stable
+server-maintained placement projections while they migrate to generic scope
+queries.
+
+## Completion Invariants
+
+1. `organizations` is the authority for enterprise boundaries.
+2. `organizationUnits` is the only authority for hierarchy nodes.
+3. Every unit belongs to exactly one organization and has a valid parent path.
+4. `organizationAssignments` is the only authority for membership and unit
+   leadership.
+5. One agent has at most one active primary assignment.
+6. One unit has at most one active permanent head; acting heads are
+   effective-dated and explicitly marked.
+7. `agents/{firebaseAuthUid}` remains the private identity and authorization
+   profile. Its organization fields are projections maintained by trusted
+   Functions, never independent client input.
+8. `agentDirectory/{firebaseAuthUid}` contains only safe directory fields.
+9. Organization mutations and agent transfers use trusted transactional
+   commands and append audit events.
+10. Legacy hierarchy collections are denied by rules and unused by production
+    UserManagement code.
+11. List APIs are bounded, use stable ordering and cursor pagination, and have
+    tracked indexes.
+12. Notification events have event-specific authorization; organization-scope
+    recipients are resolved by trusted Functions from inherited scope keys.
+
+## Firestore Schema
+
+### `organizations/{organizationId}`
+
+```text
+code: string                       // normalized unique business code
+name: string
+nameLower: string
+description: string
+status: ACTIVE | INACTIVE | ARCHIVED
+schemaVersion: 2
+createdAt: timestamp
+createdBy: string                  // Auth UID
+updatedAt: timestamp
+updatedBy: string                  // Auth UID
+archivedAt: timestamp | null
+archivedBy: string | null
+```
+
+Organization codes are protected by the internal lock document
+`organizationCodeLocks/{normalizedCode}`.
+
+### `organizationDirectory/{organizationId}`
+
+```text
+name: string
+nameLower: string
+status: ACTIVE | INACTIVE | ARCHIVED
+updatedAt: timestamp
+```
+
+This minimal server-maintained projection is the only organization document an
+ordinary `USER` may read, and only for the user's own active organization. Full
+organization metadata remains restricted to `MANAGER` and read-only `ADMIN`
+supervisors.
+
+### `organizationUnits/{unitId}`
+
+```text
+organizationId: string
+type: DEPARTMENT | SERVICE | BUREAU | CUSTOM
+code: string
+name: string
+nameLower: string
+description: string
+parentUnitId: string | null
+parentUnitType: string | null
+ancestorUnitIds: string[]          // root to direct parent
+pathUnitIds: string[]              // ancestors plus this unit
+pathNames: string[]                // denormalized display breadcrumb
+depth: number                      // root unit = 0
+scopeKeys: string[]                // org:<id>, unit:<id> for every path node
+status: ACTIVE | INACTIVE | ARCHIVED
+headUserId: string | null          // read projection only
+headAssignmentId: string | null    // read projection only
+actingHeadUserId: string | null    // read projection only
+actingHeadAssignmentId: string | null // read projection only
+actingHeadEndsAt: timestamp | null // read projection only
+schemaVersion: 2
+createdAt/createdBy: timestamp/string
+updatedAt/updatedBy: timestamp/string
+archivedAt/archivedBy: timestamp|string|null
+```
+
+Allowed default hierarchy:
+
+- `DEPARTMENT` is a root unit.
+- `SERVICE` is a child of `DEPARTMENT`.
+- `BUREAU` is a child of `SERVICE`.
+- `CUSTOM` may be enabled later through organization hierarchy policy; it is
+  not exposed in the MVP creation UI.
+
+The server computes path, ancestry, depth, and scope keys. Unit codes are
+unique per organization through
+`organizationUnitCodeLocks/{organizationId}:{normalizedCode}`.
+
+### `organizationAssignments/{assignmentId}`
+
+```text
+organizationId: string
+agentId: string                    // Firebase Auth UID
+unitId: string
+unitType: string
+unitName: string                   // historical snapshot
+ancestorUnitIds: string[]          // historical snapshot
+pathUnitIds: string[]              // historical snapshot
+pathNames: string[]                // historical snapshot
+scopeKeys: string[]                // historical snapshot
+assignmentType: MEMBER | HEAD
+isPrimary: bool
+isActing: bool
+status: ACTIVE | ENDED | CANCELLED
+startsAt: timestamp
+endsAt: timestamp | null
+reason: string
+createdAt/createdBy: timestamp/string
+updatedAt/updatedBy: timestamp/string
+endedAt/endedBy: timestamp|string|null
+```
+
+Assignment IDs are generated by the server. A transfer transaction ends the
+old primary membership, creates the new membership, updates the agent and
+directory projections, and appends one audit event. Leadership is represented
+by a separate `HEAD` assignment, not by an agent position string.
+
+### Agent organization projection
+
+The following server-owned fields are stored on `agents/{uid}`:
+
+```text
+organizationSchemaVersion: 2
+organizationId: string
+organizationName: string
+primaryOrganizationUnitId: string
+primaryOrganizationUnitName: string
+primaryOrganizationUnitType: string
+primaryAssignmentId: string
+organizationAncestorUnitIds: string[]
+organizationPathUnitIds: string[]
+organizationPathNames: string[]
+scopeKeys: string[]
+departmentId/department: string    // typed path projection
+serviceId/service: string          // typed path projection
+bureauId/bureau: string            // typed path projection
+```
+
+The typed projections are intentionally redundant. They preserve efficient
+incident, task, catalogue eligibility, and reporting queries while the generic
+unit path remains authoritative.
+
+### `agentDirectory/{uid}`
+
+```text
+displayName: string
+displayNameLower: string
+firstName: string
+name: string
+postName: string
+email: string
+profilePictureUrl: string | null
+jobTitle: string
+organizationId: string
+organizationName: string
+primaryOrganizationUnitId: string
+primaryOrganizationUnitName: string
+primaryOrganizationUnitType: string
+departmentId/serviceId/bureauId: string // safe typed placement projections
+organizationPathNames: string[]
+scopeKeys: string[]
+isActive: bool
+updatedAt: timestamp
+```
+
+The directory excludes matricule, module permissions, assignment reasons,
+private profile fields, and device/notification data.
+
+### `agentAuthorizationIndex/{uid}`
+
+This Function-only projection contains `organizationId`, `primaryUnitId`,
+`scopeKeys`, `moduleRoleKeys`, `scopeRoleKeys`, `isActive`, and
+`schemaVersion`. It is denied to every client. Organization-scoped notification
+resolution and future server-side authorization use this index without exposing
+private agent profiles or module permissions through `agentDirectory`.
+
+### `organizationAuditEvents/{eventId}`
+
+Append-only events contain `eventType`, actor identity, organization and unit
+IDs, agent/assignment IDs, reason, before/after summaries, command ID, and a
+server timestamp. Clients cannot create, edit, or delete these events.
+
+## Trusted Commands
+
+All commands require an active, verified agent. Mutating commands require the
+UserManagement `MANAGER` role. `ADMIN` has global read-only supervision and
+`USER` has directory/self-service reads.
+
+- `createOrganization`
+- `updateOrganization`
+- `archiveOrganization`
+- `createOrganizationUnit`
+- `updateOrganizationUnit`
+- `moveOrganizationUnit`
+- `archiveOrganizationUnit`
+- `assignAgentOrganization`
+- `transferAgentOrganization`
+- `setOrganizationUnitHead`
+- `endOrganizationUnitHead`
+- `createAgentAccount`
+- `updateAgentAccount`
+- `deactivateAgentAccount`
+- `sendOrganizationNotification`
+
+Hard deletion is not part of organization or agent management. Archive and
+deactivation commands reject active children, assignments, or leadership where
+appropriate.
+
+Every command accepts a client-generated `commandId`. A receipt at
+`organizationCommandReceipts/{commandId}` makes retries idempotent.
+
+Interactive rename, move, deactivation, and repair commands reject work that
+would exceed their documented bounded fan-out instead of partially updating a
+large hierarchy. `expireOrganizationActingHeads` runs every 15 minutes, pages
+eligible assignments with a stable cursor, and ends expired acting leadership
+idempotently while preserving newer unit projections.
+
+## UserManagement Experience
+
+The module uses four top-level destinations:
+
+1. **Organizations**: responsive organization cards/list, create organization,
+   view details, edit, activate/deactivate, and archive after dependency checks.
+2. **Structure**: organization selector, breadcrumb, tree/list toggle on wide
+   layouts, compact hierarchical list on phones, unit type/status filters,
+   create child unit, edit or safely move a unit, select a head, and archive.
+3. **Agents**: bounded searchable directory, organization/unit/status filters,
+   create an Auth-backed agent, view private details when authorized, transfer
+   placement, view assignment and leadership history, edit permissions, and
+   deactivate.
+4. **Modules**: existing module and role management.
+
+Material 3 interaction rules:
+
+- Use a page title, concise supporting text, and one primary action.
+- Use `NavigationRail`/segmented destinations on wide layouts and tabs or a
+  compact menu on phones.
+- Use cards only for summary/grouping, not every row.
+- Use dialogs for create/edit/assign/head/archive decisions.
+- Show hierarchy with breadcrumbs and type icons rather than three duplicated
+  screens.
+- Hide mutating controls for `ADMIN` and `USER`; enforce the same rule at the
+  route, repository, Function, and Firestore layers.
+- Streams refresh first-page organization, unit, directory, and assignment
+  data immediately after server commits.
+
+## User Stories and Acceptance Tests
+
+### Organization administration
+
+- As a MANAGER, I can create an organization with a unique code.
+- As a MANAGER, I cannot create a duplicate normalized code.
+- As a MANAGER, I can edit display fields without breaking unit references.
+- As a MANAGER, I cannot archive an organization with active units or agents.
+- As an ADMIN, I can inspect all organizations but cannot mutate them.
+- As a USER, I can read active directory organization names only.
+
+### Hierarchy administration
+
+- As a MANAGER, I can create Department -> Service -> Bureau paths.
+- An invalid parent type or cross-organization parent is rejected server-side.
+- A unit's path, ancestors, depth, and scope keys are server-generated.
+- A unit with active children, members, or heads cannot be archived.
+- A service or bureau can be moved only to an eligible active parent; the
+  bounded command updates descendant and current-agent projections while
+  preserving historical assignment snapshots.
+- Hierarchy updates appear without manual refresh.
+
+### Agent placement and leadership
+
+- Creating an agent uses the Firebase Auth UID and creates a primary assignment.
+- The agent private profile and safe directory projection are atomic.
+- A transfer ends the previous assignment and preserves its historical path.
+- A transfer updates all current agent projections atomically.
+- A permanent head cannot conflict with another permanent head.
+- Acting leadership has an explicit start/end period.
+- Agent `jobTitle` cannot contradict or override leadership authority.
+- Deactivating an agent ends active membership/leadership and hides the agent
+  from active directory searches.
+
+### Security and notifications
+
+- Ordinary users cannot list private `agents` documents.
+- Active verified agents can query the bounded `agentDirectory` projection.
+- Inactive/unverified agents cannot browse organization data.
+- Clients cannot emit arbitrary, broadcast, or `ORG_SCOPE` notifications.
+- An authorized organization notification includes descendant units.
+- Optional module-role filters are applied within the organization scope.
+- Recipient retries do not create duplicate personal notifications.
+- Organization notification creation appends one immutable organization audit
+  event in the same transaction as its trusted event and command receipt.
+
+### Query behavior
+
+- Organization, unit, agent directory, assignment, and audit lists enforce a
+  maximum page size of 100 and stable document-ID tie-breakers.
+- Prefix search uses normalized fields and cursor pagination.
+- Every production compound query has a tracked Firestore index.
+
+## Migration and Enforcement Sequence
+
+1. Deploy the schemas, trusted commands, scheduled maintenance, rules, and
+   indexes after review. Deployment is intentionally outside this goal.
+2. Create each organization and its Department -> Service -> Bureau hierarchy
+   from the new UserManagement UI.
+3. Use the bounded unplaced-agent queue. If an old document is not keyed by a
+   Firebase Auth UID, run the explicit identity migration first; it never
+   invents organization placement.
+4. Assign each active Auth-backed agent to a primary unit. This creates the
+   effective-dated assignment and writes schema-version-2 private, directory,
+   and authorization projections atomically.
+5. Use only Organizations, Structure, Agents, and Modules routes. Legacy
+   department/service/bureau routes redirect to Structure, and active
+   UserManagement code has no legacy hierarchy repository.
+6. Keep all legacy hierarchy collection access denied in Firestore rules.
+7. Run the explicit architecture audit in dry-run mode. It reports agents without a
+   valid assignment, stale projections, duplicate heads, invalid paths, and
+   private/directory/authorization projection drift. Repair mode is bounded,
+   command-receipt idempotent, and repairs projections only; it never invents
+   placement or rewrites historical assignment snapshots.
+8. Delete old hierarchy data manually after the audit is clean. No automatic
+   production deletion or Firebase deployment is performed.
+
+## Required Indexes
+
+- `organizations`: `status`, `nameLower`, `__name__`
+- `organizationDirectory`: `status`, `nameLower`, `__name__`
+- `organizationUnits`: `organizationId`, `status`, `parentUnitId`, `nameLower`,
+  `__name__`
+- `organizationUnits`: `organizationId`, `type`, `nameLower`, `__name__` for
+  type filtering when archived units are included
+- `organizationUnits`: `organizationId`, `type`, `status`, `nameLower`,
+  `__name__`
+- `organizationAssignments`: `agentId`, `status`, `startsAt desc`, `__name__`
+- `organizationAssignments`: `unitId`, `status`, `assignmentType`, `startsAt`,
+  `__name__`
+- `organizationAssignments`: `assignmentType`, `isActing`, `status`, `endsAt`,
+  `__name__` for scheduled acting-head expiry
+- `agentDirectory`: `organizationId`, `isActive`, `displayNameLower`, `__name__`
+- `agentDirectory`: `scopeKeys array-contains`, `isActive`,
+  `displayNameLower`, `__name__`
+- `agentAuthorizationIndex`: `organizationId`, `isActive`,
+  `scopeKeys array-contains`, `__name__`
+- `agentAuthorizationIndex`: `organizationId`, `isActive`,
+  `scopeRoleKeys array-contains`, `__name__`
+- `organizationAuditEvents`: `organizationId`, `createdAt desc`, `__name__`
+
+## Verification Gates
+
+1. Pure Dart model, policy, query, and controller tests.
+2. Node unit tests for hierarchy validation, assignment transitions,
+   projections, idempotency, recipient inheritance, and drift auditing.
+3. Riverpod tests for stream refresh, filters, cursors, and session switching.
+4. Widget/router tests for all role-specific user stories and responsive states.
+5. Firestore emulator allow/deny tests for private profiles, directory,
+   hierarchy, assignments, notifications, bounded queries, and legacy denial.
+6. `flutter analyze`.
+7. `flutter test`.
+8. Functions `npm test`.
+9. Firebase emulator integration suite under JDK 21.
+10. `flutter build web` with the configured VAPID key.
+11. `git diff --check`.
+
+No Firebase deployment is part of this implementation goal.
+
+## User-Story Traceability
+
+Every story above has executable evidence. The focused test names are kept
+stable enough to locate with `rg` even when line numbers move.
+
+| Story | Primary executable evidence |
+| --- | --- |
+| MANAGER creates an organization and normalized code lock | `organization_service.test.js`: transactional hierarchy creation |
+| Duplicate organization or unit codes are rejected atomically | `organization_service.test.js`: duplicate codes and code-lock retention |
+| Organization and unit metadata can be edited without broken projections | `organization_service.test.js`: rename propagation |
+| Organization/unit archival rejects active dependencies | `organization_service.test.js`: archival dependency tests |
+| ADMIN supervises read-only and USER sees only the safe directory | `user_management_role_ui_test.dart`, `user_management_router_test.dart`, `organization_firestore_rules.emulator.js` |
+| Department -> Service -> Bureau paths are created server-side | `organization_domain.test.js`, `organization_service.test.js` |
+| Invalid, skipped, cross-organization, or cyclic hierarchy is rejected | `organization_domain.test.js`, `organization_service.test.js` |
+| Unit move updates bounded live projections but preserves history | `organization_service.test.js`, `organization_dialogs_test.dart` |
+| Organization, unit, and directory screens refresh from streams | `organization_live_refresh_test.dart` |
+| Agent creation uses Auth UID and creates profile, primary assignment, safe directory, authorization index, and audit atomically | `organization_service.test.js`, `application_notification_triggers.test.js` |
+| Legacy identity migration is explicit, idempotent, and preserves valid v2 placement | `agent_account_migration.test.js` |
+| Transfer ends the prior assignment and retains historical snapshots | `organization_service.test.js` |
+| Permanent and acting heads are independent and conflict-safe | `organization_service.test.js`, `organization_domain.test.js` |
+| Expired acting leadership ends automatically and idempotently | `organization_maintenance.test.js` |
+| Job title never grants leadership authority | `organization_service.test.js` |
+| Deactivation ends membership and leadership and disables projections | `organization_service.test.js` |
+| Safe Agent models retain organization path/scope fields without `direction` | `user_management_agent_test.dart`, `agent_organization_projection_test.dart` |
+| Private profiles, internal authorization indexes, receipts, locks, and legacy hierarchy are denied | `organization_firestore_rules.emulator.js` |
+| Trusted notification sources, role, target scope, canonical route, event, receipt, and audit are validated | `organization_notifications.test.js` |
+| Department/service/bureau inheritance and optional module-role filtering resolve bounded recipients | `organization_notifications.test.js` |
+| Client-forged notification events and broadcasts are denied | `organization_firestore_rules.emulator.js` |
+| Organization, unit, directory, assignment, and audit pages are bounded and cursor-stable | `organization_query_test.dart`, `organization_accumulators_test.dart`, `organization_migration.test.js` |
+| Every compound organization query has a tracked index | `organization_firestore_indexes.test.js` |
+| Architecture audit traverses stable pages, detects drift, and replays repair before writes | `organization_service.test.js` |

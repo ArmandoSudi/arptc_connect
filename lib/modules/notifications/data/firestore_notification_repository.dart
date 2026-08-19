@@ -1,7 +1,6 @@
 import 'package:arptc_connect/core/firebase_providers.dart';
 import 'package:arptc_connect/modules/notifications/data/notification_repository.dart';
 import 'package:arptc_connect/modules/notifications/domain/app_notification.dart';
-import 'package:arptc_connect/modules/notifications/domain/notification_event.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,20 +13,11 @@ class FirestoreNotificationRepository implements NotificationRepository {
 
   final FirebaseFirestore firestore;
 
-  CollectionReference<Map<String, dynamic>> get _events =>
-      firestore.collection('notificationEvents');
-
   CollectionReference<Map<String, dynamic>> get _globalNotifications =>
       firestore.collection('globalNotifications');
 
   CollectionReference<Map<String, dynamic>> get _agents =>
       firestore.collection('agents');
-
-  @override
-  Future<void> emitEvent(NotificationEvent event) async {
-    final doc = event.id.trim().isEmpty ? _events.doc() : _events.doc(event.id);
-    await doc.set(event.toFirestore());
-  }
 
   @override
   Stream<List<AppNotification>> watchPersonalNotifications(String agentId) {

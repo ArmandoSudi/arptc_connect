@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:arptc_connect/core/firebase_providers.dart';
+import 'package:arptc_connect/modules/authentication/application/authorized_session.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:arptc_connect/modules/notifications/data/notification_messaging_service.dart';
-import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
 import 'package:arptc_connect/router.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,13 +22,13 @@ class NotificationBootstrapper extends ConsumerStatefulWidget {
 
 class _NotificationBootstrapperState
     extends ConsumerState<NotificationBootstrapper> {
-  ProviderSubscription<AsyncValue<Map<String, dynamic>>>? _profileSubscription;
+  ProviderSubscription<AuthorizedSessionState>? _sessionSubscription;
 
   @override
   void initState() {
     super.initState();
-    _profileSubscription = ref.listenManual<AsyncValue<Map<String, dynamic>>>(
-      liveAgentProfileProvider,
+    _sessionSubscription = ref.listenManual<AuthorizedSessionState>(
+      authorizedSessionProvider,
       (_, next) => _initializeMessaging(next),
       fireImmediately: true,
     );
@@ -45,20 +45,18 @@ class _NotificationBootstrapperState
     });
   }
 
-  void _initializeMessaging(AsyncValue<Map<String, dynamic>> profileAsync) {
-    profileAsync.whenData((profile) {
-      final currentUser = ref.read(firebaseAuthProvider).currentUser;
-      if (profile.isEmpty || currentUser == null) {
-        return;
-      }
+  void _initializeMessaging(AuthorizedSessionState sessionState) {
+    final session = sessionState.session;
+    if (session == null) {
+      return;
+    }
 
-      unawaited(
-        ref.read(notificationMessagingServiceProvider).initializeForAgent(
-              profile: profile,
-              fallbackUserId: currentUser.uid,
-            ),
-      );
-    });
+    unawaited(
+      ref.read(notificationMessagingServiceProvider).initializeForAgent(
+            profile: Map<String, dynamic>.from(session.profile),
+            fallbackUserId: session.userId,
+          ),
+    );
   }
 
   void _openNotificationRoute(String route) {
@@ -72,7 +70,7 @@ class _NotificationBootstrapperState
 
   @override
   void dispose() {
-    _profileSubscription?.close();
+    _sessionSubscription?.close();
     super.dispose();
   }
 

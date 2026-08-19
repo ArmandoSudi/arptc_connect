@@ -10,6 +10,7 @@ class ItsmSession {
     required this.email,
     required this.displayName,
     required this.role,
+    this.organizationId = '',
   });
 
   final String sessionKey;
@@ -17,6 +18,7 @@ class ItsmSession {
   final String email;
   final String displayName;
   final ItsmRole role;
+  final String organizationId;
 
   ItsmPermissionPolicy get permissionPolicy => ItsmPermissionPolicy(role);
 
@@ -64,12 +66,11 @@ class ItsmSessionResolver {
     }
 
     final profileId = _string(profile['id']);
-    // Some legacy agent documents were created with an email or generated ID.
-    // The authenticated email is still a safe identity match in that case.
-    final profileMatchesAuthEmail = knownProfileEmails.contains(email);
-    if (profileId.isNotEmpty &&
-        profileId != userId &&
-        !profileMatchesAuthEmail) {
+    if (profileId != userId) {
+      return null;
+    }
+
+    if (profile['isActive'] != true) {
       return null;
     }
 
@@ -89,6 +90,7 @@ class ItsmSessionResolver {
       displayName:
           displayName.isNotEmpty ? displayName : _string(profile['fullName']),
       role: role,
+      organizationId: _string(profile['organizationId']),
     );
   }
 

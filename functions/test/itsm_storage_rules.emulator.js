@@ -46,6 +46,19 @@ beforeEach(async () => {
       setDoc(doc(firestore, 'agents/manager-1'), agent('MANAGER')),
       setDoc(doc(firestore, 'agents/manager-2'), agent('MANAGER')),
       setDoc(doc(firestore, 'agents/admin-1'), agent('ADMIN')),
+      setDoc(doc(firestore, 'agents/legacy-manager@arptc.cd'), agent('MANAGER')),
+      setDoc(doc(firestore, 'agents/inactive-manager'), {
+        ...agent('MANAGER'),
+        isActive: false,
+      }),
+      setDoc(doc(firestore, 'agents/missing-active-manager'), {
+        modulePermissions: { ticketing: 'MANAGER' },
+      }),
+      setDoc(doc(firestore, 'agents/unverified-manager'), agent('MANAGER')),
+      setDoc(doc(firestore, 'agents/password-change-user'), {
+        ...agent('USER'),
+        mustChangePassword: true,
+      }),
       setDoc(
         doc(firestore, 'serviceRequests/request-1'),
         workItem('user-1'),
@@ -79,6 +92,38 @@ beforeEach(async () => {
 
 after(async () => {
   await environment.cleanup();
+});
+
+test('storage requires a verified active profile at the authenticated UID', async () => {
+  for (const [storage, userId, attachmentId] of [
+    [legacyManagerStorage(), 'legacy-manager-uid', 'legacy-email-profile'],
+    [storageFor('inactive-manager'), 'inactive-manager', 'inactive-profile'],
+    [
+      storageFor('missing-active-manager'),
+      'missing-active-manager',
+      'missing-active',
+    ],
+    [
+      storageFor('unverified-manager', { emailVerified: false }),
+      'unverified-manager',
+      'unverified-email',
+    ],
+    [
+      storageFor('password-change-user'),
+      'password-change-user',
+      'initial-password-change',
+    ],
+  ]) {
+    await assertFails(
+      uploadAttachment(storage, {
+        collectionName: 'serviceRequests',
+        workItemId: 'request-1',
+        attachmentId,
+        uploadedByUserId: userId,
+        isInternal: true,
+      }),
+    );
+  }
 });
 
 test('USER uploads only public attachments to an owned active parent', async () => {
@@ -249,8 +294,28 @@ test('unauthenticated and unknown-path access is denied', async () => {
 });
 
 function userStorage(uid) {
+  return storageFor(uid);
+}
+
+function legacyManagerStorage() {
+  return storageFor(
+    'legacy-manager-uid',
+    { email: 'legacy-manager@arptc.cd' },
+  );
+}
+
+function storageFor(
+  uid,
+  {
+    email = `${uid}@arptc.cd`,
+    emailVerified = true,
+  } = {},
+) {
   return environment
-    .authenticatedContext(uid, { email: `${uid}@arptc.cd` })
+    .authenticatedContext(uid, {
+      email,
+      email_verified: emailVerified,
+    })
     .storage();
 }
 
@@ -362,6 +427,7 @@ async function registerSecurityFindingEvidence(evidence) {
 function agent(role) {
   return {
     email: `${role.toLowerCase()}@arptc.cd`,
+    isActive: true,
     modulePermissions: { ticketing: role },
   };
 }

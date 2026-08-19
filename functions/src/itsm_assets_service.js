@@ -19,19 +19,34 @@ const {
 } = require('./itsm_assets_notifications');
 
 const ASSET_TRANSITIONS = Object.freeze({
-  planned: ['ordered', 'retired'],
-  ordered: ['received', 'retired'],
+  // Procurement-era states remain readable for existing records. New assets
+  // enter the operational lifecycle directly in stock.
+  planned: ['ordered'],
+  ordered: ['received'],
   received: ['in_stock', 'configured', 'in_maintenance'],
-  in_stock: ['configured', 'assigned', 'in_maintenance', 'retired', 'disposed'],
-  configured: ['assigned', 'in_stock', 'in_maintenance', 'retired'],
+  in_stock: ['configured', 'assigned', 'in_maintenance'],
+  configured: ['assigned', 'in_stock', 'in_maintenance'],
   assigned: ['in_maintenance', 'returned', 'lost', 'stolen'],
-  in_maintenance: ['configured', 'assigned', 'returned', 'retired'],
-  returned: ['in_stock', 'configured', 'in_maintenance', 'retired'],
+  in_maintenance: ['configured', 'assigned', 'returned'],
+  returned: ['in_stock', 'configured', 'in_maintenance'],
   retired: ['disposed'],
   disposed: [],
-  lost: ['in_stock', 'retired', 'disposed'],
-  stolen: ['in_stock', 'retired', 'disposed'],
+  // Recovery must use the return command so custody closes atomically.
+  lost: ['returned'],
+  stolen: ['returned'],
 });
+
+const DECOMMISSIONABLE_ASSET_STATES = new Set([
+  'planned',
+  'ordered',
+  'received',
+  'in_stock',
+  'configured',
+  'in_maintenance',
+  'returned',
+  'lost',
+  'stolen',
+]);
 
 const CLAIM_TRANSITIONS = Object.freeze({
   submitted: ['acknowledged', 'rejected'],
@@ -92,12 +107,18 @@ async function executeAssetsCommand({
           return registerAsset(context);
         case ITSM_ASSETS_COMMANDS.updateAsset:
           return updateAsset(context);
+        case ITSM_ASSETS_COMMANDS.changeAssetState:
+          return changeAssetState(context);
         case ITSM_ASSETS_COMMANDS.transitionAsset:
           return transitionAsset(context);
         case ITSM_ASSETS_COMMANDS.assignAsset:
           return assignAsset(context);
         case ITSM_ASSETS_COMMANDS.returnAsset:
           return returnAsset(context);
+        case ITSM_ASSETS_COMMANDS.decommissionAsset:
+          return decommissionAsset(context);
+        case ITSM_ASSETS_COMMANDS.saveAssetParameter:
+          return saveAssetParameter(context);
         case ITSM_ASSETS_COMMANDS.saveStockLocation:
           return saveStockLocation(context);
         case ITSM_ASSETS_COMMANDS.saveStockItem:
@@ -139,7 +160,7 @@ async function executeAssetsCommand({
   });
 }
 
-function registerAsset({
+async function registerAsset({
   db,
   fieldValue,
   transaction,
@@ -150,20 +171,161 @@ function registerAsset({
   const payload = command.payload;
   const ref = db.collection('assets').doc(payload.assetId);
   const timestamp = fieldValue.serverTimestamp();
+  const hasInitialAssignment = Boolean(payload.assignedUserId);
+  const status = hasInitialAssignment ? 'assigned' : 'in_stock';
+  const identifierChanges = await prepareAssetIdentifierChanges({
+    transaction,
+    db,
+    assetId: payload.assetId,
+    current: null,
+    next: payload,
+  });
+  let assignee = null;
+  let warranty = null;
+  let assignmentLockSnapshot = null;
+  if (hasInitialAssignment) {
+    [assignee, warranty, assignmentLockSnapshot] = await Promise.all([
+      resolveActiveAgent(transaction, db, payload.assignedUserId, 'assigned user'),
+      resolveProjectionWarranty(transaction, db, payload.warrantyId),
+      transaction.get(db.collection('assetAssignmentLocks').doc(payload.assetId)),
+    ]);
+    if (assignmentLockSnapshot.exists &&
+        assignmentLockSnapshot.data()?.isActive !== false) {
+      throw failed('The asset already has an active assignment lock.');
+    }
+  }
+  const assignmentId = hasInitialAssignment
+    ? `assignment_${receiptId.substring(0, 32)}`
+    : null;
+  const assignedAt = hasInitialAssignment
+    ? payload.assignedAt ? firestoreDate(payload.assignedAt) : timestamp
+    : null;
+  const assignedUserName = hasInitialAssignment
+    ? authoritativeAgentName(assignee, payload.assignedUserId)
+    : null;
+  const assignedUserEmail = hasInitialAssignment
+    ? authoritativeAgentEmail(assignee)
+    : null;
+  const departmentId = hasInitialAssignment
+    ? normalizeString(assignee.departmentId) || payload.departmentId || null
+    : payload.departmentId || null;
   const document = {
-    ...withoutEmpty(payload, ['expectedRevision']),
+    ...withoutEmpty(payload, [
+      'expectedRevision',
+      'status',
+      'assignedUserId',
+      'assignedAt',
+    ]),
+    ...normalizedAssetIdentifierFields(payload),
+    status,
+    isInStock: !hasInitialAssignment,
     searchTokens: assetSearchTokens(payload),
     revision: 0,
-    assignedUserId: null,
-    assignedUserName: null,
-    assignedUserEmail: null,
-    assignedAt: null,
+    departmentId,
+    assignedUserId: hasInitialAssignment ? payload.assignedUserId : null,
+    assignedUserName,
+    assignedUserEmail: assignedUserEmail || null,
+    assignedAt,
+    currentAssignmentId: assignmentId,
+    decommissionedAt: null,
+    decommissionedBy: null,
+    decommissionReason: null,
     createdAt: timestamp,
     createdBy: actor.uid,
     updatedAt: timestamp,
     updatedBy: actor.uid,
   };
   transaction.create(ref, document);
+  applyAssetIdentifierChanges({
+    transaction,
+    fieldValue,
+    assetId: payload.assetId,
+    changes: identifierChanges,
+  });
+  if (hasInitialAssignment) {
+    const assignment = {
+      assignmentId,
+      assetId: payload.assetId,
+      assetTag: payload.assetTag,
+      assetType: payload.type,
+      assetBrand: payload.brand || '',
+      assetModel: payload.model || '',
+      assignedUserId: payload.assignedUserId,
+      assignedUserName,
+      assignedUserEmail: assignedUserEmail || null,
+      assignedByUserId: actor.uid,
+      assignmentReason: 'Asset assigned during registration.',
+      departmentId,
+      departmentName: normalizeString(assignee.departmentName),
+      locationId: payload.locationId || null,
+      locationName: payload.locationName || '',
+      status: 'current',
+      isCurrent: true,
+      assetStatus: 'assigned',
+      assetCondition: payload.condition || 'good',
+      assignedAt,
+      returnedAt: null,
+      returnedToUserId: null,
+      relatedRequestId: null,
+      evidence: [],
+      actor: actorMap(actor),
+      correlationId: command.idempotencyKey,
+    };
+    transaction.create(
+      db.collection('assetAssignments').doc(assignmentId),
+      assignment,
+    );
+    const assignmentLockRef = db.collection('assetAssignmentLocks').doc(payload.assetId);
+    const assignmentLock = {
+      assetId: payload.assetId,
+      assignmentId,
+      assignedUserId: payload.assignedUserId,
+      isActive: true,
+      updatedAt: timestamp,
+    };
+    if (assignmentLockSnapshot.exists) {
+      transaction.update(assignmentLockRef, assignmentLock);
+    } else {
+      transaction.create(assignmentLockRef, assignmentLock);
+    }
+    writeSelfServiceProjection({
+      db,
+      fieldValue,
+      transaction,
+      asset: {...document, assetId: payload.assetId},
+      assignment,
+      warranty,
+      isCurrent: true,
+    });
+    const notification = buildAssetAssignmentNotificationEvent({
+      assetId: payload.assetId,
+      assetTag: payload.assetTag,
+      assignedUserId: payload.assignedUserId,
+      assignedUserEmail,
+      assignmentId,
+      actor,
+      createdAt: timestamp,
+    });
+    transaction.create(
+      db.collection('notificationEvents').doc(notification.id),
+      notification.data,
+    );
+  }
+  writeAssetStateEvent({
+    db,
+    fieldValue,
+    transaction,
+    actor,
+    command,
+    receiptId,
+    assetId: payload.assetId,
+    fromStateId: null,
+    fromStateName: null,
+    toStateId: payload.stateId,
+    toStateName: payload.stateName,
+    observation: payload.observation || 'Asset registered.',
+    revision: 0,
+  });
   writeAssetLifecycleEvent({
     db,
     fieldValue,
@@ -173,8 +335,10 @@ function registerAsset({
     receiptId,
     assetRef: ref,
     fromStatus: null,
-    toStatus: payload.status,
-    reason: 'Asset registered.',
+    toStatus: status,
+    reason: payload.observation || (hasInitialAssignment
+      ? 'Asset registered and assigned to a custodian.'
+      : 'Asset registered in stock.'),
   });
   writeAudit({
     db,
@@ -187,9 +351,79 @@ function registerAsset({
     entityType: 'asset',
     entityId: payload.assetId,
     action: 'registered',
-    after: { status: payload.status, revision: 0 },
+    after: {
+      status,
+      assignedUserId: hasInitialAssignment ? payload.assignedUserId : null,
+      revision: 0,
+    },
   });
-  return { assetId: payload.assetId, status: payload.status, revision: 0 };
+  return {
+    assetId: payload.assetId,
+    assignmentId,
+    status,
+    revision: 0,
+  };
+}
+
+async function changeAssetState(context) {
+  const { db, fieldValue, transaction, actor, command, receiptId } = context;
+  const payload = command.payload;
+  const ref = db.collection('assets').doc(payload.assetId);
+  const snapshot = await transaction.get(ref);
+  const asset = requireDocument(snapshot, 'The asset does not exist.');
+  requireRevision(asset, payload.expectedRevision);
+  if (['retired', 'disposed'].includes(normalizeString(asset.status))) {
+    throw failed('A decommissioned asset state cannot be changed.');
+  }
+  if (normalizeString(asset.stateId) === payload.stateId) {
+    throw failed('Select a different asset state.');
+  }
+  const revision = payload.expectedRevision + 1;
+  const timestamp = fieldValue.serverTimestamp();
+  transaction.update(ref, {
+    stateId: payload.stateId,
+    stateName: payload.stateName,
+    observation: payload.observation,
+    lastStateChangedAt: timestamp,
+    lastStateChangedBy: actor.uid,
+    revision,
+    updatedAt: timestamp,
+    updatedBy: actor.uid,
+  });
+  writeAssetStateEvent({
+    ...context,
+    assetId: payload.assetId,
+    fromStateId: asset.stateId || null,
+    fromStateName: asset.stateName || null,
+    toStateId: payload.stateId,
+    toStateName: payload.stateName,
+    observation: payload.observation,
+    revision,
+  });
+  writeAudit({
+    ...context,
+    parentRef: ref,
+    entityType: 'asset',
+    entityId: payload.assetId,
+    action: 'state_changed',
+    before: {
+      stateId: asset.stateId || null,
+      stateName: asset.stateName || null,
+      revision: payload.expectedRevision,
+    },
+    after: {
+      stateId: payload.stateId,
+      stateName: payload.stateName,
+      observation: payload.observation,
+      revision,
+    },
+  });
+  return {
+    assetId: payload.assetId,
+    stateId: payload.stateId,
+    stateName: payload.stateName,
+    revision,
+  };
 }
 
 async function updateAsset(context) {
@@ -200,18 +434,32 @@ async function updateAsset(context) {
   const asset = requireDocument(snapshot, 'The asset does not exist.');
   requireRevision(asset, payload.expectedRevision);
   const mergedAsset = { ...asset, ...withoutEmpty(payload, ['assetId', 'expectedRevision']) };
+  const identifierChanges = await prepareAssetIdentifierChanges({
+    transaction,
+    db,
+    assetId: payload.assetId,
+    current: asset,
+    next: mergedAsset,
+  });
   const warranty = asset.assignedUserId
     ? await resolveProjectionWarranty(transaction, db, mergedAsset.warrantyId)
     : null;
   const revision = payload.expectedRevision + 1;
   const patch = {
     ...withoutEmpty(payload, ['assetId', 'expectedRevision']),
+    ...normalizedAssetIdentifierFields(mergedAsset),
     searchTokens: assetSearchTokens({ ...asset, ...payload }),
     revision,
     updatedAt: fieldValue.serverTimestamp(),
     updatedBy: actor.uid,
   };
   transaction.update(ref, patch);
+  applyAssetIdentifierChanges({
+    transaction,
+    fieldValue,
+    assetId: payload.assetId,
+    changes: identifierChanges,
+  });
   if (asset.assignedUserId && asset.currentAssignmentId) {
     writeSelfServiceProjection({
       db,
@@ -249,11 +497,26 @@ async function transitionAsset(context) {
   const asset = requireDocument(snapshot, 'The asset does not exist.');
   requireRevision(asset, payload.expectedRevision);
   const fromStatus = normalizeString(asset.status).toLowerCase();
+  if (payload.toStatus === 'assigned') {
+    throw failed('Use the assign asset action to select a custodian.');
+  }
+  if (payload.toStatus === 'returned') {
+    throw failed('Use the return asset action to close the active assignment.');
+  }
+  if (payload.toStatus === 'retired') {
+    throw failed('Use the decommission asset action.');
+  }
+  const hasActiveAssignment = Boolean(asset.currentAssignmentId || asset.assignedUserId);
+  if (hasActiveAssignment &&
+      !['in_maintenance', 'lost', 'stolen'].includes(payload.toStatus)) {
+    throw failed('Return the active assignment before this lifecycle transition.');
+  }
   validateAssetTransition(fromStatus, payload.toStatus);
   const revision = payload.expectedRevision + 1;
   const timestamp = fieldValue.serverTimestamp();
   const patch = {
     status: payload.toStatus,
+    isInStock: isInStockStatus(payload.toStatus),
     condition: payload.condition || asset.condition || null,
     locationId: payload.locationId || asset.locationId || null,
     stockLocationId: payload.stockLocationId || asset.stockLocationId || null,
@@ -263,12 +526,12 @@ async function transitionAsset(context) {
     updatedAt: timestamp,
     updatedBy: actor.uid,
   };
-  if (['returned', 'retired', 'disposed', 'lost', 'stolen'].includes(payload.toStatus)) {
-    Object.assign(patch, clearedAssignment());
-  }
   transaction.update(ref, patch);
-  if (asset.assignedUserId && asset.currentAssignmentId &&
-      ['returned', 'retired', 'disposed', 'lost', 'stolen'].includes(payload.toStatus)) {
+  if (asset.assignedUserId && asset.currentAssignmentId) {
+    transaction.update(db.collection('assetAssignments').doc(asset.currentAssignmentId), {
+      assetStatus: payload.toStatus,
+      updatedAt: timestamp,
+    });
     writeSelfServiceProjection({
       db,
       fieldValue,
@@ -282,7 +545,9 @@ async function transitionAsset(context) {
         assignedAt: asset.assignedAt,
       },
       warranty: null,
-      isCurrent: false,
+      // Lost and stolen assets remain the custodian's responsibility until
+      // recovery is recorded through the dedicated return workflow.
+      isCurrent: true,
     });
   }
   writeAssetLifecycleEvent({
@@ -321,7 +586,7 @@ async function assignAsset(context) {
   if (asset.currentAssignmentId || asset.assignedUserId) {
     throw failed('The asset already has an active assignment.');
   }
-  if (!['in_stock', 'configured', 'returned'].includes(asset.status)) {
+  if (!['in_stock', 'configured'].includes(asset.status)) {
     throw failed(`An asset in ${asset.status || 'unknown'} status cannot be assigned.`);
   }
   const [assignee, assignmentLockSnapshot, warranty] = await Promise.all([
@@ -336,11 +601,15 @@ async function assignAsset(context) {
     throw failed('The asset already has an active assignment.');
   }
   const timestamp = fieldValue.serverTimestamp();
+  const assignedAt = payload.assignedAt
+    ? firestoreDate(payload.assignedAt)
+    : timestamp;
   const revision = payload.expectedRevision + 1;
   const assignmentId = `assignment_${receiptId.substring(0, 32)}`;
   const assignedUserName = authoritativeAgentName(assignee, payload.assignedUserId);
   const assignedUserEmail = authoritativeAgentEmail(assignee);
   const assignment = {
+    assignmentId,
     assetId: payload.assetId,
     assetTag: asset.assetTag,
     assetType: asset.type,
@@ -359,7 +628,7 @@ async function assignAsset(context) {
     isCurrent: true,
     assetStatus: 'assigned',
     assetCondition: asset.condition || 'good',
-    assignedAt: timestamp,
+    assignedAt,
     returnedAt: null,
     returnedToUserId: null,
     relatedRequestId: payload.relatedRequestId || null,
@@ -383,6 +652,7 @@ async function assignAsset(context) {
   }
   transaction.update(ref, {
     status: 'assigned',
+    isInStock: false,
     assignedUserId: payload.assignedUserId,
     assignedUserName,
     assignedUserEmail: assignedUserEmail || null,
@@ -390,7 +660,7 @@ async function assignAsset(context) {
       payload.departmentId || asset.departmentId || null,
     locationId: payload.locationId || asset.locationId || null,
     currentAssignmentId: assignmentId,
-    assignedAt: timestamp,
+    assignedAt,
     revision,
     updatedAt: timestamp,
     updatedBy: actor.uid,
@@ -463,8 +733,9 @@ async function returnAsset(context) {
   const snapshot = await transaction.get(ref);
   const asset = requireDocument(snapshot, 'The asset does not exist.');
   requireRevision(asset, payload.expectedRevision);
-  if (!['assigned', 'in_maintenance'].includes(asset.status) || !asset.assignedUserId) {
-    throw failed('Only an assigned asset can be returned by this command.');
+  if (!['assigned', 'in_maintenance', 'lost', 'stolen'].includes(asset.status) ||
+      !asset.assignedUserId) {
+    throw failed('Only an assigned, maintained, lost, or stolen asset can be returned.');
   }
   const timestamp = fieldValue.serverTimestamp();
   const revision = payload.expectedRevision + 1;
@@ -508,6 +779,7 @@ async function returnAsset(context) {
   });
   transaction.update(ref, {
     status: 'returned',
+    isInStock: false,
     condition: payload.condition,
     locationId: payload.locationId || asset.locationId || null,
     stockLocationId: payload.stockLocationId || asset.stockLocationId || null,
@@ -563,6 +835,65 @@ async function returnAsset(context) {
   return { assetId: payload.assetId, status: 'returned', revision };
 }
 
+async function decommissionAsset(context) {
+  const { db, fieldValue, transaction, actor, command } = context;
+  const payload = command.payload;
+  const ref = db.collection('assets').doc(payload.assetId);
+  const assignmentLockRef = db.collection('assetAssignmentLocks').doc(payload.assetId);
+  const [snapshot, assignmentLockSnapshot] = await Promise.all([
+    transaction.get(ref),
+    transaction.get(assignmentLockRef),
+  ]);
+  const asset = requireDocument(snapshot, 'The asset does not exist.');
+  requireRevision(asset, payload.expectedRevision);
+  const fromStatus = normalizeString(asset.status).toLowerCase();
+  if (!DECOMMISSIONABLE_ASSET_STATES.has(fromStatus)) {
+    throw failed(`An asset in ${fromStatus || 'unknown'} status cannot be decommissioned.`);
+  }
+  const lock = assignmentLockSnapshot.exists
+    ? assignmentLockSnapshot.data() || {}
+    : null;
+  if (asset.currentAssignmentId || asset.assignedUserId || lock?.isActive === true) {
+    throw failed('Return the active assignment before decommissioning this asset.');
+  }
+  const revision = payload.expectedRevision + 1;
+  const timestamp = fieldValue.serverTimestamp();
+  transaction.update(ref, {
+    status: 'retired',
+    isInStock: false,
+    decommissionedAt: timestamp,
+    decommissionedBy: actor.uid,
+    decommissionReason: payload.observation,
+    lastLifecycleReason: payload.observation,
+    lastLifecycleChangedAt: timestamp,
+    revision,
+    updatedAt: timestamp,
+    updatedBy: actor.uid,
+  });
+  writeAssetLifecycleEvent({
+    ...context,
+    assetRef: ref,
+    fromStatus,
+    toStatus: 'retired',
+    reason: payload.observation,
+  });
+  writeAudit({
+    ...context,
+    parentRef: ref,
+    entityType: 'asset',
+    entityId: payload.assetId,
+    action: 'decommissioned',
+    before: { status: fromStatus, revision: payload.expectedRevision },
+    after: {
+      status: 'retired',
+      isInStock: false,
+      decommissionReason: payload.observation,
+      revision,
+    },
+  });
+  return { assetId: payload.assetId, status: 'retired', revision };
+}
+
 async function saveStockLocation(context) {
   const { db, fieldValue, transaction, actor, command } = context;
   const payload = command.payload;
@@ -602,6 +933,46 @@ async function saveStockLocation(context) {
     after: { revision, isActive: payload.isActive },
   });
   return { id: payload.id, revision, created: !current };
+}
+
+async function saveAssetParameter(context) {
+  const { db, fieldValue, transaction, actor, command } = context;
+  const payload = command.payload;
+  const collection = db.collection('assetParameters');
+  const ref = payload.id ? collection.doc(payload.id) : collection.doc();
+  const snapshot = await transaction.get(ref);
+  const current = snapshot.exists ? snapshot.data() || {} : null;
+  requireExpectedRevision(current, payload.expectedRevision);
+  const revision = current ? integer(current.revision) + 1 : 0;
+  const timestamp = fieldValue.serverTimestamp();
+  const document = {
+    type: payload.type,
+    name: payload.name,
+    isActive: payload.isActive,
+    sortOrder: payload.sortOrder,
+    revision,
+    updatedAt: timestamp,
+    updatedBy: actor.uid,
+  };
+  if (current) {
+    transaction.update(ref, document);
+  } else {
+    transaction.create(ref, {
+      ...document,
+      createdAt: timestamp,
+      createdBy: actor.uid,
+    });
+  }
+  writeAudit({
+    ...context,
+    parentRef: ref,
+    entityType: 'asset_parameter',
+    entityId: ref.id,
+    action: current ? 'updated' : 'created',
+    before: current ? { revision: current.revision } : {},
+    after: { revision, type: payload.type, isActive: payload.isActive },
+  });
+  return { id: ref.id, revision, created: !current };
 }
 
 async function saveStockItem(context) {
@@ -1505,6 +1876,171 @@ function deterministicRelationshipKey(payload) {
   return `relationship_${crypto.createHash('sha256').update(canonical).digest('hex')}`;
 }
 
+async function prepareAssetIdentifierChanges({
+  transaction,
+  db,
+  assetId,
+  current,
+  next,
+}) {
+  const previous = new Map(
+    assetIdentifierDefinitions(current || {}).map((entry) => [entry.key, entry]),
+  );
+  const desired = new Map(
+    assetIdentifierDefinitions(next || {}).map((entry) => [entry.key, entry]),
+  );
+  const definitions = new Map([...previous, ...desired]);
+  for (const entry of definitions.values()) {
+    entry.reference = db.collection('assetIdentifierLocks').doc(entry.key);
+  }
+  const snapshots = new Map(await Promise.all(
+    [...definitions.entries()].map(async ([key, entry]) => [
+      key,
+      await transaction.get(entry.reference),
+    ]),
+  ));
+  const conflicts = await findAssetIdentifierConflicts({
+    transaction,
+    db,
+    assetId,
+    desired,
+  });
+
+  const claims = [];
+  for (const [key, entry] of desired) {
+    if (conflicts.has(key)) {
+      throw alreadyExists(
+        `Another asset already uses this ${entry.label}: ${entry.value}.`,
+      );
+    }
+    const snapshot = snapshots.get(key);
+    if (snapshot?.exists) {
+      const ownerId = normalizeString((snapshot.data() || {}).assetId);
+      if (ownerId !== assetId) {
+        throw alreadyExists(
+          `Another asset already uses this ${entry.label}: ${entry.value}.`,
+        );
+      }
+    } else {
+      claims.push(entry);
+    }
+  }
+
+  const releases = [];
+  for (const [key, entry] of previous) {
+    if (desired.has(key)) continue;
+    const snapshot = snapshots.get(key);
+    if (snapshot?.exists &&
+        normalizeString((snapshot.data() || {}).assetId) === assetId) {
+      releases.push(entry);
+    }
+  }
+  return { claims, releases };
+}
+
+async function findAssetIdentifierConflicts({
+  transaction,
+  db,
+  assetId,
+  desired,
+}) {
+  const results = await Promise.all(
+    [...desired.entries()].map(async ([key, entry]) => {
+      const normalizedQuery = db.collection('assets')
+        .where(entry.normalizedField, '==', entry.normalizedValue)
+        .limit(2);
+      const legacyQuery = db.collection('assets')
+        .where(entry.rawField, 'in', legacyAssetIdentifierVariants(entry.value))
+        .limit(2);
+      const [normalizedSnapshot, legacySnapshot] = await Promise.all([
+        transaction.get(normalizedQuery),
+        transaction.get(legacyQuery),
+      ]);
+      const hasConflict = [
+        ...normalizedSnapshot.docs,
+        ...legacySnapshot.docs,
+      ].some((document) => document.id !== assetId);
+      return [key, hasConflict];
+    }),
+  );
+  return new Map(results.filter(([, hasConflict]) => hasConflict));
+}
+
+function applyAssetIdentifierChanges({
+  transaction,
+  fieldValue,
+  assetId,
+  changes,
+}) {
+  for (const entry of changes.claims) {
+    transaction.create(entry.reference, {
+      assetId,
+      identifierType: entry.type,
+      normalizedValue: entry.normalizedValue,
+      createdAt: fieldValue.serverTimestamp(),
+      updatedAt: fieldValue.serverTimestamp(),
+    });
+  }
+  for (const entry of changes.releases) {
+    transaction.delete(entry.reference);
+  }
+}
+
+function assetIdentifierDefinitions(asset) {
+  return [
+    [
+      'serial_number',
+      'serial number',
+      'serialNumber',
+      'serialNumberNormalized',
+      asset.serialNumber,
+    ],
+    [
+      'product_number',
+      'product number',
+      'productNumber',
+      'productNumberNormalized',
+      asset.productNumber,
+    ],
+  ].flatMap(([type, label, rawField, normalizedField, rawValue]) => {
+    const value = normalizeString(rawValue);
+    const normalizedValue = normalizeAssetIdentifier(value);
+    if (!normalizedValue) return [];
+    const key = `asset_identifier_${crypto.createHash('sha256')
+      .update(`${type}|${normalizedValue}`)
+      .digest('hex')}`;
+    return [{
+      key,
+      type,
+      label,
+      value,
+      normalizedValue,
+      rawField,
+      normalizedField,
+      reference: null,
+    }];
+  });
+}
+
+function legacyAssetIdentifierVariants(value) {
+  return [...new Set([
+    normalizeString(value),
+    normalizeString(value).toLowerCase(),
+    normalizeString(value).toUpperCase(),
+  ])];
+}
+
+function normalizedAssetIdentifierFields(asset) {
+  return {
+    serialNumberNormalized: normalizeAssetIdentifier(asset.serialNumber),
+    productNumberNormalized: normalizeAssetIdentifier(asset.productNumber),
+  };
+}
+
+function normalizeAssetIdentifier(value) {
+  return normalizeString(value).normalize('NFKC').toLowerCase();
+}
+
 function safeCiHistorySnapshot(ci) {
   return {
     name: normalizeString(ci.name),
@@ -1546,6 +2082,37 @@ function writeAssetLifecycleEvent({
     actor: actorMap(actor),
     correlationId: command.idempotencyKey,
     occurredAt: fieldValue.serverTimestamp(),
+  });
+}
+
+function writeAssetStateEvent({
+  db,
+  fieldValue,
+  transaction,
+  actor,
+  command,
+  receiptId,
+  assetId,
+  fromStateId,
+  fromStateName,
+  toStateId,
+  toStateName,
+  observation,
+  revision,
+}) {
+  const eventId = `state_${receiptId.substring(0, 32)}`;
+  transaction.create(db.collection('assetStateEvents').doc(eventId), {
+    eventId,
+    assetId,
+    fromStateId: fromStateId || null,
+    fromStateName: fromStateName || null,
+    toStateId,
+    toStateName,
+    observation,
+    revision,
+    actor: actorMap(actor),
+    correlationId: command.idempotencyKey,
+    changedAt: fieldValue.serverTimestamp(),
   });
 }
 
@@ -1759,6 +2326,10 @@ function clearedAssignment() {
   };
 }
 
+function isInStockStatus(status) {
+  return ['in_stock', 'configured'].includes(normalizeString(status).toLowerCase());
+}
+
 function assetSearchTokens(asset) {
   return [...new Set([
     asset.assetTag,
@@ -1768,6 +2339,7 @@ function assetSearchTokens(asset) {
     asset.brand,
     asset.model,
     asset.serialNumber,
+    asset.productNumber,
   ]
     .flatMap((value) => normalizeString(value).toLowerCase().split(/[^\p{L}\p{N}]+/u))
     .filter(Boolean))]
@@ -1824,6 +2396,10 @@ function failed(message) {
   return new ItsmCommandError('failed-precondition', message);
 }
 
+function alreadyExists(message) {
+  return new ItsmCommandError('already-exists', message);
+}
+
 function conflict(message) {
   return new ItsmCommandError('aborted', message);
 }
@@ -1842,6 +2418,7 @@ module.exports = {
   releaseLicence,
   returnAsset,
   saveConfigurationItem,
+  saveAssetParameter,
   saveStockItem,
   saveStockLocation,
   transitionAsset,

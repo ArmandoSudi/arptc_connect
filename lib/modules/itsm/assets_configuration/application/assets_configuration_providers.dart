@@ -8,6 +8,8 @@ import '../../shared/application/itsm_session.dart';
 import '../../shared/domain/pagination.dart';
 import '../data/firestore_assets_configuration_port.dart';
 import '../data/firebase_assets_attachment_gateway.dart';
+import '../domain/asset_assignee.dart';
+import '../domain/asset_parameter.dart';
 import 'assets_attachment.dart';
 import 'assets_configuration_access_policy.dart';
 import 'assets_configuration_command_controller.dart';
@@ -141,6 +143,95 @@ final assetDetailProvider = StreamProvider.autoDispose
     return identity.selfService
         ? port.watchMyAssetDetail(principal: principal, assetId: identity.id)
         : port.watchAssetDetail(principal: principal, assetId: identity.id);
+  });
+});
+
+final assetAssignmentHistoryProvider = StreamProvider.autoDispose
+    .family<List<AssetAssignmentHistoryEntry>, String>((ref, assetId) {
+  final port = ref.watch(assetsConfigurationReadPortProvider);
+  final policy = ref.read(assetsConfigurationAccessPolicyProvider);
+  return _sessionStream(ref, (session) {
+    policy.authorizeOperational(session);
+    return port.watchAssetAssignmentHistory(
+      principal: AssetConfigurationPrincipal.fromSession(session),
+      assetId: assetId,
+      limit: 100,
+    );
+  });
+});
+
+final assetStateHistoryProvider = StreamProvider.autoDispose
+    .family<List<AssetStateHistoryEntry>, String>((ref, assetId) {
+  final port = ref.watch(assetsConfigurationReadPortProvider);
+  final policy = ref.read(assetsConfigurationAccessPolicyProvider);
+  return _sessionStream(ref, (session) {
+    policy.authorizeOperational(session);
+    return port.watchAssetStateHistory(
+      principal: AssetConfigurationPrincipal.fromSession(session),
+      assetId: assetId,
+      limit: PageRequest.maximumLimit,
+    );
+  });
+});
+
+final assetParametersProvider =
+    StreamProvider.autoDispose.family<List<AssetParameter>, int>((ref, limit) {
+  _validateLimit(limit);
+  final port = ref.watch(assetsConfigurationReadPortProvider);
+  final policy = ref.read(assetsConfigurationAccessPolicyProvider);
+  return _sessionStream(ref, (session) {
+    policy.authorizeOperational(session);
+    return port.watchAssetParameters(
+      principal: AssetConfigurationPrincipal.fromSession(session),
+      limit: limit,
+    );
+  });
+});
+
+final assetAssigneesProvider =
+    StreamProvider.autoDispose.family<List<AssetAssignee>, int>((ref, limit) {
+  _validateLimit(limit);
+  final port = ref.watch(assetsConfigurationReadPortProvider);
+  final policy = ref.read(assetsConfigurationAccessPolicyProvider);
+  return _sessionStream(ref, (session) {
+    policy.authorizeOperational(session);
+    return port.watchAssetAssignees(
+      principal: AssetConfigurationPrincipal.fromSession(session),
+      limit: limit,
+    );
+  });
+});
+
+class AssetAssigneeSearchQuery {
+  AssetAssigneeSearchQuery({String search = '', this.limit = 20})
+      : search = search.trim().toLowerCase() {
+    _validateLimit(limit);
+  }
+
+  final String search;
+  final int limit;
+
+  @override
+  bool operator ==(Object other) =>
+      other is AssetAssigneeSearchQuery &&
+      other.search == search &&
+      other.limit == limit;
+
+  @override
+  int get hashCode => Object.hash(search, limit);
+}
+
+final assetAssigneeSearchProvider = StreamProvider.autoDispose
+    .family<List<AssetAssignee>, AssetAssigneeSearchQuery>((ref, query) {
+  final port = ref.watch(assetsConfigurationReadPortProvider);
+  final policy = ref.read(assetsConfigurationAccessPolicyProvider);
+  return _sessionStream(ref, (session) {
+    policy.authorizeOperational(session);
+    return port.watchAssetAssignees(
+      principal: AssetConfigurationPrincipal.fromSession(session),
+      limit: query.limit,
+      search: query.search,
+    );
   });
 });
 

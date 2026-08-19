@@ -127,8 +127,17 @@ function registerCommand() {
       assetId: 'asset-1',
       assetTag: 'ARPTC-001',
       categoryId: 'computer',
+      categoryName: 'Computer',
       type: 'laptop',
-      status: 'planned',
+      brand: 'Dell',
+      model: 'Latitude',
+      serialNumber: 'SN-001',
+      locationId: 'kinshasa-hq',
+      locationName: 'Kinshasa HQ',
+      stateId: 'new',
+      stateName: 'New',
+      acquisitionDate: '2026-08-01',
+      status: 'in_stock',
     },
   };
 }

@@ -2,6 +2,7 @@ import 'package:arptc_connect/generated/l10n.dart';
 import 'package:flutter/widgets.dart';
 
 import '../application/assets_configuration_contracts.dart';
+import '../domain/asset_parameter.dart';
 
 class AssetsConfigurationStrings {
   AssetsConfigurationStrings._(this._l10n);
@@ -49,9 +50,15 @@ class AssetsConfigurationStrings {
   String get editAsset => _l10n.editAsset;
   String get assignAsset => _l10n.assignAsset;
   String get returnAsset => _l10n.returnAsset;
+  String get confirm => _l10n.confirm;
   String get transitionAsset => _l10n.transitionAsset;
   String get assignedUserId => _l10n.assignedUserId;
   String get assignedAssetReturnHint => _l10n.assignedAssetReturnHint;
+  String get exceptionalAssetReturnHint => _l10n.exceptionalAssetReturnHint;
+  String get confirmExceptionalAssetStatus =>
+      _l10n.confirmExceptionalAssetStatus;
+  String get exceptionalAssetStatusWarning =>
+      _l10n.exceptionalAssetStatusWarning;
   String get transitionReason => _l10n.transitionReason;
   String get lifecycleOperationCompleted => _l10n.lifecycleOperationCompleted;
   String get registerAsset => '${_l10n.add} ${_l10n.assetId}';
@@ -90,6 +97,80 @@ class AssetsConfigurationStrings {
   String get addWarranty => '${_l10n.add} ${_l10n.warranty}';
   String get addConfigurationItem => '${_l10n.add} ${_l10n.configurationItem}';
   String get registerNewAsset => _l10n.registerNewAsset;
+  String get assetParameters => _l10n.assetParameters;
+  String get assetParametersDescription => _l10n.assetParametersDescription;
+  String get addAssetParameter => _l10n.addAssetParameter;
+  String get editAssetParameter => _l10n.editAssetParameter;
+  String get assetParameterSortOrder => _l10n.assetParameterSortOrder;
+  String get assetParameterLocations => _l10n.assetParameterLocations;
+  String get assetParameterCategories => _l10n.assetParameterCategories;
+  String get assetParameterStates => _l10n.assetParameterStates;
+  String get addAssetLocation => _l10n.addAssetLocation;
+  String get addAssetCategory => _l10n.addAssetCategory;
+  String get addAssetState => _l10n.addAssetState;
+  String get noAssetLocations => _l10n.noAssetLocations;
+  String get noAssetCategories => _l10n.noAssetCategories;
+  String get noAssetStates => _l10n.noAssetStates;
+  String get deleteAssetParameterTitle => _l10n.deleteAssetParameterTitle;
+  String get deleteAssetParameterMessage => _l10n.deleteAssetParameterMessage;
+  String get assetParameterDeleted => _l10n.assetParameterDeleted;
+  String get assetCommandServiceUnavailable =>
+      _l10n.assetCommandServiceUnavailable;
+  String get productNumber => _l10n.productNumber;
+  String get observation => _l10n.observation;
+  String get assignmentDate => _l10n.assignmentDate;
+  String get assignmentHistory => _l10n.assignmentHistory;
+  String get noAssignmentHistory => _l10n.noAssignmentHistory;
+  String get currentAssignment => _l10n.currentAssignment;
+  String get previousAssignment => _l10n.previousAssignment;
+  String get changeAssetState => _l10n.changeAssetState;
+  String get updateAssetStatus => _l10n.updateAssetStatus;
+  String get updateAssetStatusDescription => _l10n.updateAssetStatusDescription;
+  String get assetCondition => _l10n.assetCondition;
+  String get assetConditionDescription => _l10n.assetConditionDescription;
+  String get assetLifecycle => _l10n.assetLifecycle;
+  String get assetLifecycleDescription => _l10n.assetLifecycleDescription;
+  String get noAssetConditionUpdates => _l10n.noAssetConditionUpdates;
+  String get noLifecycleTransitions => _l10n.noLifecycleTransitions;
+  String get decommissionUnavailable => _l10n.decommissionUnavailable;
+  String get newAssignment => _l10n.newAssignment;
+  String get selectAgent => _l10n.selectAgent;
+  String get searchAgents => _l10n.searchAgents;
+  String get noActiveAgents => _l10n.noActiveAgents;
+  String get requiredField => _l10n.requiredField;
+  String get allAssetCategories => _l10n.allAssetCategories;
+  String get allAssetBrands => _l10n.allAssetBrands;
+  String get filterByAssetCategory => _l10n.filterByAssetCategory;
+  String get filterByAssetBrand => _l10n.filterByAssetBrand;
+  String get searchAssetSerialOrProduct => _l10n.searchAssetSerialOrProduct;
+  String get configureAssetParametersFirst =>
+      _l10n.configureAssetParametersFirst;
+  String get assetRegisteredSuccessfully => _l10n.assetRegisteredSuccessfully;
+  String get assetParameterSaved => _l10n.assetParameterSaved;
+  String get assetAssignedSuccessfully => _l10n.assetAssignedSuccessfully;
+  String get assetStateUpdated => _l10n.assetStateUpdated;
+  String get stateHistory => _l10n.assetStateHistory;
+  String get noStateHistory => _l10n.noAssetStateHistory;
+  String get stateChangeObservation => _l10n.assetStateChangeObservation;
+  String get decommissionAsset => _l10n.decommissionAsset;
+  String get decommissionAssetConfirmation =>
+      _l10n.decommissionAssetConfirmation;
+  String get decommissionObservation => _l10n.decommissionObservation;
+  String get assetDecommissionedSuccessfully =>
+      _l10n.assetDecommissionedSuccessfully;
+  String get assetAvailability => _l10n.assetAvailability;
+  String get allAssetAvailability => _l10n.allAssetAvailability;
+  String get filterByAssetAvailability => _l10n.filterByAssetAvailability;
+  String get selectAssetCategory => _l10n.selectAssetCategory;
+  String get selectAssetLocation => _l10n.selectAssetLocation;
+  String get selectAssetState => _l10n.selectAssetState;
+  String get optionalInitialAssignment => _l10n.optionalInitialAssignment;
+  String get optionalInitialAssignmentHint =>
+      _l10n.optionalInitialAssignmentHint;
+  String get selectAgentFromResults => _l10n.selectAgentFromResults;
+  String get deactivateAssetParameter => _l10n.deactivateAssetParameter;
+  String get assetAssignmentRequiresReturn =>
+      _l10n.assetAssignmentRequiresReturn;
   String get registerNewLicence => _l10n.registerNewLicence;
   String get allocateLicence => _l10n.allocateLicence;
   String get releaseLicence => _l10n.releaseLicence;
@@ -194,6 +275,7 @@ class AssetsConfigurationStrings {
   String get uploading => _l10n.uploading;
   String get noLifecycle => _l10n.noDataAvailable;
   String get cancel => _l10n.cancel;
+  String get delete => _l10n.delete;
   String get quantity => _l10n.quantity;
   String get positiveQuantityError => _l10n.requiredField;
   String get sourceLocation => _l10n.sourceLocation;
@@ -264,6 +346,21 @@ class AssetsConfigurationStrings {
         AssetLifecycleStatus.disposed => _l10n.assetStatusDisposed,
         AssetLifecycleStatus.lost => _l10n.assetStatusLost,
         AssetLifecycleStatus.stolen => _l10n.assetStatusStolen,
+      };
+
+  String assetAvailabilityName(AssetAvailability availability) =>
+      switch (availability) {
+        AssetAvailability.inStock => _l10n.assetStatusInStock,
+        AssetAvailability.assigned => _l10n.assetStatusAssigned,
+        AssetAvailability.decommissioned =>
+          _l10n.assetAvailabilityDecommissioned,
+        AssetAvailability.unavailable => _l10n.assetAvailabilityUnavailable,
+      };
+
+  String assetParameterType(AssetParameterType type) => switch (type) {
+        AssetParameterType.category => _l10n.assetParameterCategory,
+        AssetParameterType.location => _l10n.assetParameterLocation,
+        AssetParameterType.state => _l10n.assetParameterState,
       };
 
   String complianceState(ComplianceState state) => state.name;

@@ -1,5 +1,5 @@
 import 'package:arptc_connect/generated/l10n.dart';
-import 'package:arptc_connect/modules/usermanagement/domain/user_management_agent.dart';
+import 'package:arptc_connect/modules/usermanagement/domain/agent_directory_entry.dart';
 import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:arptc_connect/widgets/corporate_components.dart';
 import 'package:flutter/material.dart';
@@ -28,10 +28,10 @@ class ServiceRequestFormView extends StatelessWidget {
   final ServiceRequestFormState state;
   final String languageCode;
   final bool canRequestOnBehalf;
-  final List<UserManagementAgent> agents;
+  final List<AgentDirectoryEntry> agents;
   final String agentSearchQuery;
   final ValueChanged<String> onAgentSearchChanged;
-  final ValueChanged<UserManagementAgent> onAgentSelected;
+  final ValueChanged<AgentDirectoryEntry> onAgentSelected;
   final ValueChanged<String> onTitleChanged;
   final ValueChanged<String> onDescriptionChanged;
   final void Function(String key, Object? value) onResponseChanged;

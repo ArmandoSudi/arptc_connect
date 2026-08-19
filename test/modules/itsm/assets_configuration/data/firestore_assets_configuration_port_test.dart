@@ -136,6 +136,61 @@ void main() {
       expect(result.nextCursor, cursor);
     });
 
+    test('maps immutable state events to bounded state history', () async {
+      final reads = _FakeReadAdapter()
+        ..stateEvents = [
+          domain.AssetStateEvent(
+            id: 'state-event-1',
+            assetId: 'asset-1',
+            fromStateId: 'good',
+            fromStateName: 'Good',
+            toStateId: 'repairable',
+            toStateName: 'Repairable',
+            observation: 'Battery health is below threshold.',
+            actorUserId: 'manager-1',
+            actorName: 'Manager One',
+            changedAt: fixtureDate,
+            revision: 3,
+          ),
+        ];
+      final port = _port(reads: reads);
+
+      final history = await port
+          .watchAssetStateHistory(
+            principal: _principal(role: ItsmRole.manager),
+            assetId: 'asset-1',
+            limit: 25,
+          )
+          .first;
+
+      expect(history.single.fromStateName, 'Good');
+      expect(history.single.toStateName, 'Repairable');
+      expect(history.single.observation, 'Battery health is below threshold.');
+    });
+
+    test('forwards bounded assignee search to the directory adapter', () async {
+      final reads = _FakeReadAdapter()
+        ..assetAssignees = const [
+          domain.AssetAssignee(
+            id: 'agent-1',
+            displayName: 'Armando Sudi',
+            email: 'armando@arptc.cd',
+          ),
+        ];
+      final port = _port(reads: reads);
+
+      final agents = await port
+          .watchAssetAssignees(
+            principal: _principal(role: ItsmRole.manager),
+            limit: 20,
+            search: '  ARMANDO ',
+          )
+          .first;
+
+      expect(agents.single.id, 'agent-1');
+      expect(reads.assigneeSearch, '  ARMANDO ');
+    });
+
     test('dependency graph uses bounded denormalized relationship data',
         () async {
       final reads = _FakeReadAdapter()
@@ -438,6 +493,151 @@ void main() {
       expect(receipt.acceptedAt, fixtureDate);
     });
 
+    test('asset registration preserves register fields and omits assignment',
+        () async {
+      final calls = _RecordingCallableInvoker(result: const {});
+      final port = _port(calls: calls);
+
+      await port.execute(
+        application.ManagerConfigurationCommand(
+          context: _context('asset-register-command'),
+          recordType: 'asset',
+          operation: 'register',
+          recordId: 'asset-900',
+          fields: const {
+            'brand': 'Dell',
+            'model': 'Latitude 7450',
+            'assetTag': 'SN-900',
+            'serialNumber': 'SN-900',
+            'productNumber': 'PN-7450',
+            'categoryId': 'laptop',
+            'categoryName': 'Laptop',
+            'type': 'Laptop',
+            'locationId': 'hq',
+            'locationName': 'Head office',
+            'stateId': 'good',
+            'stateName': 'Good',
+            'status': 'in_stock',
+            'condition': 'good',
+            'acquisitionDate': '2026-08-01',
+            'observation': 'New workstation',
+          },
+        ),
+      );
+
+      expect(calls.functionName, 'itsmRegisterAsset');
+      expect(calls.envelope['command'], 'asset.register');
+      expect(calls.payload['assetId'], 'asset-900');
+      expect(calls.payload['productNumber'], 'PN-7450');
+      expect(calls.payload['stateId'], 'good');
+      expect(calls.payload, isNot(contains('assignedUserId')));
+      expect(calls.payload, isNot(contains('assignedAt')));
+    });
+
+    test('asset registration forwards an optional initial assignment',
+        () async {
+      final calls = _RecordingCallableInvoker(result: const {});
+      final port = _port(calls: calls);
+
+      await port.execute(
+        application.ManagerConfigurationCommand(
+          context: _context('asset-register-assigned-command'),
+          recordType: 'asset',
+          operation: 'register',
+          recordId: 'asset-901',
+          fields: const {
+            'brand': 'Dell',
+            'model': 'Latitude 7450',
+            'assetTag': 'SN-901',
+            'serialNumber': 'SN-901',
+            'categoryId': 'laptop',
+            'categoryName': 'Laptop',
+            'type': 'Laptop',
+            'stateId': 'good',
+            'stateName': 'Good',
+            'condition': 'good',
+            'acquisitionDate': '2026-08-01',
+            'assignedUserId': 'agent-armando',
+            'assignedAt': '2026-08-14',
+          },
+        ),
+      );
+
+      expect(calls.functionName, 'itsmRegisterAsset');
+      expect(calls.payload['assignedUserId'], 'agent-armando');
+      expect(calls.payload['assignedAt'], '2026-08-14');
+      expect(calls.payload, isNot(contains('assignedUserName')));
+      expect(calls.payload, isNot(contains('assignedUserEmail')));
+    });
+
+    test('state change and decommission use dedicated revisioned commands',
+        () async {
+      final calls = _RecordingCallableInvoker(result: const {});
+      final adapter = _FakeReadAdapter()..revision = 7;
+      final port = _port(calls: calls, reads: adapter);
+
+      await port.execute(
+        application.AssetOperationalCommand(
+          context: _context('asset-state-command'),
+          assetId: 'asset-900',
+          operation: 'change_state',
+          fields: const {
+            'stateId': 'repairable',
+            'stateName': 'Repairable',
+            'observation': 'Battery health is below threshold.',
+          },
+        ),
+      );
+
+      expect(calls.functionName, 'itsmChangeAssetState');
+      expect(calls.envelope['command'], 'asset.state.change');
+      expect(calls.payload['expectedRevision'], 7);
+      expect(
+          calls.payload['observation'], 'Battery health is below threshold.');
+
+      await port.execute(
+        application.AssetOperationalCommand(
+          context: _context('asset-decommission-command'),
+          assetId: 'asset-900',
+          operation: 'decommission',
+          fields: const {
+            'observation': 'Hardware is beyond economical repair.',
+          },
+        ),
+      );
+
+      expect(calls.functionName, 'itsmDecommissionAsset');
+      expect(calls.envelope['command'], 'asset.decommission');
+      expect(calls.payload['expectedRevision'], 7);
+      expect(calls.payload['observation'],
+          'Hardware is beyond economical repair.');
+    });
+
+    test('new asset parameters omit IDs so Firestore generates them', () async {
+      final calls = _RecordingCallableInvoker(result: const {});
+      final port = _port(calls: calls);
+
+      await port.execute(
+        application.ManagerConfigurationCommand(
+          context: _context('asset-parameter-command'),
+          recordType: 'asset_parameter',
+          operation: 'asset.parameter.save',
+          recordId: '',
+          fields: const {
+            'type': 'category',
+            'name': 'Laptop',
+            'isActive': true,
+            'sortOrder': 1,
+          },
+        ),
+      );
+
+      expect(calls.functionName, 'itsmSaveAssetParameter');
+      expect(calls.envelope['command'], 'asset.parameter.save');
+      expect(calls.payload, isNot(contains('id')));
+      expect(calls.payload['type'], 'category');
+    });
+
     test('stock location master data uses strict save mapping', () async {
       final calls = _RecordingCallableInvoker(result: const {});
       final port = _port(calls: calls);
@@ -663,6 +863,10 @@ class _FakeReadAdapter implements AssetsConfigurationReadAdapter {
   List<domain.Asset> assets = const [];
   domain.Asset? asset;
   List<domain.AssetLifecycleEvent> lifecycle = const [];
+  List<domain.AssetAssignment> assignments = const [];
+  List<domain.AssetStateEvent> stateEvents = const [];
+  List<domain.AssetParameter> assetParameters = const [];
+  List<domain.AssetAssignee> assetAssignees = const [];
   PageResult<domain.Asset>? assetPage;
   List<domain.StockItem> stockItems = const [];
   List<domain.StockMovement> stockMovements = const [];
@@ -684,6 +888,7 @@ class _FakeReadAdapter implements AssetsConfigurationReadAdapter {
   String revisionAssetId = '';
   String projectionUserId = '';
   String projectionAssetId = '';
+  String assigneeSearch = '';
   int assetWatchCount = 0;
 
   @override
@@ -738,6 +943,36 @@ class _FakeReadAdapter implements AssetsConfigurationReadAdapter {
     required int limit,
   }) =>
       Stream.value(assets);
+
+  @override
+  Stream<List<domain.AssetAssignment>> watchAssetAssignments({
+    required String assetId,
+    required int limit,
+  }) =>
+      Stream.value(assignments);
+
+  @override
+  Stream<List<domain.AssetStateEvent>> watchAssetStateEvents({
+    required String assetId,
+    required int limit,
+  }) =>
+      Stream.value(stateEvents);
+
+  @override
+  Stream<List<domain.AssetParameter>> watchAssetParameters({
+    required int limit,
+  }) =>
+      Stream.value(assetParameters);
+
+  @override
+  Stream<List<domain.AssetAssignee>> watchAssetAssignees({
+    required int limit,
+    String organizationId = '',
+    String search = '',
+  }) {
+    assigneeSearch = search;
+    return Stream.value(assetAssignees);
+  }
 
   @override
   Stream<List<domain.AssetSelfServiceProjection>> watchMyAssetProjections({

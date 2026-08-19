@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:arptc_connect/modules/administration/domain/models/agent.dart';
 import 'package:arptc_connect/utils/firebase_constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,7 +23,21 @@ class AuthService {
 
   //  This getter will be returning a Stream of User object.
   //  It will be used to check if the user is logged in or not.
-  Stream<User?> get authStateChange => _auth.authStateChanges();
+  Stream<User?> get authStateChange async* {
+    await for (final user in _auth.userChanges()) {
+      if (user != null && !user.emailVerified) {
+        try {
+          yield await _bootstrapInitialPasswordChange(user);
+          continue;
+        } catch (error) {
+          // Non-agent registrations retain the existing email-verification
+          // path. Valid manager-provisioned agents are upgraded by the callable.
+          log('Initial password bootstrap skipped: $error');
+        }
+      }
+      yield user;
+    }
+  }
 
   CollectionReference get _agents =>
       _firestore.collection(FirebaseConstants.agentsCollection);
@@ -37,14 +50,13 @@ class AuthService {
     bool showErrorDialog = true,
   }) async {
     try {
-      var result = await _auth.signInWithEmailAndPassword(
+      final result = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
-
-      //TODO Create an agent in the DB with email as ID
-      var agent = await getAgentByEmail(result.user!.email!);
-      log("signInWithEmail:: agent ${agent ?? "INEXISTANT"}");
-
-      await saveAgent(result.user!.email!);
+      final user = await _bootstrapInitialPasswordChange(result.user!);
+      // Ensure Firestore sees the newly authenticated identity before any
+      // profile listener starts evaluating role-based rules.
+      await user.getIdToken(true);
+      await saveAgent(user.email!);
     } on FirebaseAuthException catch (e) {
       log("signInWithEmail:: ${e.code}");
       if (!showErrorDialog) {
@@ -103,6 +115,14 @@ class AuthService {
     final sharedPref = _providerRef.read(sharedPrefUtilityProvider);
     final cachedEmail = (await sharedPref.getEmail()).trim().toLowerCase();
     final cachedProfile = sharedPref.getAgentProfile();
+    final authUser = _auth.currentUser;
+    final authUserId = authUser?.uid.trim() ?? '';
+    final authUserEmail = authUser?.email?.trim().toLowerCase() ?? '';
+
+    if (authUserId.isEmpty || authUserEmail != normalizedEmail) {
+      await sharedPref.clearSession();
+      return;
+    }
 
     final profileEmailLower =
         (cachedProfile['emailLower'] ?? cachedProfile['email'])
@@ -111,7 +131,8 @@ class AuthService {
             .toLowerCase();
     final hasMatchingProfile = cachedProfile.isNotEmpty &&
         profileEmailLower != null &&
-        profileEmailLower == normalizedEmail;
+        profileEmailLower == normalizedEmail &&
+        cachedProfile['id']?.toString().trim() == authUserId;
     final hasSameEmail = cachedEmail == normalizedEmail;
 
     if (hasSameEmail && hasMatchingProfile) {
@@ -144,8 +165,7 @@ class AuthService {
         email: email,
         password: password,
       );
-
-      // _providerRef.read(asyncUserProvider.notifier).
+      await sendEmailVerification();
     } on FirebaseAuthException catch (e) {
       if (!context.mounted) {
         return;
@@ -202,27 +222,51 @@ class AuthService {
     }
   }
 
-  Future<Agent?> getAgentByEmail(String email) async {
-    try {
-      final querySnapshot =
-          await _agents.where('email', isEqualTo: email).get();
-      if (querySnapshot.docs.isNotEmpty) {
-        return Agent.fromDocument(querySnapshot.docs.first);
-      } else {
-        return null;
-      }
-    } catch (error) {
-      log("Error getAgetnByEmail: $email ::  $error");
-      return null;
+  Future<void> sendEmailVerification() async {
+    final user = _auth.currentUser;
+    if (user == null || user.emailVerified) {
+      return;
     }
+    await user.sendEmailVerification();
   }
 
-  Future<void> createAgent(Agent agent) async {
-    try {
-      await _agents.doc(agent.email).set(agent.toJson());
-    } catch (error) {
-      log("Error createAgent: ${agent.email} ::  $error");
+  Future<void> reloadCurrentUser() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return;
     }
+    await user.reload();
+    await _auth.currentUser?.getIdToken(true);
+  }
+
+  Future<void> completeInitialPasswordChange(String newPassword) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw FirebaseAuthException(
+        code: 'user-not-found',
+        message: 'A signed-in account is required.',
+      );
+    }
+    final callable = _providerRef
+        .read(firebaseFunctionsProvider)
+        .httpsCallable('completeInitialPasswordChange');
+    await callable.call<void>({'newPassword': newPassword});
+    _hydratedEmail = null;
+    await _providerRef.read(sharedPrefUtilityProvider).clearSession();
+    await _auth.signOut();
+  }
+
+  Future<User> _bootstrapInitialPasswordChange(User user) async {
+    if (user.emailVerified) {
+      return user;
+    }
+    final callable = _providerRef
+        .read(firebaseFunctionsProvider)
+        .httpsCallable('bootstrapInitialPasswordChange');
+    await callable.call<void>();
+    await user.reload();
+    await _auth.currentUser?.getIdToken(true);
+    return _auth.currentUser ?? user;
   }
 
   Future<void> cacheAgentProfileByEmail(String email) async {
@@ -232,25 +276,21 @@ class AuthService {
     }
 
     try {
-      QuerySnapshot byEmailLower =
-          await _agents.where('emailLower', isEqualTo: normalizedEmail).get();
-
-      if (byEmailLower.docs.isEmpty) {
-        byEmailLower =
-            await _agents.where('email', isEqualTo: email.trim()).get();
-      }
-
-      if (byEmailLower.docs.isEmpty) {
-        log("cacheAgentProfileByEmail:: no agent found for $email");
+      final authUser = _auth.currentUser;
+      final authEmail = authUser?.email?.trim().toLowerCase() ?? '';
+      final userId = authUser?.uid.trim() ?? '';
+      if (userId.isEmpty || authEmail != normalizedEmail) {
         await _providerRef.read(sharedPrefUtilityProvider).clearAgentProfile();
         return;
       }
 
-      final document = _pickPreferredAgentDocument(
-            byEmailLower.docs,
-            normalizedEmail: normalizedEmail,
-          ) ??
-          byEmailLower.docs.first;
+      final document = await _agents.doc(userId).get();
+      if (!document.exists || document.data() == null) {
+        log("cacheAgentProfileByEmail:: no UID agent found for $email");
+        await _providerRef.read(sharedPrefUtilityProvider).clearAgentProfile();
+        return;
+      }
+
       final raw = document.data() as Map<String, dynamic>;
       final serialized = _toSerializableMap(raw);
       serialized['id'] = document.id;
@@ -262,6 +302,7 @@ class AuthService {
           );
     } catch (error) {
       log("cacheAgentProfileByEmail:: error for $email => $error");
+      await _providerRef.read(sharedPrefUtilityProvider).clearAgentProfile();
     }
   }
 
@@ -299,99 +340,5 @@ class AuthService {
     }
 
     return value.toString();
-  }
-
-  QueryDocumentSnapshot? _pickPreferredAgentDocument(
-    List<QueryDocumentSnapshot> docs, {
-    required String normalizedEmail,
-  }) {
-    if (docs.isEmpty) {
-      return null;
-    }
-
-    final sorted = [...docs];
-    sorted.sort((left, right) {
-      final leftData = _asMap(left.data());
-      final rightData = _asMap(right.data());
-
-      final emailComparison = _emailMatchScore(rightData, normalizedEmail)
-          .compareTo(_emailMatchScore(leftData, normalizedEmail));
-      if (emailComparison != 0) {
-        return emailComparison;
-      }
-
-      final activeComparison =
-          _activeScore(rightData).compareTo(_activeScore(leftData));
-      if (activeComparison != 0) {
-        return activeComparison;
-      }
-
-      final updatedComparison = _dateScore(rightData, 'updatedAt')
-          .compareTo(_dateScore(leftData, 'updatedAt'));
-      if (updatedComparison != 0) {
-        return updatedComparison;
-      }
-
-      final createdComparison = _dateScore(rightData, 'createdAt')
-          .compareTo(_dateScore(leftData, 'createdAt'));
-      if (createdComparison != 0) {
-        return createdComparison;
-      }
-
-      return right.id.compareTo(left.id);
-    });
-
-    return sorted.first;
-  }
-
-  Map<String, dynamic> _asMap(dynamic raw) {
-    if (raw is Map<String, dynamic>) {
-      return raw;
-    }
-    if (raw is Map) {
-      return Map<String, dynamic>.from(raw);
-    }
-    return <String, dynamic>{};
-  }
-
-  int _emailMatchScore(Map<String, dynamic> data, String normalizedEmail) {
-    final normalizedFromLower =
-        data['emailLower']?.toString().trim().toLowerCase() ?? '';
-    if (normalizedFromLower == normalizedEmail) {
-      return 1;
-    }
-
-    final normalizedFromEmail =
-        data['email']?.toString().trim().toLowerCase() ?? '';
-    if (normalizedFromEmail == normalizedEmail) {
-      return 1;
-    }
-
-    return 0;
-  }
-
-  int _activeScore(Map<String, dynamic> data) {
-    final value = data['isActive'];
-    if (value is bool) {
-      return value ? 1 : 0;
-    }
-    return 1;
-  }
-
-  int _dateScore(Map<String, dynamic> data, String field) {
-    final value = data[field];
-    if (value is Timestamp) {
-      return value.millisecondsSinceEpoch;
-    }
-    if (value is DateTime) {
-      return value.millisecondsSinceEpoch;
-    }
-    if (value is String) {
-      final parsed = DateTime.tryParse(value);
-      if (parsed != null) {
-        return parsed.millisecondsSinceEpoch;
-      }
-    }
-    return 0;
   }
 }

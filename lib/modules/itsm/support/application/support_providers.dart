@@ -1,7 +1,8 @@
 import 'package:arptc_connect/core/firebase_providers.dart';
+import 'package:arptc_connect/modules/authentication/application/authorized_session.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
-import 'package:arptc_connect/modules/usermanagement/domain/user_management_agent.dart';
+import 'package:arptc_connect/modules/usermanagement/domain/agent_directory_entry.dart';
 import 'package:arptc_connect/modules/usermanagement/presentation/controllers/management_providers.dart';
 
 import '../../shared/application/itsm_session.dart';
@@ -379,18 +380,29 @@ class ServiceRequestCatalogueContext {
 
 final serviceRequestCatalogueContextProvider =
     Provider.autoDispose<AsyncValue<ServiceRequestCatalogueContext>>((ref) {
-  return ref.watch(liveAgentProfileProvider).whenData((profile) {
-    final departmentId = profile['departmentId']?.toString().trim();
-    final serviceId = profile['serviceId']?.toString().trim();
-    final locationId = profile['locationId']?.toString().trim();
-    final positionValue = profile['position']?.toString().trim();
-    return ServiceRequestCatalogueContext(
+  final sessionState = ref.watch(authorizedSessionProvider);
+  final session = sessionState.session;
+  if (session == null) {
+    if (sessionState.status == AuthenticationStatus.initializing ||
+        sessionState.status == AuthenticationStatus.profileLoading) {
+      return const AsyncValue.loading();
+    }
+    return const AsyncValue.data(ServiceRequestCatalogueContext());
+  }
+
+  final profile = session.profile;
+  final departmentId = profile['departmentId']?.toString().trim();
+  final serviceId = profile['serviceId']?.toString().trim();
+  final locationId = profile['locationId']?.toString().trim();
+  final positionValue = profile['position']?.toString().trim();
+  return AsyncValue.data(
+    ServiceRequestCatalogueContext(
       departmentId: departmentId?.isEmpty == true ? null : departmentId,
       serviceId: serviceId?.isEmpty == true ? null : serviceId,
       locationId: locationId?.isEmpty == true ? null : locationId,
       positionValue: positionValue?.isEmpty == true ? null : positionValue,
-    );
-  });
+    ),
+  );
 });
 
 class ServiceRequestAgentSearch {
@@ -408,17 +420,18 @@ class ServiceRequestAgentSearch {
 }
 
 final serviceRequestAgentSearchProvider = Provider.autoDispose
-    .family<AsyncValue<List<UserManagementAgent>>, ServiceRequestAgentSearch>(
+    .family<AsyncValue<List<AgentDirectoryEntry>>, ServiceRequestAgentSearch>(
   (ref, search) {
     final query = search.query.trim().toLowerCase();
-    return ref.watch(umAgentsProvider).whenData((agents) {
+    return ref
+        .watch(umCurrentOrganizationAgentDirectoryProvider)
+        .whenData((agents) {
       return agents
           .where((agent) {
             if (!agent.isActive) return false;
             return query.isEmpty ||
                 agent.displayNameLower.contains(query) ||
-                agent.emailLower.contains(query) ||
-                agent.matricule.toLowerCase().contains(query);
+                agent.email.toLowerCase().contains(query);
           })
           .take(30)
           .toList(growable: false);

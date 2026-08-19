@@ -101,6 +101,24 @@ beforeEach(async () => {
         toStatus: 'assigned',
         occurredAt,
       }),
+      setDoc(doc(firestore, 'assetStateEvents/state-event-1'), {
+        assetId: 'asset-user-1',
+        fromStateId: 'new',
+        toStateId: 'repairable',
+        observation: 'Screen requires repair.',
+        changedAt: occurredAt,
+      }),
+      setDoc(doc(firestore, 'assetIdentifierLocks/serial-lock-1'), {
+        assetId: 'asset-user-1',
+        identifierType: 'serial_number',
+        normalizedValue: 'sn-001',
+      }),
+      setDoc(doc(firestore, 'assetParameters/category-laptop'), {
+        type: 'category',
+        name: 'Laptop',
+        isActive: true,
+        sortOrder: 1,
+      }),
       setDoc(doc(firestore, 'stockLocations/main'), { name: 'Main' }),
       setDoc(doc(firestore, 'stockItems/laptop'), {
         name: 'Laptop',
@@ -212,6 +230,32 @@ test('authoritative assets are MANAGER-only', async () => {
   await assertSucceeds(getDocs(query(collection(manager, 'assets'), limit(25))));
 });
 
+test('asset register parameters are readable only by MANAGER', async () => {
+  const user = firestoreFor('user-1');
+  const admin = firestoreFor('admin-1');
+  const manager = firestoreFor('manager-1');
+
+  await assertFails(
+    getDoc(doc(user, 'assetParameters/category-laptop')),
+  );
+  await assertFails(
+    getDoc(doc(admin, 'assetParameters/category-laptop')),
+  );
+  await assertSucceeds(
+    getDoc(doc(manager, 'assetParameters/category-laptop')),
+  );
+  await assertSucceeds(
+    getDocs(query(collection(manager, 'assetParameters'), limit(25))),
+  );
+  await assertFails(
+    setDoc(doc(manager, 'assetParameters/category-desktop'), {
+      type: 'category',
+      name: 'Desktop',
+      isActive: true,
+    }),
+  );
+});
+
 test('self-service asset projections are current and owner scoped', async () => {
   const user = firestoreFor('user-1');
   await assertSucceeds(
@@ -285,6 +329,7 @@ test('MANAGER reads operational collections while USER and ADMIN cannot', async 
   const manager = firestoreFor('manager-1');
   const protectedPaths = [
     'assetLifecycleEvents/event-1',
+    'assetStateEvents/state-event-1',
     'stockLocations/main',
     'stockItems/laptop',
     'stockMovements/movement-1',
@@ -311,12 +356,35 @@ test('MANAGER reads operational collections while USER and ADMIN cannot', async 
   await assertFails(getDoc(doc(manager, 'warrantyClaims/legacy-claim')));
 });
 
+test('asset identifier uniqueness locks remain server-only', async () => {
+  for (const userId of ['user-1', 'manager-1', 'admin-1']) {
+    const firestore = firestoreFor(userId);
+    await assertFails(
+      getDoc(doc(firestore, 'assetIdentifierLocks/serial-lock-1')),
+    );
+    await assertFails(
+      setDoc(doc(firestore, 'assetIdentifierLocks/client-write'), {
+        assetId: 'asset-user-2',
+        identifierType: 'serial_number',
+        normalizedValue: 'sn-client',
+      }),
+    );
+  }
+});
+
 test('MANAGER bounded queries match canonical fields and index order', async () => {
   const manager = firestoreFor('manager-1');
   await assertSucceeds(getDocs(query(
     collection(manager, 'assetLifecycleEvents'),
     where('assetId', '==', 'asset-user-1'),
     orderBy('occurredAt', 'desc'),
+    orderBy(documentId(), 'desc'),
+    limit(25),
+  )));
+  await assertSucceeds(getDocs(query(
+    collection(manager, 'assetStateEvents'),
+    where('assetId', '==', 'asset-user-1'),
+    orderBy('changedAt', 'desc'),
     orderBy(documentId(), 'desc'),
     limit(25),
   )));
@@ -424,13 +492,17 @@ test('all Phase 3 client mutations are denied, including MANAGER writes', async 
 
 function firestoreFor(uid) {
   return environment
-    .authenticatedContext(uid, { email: `${uid}@arptc.cd` })
+    .authenticatedContext(uid, {
+      email: `${uid}@arptc.cd`,
+      email_verified: true,
+    })
     .firestore();
 }
 
 function agent(role) {
   return {
     email: '',
+    isActive: true,
     modulePermissions: { ticketing: role },
   };
 }

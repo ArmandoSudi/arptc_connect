@@ -7,10 +7,36 @@ const { HttpsError, onCall } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { onObjectFinalized } = require('firebase-functions/v2/storage');
 const admin = require('firebase-admin');
-const { FieldValue, Timestamp } = require('firebase-admin/firestore');
+const { FieldPath, FieldValue, Timestamp } = require('firebase-admin/firestore');
 const {
   archiveEligibleIncidents,
 } = require('./src/incident_archival');
+const {
+  migrateLegacyAgentAccount,
+} = require('./src/agent_account_migration');
+const {
+  ORGANIZATION_COMMANDS,
+  createInitialAgentPlacement,
+  executeOrganizationCommand,
+  readOrganizationCommandReceipt,
+  refreshAgentProjections,
+} = require('./src/organization_service');
+const {
+  MAX_RECIPIENT_PAGE_SIZE,
+  createOrganizationNotificationEvent,
+  resolveOrganizationRecipientsPage,
+  writeOrganizationInboxDocuments,
+} = require('./src/organization_notifications');
+const {
+  listUnplacedAgentsPage,
+} = require('./src/organization_migration');
+const {
+  runActingHeadExpirationMaintenance,
+} = require('./src/organization_maintenance');
+const {
+  bootstrapInitialPasswordChange,
+  completeInitialPasswordChange,
+} = require('./src/initial_password_service');
 const {
   ITSM_COMMANDS,
 } = require('./src/itsm_command_validation');
@@ -75,6 +101,7 @@ const {
 } = require('./src/itsm_support_sla');
 const {
   maintainSupportWorkItemIndex,
+  notificationEventsForIncidentComment,
   notificationEventsForSupportChange,
   registerKnowledgeAttachment,
   registerServiceRequestAttachment,
@@ -82,6 +109,11 @@ const {
   synchronizeServiceRequestTask,
   writeSupportNotificationEvents,
 } = require('./src/itsm_support_triggers');
+const {
+  notificationEventsForMeetingHallReservationChange,
+  notificationEventsForNewsChange,
+  writeApplicationNotificationEvents,
+} = require('./src/application_notification_triggers');
 
 admin.initializeApp();
 
@@ -89,7 +121,7 @@ const db = admin.firestore();
 const COMPANY_TOPIC = 'company_all';
 const DEFAULT_APP_BASE_URL = 'https://arptc-connect.web.app';
 const DEFAULT_STORAGE_BUCKET =
-  process.env.FIREBASE_STORAGE_BUCKET || 'arptc-connect.appspot.com';
+  process.env.FIREBASE_STORAGE_BUCKET || 'arptc-connect.firebasestorage.app';
 const ANDROID_NOTIFICATION_CHANNEL_ID = 'arptc_connect_notifications';
 const INVALID_TOKEN_CODES = new Set([
   'messaging/invalid-registration-token',
@@ -118,6 +150,66 @@ function registerItsmCallable(command) {
       logger,
     }),
   );
+}
+
+function registerOrganizationCallable(command) {
+  return onCall(async (request) => {
+    const actor = await requireUserManagementManager(request.auth);
+    try {
+      return await executeOrganizationCommand({
+        db,
+        fieldValue: FieldValue,
+        timestamp: Timestamp,
+        command,
+        payload: request.data || {},
+        actor,
+      });
+    } catch (error) {
+      logger.error('Organization command failed', {
+        command,
+        actorUid: actor.uid,
+        error,
+      });
+      throwAgentCallableError(error, 'Unable to complete the organization action.');
+    }
+  });
+}
+
+function registerAgentDeactivationCallable() {
+  return onCall(async (request) => {
+    const actor = await requireUserManagementManager(request.auth);
+    const payload = {
+      ...(request.data || {}),
+      agentId: normalizeString(
+        request.data?.agentId || request.data?.uid,
+      ),
+    };
+    if (payload.agentId === actor.uid) {
+      throw new HttpsError(
+        'failed-precondition',
+        'You cannot deactivate your own agent account.',
+      );
+    }
+    try {
+      const result = await executeOrganizationCommand({
+        db,
+        fieldValue: FieldValue,
+        timestamp: Timestamp,
+        command: ORGANIZATION_COMMANDS.deactivateAgentAccount,
+        payload,
+        actor,
+      });
+      await admin.auth().updateUser(payload.agentId, { disabled: true });
+      return result;
+    } catch (error) {
+      logger.error('Unable to deactivate agent account', {
+        agentId: payload.agentId,
+        actorUid: actor.uid,
+        error,
+      });
+      throwAgentCallableError(error, 'Unable to deactivate the agent account.');
+    }
+  });
 }
 
 exports.itsmTransitionWorkItem = registerItsmCallable(
@@ -204,6 +296,9 @@ exports.itsmRegisterAsset = registerItsmAssetsCallable(
 exports.itsmUpdateAsset = registerItsmAssetsCallable(
   ITSM_ASSETS_COMMANDS.updateAsset,
 );
+exports.itsmChangeAssetState = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.changeAssetState,
+);
 exports.itsmTransitionAsset = registerItsmAssetsCallable(
   ITSM_ASSETS_COMMANDS.transitionAsset,
 );
@@ -212,6 +307,12 @@ exports.itsmAssignAsset = registerItsmAssetsCallable(
 );
 exports.itsmReturnAsset = registerItsmAssetsCallable(
   ITSM_ASSETS_COMMANDS.returnAsset,
+);
+exports.itsmDecommissionAsset = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.decommissionAsset,
+);
+exports.itsmSaveAssetParameter = registerItsmAssetsCallable(
+  ITSM_ASSETS_COMMANDS.saveAssetParameter,
 );
 exports.itsmSaveStockLocation = registerItsmAssetsCallable(
   ITSM_ASSETS_COMMANDS.saveStockLocation,
@@ -652,6 +753,68 @@ exports.itsmNotifyServiceRequestChanges = onDocumentWritten(
   },
 );
 
+exports.itsmNotifyIncidentChanges = onDocumentWritten(
+  'incidentTickets/{workItemId}',
+  async (event) => {
+    const events = notificationEventsForSupportChange({
+      collectionName: 'incidentTickets',
+      workItemId: event.params.workItemId,
+      before: event.data && event.data.before,
+      after: event.data && event.data.after,
+      sourceEventId: event.id,
+      fieldValue: FieldValue,
+    });
+    return writeSupportNotificationEvents({ db, events });
+  },
+);
+
+exports.itsmNotifyIncidentInternalComments = onDocumentCreated(
+  'incidentTickets/{ticketId}/comments/{commentId}',
+  async (event) => {
+    if (!event.data) return 0;
+    const ticket = await db
+      .collection('incidentTickets')
+      .doc(event.params.ticketId)
+      .get();
+    const events = notificationEventsForIncidentComment({
+      ticketId: event.params.ticketId,
+      ticket,
+      comment: event.data,
+      sourceEventId: event.id,
+      fieldValue: FieldValue,
+    });
+    return writeSupportNotificationEvents({ db, events });
+  },
+);
+
+exports.notifyNewsPostChanges = onDocumentWritten(
+  'newsPosts/{postId}',
+  async (event) => {
+    const events = notificationEventsForNewsChange({
+      postId: event.params.postId,
+      before: event.data && event.data.before,
+      after: event.data && event.data.after,
+      sourceEventId: event.id,
+      fieldValue: FieldValue,
+    });
+    return writeApplicationNotificationEvents({ db, events });
+  },
+);
+
+exports.notifyMeetingHallReservationChanges = onDocumentWritten(
+  'meeting_hall_reservations/{reservationId}',
+  async (event) => {
+    const events = notificationEventsForMeetingHallReservationChange({
+      reservationId: event.params.reservationId,
+      before: event.data && event.data.before,
+      after: event.data && event.data.after,
+      sourceEventId: event.id,
+      fieldValue: FieldValue,
+    });
+    return writeApplicationNotificationEvents({ db, events });
+  },
+);
+
 exports.itsmProcessServiceRequestSlaChange = onDocumentWritten(
   'serviceRequests/{workItemId}',
   async (event) => processServiceRequestSlaChange({
@@ -721,32 +884,187 @@ exports.archiveEligibleIncidents = onSchedule(
   },
 );
 
-exports.createAgentAccount = onCall(async (request) => {
-  if (!request.auth) {
-    throw new HttpsError('unauthenticated', 'You must be signed in.');
-  }
+exports.expireOrganizationActingHeads = onSchedule(
+  {
+    schedule: 'every 15 minutes',
+    timeZone: 'Africa/Kinshasa',
+    region: 'us-central1',
+    retryCount: 3,
+  },
+  async () => {
+    const result = await runActingHeadExpirationMaintenance({
+      db,
+      fieldValue: FieldValue,
+      now: Timestamp.now(),
+    });
+    logger.info('Organization acting-head expiration completed', result);
+    return result;
+  },
+);
 
-  const caller = await findCallerAgent(request.auth);
-  const permissions = (caller && caller.modulePermissions) || {};
-  const userManagementRole = normalizeString(
-    permissions.usermanagement || permissions.user_management,
-  ).toUpperCase();
-  if (userManagementRole !== 'MANAGER') {
+exports.createOrganization = registerOrganizationCallable(
+  ORGANIZATION_COMMANDS.createOrganization,
+);
+exports.updateOrganization = registerOrganizationCallable(
+  ORGANIZATION_COMMANDS.updateOrganization,
+);
+exports.archiveOrganization = registerOrganizationCallable(
+  ORGANIZATION_COMMANDS.archiveOrganization,
+);
+exports.createOrganizationUnit = registerOrganizationCallable(
+  ORGANIZATION_COMMANDS.createOrganizationUnit,
+);
+exports.updateOrganizationUnit = registerOrganizationCallable(
+  ORGANIZATION_COMMANDS.updateOrganizationUnit,
+);
+exports.moveOrganizationUnit = registerOrganizationCallable(
+  ORGANIZATION_COMMANDS.moveOrganizationUnit,
+);
+exports.archiveOrganizationUnit = registerOrganizationCallable(
+  ORGANIZATION_COMMANDS.archiveOrganizationUnit,
+);
+exports.assignAgentOrganization = registerOrganizationCallable(
+  ORGANIZATION_COMMANDS.assignAgentOrganization,
+);
+exports.transferAgentOrganization = registerOrganizationCallable(
+  ORGANIZATION_COMMANDS.transferAgentOrganization,
+);
+exports.setOrganizationUnitHead = registerOrganizationCallable(
+  ORGANIZATION_COMMANDS.setOrganizationUnitHead,
+);
+exports.endOrganizationUnitHead = registerOrganizationCallable(
+  ORGANIZATION_COMMANDS.endOrganizationUnitHead,
+);
+exports.deactivateAgentAccount = registerAgentDeactivationCallable();
+exports.auditOrganizationArchitecture = registerOrganizationCallable(
+  ORGANIZATION_COMMANDS.auditOrganizationArchitecture,
+);
+
+exports.listUnplacedAgents = onCall(async (request) => {
+  const actor = await requireUserManagementManager(request.auth);
+  try {
+    const page = await listUnplacedAgentsPage({
+      db,
+      fieldPath: FieldPath,
+      limit: request.data?.limit ?? 100,
+      afterId: request.data?.afterId,
+    });
+    const items = await Promise.all(page.items.map(async (item) => {
+      try {
+        await admin.auth().getUser(item.id);
+        return { ...item, hasCanonicalIdentity: true };
+      } catch (error) {
+        if (error?.code === 'auth/user-not-found') {
+          return { ...item, hasCanonicalIdentity: false };
+        }
+        throw error;
+      }
+    }));
+    return { ...page, items };
+  } catch (error) {
+    logger.error('Unable to list unplaced agents', {
+      actorUid: actor.uid,
+      error,
+    });
+    throwAgentCallableError(error, 'Unable to load unplaced agents.');
+  }
+});
+
+exports.listIncidentManagerDirectory = onCall(async (request) => {
+  if (!request.auth || request.auth.token?.email_verified !== true) {
     throw new HttpsError(
       'permission-denied',
-      'Only a User Management manager can create agent accounts.',
+      'A verified Incident manager account is required.',
     );
   }
+  const actor = await findCallerAgent(request.auth);
+  const permissions = actor?.modulePermissions || {};
+  const incidentRole = normalizeString(
+    permissions.ticketing ||
+    permissions.support ||
+    permissions.incident ||
+    permissions.incidents,
+  ).toUpperCase();
+  const organizationId = normalizeString(actor?.organizationId);
+  if (actor?.isActive !== true || incidentRole !== 'MANAGER' || !organizationId) {
+    throw new HttpsError(
+      'permission-denied',
+      'Only an active Incident manager can load the IT staff directory.',
+    );
+  }
+  const pageSize = Math.min(
+    Math.max(Number(request.data?.limit) || 100, 1),
+    100,
+  );
+  try {
+    const page = await resolveOrganizationRecipientsPage({
+      db,
+      target: {
+        type: 'ORG_SCOPE',
+        organizationId,
+        scopeKey: `org:${organizationId}`,
+        moduleKey: 'ticketing',
+        roles: ['MANAGER'],
+      },
+      cursor: request.data?.afterId,
+      pageSize,
+    });
+    const snapshots = page.recipientIds.length === 0
+      ? []
+      : await db.getAll(...page.recipientIds.map((agentId) =>
+        db.collection('agentDirectory').doc(agentId)));
+    const items = snapshots
+      .filter((snapshot) => snapshot.exists && snapshot.get('isActive') === true)
+      .map((snapshot) => ({
+        id: snapshot.id,
+        ...(snapshot.data() || {}),
+        incidentRole: 'MANAGER',
+      }));
+    return {
+      items,
+      nextCursor: page.nextCursor,
+      hasMore: page.hasMore,
+    };
+  } catch (error) {
+    logger.error('Unable to load Incident manager directory', {
+      actorUid: request.auth.uid,
+      organizationId,
+      error,
+    });
+    throwAgentCallableError(error, 'Unable to load the IT staff directory.');
+  }
+});
+
+exports.createAgentAccount = onCall(async (request) => {
+  const actor = await requireUserManagementManager(request.auth);
 
   const data = request.data || {};
+  const commandId = normalizeString(data.commandId);
+  if (!commandId) {
+    throw new HttpsError('invalid-argument', 'A command ID is required.');
+  }
+  try {
+    const replay = await readOrganizationCommandReceipt({
+      db,
+      commandId,
+      command: 'createAgentAccount',
+      actorUid: actor.uid,
+      payload: data,
+    });
+    if (replay) return replay;
+  } catch (error) {
+    throwAgentCallableError(error, 'Unable to validate the agent command.');
+  }
   const requiredFields = [
     'firstName',
     'name',
     'postName',
     'matricule',
+    'sex',
     'email',
-    'position',
-    'departmentId',
+    'jobTitle',
+    'organizationId',
+    'organizationUnitId',
   ];
   for (const field of requiredFields) {
     if (!normalizeString(data[field])) {
@@ -761,6 +1079,7 @@ exports.createAgentAccount = onCall(async (request) => {
   if (!isValidEmail(email)) {
     throw new HttpsError('invalid-argument', 'Enter a valid email address.');
   }
+  const sex = normalizeAgentSex(data.sex);
 
   const requestedModuleKeys =
     data.modulePermissions && typeof data.modulePermissions === 'object'
@@ -773,42 +1092,49 @@ exports.createAgentAccount = onCall(async (request) => {
     .map(normalizeString)
     .filter(Boolean)
     .join(' ');
-
   let authUser = null;
   try {
     authUser = await admin.auth().createUser({
       email,
       password: DEFAULT_AGENT_PASSWORD,
       displayName,
+      emailVerified: true,
       disabled: data.isActive === false,
     });
 
-    const now = FieldValue.serverTimestamp();
-    await db.collection('agents').doc(authUser.uid).set({
+    const result = await createInitialAgentPlacement({
+      db,
+      fieldValue: FieldValue,
+      timestamp: Timestamp,
+      agentId: authUser.uid,
+      organizationId: normalizeString(data.organizationId),
+      unitId: normalizeString(data.organizationUnitId),
+      startsAt: data.assignmentStartsAt
+        ? Timestamp.fromDate(new Date(data.assignmentStartsAt))
+        : Timestamp.now(),
+      reason: normalizeString(data.assignmentReason) ||
+        'Initial organization placement',
+      assignAsHead: data.assignAsHead === true,
+      actorUid: actor.uid,
+      commandId,
+      commandPayload: data,
+      agent: {
       firstName: normalizeString(data.firstName),
       name: normalizeString(data.name),
       postName: normalizeString(data.postName),
       matricule: normalizeString(data.matricule),
+      sex,
       email,
       emailLower: email,
       profilePictureUrl: normalizeString(data.profilePictureUrl) || null,
-      position: normalizeString(data.position),
-      departmentId: normalizeString(data.departmentId),
-      serviceId: normalizeString(data.serviceId),
-      bureauId: normalizeString(data.bureauId),
+      jobTitle: normalizeString(data.jobTitle),
       isActive: data.isActive !== false,
+      mustChangePassword: true,
       modulePermissions,
-      createdAt: now,
-      updatedAt: now,
-      genre: '',
-      dob: '',
-      category: '',
-      direction: normalizeString(data.departmentId),
-      service: normalizeString(data.serviceId),
-      bureau: normalizeString(data.bureauId),
+      },
     });
 
-    return { uid: authUser.uid };
+    return result;
   } catch (error) {
     if (authUser) {
       try {
@@ -827,7 +1153,244 @@ exports.createAgentAccount = onCall(async (request) => {
       );
     }
     logger.error('Unable to create agent account', { email, error });
-    throw new HttpsError('internal', 'Unable to create the agent account.');
+    throwAgentCallableError(error, 'Unable to create the agent account.');
+  }
+});
+
+exports.bootstrapInitialPasswordChange = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'You must be signed in.');
+  }
+  try {
+    return await bootstrapInitialPasswordChange({
+      auth: admin.auth(),
+      db,
+      fieldValue: FieldValue,
+      uid: request.auth.uid,
+      email: request.auth.token?.email,
+    });
+  } catch (error) {
+    logger.error('Unable to bootstrap the initial password change', {
+      uid: request.auth.uid,
+      error,
+    });
+    throwInitialPasswordCallableError(error);
+  }
+});
+
+exports.completeInitialPasswordChange = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'You must be signed in.');
+  }
+  try {
+    return await completeInitialPasswordChange({
+      auth: admin.auth(),
+      db,
+      fieldValue: FieldValue,
+      uid: request.auth.uid,
+      email: request.auth.token?.email,
+      newPassword: request.data?.newPassword,
+    });
+  } catch (error) {
+    logger.error('Unable to complete the initial password change', {
+      uid: request.auth.uid,
+      error,
+    });
+    throwInitialPasswordCallableError(error);
+  }
+});
+
+exports.updateAgentAccount = onCall(async (request) => {
+  const actor = await requireUserManagementManager(request.auth);
+
+  const data = request.data || {};
+  const commandId = normalizeString(data.commandId);
+  if (!commandId) {
+    throw new HttpsError('invalid-argument', 'A command ID is required.');
+  }
+  const uid = normalizeString(data.uid);
+  if (!uid) {
+    throw new HttpsError('invalid-argument', 'Select an agent to update.');
+  }
+  try {
+    const replay = await readOrganizationCommandReceipt({
+      db,
+      commandId,
+      command: 'updateAgentAccount',
+      actorUid: actor.uid,
+      payload: data,
+    });
+    if (replay) return replay;
+  } catch (error) {
+    throwAgentCallableError(error, 'Unable to validate the agent command.');
+  }
+
+  const requiredFields = [
+    'firstName',
+    'name',
+    'postName',
+    'matricule',
+    'sex',
+    'email',
+    'jobTitle',
+  ];
+  for (const field of requiredFields) {
+    if (!normalizeString(data[field])) {
+      throw new HttpsError(
+        'invalid-argument',
+        `The ${field} field is required.`,
+      );
+    }
+  }
+
+  const email = normalizeString(data.email).toLowerCase();
+  if (!isValidEmail(email)) {
+    throw new HttpsError('invalid-argument', 'Enter a valid email address.');
+  }
+  const sex = normalizeAgentSex(data.sex);
+
+  const agentRef = db.collection('agents').doc(uid);
+  const snapshot = await agentRef.get();
+  if (!snapshot.exists) {
+    throw new HttpsError(
+      'not-found',
+      'The UID-linked agent profile no longer exists.',
+    );
+  }
+
+  const existing = snapshot.data() || {};
+  const modulePermissions = normalizeAgentModulePermissions(
+    data.modulePermissions ?? existing.modulePermissions,
+  );
+  const displayName = [data.firstName, data.name, data.postName]
+    .map(normalizeString)
+    .filter(Boolean)
+    .join(' ');
+
+  let previousAuthUser;
+  try {
+    previousAuthUser = await admin.auth().getUser(uid);
+  } catch (error) {
+    if (error?.code === 'auth/user-not-found') {
+      throw new HttpsError(
+        'failed-precondition',
+        'The agent profile is not linked to a Firebase Auth account.',
+      );
+    }
+    logger.error('Unable to load agent Auth account', { uid, error });
+    throw new HttpsError('internal', 'Unable to update the agent account.');
+  }
+
+  const authUpdate = {
+    email,
+    displayName,
+    disabled: existing.isActive !== true,
+  };
+  try {
+    await admin.auth().updateUser(uid, authUpdate);
+    const result = await refreshAgentProjections({
+      db,
+      fieldValue: FieldValue,
+      agentId: uid,
+      actorUid: actor.uid,
+      commandId,
+      commandPayload: data,
+      updates: {
+        firstName: normalizeString(data.firstName),
+        name: normalizeString(data.name),
+        postName: normalizeString(data.postName),
+        matricule: normalizeString(data.matricule),
+        sex,
+        email,
+        emailLower: email,
+        profilePictureUrl: normalizeString(data.profilePictureUrl) || null,
+        jobTitle: normalizeString(data.jobTitle),
+        isActive: existing.isActive === true,
+        modulePermissions,
+      },
+    });
+    return result;
+  } catch (error) {
+    try {
+      await admin.auth().updateUser(uid, {
+        email: previousAuthUser.email,
+        displayName: previousAuthUser.displayName,
+        disabled: previousAuthUser.disabled,
+      });
+    } catch (rollbackError) {
+      logger.error('Unable to roll back agent Auth update', {
+        uid,
+        rollbackError,
+      });
+    }
+    if (error?.code === 'auth/email-already-exists') {
+      throw new HttpsError(
+        'already-exists',
+        'An account already exists with this email address.',
+      );
+    }
+    logger.error('Unable to update agent account', { uid, error });
+    throwAgentCallableError(error, 'Unable to update the agent account.');
+  }
+});
+
+// Compatibility alias. The old destructive command now performs the same
+// audited deactivation as the canonical endpoint.
+exports.deleteAgentAccount = registerAgentDeactivationCallable();
+
+exports.migrateLegacyAgentAccount = onCall(async (request) => {
+  const caller = await requireUserManagementManager(request.auth);
+  const legacyAgentId = normalizeString(request.data?.legacyAgentId);
+  if (!legacyAgentId) {
+    throw new HttpsError('invalid-argument', 'Select an agent to migrate.');
+  }
+
+  try {
+    return await migrateLegacyAgentAccount({
+      db,
+      auth: admin.auth(),
+      fieldValue: FieldValue,
+      legacyAgentId,
+      actorUid: caller.uid,
+      defaultPassword: DEFAULT_AGENT_PASSWORD,
+    });
+  } catch (error) {
+    logger.error('Unable to migrate legacy agent account', {
+      legacyAgentId,
+      error,
+    });
+    throw new HttpsError(
+      error?.code || 'internal',
+      error?.message || 'Unable to migrate the legacy agent profile.',
+    );
+  }
+});
+
+exports.sendOrganizationNotification = onCall(async (request) => {
+  if (request.auth?.token?.email_verified !== true) {
+    throw new HttpsError(
+      'permission-denied',
+      'A verified email address is required to send organization notifications.',
+    );
+  }
+  const actor = await requireUserManagementManager(request.auth);
+  try {
+    return await createOrganizationNotificationEvent({
+      db,
+      fieldValue: FieldValue,
+      payload: request.data || {},
+      actor,
+    });
+  } catch (error) {
+    logger.error('Unable to create organization notification', {
+      actorUid: actor.uid,
+      organizationId: actor.organizationId,
+      error,
+    });
+    throwAgentCallableError(
+      error,
+      'Unable to create the organization notification.',
+    );
   }
 });
 
@@ -880,6 +1443,31 @@ exports.dispatchNotificationEvent = onDocumentCreated(
           event,
           notification,
         );
+      } else if (targetType === 'ORG_SCOPE') {
+        let cursor = '';
+        while (true) {
+          const page = await resolveOrganizationRecipientsPage({
+            db,
+            target,
+            cursor,
+            pageSize: MAX_RECIPIENT_PAGE_SIZE,
+          });
+          const recipientIds = page.recipientIds;
+          if (recipientIds.length > 0) {
+            recipientCount += recipientIds.length;
+            fcmCount += await writeOrganizationNotificationsAndSend(
+              recipientIds,
+              eventId,
+              event,
+              notification,
+            );
+          }
+          if (!page.hasMore) break;
+          if (!page.nextCursor || page.nextCursor === cursor) {
+            throw new Error('Organization recipient cursor did not advance.');
+          }
+          cursor = page.nextCursor;
+        }
       } else {
         throw new Error(`Unsupported notification target type: ${targetType}`);
       }
@@ -947,40 +1535,59 @@ exports.subscribeDeviceTokenToCompanyTopic = onDocumentCreated(
 
 async function findCallerAgent(authContext) {
   const uid = normalizeString(authContext.uid);
-  const rawEmail = normalizeString(
-    authContext.token && authContext.token.email,
-  );
-  const email = rawEmail.toLowerCase();
-  const candidateIds = [...new Set([uid, rawEmail, email].filter(Boolean))];
+  if (!uid || authContext.token?.email_verified !== true) return null;
 
-  for (const candidateId of candidateIds) {
-    const snapshot = await db.collection('agents').doc(candidateId).get();
-    if (snapshot.exists) {
-      return snapshot.data() || {};
-    }
+  // Firebase Auth UID is the only supported agent identity. Email-keyed
+  // lookups could authorize a stale or unrelated profile after an account swap.
+  const snapshot = await db.collection('agents').doc(uid).get();
+  if (!snapshot.exists) return null;
+  const agent = snapshot.data() || {};
+  return agent.mustChangePassword === true ? null : agent;
+}
+
+function throwInitialPasswordCallableError(error) {
+  const supportedCodes = new Set([
+    'invalid-argument',
+    'unauthenticated',
+    'not-found',
+    'permission-denied',
+    'failed-precondition',
+  ]);
+  const code = supportedCodes.has(error?.code) ? error.code : 'internal';
+  const message = code === 'internal'
+    ? 'Unable to update the initial password.'
+    : error.message;
+  throw new HttpsError(code, message);
+}
+
+async function requireUserManagementManager(authContext) {
+  if (!authContext) {
+    throw new HttpsError('unauthenticated', 'You must be signed in.');
   }
 
-  if (email) {
-    const byEmailLower = await db
-      .collection('agents')
-      .where('emailLower', '==', email)
-      .limit(1)
-      .get();
-    if (!byEmailLower.empty) {
-      return byEmailLower.docs[0].data() || {};
-    }
-
-    const byEmail = await db
-      .collection('agents')
-      .where('email', '==', rawEmail)
-      .limit(1)
-      .get();
-    if (!byEmail.empty) {
-      return byEmail.docs[0].data() || {};
-    }
+  const caller = await findCallerAgent(authContext);
+  if (!caller || caller.isActive !== true) {
+    throw new HttpsError(
+      'permission-denied',
+      'Only an active User Management manager can manage agent accounts.',
+    );
   }
 
-  return null;
+  const permissions = caller.modulePermissions || {};
+  const userManagementRole = normalizeString(
+    permissions.usermanagement || permissions.user_management,
+  ).toUpperCase();
+  if (userManagementRole !== 'MANAGER') {
+    throw new HttpsError(
+      'permission-denied',
+      'Only a User Management manager can manage agent accounts.',
+    );
+  }
+
+  return {
+    ...caller,
+    uid: normalizeString(authContext.uid),
+  };
 }
 
 async function buildDefaultAgentPermissions(additionalModuleKeys = []) {
@@ -1002,6 +1609,48 @@ async function buildDefaultAgentPermissions(additionalModuleKeys = []) {
   return Object.fromEntries(
     Array.from(moduleKeys).map((key) => [key, 'USER']),
   );
+}
+
+function normalizeAgentModulePermissions(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {};
+  }
+
+  const permissions = {};
+  for (const [rawModuleKey, rawRole] of Object.entries(value)) {
+    const moduleKey = normalizeModuleKey(rawModuleKey);
+    const role = normalizeString(rawRole).toUpperCase();
+    if (moduleKey && role) {
+      permissions[moduleKey] = role;
+    }
+  }
+  return permissions;
+}
+
+function normalizeAgentSex(value) {
+  const sex = normalizeString(value).toLowerCase();
+  if (sex !== 'male' && sex !== 'female') {
+    throw new HttpsError(
+      'invalid-argument',
+      'Select Male or Female for the agent sex.',
+    );
+  }
+  return sex;
+}
+
+function throwAgentCallableError(error, fallbackMessage) {
+  if (error instanceof HttpsError) throw error;
+
+  const supportedCodes = new Set([
+    'aborted',
+    'already-exists',
+    'failed-precondition',
+    'invalid-argument',
+    'not-found',
+    'permission-denied',
+  ]);
+  const code = supportedCodes.has(error?.code) ? error.code : 'internal';
+  throw new HttpsError(code, error?.message || fallbackMessage);
 }
 
 function normalizeModuleKey(value) {
@@ -1077,7 +1726,7 @@ async function findAgentsByModuleRole(target, fallbackModuleKey) {
         .get();
 
       querySnapshot.docs
-        .filter((doc) => doc.get('isActive') !== false)
+        .filter((doc) => doc.get('isActive') === true)
         .forEach((doc) => agentsById.set(doc.id, doc));
     }
   }
@@ -1168,19 +1817,21 @@ async function findAgentsByIdentity(target) {
     }
   }
 
-  for (const emailChunk of chunk(userEmails, 10)) {
-    if (emailChunk.length === 0) {
-      continue;
+  for (const email of userEmails) {
+    try {
+      const authUser = await admin.auth().getUserByEmail(email);
+      const doc = await db.collection('agents').doc(authUser.uid).get();
+      if (doc.exists) {
+        agentsById.set(doc.id, doc);
+      }
+    } catch (error) {
+      if (error?.code !== 'auth/user-not-found') {
+        logger.warn('Unable to resolve notification recipient by Auth email', {
+          email,
+          error,
+        });
+      }
     }
-
-    const byEmailLower = await db
-      .collection('agents')
-      .where('emailLower', 'in', emailChunk)
-      .get();
-    byEmailLower.docs.forEach((doc) => agentsById.set(doc.id, doc));
-
-    const byEmail = await db.collection('agents').where('email', 'in', emailChunk).get();
-    byEmail.docs.forEach((doc) => agentsById.set(doc.id, doc));
   }
 
   return Array.from(agentsById.values());
@@ -1205,6 +1856,38 @@ async function writePersonalNotificationsAndSend(agents, eventId, event, notific
 
   await writeBatch.commit();
   return sendToTokens(tokenDocs, eventId, event, notification);
+}
+
+async function writeOrganizationNotificationsAndSend(
+  recipientIds,
+  eventId,
+  event,
+  notification,
+) {
+  await writeOrganizationInboxDocuments({
+    db,
+    recipientIds,
+    eventId,
+    notification,
+  });
+
+  const tokenDocsByToken = new Map();
+  for (const recipientId of recipientIds) {
+    const tokenSnapshot = await db.collection('agents').doc(recipientId)
+      .collection('deviceTokens').get();
+    for (const tokenDoc of tokenSnapshot.docs) {
+      const token = normalizeString(tokenDoc.get('token'));
+      if (token && !tokenDocsByToken.has(token)) {
+        tokenDocsByToken.set(token, { token, ref: tokenDoc.ref });
+      }
+    }
+  }
+  return sendToTokens(
+    [...tokenDocsByToken.values()],
+    eventId,
+    event,
+    notification,
+  );
 }
 
 async function sendToCompanyTopic(eventId, event, notification) {

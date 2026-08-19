@@ -1,6 +1,5 @@
-import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:arptc_connect/modules/incident_management/data/firestore_incident_repository.dart';
-import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,30 +14,16 @@ final itsmSessionResolverProvider = Provider<ItsmSessionResolver>(
 
 final itsmSessionProvider =
     StreamProvider.autoDispose<ItsmSession?>((ref) async* {
-  ref.watch(currentAuthSessionKeyProvider);
-  final authState = ref.watch(authStateProvider);
-  if (authState.isLoading) return;
-  if (authState.hasError) {
-    Error.throwWithStackTrace(authState.error!, authState.stackTrace!);
-  }
-
-  final authUser = authState.valueOrNull;
-  if (authUser == null) {
+  final authorizedSession = ref.watch(authorizedSessionProvider).session;
+  if (authorizedSession == null) {
     yield null;
     return;
   }
 
-  final profileState = ref.watch(liveAgentProfileProvider);
-  if (profileState.isLoading) return;
-  if (profileState.hasError) {
-    Error.throwWithStackTrace(profileState.error!, profileState.stackTrace!);
-  }
-
-  final rawProfile = profileState.valueOrNull ?? const <String, dynamic>{};
   yield ref.read(itsmSessionResolverProvider).resolve(
-        authUserId: authUser.uid,
-        authEmail: authUser.email,
-        profile: Map<String, Object?>.from(rawProfile),
+        authUserId: authorizedSession.userId,
+        authEmail: authorizedSession.email,
+        profile: authorizedSession.profile,
       );
 });
 
@@ -223,7 +208,7 @@ final itsmWorkItemProvider = StreamProvider.autoDispose
 );
 
 void _invalidateWhenAuthSessionChanges(Ref ref) {
-  ref.listen<String?>(currentAuthSessionKeyProvider, (previous, next) {
+  ref.listen<String?>(currentAuthorizedSessionKeyProvider, (previous, next) {
     if (previous != null && previous != next) {
       ref.invalidateSelf();
     }

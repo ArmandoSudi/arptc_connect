@@ -1,4 +1,5 @@
-import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
+import 'package:arptc_connect/modules/authentication/application/authorized_session.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:arptc_connect/modules/incident_management/application/incident_dashboard_aggregator.dart';
 import 'package:arptc_connect/modules/incident_management/data/firestore_incident_repository.dart';
 import 'package:arptc_connect/modules/incident_management/data/incident_repository.dart';
@@ -124,7 +125,9 @@ ProviderContainer _container({
 }) {
   return ProviderContainer(
     overrides: [
-      currentAuthSessionKeyProvider.overrideWith((ref) => 'agent-1|session'),
+      authorizedSessionProvider.overrideWithValue(
+        AuthorizedSessionState.authenticated(_authorizedSession(role)),
+      ),
       currentIncidentUserProvider.overrideWith(
         (ref) => AsyncValue.data(
           IncidentUser(
@@ -145,6 +148,22 @@ ProviderContainer _container({
       ),
       incidentRepositoryProvider.overrideWithValue(repository),
     ],
+  );
+}
+
+AuthorizedSession _authorizedSession(IncidentRole role) {
+  return AuthorizedSession(
+    sessionKey: 'agent-1|agent@arptc.cd',
+    userId: 'agent-1',
+    email: 'agent@arptc.cd',
+    displayName: 'Test Agent',
+    profile: <String, Object?>{
+      'id': 'agent-1',
+      'email': 'agent@arptc.cd',
+      'isActive': true,
+      'modulePermissions': <String, String>{'ticketing': role.value},
+    },
+    modulePermissions: <String, String>{'ticketing': role.value},
   );
 }
 

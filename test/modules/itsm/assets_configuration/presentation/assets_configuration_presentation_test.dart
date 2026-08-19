@@ -2,8 +2,12 @@ import 'dart:typed_data';
 
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/itsm/assets_configuration/application/assets_configuration_application.dart';
+import 'package:arptc_connect/modules/itsm/assets_configuration/data/firestore_assets_configuration_port.dart';
+import 'package:arptc_connect/modules/itsm/assets_configuration/domain/asset_assignee.dart';
+import 'package:arptc_connect/modules/itsm/assets_configuration/domain/asset_parameter.dart';
 import 'package:arptc_connect/modules/itsm/assets_configuration/presentation/assets_configuration_presentation.dart';
 import 'package:arptc_connect/modules/itsm/shared/application/itsm_providers.dart';
+import 'package:arptc_connect/modules/itsm/shared/data/trusted_command_gateways.dart';
 import 'package:arptc_connect/modules/itsm/shared/domain/itsm_common.dart';
 import 'package:arptc_connect/widgets/common_text_input.dart';
 import 'package:flutter/material.dart';
@@ -77,6 +81,426 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('asset register exposes company asset filters and identifiers',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1100, 760));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final selectedAssets = <AssetSummary>[];
+    await tester.pumpWidget(
+      _app(
+        AssetRegisterView(
+          assets: const [
+            AssetSummary(
+              id: 'asset-1',
+              assetTag: 'SN-001',
+              name: 'Dell Latitude',
+              categoryId: 'laptop',
+              categoryName: 'Laptop',
+              status: AssetLifecycleStatus.inStock,
+              brand: 'Dell',
+              model: 'Latitude 7450',
+              serialNumber: 'SN-001',
+              productNumber: 'PN-7450',
+              stateName: 'Good',
+              isInStock: true,
+            ),
+          ],
+          categoryOptions: const {'laptop': 'Laptop'},
+          brandOptions: const ['Dell'],
+          onSelected: selectedAssets.add,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Search by serial or product number'), findsOneWidget);
+    expect(find.text('Filter by category'), findsOneWidget);
+    expect(find.text('Filter by brand'), findsOneWidget);
+    expect(find.text('Filter by availability'), findsOneWidget);
+    expect(find.text('In stock'), findsOneWidget);
+    expect(find.text('SN-001'), findsOneWidget);
+    expect(find.text('PN-7450'), findsOneWidget);
+    expect(find.text('Good'), findsOneWidget);
+    expect(find.byType(Checkbox), findsNothing);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(DataTable),
+        matching: find.text('In stock'),
+      ),
+    );
+    await tester.pump();
+    expect(selectedAssets.map((asset) => asset.id), ['asset-1']);
+  });
+
+  testWidgets('asset registration does not require a location', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1100, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final readPort = RecordingAssetsReadPort()
+      ..assetParameters = const [
+        AssetParameter(
+          id: 'category-laptop',
+          type: AssetParameterType.category,
+          name: 'Laptop',
+          isActive: true,
+        ),
+        AssetParameter(
+          id: 'state-good',
+          type: AssetParameterType.state,
+          name: 'Good',
+          isActive: true,
+        ),
+      ];
+    final commandPort = RecordingAssetsCommandPort();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itsmSessionProvider.overrideWith(
+            (ref) => Stream.value(assetSession(ItsmRole.manager)),
+          ),
+          assetsConfigurationReadPortProvider.overrideWithValue(readPort),
+          assetsConfigurationCommandPortProvider.overrideWithValue(commandPort),
+        ],
+        child: _app(
+          AssetRegisterScreen(
+            onAssetSelected: (_) {},
+            onManageParameters: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    await _enterField(tester, 'Brand', 'Dell');
+    await _enterField(tester, 'Model', 'Latitude 7450');
+    await _enterField(tester, 'Serial number', 'SN-LOCATION-OPTIONAL');
+    await tester.ensureVisible(find.text('Select a category'));
+    await tester.tap(find.text('Select a category'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Laptop').last);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Select a condition'));
+    await tester.tap(find.text('Select a condition'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Good').last);
+    await tester.pumpAndSettle();
+    final acquisitionDate = tester.widget<CommonTextInput>(
+      find.widgetWithText(CommonTextInput, 'Acquisition date'),
+    );
+    acquisitionDate.controller!.text = '2026-08-14';
+    await tester.pump();
+    await tester.tap(find.text('Add Asset ID').last);
+    await tester.pumpAndSettle();
+
+    final command = commandPort.commands.single as ManagerConfigurationCommand;
+    expect(command.fields['serialNumber'], 'SN-LOCATION-OPTIONAL');
+    expect(command.fields, isNot(contains('locationId')));
+    expect(command.fields, isNot(contains('locationName')));
+    expect(command.fields, isNot(contains('assignedUserId')));
+    expect(command.fields, isNot(contains('assignedAt')));
+  });
+
+  testWidgets('asset registration can optionally assign a searched agent',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 850));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final readPort = RecordingAssetsReadPort()
+      ..assetParameters = const [
+        AssetParameter(
+          id: 'category-laptop',
+          type: AssetParameterType.category,
+          name: 'Laptop',
+          isActive: true,
+        ),
+        AssetParameter(
+          id: 'state-good',
+          type: AssetParameterType.state,
+          name: 'Good',
+          isActive: true,
+        ),
+      ]
+      ..assetAssignees = const [
+        AssetAssignee(
+          id: 'agent-armando',
+          displayName: 'Armando Sudi',
+          email: 'armando@arptc.cd',
+          departmentId: 'it',
+        ),
+      ];
+    final commandPort = RecordingAssetsCommandPort();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itsmSessionProvider.overrideWith(
+            (ref) => Stream.value(assetSession(ItsmRole.manager)),
+          ),
+          assetsConfigurationReadPortProvider.overrideWithValue(readPort),
+          assetsConfigurationCommandPortProvider.overrideWithValue(commandPort),
+        ],
+        child: _app(
+          AssetRegisterScreen(
+            onAssetSelected: (_) {},
+            onManageParameters: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    await _enterField(tester, 'Brand', 'Dell');
+    await _enterField(tester, 'Model', 'Latitude 7450');
+    await _enterField(tester, 'Serial number', 'SN-DIRECT-ASSIGN');
+    await tester.ensureVisible(find.text('Select a category'));
+    await tester.tap(find.text('Select a category'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Laptop').last);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Select a condition'));
+    await tester.tap(find.text('Select a condition'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Good').last);
+    await tester.pumpAndSettle();
+    final acquisitionDate = tester.widget<CommonTextInput>(
+      find.widgetWithText(CommonTextInput, 'Acquisition date'),
+    );
+    acquisitionDate.controller!.text = '2026-08-14';
+    await tester.ensureVisible(
+      find.widgetWithText(CommonTextInput, 'Search agents'),
+    );
+    await _enterField(tester, 'Search agents', 'arma');
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Armando Sudi').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Assignment date'), findsOneWidget);
+    await tester.ensureVisible(find.text('Add Asset ID').last);
+    await tester.tap(find.text('Add Asset ID').last);
+    await tester.pumpAndSettle();
+
+    final command = commandPort.commands.single as ManagerConfigurationCommand;
+    expect(command.fields['assignedUserId'], 'agent-armando');
+    expect(command.fields['assignedAt'], isNotEmpty);
+    expect(command.fields, isNot(contains('assignedUserName')));
+    expect(command.fields, isNot(contains('assignedUserEmail')));
+    expect(command.fields, isNot(contains('status')));
+    expect(readPort.assigneeSearches, contains('arma'));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('asset register and registration dialog use bounded queries',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1100, 760));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final readPort = RecordingAssetsReadPort();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itsmSessionProvider.overrideWith(
+            (ref) => Stream.value(assetSession(ItsmRole.manager)),
+          ),
+          assetsConfigurationReadPortProvider.overrideWithValue(readPort),
+          assetsConfigurationCommandPortProvider.overrideWithValue(
+            RecordingAssetsCommandPort(),
+          ),
+        ],
+        child: _app(
+          AssetRegisterScreen(
+            onAssetSelected: (_) {},
+            onManageParameters: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Latitude 7440'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Register a new asset'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('asset parameters screen provides location category state tabs',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final readPort = RecordingAssetsReadPort()
+      ..assetParameters = const [
+        AssetParameter(
+          id: 'location-hq',
+          type: AssetParameterType.location,
+          name: 'Head office',
+          isActive: true,
+          revision: 2,
+        ),
+        AssetParameter(
+          id: 'category-laptop',
+          type: AssetParameterType.category,
+          name: 'Laptop',
+          isActive: true,
+        ),
+        AssetParameter(
+          id: 'state-good',
+          type: AssetParameterType.state,
+          name: 'Good',
+          isActive: true,
+        ),
+      ];
+    final commandPort = RecordingAssetsCommandPort();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itsmSessionProvider.overrideWith(
+            (ref) => Stream.value(assetSession(ItsmRole.manager)),
+          ),
+          assetsConfigurationReadPortProvider.overrideWithValue(readPort),
+          assetsConfigurationCommandPortProvider.overrideWithValue(commandPort),
+        ],
+        child: _app(const AssetParametersScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Locations'), findsOneWidget);
+    expect(find.text('Categories'), findsOneWidget);
+    expect(find.text('Conditions'), findsOneWidget);
+    expect(find.text('Head office'), findsOneWidget);
+
+    await tester.tap(find.text('Categories'));
+    await tester.pumpAndSettle();
+    expect(find.text('Laptop'), findsOneWidget);
+    expect(find.text('Head office'), findsNothing);
+
+    await tester.tap(find.text('Add category'));
+    await tester.pumpAndSettle();
+    final input = find.descendant(
+      of: find.widgetWithText(CommonTextInput, 'Name'),
+      matching: find.byType(TextFormField),
+    );
+    await tester.enterText(input, 'Monitor');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    final create = commandPort.commands.single as ManagerConfigurationCommand;
+    expect(create.recordId, isEmpty);
+    expect(create.fields['type'], 'category');
+    expect(create.fields['name'], 'Monitor');
+
+    await tester.tap(find.byIcon(Icons.delete_outline));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete parameter?'), findsOneWidget);
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+
+    final deletion = commandPort.commands.last as ManagerConfigurationCommand;
+    expect(deletion.recordId, 'category-laptop');
+    expect(deletion.fields['isActive'], false);
+    expect(deletion.fields['expectedRevision'], 0);
+  });
+
+  testWidgets('asset parameters explain when the callable is not deployed',
+      (tester) async {
+    final readPort = RecordingAssetsReadPort();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itsmSessionProvider.overrideWith(
+            (ref) => Stream.value(assetSession(ItsmRole.manager)),
+          ),
+          assetsConfigurationReadPortProvider.overrideWithValue(readPort),
+          assetsConfigurationCommandPortProvider.overrideWithValue(
+            const _UnavailableAssetsCommandPort(),
+          ),
+        ],
+        child: _app(const AssetParametersScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add location'));
+    await tester.pumpAndSettle();
+    final input = find.descendant(
+      of: find.widgetWithText(CommonTextInput, 'Name'),
+      matching: find.byType(TextFormField),
+    );
+    await tester.enterText(input, 'Head office');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'The asset service is not available on the server. '
+        'Deploy the latest Firebase Functions, then try again.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('assignment history distinguishes current and previous owners',
+      (tester) async {
+    await tester.pumpWidget(
+      _app(
+        AssetAssignmentHistoryPanel(
+          entries: [
+            AssetAssignmentHistoryEntry(
+              id: 'assignment-2',
+              assignedUserName: 'Current Agent',
+              assignedAt: DateTime.utc(2026, 8, 1),
+              status: 'current',
+            ),
+            AssetAssignmentHistoryEntry(
+              id: 'assignment-1',
+              assignedUserName: 'Previous Agent',
+              assignedAt: DateTime.utc(2026, 1, 1),
+              returnedAt: DateTime.utc(2026, 7, 31),
+              status: 'returned',
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Assignment history'), findsOneWidget);
+    expect(find.text('Current Agent'), findsOneWidget);
+    expect(find.text('Previous Agent'), findsOneWidget);
+    expect(find.textContaining('Current assignment'), findsOneWidget);
+    expect(find.textContaining('Previous assignment'), findsOneWidget);
+  });
+
+  testWidgets('state history shows each observation and transition',
+      (tester) async {
+    await tester.pumpWidget(
+      _app(
+        AssetStateHistoryPanel(
+          entries: [
+            AssetStateHistoryEntry(
+              id: 'state-event-1',
+              fromStateName: 'Good',
+              toStateName: 'Repairable',
+              observation: 'Battery health is below threshold.',
+              actorName: 'Manager One',
+              changedAt: DateTime.utc(2026, 8, 14),
+              revision: 3,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Condition change history'), findsOneWidget);
+    expect(find.text('Good → Repairable'), findsOneWidget);
+    expect(find.textContaining('Battery health is below threshold.'),
+        findsOneWidget);
+  });
+
   testWidgets('asset detail emits each catalogue navigation intent',
       (tester) async {
     final actions = <AssetCatalogueAction>[];
@@ -118,7 +542,7 @@ void main() {
     var editCount = 0;
     var assignCount = 0;
     var returnCount = 0;
-    var transitionCount = 0;
+    var statusCount = 0;
     var attachmentCount = 0;
     var photographCount = 0;
     await tester.pumpWidget(
@@ -130,7 +554,7 @@ void main() {
             onEdit: () => editCount += 1,
             onAssign: () => assignCount += 1,
             onReturn: () => returnCount += 1,
-            onTransition: () => transitionCount += 1,
+            onUpdateStatus: () => statusCount += 1,
             onUploadAttachment: () => attachmentCount += 1,
             onUploadPhotograph: () => photographCount += 1,
           ),
@@ -141,9 +565,8 @@ void main() {
 
     for (final label in [
       'Edit asset',
-      'Assign asset',
       'Return asset',
-      'Change lifecycle state',
+      'Update asset status',
       'Upload attachment',
       'Upload photograph',
     ]) {
@@ -160,13 +583,210 @@ void main() {
         editCount,
         assignCount,
         returnCount,
-        transitionCount,
+        statusCount,
         attachmentCount,
         photographCount,
       ],
-      [1, 1, 1, 1, 1, 1],
+      [1, 0, 1, 1, 1, 1],
     );
+    expect(find.text('Update condition'), findsNothing);
+    expect(find.text('Change lifecycle state'), findsNothing);
+    expect(find.text('Decommission asset'), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('status hub consolidates condition lifecycle and decommission',
+      (tester) async {
+    final readPort = _statusReadPort();
+    await _pumpManagerAssetDetail(
+      tester,
+      readPort: readPort,
+      commandPort: RecordingAssetsCommandPort(),
+    );
+
+    await _openStatusHub(tester);
+
+    expect(find.text('Asset condition'), findsWidgets);
+    expect(find.text('Asset lifecycle'), findsOneWidget);
+    expect(find.text('Decommission asset'), findsOneWidget);
+    expect(find.text('Configured'), findsOneWidget);
+    expect(find.text('Maintenance'), findsOneWidget);
+    expect(find.text('Assigned'), findsNothing);
+    expect(find.text('Returned'), findsNothing);
+    expect(find.text('Update condition'), findsNothing);
+    expect(find.text('Change lifecycle state'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('status hub uses a centered responsive dialog on desktop',
+      (tester) async {
+    final readPort = _statusReadPort();
+    await _pumpManagerAssetDetail(
+      tester,
+      readPort: readPort,
+      commandPort: RecordingAssetsCommandPort(),
+      size: const Size(1200, 900),
+    );
+
+    await _openStatusHub(tester);
+
+    expect(find.byType(Dialog), findsOneWidget);
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(find.text('Asset condition'), findsWidgets);
+    expect(find.text('Asset lifecycle'), findsOneWidget);
+    expect(find.text('Decommission asset'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('status hub records a condition change with an observation',
+      (tester) async {
+    final readPort = _statusReadPort();
+    final commandPort = RecordingAssetsCommandPort();
+    await _pumpManagerAssetDetail(
+      tester,
+      readPort: readPort,
+      commandPort: commandPort,
+    );
+
+    await _openStatusHub(tester);
+    await tester.tap(find.text('Asset condition').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Update condition'), findsOneWidget);
+    await tester.tap(find.text('Good').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Damaged').last);
+    await tester.pumpAndSettle();
+    await _enterField(
+      tester,
+      'Reason for the condition change',
+      'Battery casing is cracked.',
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.pumpAndSettle();
+
+    final command = commandPort.commands.single as AssetOperationalCommand;
+    expect(command.operation, 'change_state');
+    expect(command.fields['stateId'], 'condition-damaged');
+    expect(command.fields['stateName'], 'Damaged');
+    expect(command.fields['observation'], 'Battery casing is cracked.');
+  });
+
+  testWidgets('status hub exposes only safe lifecycle transitions',
+      (tester) async {
+    final readPort = _statusReadPort();
+    final commandPort = RecordingAssetsCommandPort();
+    await _pumpManagerAssetDetail(
+      tester,
+      readPort: readPort,
+      commandPort: commandPort,
+    );
+
+    await _openStatusHub(tester);
+    await tester.tap(find.text('Asset lifecycle'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Assigned'), findsNothing);
+    expect(find.text('Returned'), findsNothing);
+    await tester.tap(find.text('Configured'));
+    await tester.pumpAndSettle();
+    await _enterField(
+      tester,
+      'Transition reason',
+      'Security baseline has been installed.',
+    );
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Change lifecycle state'),
+    );
+    await tester.pumpAndSettle();
+
+    final command = commandPort.commands.single as AssetOperationalCommand;
+    expect(command.operation, 'transition');
+    expect(command.fields['toStatus'], 'configured');
+    expect(
+      command.fields['reason'],
+      'Security baseline has been installed.',
+    );
+  });
+
+  testWidgets('assigned assets can be reported lost with confirmation',
+      (tester) async {
+    final readPort = _statusReadPort(
+      status: AssetLifecycleStatus.assigned,
+      assignedUserName: 'Armando Sudi',
+      isInStock: false,
+    );
+    final commandPort = RecordingAssetsCommandPort();
+    await _pumpManagerAssetDetail(
+      tester,
+      readPort: readPort,
+      commandPort: commandPort,
+    );
+
+    await _openStatusHub(tester);
+    expect(find.text('Lost'), findsOneWidget);
+    expect(find.text('Stolen'), findsOneWidget);
+    await tester.tap(find.text('Asset lifecycle'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lost').last);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Confirm exceptional status'), findsOneWidget);
+    expect(find.textContaining('current custodian'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Confirm'));
+    await tester.pumpAndSettle();
+    await _enterField(
+      tester,
+      'Transition reason',
+      'Custodian reported the laptop missing.',
+    );
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Change lifecycle state'),
+    );
+    await tester.pumpAndSettle();
+
+    final command = commandPort.commands.single as AssetOperationalCommand;
+    expect(command.operation, 'transition');
+    expect(command.fields['toStatus'], 'lost');
+    expect(
+      command.fields['reason'],
+      'Custodian reported the laptop missing.',
+    );
+  });
+
+  testWidgets('status hub keeps decommissioning destructive and confirmed',
+      (tester) async {
+    final readPort = _statusReadPort();
+    final commandPort = RecordingAssetsCommandPort();
+    await _pumpManagerAssetDetail(
+      tester,
+      readPort: readPort,
+      commandPort: commandPort,
+    );
+
+    await _openStatusHub(tester);
+    await tester.ensureVisible(find.text('Decommission asset'));
+    await tester.tap(find.text('Decommission asset'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining("This ends the asset's active lifecycle"),
+      findsOneWidget,
+    );
+    await _enterField(
+      tester,
+      'Decommissioning reason and observation',
+      'Repair is no longer economically viable.',
+    );
+    await tester.tap(find.byIcon(Icons.inventory_2_outlined).last);
+    await tester.pumpAndSettle();
+
+    final command = commandPort.commands.single as AssetOperationalCommand;
+    expect(command.operation, 'decommission');
+    expect(
+      command.fields['observation'],
+      'Repair is no longer economically viable.',
+    );
   });
 
   testWidgets('self-service detail callback never executes asset command',
@@ -343,6 +963,83 @@ void main() {
   });
 }
 
+RecordingAssetsReadPort _statusReadPort({
+  AssetLifecycleStatus status = AssetLifecycleStatus.inStock,
+  String assignedUserName = '',
+  bool isInStock = true,
+}) {
+  return RecordingAssetsReadPort()
+    ..detail = AssetDetail(
+      summary: AssetSummary(
+        id: 'asset-1',
+        assetTag: 'ARPTC-001',
+        name: 'Latitude 7440',
+        categoryName: 'Laptop',
+        status: status,
+        brand: 'Dell',
+        model: 'Latitude 7440',
+        serialNumber: 'SN-001',
+        stateName: 'Good',
+        assignedUserName: assignedUserName,
+        isInStock: isInStock,
+      ),
+      stateName: 'Good',
+    )
+    ..assetParameters = const [
+      AssetParameter(
+        id: 'condition-good',
+        type: AssetParameterType.state,
+        name: 'Good',
+        isActive: true,
+      ),
+      AssetParameter(
+        id: 'condition-damaged',
+        type: AssetParameterType.state,
+        name: 'Damaged',
+        isActive: true,
+      ),
+    ];
+}
+
+Future<void> _pumpManagerAssetDetail(
+  WidgetTester tester, {
+  required RecordingAssetsReadPort readPort,
+  required RecordingAssetsCommandPort commandPort,
+  Size size = const Size(390, 900),
+}) async {
+  await tester.binding.setSurfaceSize(size);
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        itsmSessionProvider.overrideWith(
+          (ref) => Stream.value(assetSession(ItsmRole.manager)),
+        ),
+        assetsConfigurationReadPortProvider.overrideWithValue(readPort),
+        assetsConfigurationCommandPortProvider.overrideWithValue(commandPort),
+      ],
+      child: _app(
+        const AssetDetailScreen(
+          assetId: 'asset-1',
+          selfService: false,
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<void> _openStatusHub(WidgetTester tester) async {
+  await tester.drag(
+    find.byType(CustomScrollView),
+    const Offset(0, -900),
+  );
+  await tester.pumpAndSettle();
+  await tester.ensureVisible(find.text('Update asset status'));
+  await tester.tap(find.text('Update asset status'));
+  await tester.pumpAndSettle();
+}
+
 Future<void> _enterField(
   WidgetTester tester,
   String label,
@@ -386,6 +1083,19 @@ class _RecordingAttachmentGateway implements AssetsAttachmentGateway {
       kind: request.kind,
     );
   }
+}
+
+class _UnavailableAssetsCommandPort implements AssetsConfigurationCommandPort {
+  const _UnavailableAssetsCommandPort();
+
+  @override
+  Future<ItsmCommandReceipt> execute(AssetsConfigurationCommand command) =>
+      Future.error(
+        const AssetsConfigurationCommandException(
+          code: 'internal',
+          message: 'internal',
+        ),
+      );
 }
 
 Widget _app(Widget child) {

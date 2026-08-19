@@ -6,6 +6,7 @@ const {
   ItsmCommandError,
   actorFrom,
   isOwnedByActor,
+  requireActiveAgent,
   requireAuthentication,
   requireRole,
   resolveItsmRole,
@@ -19,6 +20,28 @@ test('authentication rejects a missing Firebase principal', () => {
       error.code === 'unauthenticated',
   );
   assert.equal(requireAuthentication({ uid: 'agent-1' }).uid, 'agent-1');
+  assert.throws(
+    () => requireAuthentication({
+      uid: 'agent-1',
+      token: { email_verified: false },
+    }),
+    (error) =>
+      error instanceof ItsmCommandError &&
+      error.code === 'permission-denied',
+  );
+});
+
+test('commands require an explicitly active UID agent profile', () => {
+  assert.doesNotThrow(() => requireActiveAgent({ isActive: true }));
+
+  for (const agent of [null, {}, { isActive: false }]) {
+    assert.throws(
+      () => requireActiveAgent(agent),
+      (error) =>
+        error instanceof ItsmCommandError &&
+        error.code === 'permission-denied',
+    );
+  }
 });
 
 test('ticketing is canonical and aliases are fallback-only', () => {

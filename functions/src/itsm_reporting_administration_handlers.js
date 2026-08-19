@@ -47,7 +47,7 @@ function createItsmReportingAdministrationCallableHandler({
       const trustedActor = actorFrom(auth, agent, role);
       const actor = Object.freeze({
         ...trustedActor,
-        departmentId: normalizeString(agent.departmentId || agent.department),
+        departmentId: normalizeString(agent.departmentId),
       });
       return await executeReportingAdministrationCommand({
         db,

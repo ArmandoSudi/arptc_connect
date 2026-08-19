@@ -451,7 +451,10 @@ test('unauthenticated principals cannot read Phase 6 collections', async () => {
 
 function firestoreFor(uid) {
   return environment
-    .authenticatedContext(uid, { email: `${uid}@arptc.cd` })
+    .authenticatedContext(uid, {
+      email: `${uid}@arptc.cd`,
+      email_verified: true,
+    })
     .firestore();
 }
 

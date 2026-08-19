@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:arptc_connect/core/firebase_providers.dart';
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:arptc_connect/modules/notifications/data/notification_messaging_service.dart';
 import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
 import 'package:arptc_connect/widgets/content_view.dart';
@@ -20,7 +21,7 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profileAsync = ref.watch(liveAgentProfileProvider);
+    final profileAsync = ref.watch(authorizedAgentProfileProvider);
     final theme = Theme.of(context);
     final l10n = S.of(context);
 
@@ -419,25 +420,26 @@ List<MapEntry<String, String>> _buildFieldEntries(
     'name',
     'postName',
     'matricule',
+    'sex',
     'email',
     'position',
+    'department',
     'departmentId',
+    'service',
     'serviceId',
+    'bureau',
     'bureauId',
     'isActive',
     'modulePermissions',
     'genre',
     'dob',
     'category',
-    'direction',
-    'service',
-    'bureau',
     'createdAt',
     'updatedAt',
   ];
 
   final entries = <MapEntry<String, String>>[];
-  final consumedKeys = <String>{};
+  final consumedKeys = <String>{'direction'};
 
   for (final key in orderedKeys) {
     if (!profile.containsKey(key)) {
@@ -445,7 +447,10 @@ List<MapEntry<String, String>> _buildFieldEntries(
     }
     consumedKeys.add(key);
     entries.add(
-      MapEntry(_profileFieldLabel(key, l10n), _stringifyValue(profile[key])),
+      MapEntry(
+        _profileFieldLabel(key, l10n),
+        _profileFieldValue(key, profile[key], l10n),
+      ),
     );
   }
 
@@ -454,7 +459,10 @@ List<MapEntry<String, String>> _buildFieldEntries(
 
   for (final key in extraKeys) {
     entries.add(
-      MapEntry(_profileFieldLabel(key, l10n), _stringifyValue(profile[key])),
+      MapEntry(
+        _profileFieldLabel(key, l10n),
+        _profileFieldValue(key, profile[key], l10n),
+      ),
     );
   }
 
@@ -471,13 +479,14 @@ String _profileFieldLabel(String key, S l10n) {
       return l10n.postName;
     case 'matricule':
       return l10n.matricule;
+    case 'sex':
+      return l10n.lookup('umSex');
     case 'email':
       return l10n.email;
     case 'position':
       return l10n.position;
     case 'departmentId':
     case 'department':
-    case 'direction':
       return l10n.department;
     case 'serviceId':
     case 'service':
@@ -498,6 +507,17 @@ String _profileFieldLabel(String key, S l10n) {
     default:
       return _prettyLabel(key);
   }
+}
+
+String _profileFieldValue(String key, dynamic value, S l10n) {
+  if (key == 'sex') {
+    return switch (value?.toString().trim().toLowerCase()) {
+      'male' => l10n.lookup('umMale'),
+      'female' => l10n.lookup('umFemale'),
+      _ => '-',
+    };
+  }
+  return _stringifyValue(value);
 }
 
 String _prettyLabel(String key) {

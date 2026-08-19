@@ -13,6 +13,7 @@ void main() {
       profile: const {
         'id': 'user-1',
         'email': 'agent@example.com',
+        'isActive': true,
         'firstName': 'Ada',
         'name': 'Lovelace',
         'modulePermissions': {'ticketing': 'MANAGER'},
@@ -32,6 +33,7 @@ void main() {
       profile: const {
         'id': 'user-1',
         'emailLower': 'agent@example.com',
+        'isActive': true,
         'modulePermissions': {'IT Service Management': 'ADMIN'},
       },
     );
@@ -39,7 +41,8 @@ void main() {
     expect(session?.role, ItsmRole.admin);
   });
 
-  test('accepts a legacy agent document ID when its email matches', () {
+  test('rejects an agent profile whose document ID is not the Firebase UID',
+      () {
     final session = resolver.resolve(
       authUserId: 'firebase-auth-uid',
       authEmail: 'agent@example.com',
@@ -50,9 +53,22 @@ void main() {
       },
     );
 
-    expect(session, isNotNull);
-    expect(session?.userId, 'firebase-auth-uid');
-    expect(session?.role, ItsmRole.user);
+    expect(session, isNull);
+  });
+
+  test('rejects an inactive agent profile', () {
+    final session = resolver.resolve(
+      authUserId: 'user-1',
+      authEmail: 'agent@example.com',
+      profile: const {
+        'id': 'user-1',
+        'emailLower': 'agent@example.com',
+        'isActive': false,
+        'modulePermissions': {'ticketing': 'MANAGER'},
+      },
+    );
+
+    expect(session, isNull);
   });
 
   test('rejects stale profile data from a previous account', () {

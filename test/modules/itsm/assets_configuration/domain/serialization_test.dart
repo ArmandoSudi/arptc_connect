@@ -13,6 +13,7 @@ void main() {
       brand: 'Dell',
       model: 'Latitude',
       status: AssetStatus.assigned,
+      isInStock: false,
       condition: AssetCondition.good,
       assignedUserId: 'agent-1',
       assignedUserName: 'Agent One',
@@ -25,8 +26,36 @@ void main() {
 
     expect(parsed.assetTag, source.assetTag);
     expect(parsed.status, AssetStatus.assigned);
+    expect(parsed.isInStock, isFalse);
     expect(parsed.assignedUserId, 'agent-1');
     expect(parsed.attachmentIds, ['attachment-1']);
+  });
+
+  test('asset state event preserves the observation and actor', () {
+    final source = AssetStateEvent(
+      id: 'state-event-1',
+      assetId: 'asset-1',
+      fromStateId: 'good',
+      fromStateName: 'Good',
+      toStateId: 'repairable',
+      toStateName: 'Repairable',
+      observation: 'Battery health is below threshold.',
+      actorUserId: 'manager-1',
+      actorName: 'Manager One',
+      changedAt: DateTime.utc(2026, 8, 14),
+      revision: 3,
+    );
+
+    final parsed = AssetStateEvent.fromMap(
+      source.id,
+      source.toFirestore(),
+    );
+
+    expect(parsed.fromStateName, 'Good');
+    expect(parsed.toStateName, 'Repairable');
+    expect(parsed.observation, 'Battery health is below threshold.');
+    expect(parsed.actorName, 'Manager One');
+    expect(parsed.revision, 3);
   });
 
   test('self-service projection exposes only custodian-safe fields', () {

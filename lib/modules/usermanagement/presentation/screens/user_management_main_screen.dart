@@ -1,87 +1,99 @@
 import 'package:arptc_connect/generated/l10n.dart';
-import 'package:arptc_connect/widgets/content_view.dart';
-import 'package:arptc_connect/widgets/page_header_simple.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/controllers/management_providers.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/widgets/user_management_access_gate.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class UserManagementMainScreen extends StatelessWidget {
+class UserManagementMainScreen extends ConsumerWidget {
   const UserManagementMainScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
-    const menus = [
+    final policy = ref.watch(userManagementAccessPolicyProvider);
+    final supervisorMenus = [
       _UserManagementMenu(
-        title: 'Agents',
-        subtitle: 'Manage agents and assignments',
-        icon: Icons.group_outlined,
-        color: Color(0xFF4A148C),
+        title: l10n.lookup('umOrganizations'),
+        subtitle: l10n.lookup('umOrganizationsDescription'),
+        icon: Icons.corporate_fare_outlined,
+        color: const Color(0xFF0D47A1),
+        path: '/service/usermanagement/organizations',
+      ),
+      _UserManagementMenu(
+        title: l10n.lookup('umStructure'),
+        subtitle: l10n.lookup('umStructureDescription'),
+        icon: Icons.account_tree_outlined,
+        color: const Color(0xFF00695C),
+        path: '/service/usermanagement/structure',
+      ),
+      _UserManagementMenu(
+        title: l10n.lookup('umAgents'),
+        subtitle: l10n.lookup('umAgentsDescription'),
+        icon: Icons.badge_outlined,
+        color: const Color(0xFFAD5700),
         path: '/service/usermanagement/agents',
       ),
       _UserManagementMenu(
-        title: 'Bureaux',
-        subtitle: 'Manage bureaux by service',
-        icon: Icons.business_outlined,
-        color: Color(0xFFE65100),
-        path: '/service/usermanagement/bureaux',
-      ),
-      _UserManagementMenu(
-        title: 'Services',
-        subtitle: 'Manage services by department',
-        icon: Icons.workspaces_outline,
-        color: Color(0xFF0D47A1),
-        path: '/service/usermanagement/services',
-      ),
-      _UserManagementMenu(
-        title: 'Departments',
-        subtitle: 'Manage organizational departments',
-        icon: Icons.account_tree_outlined,
-        color: Color(0xFF1B5E20),
-        path: '/service/usermanagement/departments',
-      ),
-      _UserManagementMenu(
-        title: 'Modules',
-        subtitle: 'Manage modules and permission roles',
+        title: l10n.lookup('umModules'),
+        subtitle: l10n.lookup('umModulesDescription'),
         icon: Icons.extension_outlined,
-        color: Color(0xFF00695C),
+        color: const Color(0xFF5D4037),
         path: '/service/usermanagement/modules',
       ),
     ];
+    final menus = policy.canReadPrivateProfiles
+        ? supervisorMenus
+        : supervisorMenus
+            .where((menu) => menu.path.endsWith('/agents'))
+            .toList(growable: false);
 
-    return Scaffold(
-      body: ContentView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            PageHeaderSimple(
-              title: l10n.moduleUserManagementName,
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final columns = _columnCount(constraints.maxWidth);
-
-                  return GridView.builder(
-                    itemCount: menus.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: columns,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 1.2,
-                    ),
-                    itemBuilder: (context, index) {
-                      final menu = menus[index];
-                      return _MenuCard(
-                        menu: menu,
-                        onTap: () => context.go(menu.path),
+    return UserManagementAccessGate(
+      child: Scaffold(
+        appBar: AppBar(title: Text(l10n.lookup('umTitle'))),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.lookup('umTitle'),
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall
+                      ?.copyWith(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 4),
+                Text(l10n.lookup('umSubtitle')),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final columns = _columnCount(constraints.maxWidth);
+                      return GridView.builder(
+                        itemCount: menus.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: columns,
+                          crossAxisSpacing: 14,
+                          mainAxisSpacing: 14,
+                          childAspectRatio:
+                              constraints.maxWidth < 600 ? 1.15 : 1.5,
+                        ),
+                        itemBuilder: (context, index) {
+                          final menu = menus[index];
+                          return _MenuCard(
+                            menu: menu,
+                            onTap: () => context.go(menu.path),
+                          );
+                        },
                       );
                     },
-                  );
-                },
-              ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -91,7 +103,7 @@ class UserManagementMainScreen extends StatelessWidget {
     if (width >= 1200) return 4;
     if (width >= 900) return 3;
     if (width >= 600) return 2;
-    return 2;
+    return 1;
   }
 }
 

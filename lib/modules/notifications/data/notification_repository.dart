@@ -1,9 +1,6 @@
 import 'package:arptc_connect/modules/notifications/domain/app_notification.dart';
-import 'package:arptc_connect/modules/notifications/domain/notification_event.dart';
 
 abstract class NotificationRepository {
-  Future<void> emitEvent(NotificationEvent event);
-
   Stream<List<AppNotification>> watchPersonalNotifications(String agentId);
 
   Stream<List<AppNotification>> watchGlobalNotifications();

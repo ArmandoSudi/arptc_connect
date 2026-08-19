@@ -8,45 +8,43 @@ import 'package:arptc_connect/modules/itsm/shared/domain/pagination.dart';
 import 'package:arptc_connect/modules/itsm/support/application/support_providers.dart';
 import 'package:arptc_connect/modules/itsm/support/data/service_request_repository.dart';
 import 'package:arptc_connect/modules/itsm/support/domain/service_request.dart';
-import 'package:arptc_connect/modules/usermanagement/domain/user_management_agent.dart';
+import 'package:arptc_connect/modules/usermanagement/domain/agent_directory_entry.dart';
 import 'package:arptc_connect/modules/usermanagement/presentation/controllers/management_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('agent search returns only active name/email/matricule matches',
+  test('agent search returns only active safe-directory name/email matches',
       () async {
     final container = ProviderContainer(
       overrides: [
-        umAgentsProvider.overrideWith((ref) async => [
-              _agent(
-                id: 'armando',
-                name: 'Armando Sudi',
-                email: 'armando@example.com',
-                matricule: 'A-100',
-              ),
-              _agent(
-                id: 'inactive',
-                name: 'Armando Inactive',
-                email: 'inactive@example.com',
-                matricule: 'A-200',
-                active: false,
-              ),
-              _agent(
-                id: 'other',
-                name: 'Other Agent',
-                email: 'other@example.com',
-                matricule: 'B-100',
-              ),
-            ]),
+        umCurrentOrganizationAgentDirectoryProvider
+            .overrideWith((ref) => Stream.value([
+                  _agent(
+                    id: 'armando',
+                    name: 'Armando Sudi',
+                    email: 'armando@example.com',
+                  ),
+                  _agent(
+                    id: 'inactive',
+                    name: 'Armando Inactive',
+                    email: 'inactive@example.com',
+                    active: false,
+                  ),
+                  _agent(
+                    id: 'other',
+                    name: 'Other Agent',
+                    email: 'other@example.com',
+                  ),
+                ])),
       ],
     );
     addTearDown(container.dispose);
 
-    await container.read(umAgentsProvider.future);
+    await container.read(umCurrentOrganizationAgentDirectoryProvider.future);
     final result = container.read(
       serviceRequestAgentSearchProvider(
-        const ServiceRequestAgentSearch('A-1'),
+        const ServiceRequestAgentSearch('armando@'),
       ),
     );
 
@@ -143,27 +141,36 @@ class _RecordingServiceRequestRepository implements ServiceRequestRepository {
   }
 }
 
-UserManagementAgent _agent({
+AgentDirectoryEntry _agent({
   required String id,
   required String name,
   required String email,
-  required String matricule,
   bool active = true,
 }) {
   final parts = name.split(' ');
-  return UserManagementAgent(
+  return AgentDirectoryEntry(
     id: id,
+    displayName: name,
     firstName: parts.first,
     name: parts.skip(1).join(' '),
     postName: '',
-    matricule: matricule,
     email: email,
-    emailLower: email.toLowerCase(),
-    position: 'BUREAU_ATTACHE',
+    profilePictureUrl: null,
+    jobTitle: 'Support analyst',
+    organizationId: 'org-1',
+    organizationName: 'ARPTC',
+    primaryOrganizationUnitId: 'bureau-1',
+    primaryOrganizationUnitName: 'Help Desk',
+    primaryOrganizationUnitType: 'BUREAU',
     departmentId: 'department-1',
     serviceId: 'service-1',
     bureauId: 'bureau-1',
+    organizationPathNames: const [
+      'Information Technology',
+      'IT Support',
+      'Help Desk',
+    ],
+    scopeKeys: const ['org:org-1', 'unit:bureau-1'],
     isActive: active,
-    modulePermissions: const {'ticketing': 'USER'},
   );
 }

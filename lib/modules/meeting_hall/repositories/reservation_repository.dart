@@ -1,6 +1,4 @@
 import 'dart:developer';
-import 'package:arptc_connect/modules/notifications/domain/notification_event.dart';
-import 'package:arptc_connect/modules/notifications/domain/notification_target.dart';
 import 'package:arptc_connect/utils/firestore_client.dart';
 import 'package:arptc_connect/utils/firestore_filter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,8 +9,6 @@ import '../providers/meeting_hall_access_provider.dart';
 
 class ReservationRepository {
   final String path = 'meeting_hall_reservations';
-  static const String _notificationPath = 'notificationEvents';
-  static const String _moduleKey = 'meetinghall';
   final FirestoreClient firestoreClient;
 
   ReservationRepository(this.firestoreClient);
@@ -122,19 +118,10 @@ class ReservationRepository {
         endTime: reservation.endTime,
       );
 
-      final reservationRef = firestoreClient.firestore.collection(path).doc();
-      final batch = firestoreClient.firestore.batch();
-      batch.set(reservationRef, _reservationCreateData(reservation));
-
-      if (reservation.status == ReservationStatus.onHold) {
-        _addReservationRequestNotifications(
-          batch: batch,
-          reservationId: reservationRef.id,
-          reservation: reservation,
-        );
-      }
-
-      await batch.commit();
+      await firestoreClient.add(
+        collection: path,
+        data: _reservationCreateData(reservation),
+      );
     } catch (err) {
       throw Exception(err);
     }
@@ -191,10 +178,12 @@ class ReservationRepository {
 
       final reservationRef =
           firestoreClient.firestore.collection(path).doc(reservation.id);
-      final batch = firestoreClient.firestore.batch();
       final update = <String, dynamic>{
         'status': status.value,
         'updatedAt': FieldValue.serverTimestamp(),
+        'lastActionByUserId': actor.id.trim(),
+        'lastActionByName': actor.displayName.trim(),
+        'lastActionByEmail': actor.email.trim().toLowerCase(),
       };
       final cleanedComment = comment.trim();
       if (status == ReservationStatus.rejected) {
@@ -204,20 +193,7 @@ class ReservationRepository {
         update['cancelReason'] = cleanedComment;
       }
 
-      batch.update(reservationRef, update);
-      if (status == ReservationStatus.accepted ||
-          status == ReservationStatus.rejected ||
-          status == ReservationStatus.cancelled) {
-        _addRequesterStatusNotification(
-          batch: batch,
-          reservation: reservation,
-          status: status,
-          actor: actor,
-          comment: cleanedComment,
-        );
-      }
-
-      await batch.commit();
+      await reservationRef.update(update);
     } catch (err) {
       throw Exception(err);
     }
@@ -331,147 +307,6 @@ class ReservationRepository {
           reservation.endTime.isAfter(startTime);
     }).toList();
   }
-
-  void _addReservationRequestNotifications({
-    required WriteBatch batch,
-    required String reservationId,
-    required MeetingHallReservation reservation,
-  }) {
-    final route = _hallDetailsRoute(
-      reservation,
-      reservationId: reservationId,
-    );
-    batch.set(
-      firestoreClient.firestore.collection(_notificationPath).doc(),
-      NotificationEvent(
-        id: '',
-        eventType: 'meeting_hall.reservation_requested',
-        moduleKey: _moduleKey,
-        title: 'Demande de réservation de salle',
-        body:
-            '${reservation.userName} a soumis une demande pour "${reservation.title}" le ${_formatDate(reservation.startTime)}.',
-        entityType: 'meetingHallReservation',
-        entityId: reservationId,
-        route: route,
-        createdByUserId: reservation.userId,
-        createdByName: reservation.userName,
-        createdByEmail: reservation.userEmail,
-        target: NotificationTarget.moduleRole(
-          moduleKey: _moduleKey,
-          roles: const ['MANAGER'],
-        ),
-      ).toFirestore(),
-    );
-  }
-
-  void _addRequesterStatusNotification({
-    required WriteBatch batch,
-    required MeetingHallReservation reservation,
-    required ReservationStatus status,
-    required MeetingHallUser actor,
-    required String comment,
-  }) {
-    final route = _hallDetailsRoute(
-      reservation,
-      reservationId: reservation.id,
-    );
-    final statusCopy = _statusNotificationCopy(
-      reservation: reservation,
-      status: status,
-      comment: comment,
-    );
-
-    batch.set(
-      firestoreClient.firestore.collection(_notificationPath).doc(),
-      NotificationEvent(
-        id: '',
-        eventType: 'meeting_hall.reservation_${status.value.toLowerCase()}',
-        moduleKey: _moduleKey,
-        title: statusCopy.title,
-        body: statusCopy.body,
-        entityType: 'meetingHallReservation',
-        entityId: reservation.id,
-        route: route,
-        createdByUserId: actor.id,
-        createdByName: actor.displayName,
-        createdByEmail: actor.email,
-        target: NotificationTarget.users(
-          userIds: [reservation.userId],
-          userEmails: [reservation.userEmail],
-        ),
-      ).toFirestore(),
-    );
-  }
-
-  String _hallDetailsRoute(
-    MeetingHallReservation reservation, {
-    String? reservationId,
-  }) {
-    final date = _formatIsoDate(reservation.startTime);
-    final safeReservationId = (reservationId ?? reservation.id).trim();
-    return Uri(
-      path: '/service/meeting-hall/${reservation.hallId}',
-      queryParameters: {
-        'date': date,
-        if (safeReservationId.isNotEmpty) 'reservationId': safeReservationId,
-      },
-    ).toString();
-  }
-
-  String _formatIsoDate(DateTime date) {
-    final year = date.year.toString().padLeft(4, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    final day = date.day.toString().padLeft(2, '0');
-    return '$year-$month-$day';
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-
-  _StatusNotificationCopy _statusNotificationCopy({
-    required MeetingHallReservation reservation,
-    required ReservationStatus status,
-    required String comment,
-  }) {
-    switch (status) {
-      case ReservationStatus.accepted:
-        return _StatusNotificationCopy(
-          title: 'Réservation approuvée',
-          body: 'Votre réservation "${reservation.title}" a été approuvée.',
-        );
-      case ReservationStatus.rejected:
-        final reason = comment.isEmpty ? '' : ' Motif: $comment';
-        return _StatusNotificationCopy(
-          title: 'Réservation rejetée',
-          body:
-              'Votre réservation "${reservation.title}" a été rejetée.$reason',
-        );
-      case ReservationStatus.cancelled:
-        final reason = comment.isEmpty ? '' : ' Motif: $comment';
-        return _StatusNotificationCopy(
-          title: 'Réservation annulée',
-          body:
-              'Votre réservation "${reservation.title}" a été annulée.$reason',
-        );
-      case ReservationStatus.onHold:
-      case ReservationStatus.blocked:
-        return _StatusNotificationCopy(
-          title: 'Réservation mise à jour',
-          body: 'Votre réservation "${reservation.title}" a été mise à jour.',
-        );
-    }
-  }
-}
-
-class _StatusNotificationCopy {
-  const _StatusNotificationCopy({
-    required this.title,
-    required this.body,
-  });
-
-  final String title;
-  final String body;
 }
 
 final reservationRepositoryProvider = Provider<ReservationRepository>((ref) {

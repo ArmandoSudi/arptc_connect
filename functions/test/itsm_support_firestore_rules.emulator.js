@@ -361,7 +361,10 @@ test('knowledge attachment metadata follows article visibility', async () => {
 
 function userFirestore(uid) {
   return environment
-    .authenticatedContext(uid, { email: `${uid}@arptc.cd` })
+    .authenticatedContext(uid, {
+      email: `${uid}@arptc.cd`,
+      email_verified: true,
+    })
     .firestore();
 }
 

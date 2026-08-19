@@ -1,6 +1,12 @@
 import 'dart:async';
 
 import 'package:arptc_connect/modules/authentication/screens/login_screen.dart';
+import 'package:arptc_connect/modules/authentication/screens/account_access_screen.dart';
+import 'package:arptc_connect/modules/authentication/screens/session_loading_screen.dart';
+import 'package:arptc_connect/modules/authentication/screens/verify_email_screen.dart';
+import 'package:arptc_connect/modules/authentication/screens/initial_password_change_screen.dart';
+import 'package:arptc_connect/modules/authentication/application/authorized_session.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:arptc_connect/modules/courrier/screens/add_annotation_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/add_courrier_screen.dart';
 import 'package:arptc_connect/modules/courrier/screens/details_courrier.dart';
@@ -57,17 +63,18 @@ import 'package:arptc_connect/modules/social/screens/social_agents_page.dart';
 import 'package:arptc_connect/modules/task/presentation/screens/task_details_page.dart';
 import 'package:arptc_connect/modules/task/presentation/screens/task_form_screen.dart';
 import 'package:arptc_connect/modules/task/presentation/screens/tasks_screen.dart';
-import 'package:arptc_connect/modules/usermanagement/presentation/screens/agents_list_screen.dart';
-import 'package:arptc_connect/modules/usermanagement/presentation/screens/bureau_details_screen.dart';
-import 'package:arptc_connect/modules/usermanagement/presentation/screens/bureaux_screen.dart';
-import 'package:arptc_connect/modules/usermanagement/presentation/screens/department_details_screen.dart';
-import 'package:arptc_connect/modules/usermanagement/presentation/screens/departments_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/agent_directory_screen.dart';
 import 'package:arptc_connect/modules/usermanagement/presentation/screens/module_details_screen.dart';
 import 'package:arptc_connect/modules/usermanagement/presentation/screens/modules_screen.dart';
-import 'package:arptc_connect/modules/usermanagement/presentation/screens/service_details_screen.dart';
-import 'package:arptc_connect/modules/usermanagement/presentation/screens/services_screen.dart';
 import 'package:arptc_connect/modules/usermanagement/presentation/screens/agent_details_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/organization_audit_history_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/organization_details_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/organization_structure_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/organization_unit_details_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/screens/organizations_screen.dart';
 import 'package:arptc_connect/modules/usermanagement/presentation/screens/user_management_main_screen.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/controllers/management_providers.dart';
+import 'package:arptc_connect/modules/usermanagement/presentation/widgets/user_management_access_gate.dart';
 import 'package:arptc_connect/screens/navigators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -104,6 +111,30 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => const NoTransitionPage(
           // child: RootScreen(label: 'A', detailsPath: '/courriers/details'),
           child: LoginScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/session-loading',
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: SessionLoadingScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/verify-email',
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: VerifyEmailScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/change-initial-password',
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: InitialPasswordChangeScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/account-access',
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: AccountAccessScreen(),
         ),
       ),
       GoRoute(
@@ -336,72 +367,114 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 // User Management
                 GoRoute(
                   path: 'usermanagement',
+                  redirect: (context, state) {
+                    if (state.location != '/service/usermanagement') {
+                      return null;
+                    }
+                    final policy = ref.read(userManagementAccessPolicyProvider);
+                    return policy.canReadPrivateProfiles
+                        ? '/service/usermanagement/organizations'
+                        : '/service/usermanagement/agents';
+                  },
                   pageBuilder: (context, state) => const MaterialPage(
-                    child: UserManagementMainScreen(),
+                    child: UserManagementAccessGate(
+                      child: UserManagementMainScreen(),
+                    ),
                   ),
                   routes: [
                     GoRoute(
-                      path: 'departments',
-                      builder: (context, state) => const DepartmentsScreen(),
+                      path: 'organizations',
+                      builder: (context, state) =>
+                          const UserManagementAccessGate(
+                        requirePrivateProfiles: true,
+                        child: OrganizationsScreen(),
+                      ),
                       routes: [
                         GoRoute(
-                          path: ':departmentId',
-                          pageBuilder: (context, state) => MaterialPage(
-                              fullscreenDialog: true,
-                              child: DepartmentDetailsScreen(
-                                departmentId: state
-                                    .pathParameters['departmentId'] as String,
-                              )),
+                          path: ':organizationId',
+                          builder: (context, state) => UserManagementAccessGate(
+                            requirePrivateProfiles: true,
+                            child: OrganizationDetailsScreen(
+                              organizationId:
+                                  state.pathParameters['organizationId']!,
+                            ),
+                          ),
+                          routes: [
+                            GoRoute(
+                              path: 'audit',
+                              builder: (context, state) =>
+                                  UserManagementAccessGate(
+                                requirePrivateProfiles: true,
+                                child: OrganizationAuditHistoryScreen(
+                                  organizationId:
+                                      state.pathParameters['organizationId']!,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
+                    ),
+                    GoRoute(
+                      path: 'structure',
+                      builder: (context, state) =>
+                          const UserManagementAccessGate(
+                        requirePrivateProfiles: true,
+                        child: OrganizationStructureScreen(),
+                      ),
+                      routes: [
+                        GoRoute(
+                          path: ':unitId',
+                          redirect: (_, state) =>
+                              (state.queryParameters['organizationId'] ?? '')
+                                      .trim()
+                                      .isEmpty
+                                  ? '/service/usermanagement/structure'
+                                  : null,
+                          builder: (context, state) => UserManagementAccessGate(
+                            requirePrivateProfiles: true,
+                            child: OrganizationUnitDetailsScreen(
+                              organizationId:
+                                  state.queryParameters['organizationId']!,
+                              unitId: state.pathParameters['unitId']!,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    GoRoute(
+                      path: 'departments',
+                      redirect: (_, __) => '/service/usermanagement/structure',
                     ),
                     GoRoute(
                       path: 'services',
-                      builder: (context, state) =>
-                          const ServicesManagementScreen(),
-                      routes: [
-                        GoRoute(
-                          path: ':serviceId',
-                          builder: (context, state) => ServiceDetailsScreen(
-                            serviceId:
-                                state.pathParameters['serviceId'] as String,
-                          ),
-                        ),
-                      ],
+                      redirect: (_, __) => '/service/usermanagement/structure',
                     ),
                     GoRoute(
                       path: 'bureaux',
-                      builder: (context, state) =>
-                          const BureauxManagementScreen(),
-                      routes: [
-                        GoRoute(
-                          path: ':bureauId',
-                          builder: (context, state) => BureauDetailsScreen(
-                            bureauId:
-                                state.pathParameters['bureauId'] as String,
-                          ),
-                        ),
-                      ],
+                      redirect: (_, __) => '/service/usermanagement/structure',
                     ),
                     GoRoute(
                       path: 'agents',
                       builder: (context, state) =>
-                          const AgentsManagementScreen(),
+                          const UserManagementAccessGate(
+                        child: AgentDirectoryScreen(),
+                      ),
                       routes: [
                         GoRoute(
                           path: 'add',
-                          pageBuilder: (context, state) => const MaterialPage(
-                            fullscreenDialog: true,
-                            child: AddAgentSheet(),
-                          ),
+                          redirect: (_, __) => '/service/usermanagement/agents',
                         ),
                         GoRoute(
                           path: ':agentId',
                           pageBuilder: (context, state) => MaterialPage(
                             fullscreenDialog: true,
-                            child: AgentDetailsScreen(
-                              agentId:
-                                  state.pathParameters['agentId'] as String,
+                            child: UserManagementAccessGate(
+                              requirePrivateProfiles: true,
+                              child: AgentDetailsScreen(
+                                agentId:
+                                    state.pathParameters['agentId'] as String,
+                              ),
                             ),
                           ),
                         ),
@@ -410,13 +483,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     GoRoute(
                       path: 'modules',
                       builder: (context, state) =>
-                          const ModulesManagementScreen(),
+                          const UserManagementAccessGate(
+                        requirePrivateProfiles: true,
+                        child: ModulesManagementScreen(),
+                      ),
                       routes: [
                         GoRoute(
                           path: ':moduleId',
-                          builder: (context, state) => ModuleDetailsScreen(
-                            moduleId:
-                                state.pathParameters['moduleId'] as String,
+                          builder: (context, state) => UserManagementAccessGate(
+                            requirePrivateProfiles: true,
+                            child: ModuleDetailsScreen(
+                              moduleId: state.pathParameters['moduleId']!,
+                            ),
                           ),
                         ),
                       ],
@@ -488,6 +566,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     ],
     redirect: (context, state) {
       final authState = ref.watch(authStateProvider);
+      final sessionState = ref.watch(authorizedSessionProvider);
 
       // log("1. REDIRECTING TO DASHBOARD SCREEN");
 
@@ -495,6 +574,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           data: (data) {
             User? user = data;
             final isLoginRoute = state.matchedLocation == '/login';
+            final isSessionLoadingRoute =
+                state.matchedLocation == '/session-loading';
+            final isVerifyEmailRoute = state.matchedLocation == '/verify-email';
+            final isInitialPasswordRoute =
+                state.matchedLocation == '/change-initial-password';
+            final isAccountAccessRoute =
+                state.matchedLocation == '/account-access';
 
             // if (user == null && state.location == '/'){
             if (user == null) {
@@ -506,6 +592,48 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               return '/login?from=$from';
             }
 
+            switch (sessionState.status) {
+              case AuthenticationStatus.initializing:
+              case AuthenticationStatus.profileLoading:
+                if (isSessionLoadingRoute) {
+                  return null;
+                }
+                return _authorizationRoute(
+                  state,
+                  '/session-loading',
+                );
+              case AuthenticationStatus.emailVerificationRequired:
+                if (isVerifyEmailRoute) {
+                  return null;
+                }
+                return _authorizationRoute(state, '/verify-email');
+              case AuthenticationStatus.initialPasswordChangeRequired:
+                if (isInitialPasswordRoute) {
+                  return null;
+                }
+                return _authorizationRoute(
+                  state,
+                  '/change-initial-password',
+                );
+              case AuthenticationStatus.accountDisabled:
+              case AuthenticationStatus.failure:
+                if (isAccountAccessRoute) {
+                  return null;
+                }
+                return _authorizationRoute(state, '/account-access');
+              case AuthenticationStatus.authenticated:
+                if (isSessionLoadingRoute ||
+                    isVerifyEmailRoute ||
+                    isInitialPasswordRoute ||
+                    isAccountAccessRoute) {
+                  return _postAuthorizationRedirectLocation(state);
+                }
+              case AuthenticationStatus.unauthenticated:
+              case AuthenticationStatus.authenticating:
+              case AuthenticationStatus.registrationInProgress:
+                break;
+            }
+
             final email = user.email;
             if (email != null && email.isNotEmpty) {
               unawaited(
@@ -514,7 +642,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             }
 
             if (isLoginRoute) {
-              return _postLoginRedirectLocation(state);
+              return _postAuthorizationRedirectLocation(state);
             }
 
             return null;
@@ -805,9 +933,12 @@ GoRoute _buildAssetsConfigurationRoute() {
     routes: [
       GoRoute(
         path: ItsmFeature.assets.routeSegment,
-        redirect: (context, state) => state.matchedLocation == ItsmRoutes.assets
-            ? ItsmRoutes.myAssets
-            : null,
+        // Only the bare /assets path should default to My Assets. Checking
+        // matchedLocation also matches child routes such as /assets/register.
+        redirect: (context, state) =>
+            Uri.parse(state.location).path == ItsmRoutes.assets
+                ? ItsmRoutes.myAssets
+                : null,
         routes: [
           GoRoute(
             path: 'my',
@@ -848,12 +979,23 @@ GoRoute _buildAssetsConfigurationRoute() {
               requirement: ItsmRouteRequirement.operational,
               child: AssetRegisterScreen(
                 onBack: () => context.go(ItsmRoutes.assetsConfiguration),
-                onRegisterAsset: showRegisterAssetDialog,
+                onRegisterAsset: showAssetRegistrationDialog,
+                onManageParameters: () =>
+                    context.push(ItsmRoutes.assetParameters),
                 onAssetSelected: (asset) =>
                     context.push(ItsmRoutes.assetRegisterDetail(asset.id)),
               ),
             ),
             routes: [
+              GoRoute(
+                path: 'parameters',
+                builder: (context, state) => ItsmRouteGuard(
+                  section: ItsmSection.assetsConfiguration,
+                  feature: ItsmFeature.assets,
+                  requirement: ItsmRouteRequirement.operational,
+                  child: AssetParametersScreen(onBack: () => context.pop()),
+                ),
+              ),
               GoRoute(
                 path: ':assetId',
                 builder: (context, state) => ItsmRouteGuard(
@@ -1448,13 +1590,21 @@ String _replacePathPreservingParameters(String location, String path) {
   return uri.replace(path: path).toString();
 }
 
-String _postLoginRedirectLocation(GoRouterState state) {
+String _postAuthorizationRedirectLocation(GoRouterState state) {
   final from = state.queryParameters['from'];
   if (from == null || from.isEmpty || from == '/login') {
     return routerInitialLocation;
   }
 
   return from;
+}
+
+String _authorizationRoute(GoRouterState state, String route) {
+  final requestedLocation = state.matchedLocation == '/login'
+      ? state.queryParameters['from'] ?? routerInitialLocation
+      : state.location;
+  final from = Uri.encodeComponent(requestedLocation);
+  return '$route?from=$from';
 }
 
 DateTime? _parseMeetingHallSelectedDate(String? rawDate) {

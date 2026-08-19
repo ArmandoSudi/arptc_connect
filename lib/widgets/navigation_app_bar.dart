@@ -1,11 +1,11 @@
 import 'package:arptc_connect/generated/l10n.dart';
-import 'package:arptc_connect/modules/profile/presentation/controllers/profile_provider.dart';
+import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:arptc_connect/modules/notifications/presentation/widgets/notification_bell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-import '../modules/authentication/providers/authentication_provider.dart';
 import 'navigation_title.dart';
 
 class NavigationAppBar extends ConsumerWidget implements PreferredSizeWidget {
@@ -14,20 +14,8 @@ class NavigationAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = S.of(context);
-    final authEmail =
-        ref.watch(authStateProvider).valueOrNull?.email?.trim() ?? '';
-    final profileAsync = ref.watch(liveAgentProfileProvider);
-    final userLabel = profileAsync.maybeWhen(
-      data: (profile) {
-        final displayName = _buildDisplayName(profile);
-        if (displayName.isNotEmpty) {
-          return displayName;
-        }
-        final profileEmail = _string(profile['email']);
-        return profileEmail.isNotEmpty ? profileEmail : authEmail;
-      },
-      orElse: () => authEmail,
-    );
+    final session = ref.watch(authorizedSessionProvider).session;
+    final userLabel = session?.displayName ?? '';
 
     return AppBar(
       title: const NavigationTitle(),
@@ -65,18 +53,3 @@ class NavigationAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => AppBar().preferredSize;
 }
-
-String _buildDisplayName(Map<String, dynamic> profile) {
-  final parts = [
-    _string(profile['firstName']),
-    _string(profile['name']),
-    _string(profile['postName']),
-  ].where((part) => part.isNotEmpty).toList();
-
-  if (parts.isNotEmpty) {
-    return parts.join(' ');
-  }
-  return _string(profile['fullName']);
-}
-
-String _string(dynamic value) => value?.toString().trim() ?? '';

@@ -1,191 +1,88 @@
-import 'dart:developer';
-
-import 'package:arptc_connect/modules/administration/data/administration_api_provider.dart';
-import 'package:arptc_connect/modules/social/screens/data/voucher_service.dart';
-import 'package:arptc_connect/widgets/content_view.dart';
-import 'package:arptc_connect/widgets/responsive_center.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:arptc_connect/generated/l10n.dart';
+import 'package:arptc_connect/modules/usermanagement/domain/agent_directory_entry.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 
-import '../../administration/domain/models/agent.dart';
+class SocialAgentDetailsScreen extends StatelessWidget {
+  const SocialAgentDetailsScreen({required this.agent, super.key});
 
-class SocialAgentDetailsScreen extends ConsumerStatefulWidget {
-  final String agentId;
-  late final CollectionReference agentsRef;
+  final AgentDirectoryEntry agent;
 
-  SocialAgentDetailsScreen({required this.agentId, super.key}) {
-    agentsRef =
-        FirebaseFirestore.instance.collection('agents/$agentId/dependants');
-  }
-
-  @override
-  ConsumerState createState() => _SocialAgentDetailsScreenState();
-}
-
-class _SocialAgentDetailsScreenState
-    extends ConsumerState<SocialAgentDetailsScreen> {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
+    final l10n = S.of(context);
+    final image = agent.profilePictureUrl;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Détails de l'Agent"),
-      ),
-      body: FutureBuilder<Agent>(
-        future:
-            ref.watch(administrationAPIProvider).getAgentById(widget.agentId),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Text("something went wrong");
-          }
-
-          if (snapshot.data == null ||
-              snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (!snapshot.hasData) {
-            return const Text("There is no dependant yet");
-          }
-          Agent agent = snapshot.data!;
-
-          log("AGENT DETAILS : $agent");
-          return ContentView(
-            child: ResponsiveCenter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // PROFILE PICTURE
-                  const Gap(16),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // PROFILE
-                          const CircleAvatar(
-                            radius: 50,
-                            backgroundImage: NetworkImage(
-                                'https://i.pravatar.cc/300?img=49',
-                                scale: 2),
-                          ),
-                          const Gap(24),
-
-                          // NAME
-                          Text(
-                            agent.name,
-                            style: theme.textTheme.titleLarge!.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const Gap(16),
-
-                          // DEPARTMENT
-                          Text(
-                            "Direction Générale",
-                            style: theme.textTheme.titleMedium!.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const Gap(16),
-
-                          // SERVICE
-                          Text(
-                            "Service  Developpement et Base des données",
-                            style: theme.textTheme.titleSmall!.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const Gap(16),
-
-                          // ACTIONS
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  // primary: theme.primaryColor
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 32),
-                                  side: BorderSide(color: theme.primaryColor),
-                                ),
-                                onPressed: () async {
-                                  log("Generer bon");
-                                  VoucherService().generateVoucher(agent);
-                                },
-                                icon: const Icon(Icons.file_copy_outlined),
-                                label: const Text("Bon Médical"),
-                              ),
-                              const Gap(16),
-                              OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  // primary: theme.primaryColor
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 32),
-                                  side: BorderSide(color: theme.primaryColor),
-                                ),
-                                onPressed: () async {
-                                  log("Générer attestation");
-                                  VoucherService().generateAttestation(agent);
-                                },
-                                icon: const Icon(Icons.file_copy_outlined),
-                                label: const Text("Attestation de Service"),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const Gap(16),
-
-                  // DEPENDANTS
-                  Card(
-                    color: Colors.white,
-                    elevation: 5,
-                    child: Container(
-                      // color: Colors.white,
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Dépendants",
-                                  style: theme.textTheme.titleMedium!.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                FilledButton(
-                                  onPressed: () => log("Add dependant"),
-                                  child: const Text("Ajouter dépendant"),
-                                ),
-                              ],
-                            ),
-                          ),
-                          // TODO Implement the service to fetch dependants
-                          // FutureBuilder(
-                          //     future: future,
-                          //     builder: builder),
-                          // _buildDependantList(
-                          //     context, snapshot ?? []),
-                        ],
-                      ),
-                    ),
-                  )
-                ],
+      appBar: AppBar(title: Text(l10n.lookup('umAgentDetails'))),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            Align(
+              child: CircleAvatar(
+                radius: 48,
+                backgroundImage: image == null ? null : NetworkImage(image),
+                child: image == null
+                    ? Text(
+                        _initials(agent.displayName),
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      )
+                    : null,
               ),
             ),
-          );
-        },
+            const SizedBox(height: 18),
+            Text(
+              agent.displayName,
+              textAlign: TextAlign.center,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 20),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    _DetailRow(label: l10n.email, value: agent.email),
+                    _DetailRow(
+                      label: l10n.lookup('umJobTitle'),
+                      value: agent.jobTitle,
+                    ),
+                    _DetailRow(
+                      label: l10n.lookup('umOrganizationPath'),
+                      value: agent.organizationBreadcrumb,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(label),
+      subtitle: Text(value.isEmpty ? '-' : value),
+    );
+  }
+}
+
+String _initials(String name) => name
+    .split(RegExp(r'\s+'))
+    .where((part) => part.isNotEmpty)
+    .take(2)
+    .map((part) => part[0].toUpperCase())
+    .join();

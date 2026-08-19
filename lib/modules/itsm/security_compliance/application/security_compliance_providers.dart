@@ -1,5 +1,5 @@
 import 'package:arptc_connect/core/firebase_providers.dart';
-import 'package:arptc_connect/modules/authentication/providers/authentication_provider.dart';
+import 'package:arptc_connect/modules/authentication/providers/authorized_session_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/application/itsm_providers.dart';
@@ -302,7 +302,7 @@ Future<T> _sessionFuture<T>(
 }
 
 void _invalidateWhenSessionChanges(Ref ref) {
-  ref.listen<String?>(currentAuthSessionKeyProvider, (previous, next) {
+  ref.listen<String?>(currentAuthorizedSessionKeyProvider, (previous, next) {
     if (previous != null && previous != next) ref.invalidateSelf();
   });
 }

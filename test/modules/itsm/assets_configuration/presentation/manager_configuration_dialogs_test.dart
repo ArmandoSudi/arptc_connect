@@ -1,5 +1,6 @@
 import 'package:arptc_connect/generated/l10n.dart';
 import 'package:arptc_connect/modules/itsm/assets_configuration/application/assets_configuration_application.dart';
+import 'package:arptc_connect/modules/itsm/assets_configuration/domain/asset_assignee.dart';
 import 'package:arptc_connect/modules/itsm/assets_configuration/presentation/assets_configuration_presentation.dart';
 import 'package:arptc_connect/modules/itsm/shared/application/itsm_providers.dart';
 import 'package:arptc_connect/modules/itsm/shared/data/trusted_command_gateways.dart';
@@ -12,6 +13,57 @@ import 'package:flutter_test/flutter_test.dart';
 import '../application/assets_configuration_test_support.dart';
 
 void main() {
+  testWidgets('asset assignment searches agents and submits the selected UID',
+      (tester) async {
+    final commandPort = RecordingAssetsCommandPort();
+    final readPort = RecordingAssetsReadPort()
+      ..assetAssignees = const [
+        AssetAssignee(
+          id: 'agent-alice',
+          displayName: 'Alice Kabwe',
+          email: 'alice@arptc.cd',
+        ),
+        AssetAssignee(
+          id: 'agent-armando',
+          displayName: 'Armando Sudi',
+          email: 'armando@arptc.cd',
+          departmentId: 'it',
+        ),
+      ];
+    await tester.pumpWidget(
+      _specificDialogApp(
+        commandPort,
+        readPort: readPort,
+        onPressed: (context, ref) => showAssignAssetToAgentDialog(
+          context,
+          ref,
+          assetDetail(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open dialog'));
+    await tester.pumpAndSettle();
+    final searchField = find.widgetWithText(TextFormField, 'Search agents');
+    expect(searchField, findsOneWidget);
+    await tester.enterText(searchField, 'arma');
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Armando Sudi').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Assign asset').last);
+    await tester.pumpAndSettle();
+
+    final command = commandPort.commands.single as AssetOperationalCommand;
+    expect(command.operation, 'assign');
+    expect(command.fields['assignedUserId'], 'agent-armando');
+    expect(command.fields['departmentId'], 'it');
+    expect(command.fields, isNot(contains('assignedUserName')));
+    expect(readPort.assigneeSearches, contains('arma'));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('asset assignment sends only the selected agent UID',
       (tester) async {
     final commandPort = RecordingAssetsCommandPort();
@@ -67,7 +119,7 @@ void main() {
     await tester.tap(find.text('Open dialog'));
     await tester.pumpAndSettle();
     expect(find.text('Ordered'), findsOneWidget);
-    expect(find.text('Retired'), findsOneWidget);
+    expect(find.text('Retired'), findsNothing);
     expect(find.text('Assigned'), findsNothing);
     expect(find.text('Disposed'), findsNothing);
 
@@ -503,6 +555,7 @@ Widget _dialogApp(
 Widget _specificDialogApp(
   RecordingAssetsCommandPort commandPort, {
   required Future<void> Function(BuildContext context, WidgetRef ref) onPressed,
+  RecordingAssetsReadPort? readPort,
 }) {
   return ProviderScope(
     overrides: [
@@ -510,6 +563,8 @@ Widget _specificDialogApp(
         (ref) => Stream.value(assetSession(ItsmRole.manager)),
       ),
       assetsConfigurationCommandPortProvider.overrideWithValue(commandPort),
+      if (readPort != null)
+        assetsConfigurationReadPortProvider.overrideWithValue(readPort),
     ],
     child: MaterialApp(
       localizationsDelegates: const [S.delegate],

@@ -85,6 +85,26 @@ abstract interface class AssetsConfigurationReadAdapter {
     required int limit,
   });
 
+  Stream<List<domain.AssetAssignment>> watchAssetAssignments({
+    required String assetId,
+    required int limit,
+  });
+
+  Stream<List<domain.AssetStateEvent>> watchAssetStateEvents({
+    required String assetId,
+    required int limit,
+  });
+
+  Stream<List<domain.AssetParameter>> watchAssetParameters({
+    required int limit,
+  });
+
+  Stream<List<domain.AssetAssignee>> watchAssetAssignees({
+    required int limit,
+    String organizationId = '',
+    String search = '',
+  });
+
   Stream<List<domain.StockItem>> watchStockItems({required int limit});
 
   Stream<List<domain.StockMovement>> watchStockMovements({
@@ -281,6 +301,112 @@ class FirestoreAssetsConfigurationReadAdapter
     return snapshot.docs
         .map(domain.AssetLifecycleEvent.fromFirestore)
         .toList(growable: false);
+  }
+
+  @override
+  Stream<List<domain.AssetAssignment>> watchAssetAssignments({
+    required String assetId,
+    required int limit,
+  }) {
+    final id = requireRepositoryId(assetId, 'assetId');
+    requireRepositoryLimit(limit);
+    return _firestore
+        .collection('assetAssignments')
+        .where('assetId', isEqualTo: id)
+        .orderBy('assignedAt', descending: true)
+        .orderBy(FieldPath.documentId, descending: true)
+        .limit(limit)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map(domain.AssetAssignment.fromFirestore)
+              .toList(growable: false),
+        );
+  }
+
+  @override
+  Stream<List<domain.AssetStateEvent>> watchAssetStateEvents({
+    required String assetId,
+    required int limit,
+  }) {
+    final id = requireRepositoryId(assetId, 'assetId');
+    requireRepositoryLimit(limit);
+    return _firestore
+        .collection('assetStateEvents')
+        .where('assetId', isEqualTo: id)
+        .orderBy('changedAt', descending: true)
+        .orderBy(FieldPath.documentId, descending: true)
+        .limit(limit)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map(domain.AssetStateEvent.fromFirestore)
+              .toList(growable: false),
+        );
+  }
+
+  @override
+  Stream<List<domain.AssetParameter>> watchAssetParameters({
+    required int limit,
+  }) {
+    requireRepositoryLimit(limit);
+    return _firestore
+        .collection('assetParameters')
+        .limit(limit)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map(domain.AssetParameter.fromFirestore)
+              .where((parameter) => parameter.isActive)
+              .toList(growable: false)
+            ..sort((left, right) {
+              final type = left.type.index.compareTo(right.type.index);
+              if (type != 0) return type;
+              final order = left.sortOrder.compareTo(right.sortOrder);
+              if (order != 0) return order;
+              return left.name
+                  .toLowerCase()
+                  .compareTo(right.name.toLowerCase());
+            }),
+        );
+  }
+
+  @override
+  Stream<List<domain.AssetAssignee>> watchAssetAssignees({
+    required int limit,
+    String organizationId = '',
+    String search = '',
+  }) {
+    requireRepositoryLimit(limit);
+    final normalizedOrganizationId = organizationId.trim();
+    if (normalizedOrganizationId.isEmpty) {
+      return Stream.error(
+        StateError('An organization is required to load asset assignees.'),
+      );
+    }
+    Query<Map<String, dynamic>> query = _firestore
+        .collection('agentDirectory')
+        .where('organizationId', isEqualTo: normalizedOrganizationId)
+        .where('isActive', isEqualTo: true)
+        .orderBy('displayNameLower');
+    final normalizedSearch = search.trim().toLowerCase();
+    if (normalizedSearch.isNotEmpty) {
+      query =
+          query.startAt([normalizedSearch]).endAt(['$normalizedSearch\uf8ff']);
+    }
+    return query.limit(limit).snapshots().map(
+      (snapshot) {
+        final agents = snapshot.docs
+            .map(domain.AssetAssignee.fromFirestore)
+            .toList(growable: false);
+        agents.sort(
+          (left, right) => left.displayName
+              .toLowerCase()
+              .compareTo(right.displayName.toLowerCase()),
+        );
+        return agents;
+      },
+    );
   }
 
   @override
@@ -567,6 +693,86 @@ class FirestoreAssetsConfigurationPort
   }
 
   @override
+  Stream<List<application.AssetAssignmentHistoryEntry>>
+      watchAssetAssignmentHistory({
+    required application.AssetConfigurationPrincipal principal,
+    required String assetId,
+    required int limit,
+  }) {
+    _requirePrincipalUserId(principal);
+    if (principal.role != ItsmRole.manager) {
+      throw const application.AssetsConfigurationAccessDenied(
+        'Only a MANAGER can read an asset assignment history.',
+      );
+    }
+    return _readAdapter
+        .watchAssetAssignments(
+          assetId: requireRepositoryId(assetId, 'assetId'),
+          limit: _requireBoundedLimit(limit),
+        )
+        .map(
+          (assignments) =>
+              assignments.map(_assignmentHistoryEntry).toList(growable: false),
+        );
+  }
+
+  @override
+  Stream<List<application.AssetStateHistoryEntry>> watchAssetStateHistory({
+    required application.AssetConfigurationPrincipal principal,
+    required String assetId,
+    required int limit,
+  }) {
+    _requirePrincipalUserId(principal);
+    if (principal.role != ItsmRole.manager) {
+      throw const application.AssetsConfigurationAccessDenied(
+        'Only a MANAGER can read an asset state history.',
+      );
+    }
+    return _readAdapter
+        .watchAssetStateEvents(
+          assetId: requireRepositoryId(assetId, 'assetId'),
+          limit: _requireBoundedLimit(limit),
+        )
+        .map(
+          (events) => events.map(_stateHistoryEntry).toList(growable: false),
+        );
+  }
+
+  @override
+  Stream<List<domain.AssetParameter>> watchAssetParameters({
+    required application.AssetConfigurationPrincipal principal,
+    required int limit,
+  }) {
+    _requirePrincipalUserId(principal);
+    if (principal.role != ItsmRole.manager) {
+      throw const application.AssetsConfigurationAccessDenied(
+        'Only a MANAGER can read asset register parameters.',
+      );
+    }
+    return _readAdapter.watchAssetParameters(
+        limit: _requireBoundedLimit(limit));
+  }
+
+  @override
+  Stream<List<domain.AssetAssignee>> watchAssetAssignees({
+    required application.AssetConfigurationPrincipal principal,
+    required int limit,
+    String search = '',
+  }) {
+    _requirePrincipalUserId(principal);
+    if (principal.role != ItsmRole.manager) {
+      throw const application.AssetsConfigurationAccessDenied(
+        'Only a MANAGER can choose an asset assignee.',
+      );
+    }
+    return _readAdapter.watchAssetAssignees(
+      limit: _requireBoundedLimit(limit),
+      organizationId: principal.organizationId,
+      search: search,
+    );
+  }
+
+  @override
   Stream<List<application.StockItemSummary>> watchStockItems({
     required application.AssetConfigurationPrincipal principal,
     required int limit,
@@ -835,7 +1041,7 @@ class FirestoreAssetsConfigurationPort
     }
     _rejectSecretFields(command.fields);
     final fields = Map<String, Object?>.from(command.fields);
-    if (spec.identityField != null) {
+    if (spec.identityField != null && command.recordId.trim().isNotEmpty) {
       fields[spec.identityField!] = command.recordId.trim();
     }
     return spec.invocation(_whitelist(fields, spec.allowedFields));
@@ -961,7 +1167,9 @@ const _assetOperationSpecs = <String, _CommandSpec>{
       'brand',
       'model',
       'serialNumber',
+      'productNumber',
       'description',
+      'observation',
       'acquisitionDate',
       'acquisitionCost',
       'currency',
@@ -970,11 +1178,27 @@ const _assetOperationSpecs = <String, _CommandSpec>{
       'condition',
       'siteId',
       'locationId',
+      'locationName',
+      'stateId',
+      'stateName',
       'departmentId',
       'stockLocationId',
       'securityBaselineId',
       'attachmentIds',
       'photoAttachmentIds',
+    },
+  ),
+  'change_state': _CommandSpec(
+    functionName: 'itsmChangeAssetState',
+    commandName: 'asset.state.change',
+    identityField: 'assetId',
+    requiresRevision: true,
+    allowedFields: {
+      'assetId',
+      'expectedRevision',
+      'stateId',
+      'stateName',
+      'observation',
     },
   ),
   'assign': _CommandSpec(
@@ -990,6 +1214,7 @@ const _assetOperationSpecs = <String, _CommandSpec>{
       'assignedUserEmail',
       'departmentId',
       'locationId',
+      'assignedAt',
       'relatedRequestId',
       'evidence',
     },
@@ -1008,6 +1233,17 @@ const _assetOperationSpecs = <String, _CommandSpec>{
       'reason',
       'relatedRequestId',
       'evidence',
+    },
+  ),
+  'decommission': _CommandSpec(
+    functionName: 'itsmDecommissionAsset',
+    commandName: 'asset.decommission',
+    identityField: 'assetId',
+    requiresRevision: true,
+    allowedFields: {
+      'assetId',
+      'expectedRevision',
+      'observation',
     },
   ),
 };
@@ -1065,7 +1301,9 @@ const _configurationSpecs = <String, _CommandSpec>{
       'brand',
       'model',
       'serialNumber',
+      'productNumber',
       'description',
+      'observation',
       'acquisitionDate',
       'acquisitionCost',
       'currency',
@@ -1075,11 +1313,16 @@ const _configurationSpecs = <String, _CommandSpec>{
       'condition',
       'siteId',
       'locationId',
+      'locationName',
+      'stateId',
+      'stateName',
       'departmentId',
       'stockLocationId',
       'securityBaselineId',
       'attachmentIds',
       'photoAttachmentIds',
+      'assignedUserId',
+      'assignedAt',
     },
   ),
   'stock.location.save': _CommandSpec(
@@ -1095,6 +1338,19 @@ const _configurationSpecs = <String, _CommandSpec>{
       'siteName',
       'barcode',
       'isActive',
+    },
+  ),
+  'asset.parameter.save': _CommandSpec(
+    functionName: 'itsmSaveAssetParameter',
+    commandName: 'asset.parameter.save',
+    identityField: 'id',
+    allowedFields: {
+      'id',
+      'expectedRevision',
+      'type',
+      'name',
+      'isActive',
+      'sortOrder',
     },
   ),
   'stock.item.save': _CommandSpec(
@@ -1304,13 +1560,17 @@ application.AssetSummary _assetSummary(domain.Asset asset) =>
       id: asset.id,
       assetTag: asset.assetTag,
       name: _assetDisplayName(asset),
+      categoryId: asset.categoryId,
       categoryName: asset.categoryName,
       status: _applicationAssetStatus(asset.status),
       brand: asset.brand,
       model: asset.model,
       serialNumber: asset.serialNumber,
+      productNumber: asset.productNumber,
       locationName: asset.locationName,
+      stateName: asset.stateName,
       assignedUserName: asset.assignedUserName,
+      isInStock: asset.isInStock,
       condition: asset.condition.value,
       updatedAt: asset.updatedAt,
     );
@@ -1335,6 +1595,7 @@ application.AssetSummary _selfServiceSummary(
       serialNumber: projection.serialNumber,
       locationName: projection.locationName,
       assignedUserName: projection.assignedUserName,
+      isInStock: false,
       condition: projection.condition.value,
       photoUrl: projection.photoUrl,
       updatedAt: projection.updatedAt,
@@ -1367,6 +1628,9 @@ application.AssetDetail _assetDetail(
       barcode: asset.qrBarcode,
       typeName: asset.type,
       description: asset.description,
+      observation: asset.observation,
+      productNumber: asset.productNumber,
+      stateName: asset.stateName,
       acquisitionDate: asset.acquisitionDate,
       acquisitionCost: asset.acquisitionCost,
       supplierName: asset.supplierName,
@@ -1390,6 +1654,31 @@ application.AssetDetail _assetDetail(
             ),
           )
           .toList(growable: false),
+    );
+
+application.AssetAssignmentHistoryEntry _assignmentHistoryEntry(
+  domain.AssetAssignment assignment,
+) =>
+    application.AssetAssignmentHistoryEntry(
+      id: assignment.id,
+      assignedUserName: assignment.assignedUserName,
+      assignedAt: assignment.assignedAt,
+      returnedAt: assignment.returnedAt,
+      status: assignment.status.name,
+      assignmentReason: assignment.assignmentReason,
+    );
+
+application.AssetStateHistoryEntry _stateHistoryEntry(
+  domain.AssetStateEvent event,
+) =>
+    application.AssetStateHistoryEntry(
+      id: event.id,
+      fromStateName: event.fromStateName,
+      toStateName: event.toStateName,
+      observation: event.observation,
+      actorName: event.actorName,
+      changedAt: event.changedAt,
+      revision: event.revision,
     );
 
 application.StockItemSummary _stockItemSummary(domain.StockItem item) =>

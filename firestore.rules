@@ -6,72 +6,56 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function agentPath(agentId) {
-      return /databases/$(database)/documents/agents/$(agentId);
-    }
-
     function authAgentPath() {
       return /databases/$(database)/documents/agents/$(request.auth.uid);
-    }
-
-    function authAgentEmailPath() {
-      return /databases/$(database)/documents/agents/$(request.auth.token.email);
-    }
-
-    function hasAgent(agentId) {
-      return signedIn() && exists(agentPath(agentId));
     }
 
     function hasAuthAgentDocument() {
       return signedIn() && exists(authAgentPath());
     }
 
-    function hasAuthAgentEmailDocument() {
+    function hasVerifiedAuthEmail() {
       return signedIn() &&
-        request.auth.token.email is string &&
-        request.auth.token.email != '' &&
-        exists(authAgentEmailPath());
-    }
-
-    function agentEmailMatches(agentId) {
-      return hasAgent(agentId) &&
-        (get(agentPath(agentId)).data.email == request.auth.token.email ||
-         get(agentPath(agentId)).data.emailLower == request.auth.token.email);
-    }
-
-    function isSelfAgent(agentId) {
-      return signedIn() &&
-        (agentId == request.auth.uid || agentEmailMatches(agentId));
-    }
-
-    function userPath() {
-      return /databases/$(database)/documents/users/$(request.auth.uid);
-    }
-
-    function hasUserDocument() {
-      return signedIn() && exists(userPath());
-    }
-
-    function principalData() {
-      return hasAuthAgentDocument()
-        ? get(authAgentPath()).data
-        : (
-          hasAuthAgentEmailDocument()
-            ? get(authAgentEmailPath()).data
-            : (hasUserDocument() ? get(userPath()).data : request.auth.token)
+        (
+          !request.auth.token.keys().hasAny(['email_verified']) ||
+          request.auth.token.email_verified == true
         );
     }
 
+    function hasActiveAuthAgentDocument() {
+      return hasVerifiedAuthEmail() &&
+        hasAuthAgentDocument() &&
+        get(authAgentPath()).data.keys().hasAny(['isActive']) &&
+        get(authAgentPath()).data.isActive == true &&
+        (
+          !get(authAgentPath()).data.keys().hasAny(['mustChangePassword']) ||
+          get(authAgentPath()).data.mustChangePassword != true
+        );
+    }
+
+    function isSelfAgent(agentId) {
+      return hasActiveAuthAgentDocument() && agentId == request.auth.uid;
+    }
+
+    function principalData() {
+      return hasActiveAuthAgentDocument()
+        ? get(authAgentPath()).data
+        : {};
+    }
+
     function isUser() {
-      return itsmRole() in ['USER', 'user', 'User'];
+      return hasActiveAuthAgentDocument() &&
+        itsmRole() in ['USER', 'user', 'User'];
     }
 
     function isManager() {
-      return itsmRole() in ['MANAGER', 'manager', 'Manager'];
+      return hasActiveAuthAgentDocument() &&
+        itsmRole() in ['MANAGER', 'manager', 'Manager'];
     }
 
     function isAdmin() {
-      return itsmRole() in ['ADMIN', 'admin', 'Admin'];
+      return hasActiveAuthAgentDocument() &&
+        itsmRole() in ['ADMIN', 'admin', 'Admin'];
     }
 
     function hasIncidentAccess() {
@@ -757,6 +741,83 @@ service cloud.firestore {
       return userManagementRole() == 'MANAGER';
     }
 
+    // Organization data is available only after the identity and agent profile
+    // are both verified. This intentionally does not reuse the legacy
+    // email-verification fallback used by unrelated modules.
+    function hasActiveVerifiedOrganizationPrincipal() {
+      return signedIn() &&
+        request.auth.token.keys().hasAny(['email_verified']) &&
+        request.auth.token.email_verified == true &&
+        hasAuthAgentDocument() &&
+        get(authAgentPath()).data.keys().hasAny(['isActive']) &&
+        get(authAgentPath()).data.isActive == true &&
+        (
+          !get(authAgentPath()).data.keys().hasAny(['mustChangePassword']) ||
+          get(authAgentPath()).data.mustChangePassword != true
+        );
+    }
+
+    function principalOrganizationId() {
+      let data = hasActiveVerifiedOrganizationPrincipal()
+        ? get(authAgentPath()).data
+        : {};
+      return data.keys().hasAny(['organizationId']) &&
+        data.organizationId is string
+          ? data.organizationId
+          : '';
+    }
+
+    function isUserManagementSupervisor() {
+      return hasActiveVerifiedOrganizationPrincipal() &&
+        userManagementRole() in [
+          'MANAGER',
+          'manager',
+          'Manager',
+          'ADMIN',
+          'admin',
+          'Admin'
+        ];
+    }
+
+    function isBoundedOrganizationQuery() {
+      return request.query.limit != null && request.query.limit <= 100;
+    }
+
+    function isSamePrincipalOrganization(data) {
+      return hasActiveVerifiedOrganizationPrincipal() &&
+        principalOrganizationId() != '' &&
+        data.keys().hasAny(['organizationId']) &&
+        data.organizationId == principalOrganizationId();
+    }
+
+    function canReadPrivateAgent(data) {
+      return isUserManagementSupervisor();
+    }
+
+    function canReadAgentDirectoryRecord(data) {
+      return isUserManagementSupervisor() ||
+        (
+          isSamePrincipalOrganization(data) &&
+          data.keys().hasAny(['isActive']) &&
+          data.isActive == true
+        );
+    }
+
+    function canReadOrganizationAssignment(data) {
+      return hasActiveVerifiedOrganizationPrincipal() &&
+        (
+          (
+            data.keys().hasAny(['agentId']) &&
+            data.agentId == request.auth.uid
+          ) ||
+          isUserManagementSupervisor()
+        );
+    }
+
+    function canReadOrganizationAuditEvent(data) {
+      return isUserManagementSupervisor();
+    }
+
     function taskRole() {
       let data = principalData();
       let permissions = data.keys().hasAny(['modulePermissions'])
@@ -793,18 +854,7 @@ service cloud.firestore {
         data.departmentId is string &&
         data.departmentId != ''
           ? data.departmentId
-          : (
-            data.keys().hasAny(['department']) &&
-            data.department is string &&
-            data.department != ''
-              ? data.department
-              : (
-                data.keys().hasAny(['direction']) &&
-                data.direction is string
-                  ? data.direction
-                  : ''
-              )
-          );
+          : '';
     }
 
     function canReadTask(task) {
@@ -924,12 +974,7 @@ service cloud.firestore {
       return signedIn() &&
         (
           reservation.userId == request.auth.uid ||
-          reservation.userEmail == request.auth.token.email ||
-          (
-            reservation.userId is string &&
-            reservation.userId.size() > 0 &&
-            agentEmailMatches(reservation.userId)
-          )
+          reservation.userEmail == request.auth.token.email
         );
     }
 
@@ -963,7 +1008,17 @@ service cloud.firestore {
       let changed = request.resource.data.diff(resource.data).affectedKeys();
       return signedIn() &&
         isMeetingHallManager() &&
-        changed.hasOnly(['status', 'updatedAt', 'rejectionReason', 'cancelReason']) &&
+        changed.hasOnly([
+          'status',
+          'updatedAt',
+          'rejectionReason',
+          'cancelReason',
+          'lastActionByUserId',
+          'lastActionByName',
+          'lastActionByEmail'
+        ]) &&
+        request.resource.data.lastActionByUserId == request.auth.uid &&
+        request.resource.data.lastActionByEmail == request.auth.token.email &&
         request.resource.data.status in ['ON_HOLD', 'ACCEPTED', 'REJECTED', 'CANCELLED', 'BLOCKED'] &&
         request.resource.data.updatedAt == request.time &&
         (
@@ -984,38 +1039,6 @@ service cloud.firestore {
         request.resource.data.capacity > 0;
     }
 
-    function validNotificationEventCreate() {
-      return signedIn() &&
-        request.resource.data.keys().hasAll([
-          'eventType',
-          'moduleKey',
-          'title',
-          'body',
-          'entityType',
-          'entityId',
-          'route',
-          'createdByUserId',
-          'createdByName',
-          'createdByEmail',
-          'target',
-          'status',
-          'createdAt'
-        ]) &&
-        request.resource.data.status == 'PENDING' &&
-        request.resource.data.createdAt == request.time &&
-        request.resource.data.target is map &&
-        request.resource.data.target.type in ['ALL', 'MODULE_ROLE', 'USERS'] &&
-        (
-          request.resource.data.createdByUserId == request.auth.uid ||
-          request.resource.data.createdByEmail == request.auth.token.email ||
-          (
-            request.resource.data.createdByUserId is string &&
-            request.resource.data.createdByUserId.size() > 0 &&
-            agentEmailMatches(request.resource.data.createdByUserId)
-          )
-        );
-    }
-
     function isTicketOwner(ticket) {
       return signedIn() &&
         (ticket.createdByUserId == request.auth.uid ||
@@ -1033,6 +1056,7 @@ service cloud.firestore {
       return isItsmSelfServiceRole() &&
         request.resource.data.status == 'open' &&
         request.resource.data.lifecycleState == 'active' &&
+        request.resource.data.createdByRole in ['USER', 'ADMIN'] &&
         (request.resource.data.createdByUserId == request.auth.uid ||
          request.resource.data.createdByEmail == request.auth.token.email) &&
         (request.resource.data.affectedUserId == request.auth.uid ||
@@ -1052,6 +1076,7 @@ service cloud.firestore {
       return isManager() &&
         request.resource.data.status in ['open', 'in_progress'] &&
         request.resource.data.lifecycleState == 'active' &&
+        request.resource.data.createdByRole == 'MANAGER' &&
         (request.resource.data.createdByUserId == request.auth.uid ||
          request.resource.data.createdByEmail == request.auth.token.email) &&
         request.resource.data.affectedUserId is string &&
@@ -1115,7 +1140,10 @@ service cloud.firestore {
         'lastCommentAt',
         'lastStatusChangedAt',
         'commentCount',
-        'attachmentCount'
+        'attachmentCount',
+        'lastActionByUserId',
+        'lastActionByName',
+        'lastActionByEmail'
       ];
     }
 
@@ -1227,6 +1255,11 @@ service cloud.firestore {
       }
     }
 
+    // Server-owned uniqueness locks for asset serial and product numbers.
+    match /assetIdentifierLocks/{lockId} {
+      allow read, write: if false;
+    }
+
     match /assetSelfServiceProjections/{projectionId} {
       allow get, list: if signedIn() &&
         canReadAssetSelfServiceProjection(resource.data);
@@ -1238,6 +1271,11 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    match /assetParameters/{parameterId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+    }
+
     match /assetAssignments/{assignmentId} {
       allow get, list: if signedIn() &&
         canReadAssetAssignment(resource.data);
@@ -1245,6 +1283,11 @@ service cloud.firestore {
     }
 
     match /assetLifecycleEvents/{eventId} {
+      allow get, list: if signedIn() && isManager();
+      allow create, update, delete: if false;
+    }
+
+    match /assetStateEvents/{eventId} {
       allow get, list: if signedIn() && isManager();
       allow create, update, delete: if false;
     }
@@ -2076,8 +2119,8 @@ service cloud.firestore {
     }
 
     match /notificationEvents/{eventId} {
-      allow create: if validNotificationEventCreate();
-      allow get, list, update, delete: if false;
+      // Events are created by trusted Functions after the source mutation.
+      allow read, write: if false;
     }
 
     match /globalNotifications/{notificationId} {
@@ -2086,27 +2129,92 @@ service cloud.firestore {
     }
 
     match /departments/{departmentId} {
-      allow get, list: if signedIn();
-      allow create, update, delete: if signedIn() && canManageUserManagement();
+      allow read, write: if false;
     }
 
     match /directions/{directionId} {
-      allow get, list: if signedIn();
-      allow create, update, delete: if signedIn() && canManageUserManagement();
+      allow read, write: if false;
     }
 
     match /services/{serviceId} {
-      allow get, list: if signedIn();
-      allow create, update, delete: if signedIn() && canManageUserManagement();
+      allow read, write: if false;
     }
 
     match /bureaux/{bureauId} {
-      allow get, list: if signedIn();
-      allow create, update, delete: if signedIn() && canManageUserManagement();
+      allow read, write: if false;
+    }
+
+    match /organizations/{organizationId} {
+      allow get: if isUserManagementSupervisor();
+      allow list: if isUserManagementSupervisor() &&
+        isBoundedOrganizationQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /organizationDirectory/{organizationId} {
+      allow get: if isUserManagementSupervisor() ||
+        (
+          hasActiveVerifiedOrganizationPrincipal() &&
+          organizationId == principalOrganizationId() &&
+          resource.data.status == 'ACTIVE'
+        );
+      allow list: if (
+          isUserManagementSupervisor() ||
+          (
+            hasActiveVerifiedOrganizationPrincipal() &&
+            organizationId == principalOrganizationId() &&
+            resource.data.status == 'ACTIVE'
+          )
+        ) && isBoundedOrganizationQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /organizationUnits/{unitId} {
+      allow get: if isUserManagementSupervisor();
+      allow list: if isUserManagementSupervisor() &&
+        isBoundedOrganizationQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /organizationAssignments/{assignmentId} {
+      allow get: if canReadOrganizationAssignment(resource.data);
+      allow list: if canReadOrganizationAssignment(resource.data) &&
+        isBoundedOrganizationQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /agentDirectory/{agentId} {
+      allow get: if canReadAgentDirectoryRecord(resource.data);
+      allow list: if canReadAgentDirectoryRecord(resource.data) &&
+        isBoundedOrganizationQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /organizationAuditEvents/{eventId} {
+      allow get: if canReadOrganizationAuditEvent(resource.data);
+      allow list: if canReadOrganizationAuditEvent(resource.data) &&
+        isBoundedOrganizationQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /agentAuthorizationIndex/{agentId} {
+      allow read, write: if false;
+    }
+
+    match /organizationCodeLocks/{code} {
+      allow read, write: if false;
+    }
+
+    match /organizationUnitCodeLocks/{code} {
+      allow read, write: if false;
+    }
+
+    match /organizationCommandReceipts/{commandId} {
+      allow read, write: if false;
     }
 
     match /modules/{moduleId} {
-      allow get, list: if signedIn();
+      allow get, list: if isUserManagementSupervisor();
       allow create, update, delete: if signedIn() && canManageUserManagement();
     }
 
@@ -2118,8 +2226,17 @@ service cloud.firestore {
     }
 
     match /agents/{agentId} {
-      allow get, list: if signedIn();
-      allow create, update, delete: if signedIn() && canManageUserManagement();
+      allow get: if (
+          signedIn() &&
+          request.auth.token.keys().hasAny(['email_verified']) &&
+          request.auth.token.email_verified == true &&
+          agentId == request.auth.uid
+        ) || canReadPrivateAgent(resource.data);
+      allow list: if canReadPrivateAgent(resource.data) &&
+        isBoundedOrganizationQuery();
+      // Parent profiles are provisioned and maintained only by trusted account
+      // Functions so the document ID always remains the Firebase Auth UID.
+      allow create, update, delete: if false;
 
       match /deviceTokens/{tokenId} {
         allow get, list: if isSelfAgent(agentId);

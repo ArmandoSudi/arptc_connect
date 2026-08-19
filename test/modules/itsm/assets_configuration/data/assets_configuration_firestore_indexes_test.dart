@@ -61,6 +61,14 @@ void main() {
         ['assignedUserId', 'status', 'assignedAt', '__name__'],
       ),
       _ExpectedIndex(
+        'assetLifecycleEvents',
+        ['assetId', 'occurredAt', '__name__'],
+      ),
+      _ExpectedIndex(
+        'assetStateEvents',
+        ['assetId', 'changedAt', '__name__'],
+      ),
+      _ExpectedIndex(
         'softwareLicences',
         ['complianceStatus', 'vendor', 'updatedAt', '__name__'],
       ),
