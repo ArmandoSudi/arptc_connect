@@ -1784,6 +1784,136 @@ class S {
   String get umSex => _text('umSex');
   String get umMale => _text('umMale');
   String get umFemale => _text('umFemale');
+  String get invTitle => _text('invTitle');
+  String get invUserSubtitle => _text('invUserSubtitle');
+  String get invManagerSubtitle => _text('invManagerSubtitle');
+  String get invAdminSubtitle => _text('invAdminSubtitle');
+  String get invCatalogue => _text('invCatalogue');
+  String get invCatalogueSubtitle => _text('invCatalogueSubtitle');
+  String get invRequestItems => _text('invRequestItems');
+  String get invMyRequests => _text('invMyRequests');
+  String get invRequestHistory => _text('invRequestHistory');
+  String get invRequestQueue => _text('invRequestQueue');
+  String get invItemRegister => _text('invItemRegister');
+  String get invWarehouseBalances => _text('invWarehouseBalances');
+  String get invStockMovements => _text('invStockMovements');
+  String get invParameters => _text('invParameters');
+  String get invAuditHistory => _text('invAuditHistory');
+  String get invNoAccess => _text('invNoAccess');
+  String get invReadOnly => _text('invReadOnly');
+  String get invSearchItems => _text('invSearchItems');
+  String get invAllCategories => _text('invAllCategories');
+  String get invAvailable => _text('invAvailable');
+  String get invLimited => _text('invLimited');
+  String get invUnavailable => _text('invUnavailable');
+  String get invUnavailableWarning => _text('invUnavailableWarning');
+  String get invQuantity => _text('invQuantity');
+  String get invUnit => _text('invUnit');
+  String get invAddToRequest => _text('invAddToRequest');
+  String get invRequestCart => _text('invRequestCart');
+  String get invCartEmpty => _text('invCartEmpty');
+  String get invJustification => _text('invJustification');
+  String get invDeliveryDestination => _text('invDeliveryDestination');
+  String get invRequestedFor => _text('invRequestedFor');
+  String get invSelectAgent => _text('invSelectAgent');
+  String get invSubmitRequest => _text('invSubmitRequest');
+  String get invRequestSubmitted => _text('invRequestSubmitted');
+  String get invRequestDetails => _text('invRequestDetails');
+  String get invRequestNumber => _text('invRequestNumber');
+  String get invRequestedQuantity => _text('invRequestedQuantity');
+  String get invApprovedQuantity => _text('invApprovedQuantity');
+  String get invReservedQuantity => _text('invReservedQuantity');
+  String get invIssuedQuantity => _text('invIssuedQuantity');
+  String get invOutstandingQuantity => _text('invOutstandingQuantity');
+  String get invStartReview => _text('invStartReview');
+  String get invTakeOver => _text('invTakeOver');
+  String get invAdjustLine => _text('invAdjustLine');
+  String get invReserveStock => _text('invReserveStock');
+  String get invMarkReady => _text('invMarkReady');
+  String get invIssueStock => _text('invIssueStock');
+  String get invCloseShort => _text('invCloseShort');
+  String get invRejectRequest => _text('invRejectRequest');
+  String get invCancelRequest => _text('invCancelRequest');
+  String get invConfirmReceipt => _text('invConfirmReceipt');
+  String get invReason => _text('invReason');
+  String get invSelectReason => _text('invSelectReason');
+  String get invRecipient => _text('invRecipient');
+  String get invNoRequests => _text('invNoRequests');
+  String get invNoItems => _text('invNoItems');
+  String get invSubmitted => _text('invSubmitted');
+  String get invUnderReview => _text('invUnderReview');
+  String get invAdjusted => _text('invAdjusted');
+  String get invReadyForIssue => _text('invReadyForIssue');
+  String get invPartiallyFulfilled => _text('invPartiallyFulfilled');
+  String get invAwaitingConfirmation => _text('invAwaitingConfirmation');
+  String get invFulfilled => _text('invFulfilled');
+  String get invClosedShort => _text('invClosedShort');
+  String get invCancelled => _text('invCancelled');
+  String get invRejected => _text('invRejected');
+  String get invDashboard => _text('invDashboard');
+  String get invSubmittedRequests => _text('invSubmittedRequests');
+  String get invUnderReviewRequests => _text('invUnderReviewRequests');
+  String get invReadyRequests => _text('invReadyRequests');
+  String get invPartialRequests => _text('invPartialRequests');
+  String get invLowStockItems => _text('invLowStockItems');
+  String get invOutOfStockItems => _text('invOutOfStockItems');
+  String get invFulfilledToday => _text('invFulfilledToday');
+  String get invAverageFulfillment => _text('invAverageFulfillment');
+  String get invRequestsByStatus => _text('invRequestsByStatus');
+  String get invLowStockByWarehouse => _text('invLowStockByWarehouse');
+  String get invOldestPending => _text('invOldestPending');
+  String get invRecentMovements => _text('invRecentMovements');
+  String get invNewItem => _text('invNewItem');
+  String get invEditItem => _text('invEditItem');
+  String get invSku => _text('invSku');
+  String get invItemName => _text('invItemName');
+  String get invCategory => _text('invCategory');
+  String get invUnitOfMeasure => _text('invUnitOfMeasure');
+  String get invItemType => _text('invItemType');
+  String get invRequestable => _text('invRequestable');
+  String get invOpeningBalances => _text('invOpeningBalances');
+  String get invWarehouse => _text('invWarehouse');
+  String get invLocation => _text('invLocation');
+  String get invThreshold => _text('invThreshold');
+  String get invOnHand => _text('invOnHand');
+  String get invReserved => _text('invReserved');
+  String get invAvailableStock => _text('invAvailableStock');
+  String get invReceiveStock => _text('invReceiveStock');
+  String get invReturnStock => _text('invReturnStock');
+  String get invTransferStock => _text('invTransferStock');
+  String get invAdjustStock => _text('invAdjustStock');
+  String get invReconcileStock => _text('invReconcileStock');
+  String get invReference => _text('invReference');
+  String get invReferenceRequired => _text('invReferenceRequired');
+  String get invTopRequestedItems => _text('invTopRequestedItems');
+  String get invConsumptionByDepartment => _text('invConsumptionByDepartment');
+  String get invIssuesVsReceipts => _text('invIssuesVsReceipts');
+  String get invMonthlyFulfillmentTrend => _text('invMonthlyFulfillmentTrend');
+  String get invSaveItem => _text('invSaveItem');
+  String get invItemSaved => _text('invItemSaved');
+  String get invConfigureWarehouses => _text('invConfigureWarehouses');
+  String get invConfigureLocations => _text('invConfigureLocations');
+  String get invConfigureCategories => _text('invConfigureCategories');
+  String get invConfigureUnits => _text('invConfigureUnits');
+  String get invConfigureItemTypes => _text('invConfigureItemTypes');
+  String get invConfigureReasons => _text('invConfigureReasons');
+  String get invCode => _text('invCode');
+  String get invMovementReasons => _text('invMovementReasons');
+  String get invAdjustmentReasons => _text('invAdjustmentReasons');
+  String get invRejectionReasons => _text('invRejectionReasons');
+  String get invShortfallReasons => _text('invShortfallReasons');
+  String get invParameterSaved => _text('invParameterSaved');
+  String get invAddParameter => _text('invAddParameter');
+  String get invNoParameters => _text('invNoParameters');
+  String get invCommandFailed => _text('invCommandFailed');
+  String get invServiceUnavailable => _text('invServiceUnavailable');
+  String get invRequired => _text('invRequired');
+  String get invPositiveQuantity => _text('invPositiveQuantity');
+  String get invActionCompleted => _text('invActionCompleted');
+  String get invStatusTimeline => _text('invStatusTimeline');
+  String get invManagerAssigned => _text('invManagerAssigned');
+  String get invNoMovements => _text('invNoMovements');
+  String get invNoAuditEvents => _text('invNoAuditEvents');
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -3504,6 +3634,136 @@ const _localizedValues = <String, Map<String, String>>{
     'umSex': "Sex",
     'umMale': "Male",
     'umFemale': "Female",
+    'invTitle': "Inventory",
+    'invUserSubtitle': "Request workplace materials and follow every delivery.",
+    'invManagerSubtitle': "Manage stock, fulfil material requests, and keep every movement auditable.",
+    'invAdminSubtitle': "Read-only supervision of inventory, requests, and operational performance.",
+    'invCatalogue': "Material catalogue",
+    'invCatalogueSubtitle': "Browse requestable items without exposing confidential stock quantities.",
+    'invRequestItems': "Request items",
+    'invMyRequests': "My requests",
+    'invRequestHistory': "Request history",
+    'invRequestQueue': "Request queue",
+    'invItemRegister': "Item register",
+    'invWarehouseBalances': "Warehouse balances",
+    'invStockMovements': "Stock movements",
+    'invParameters': "Inventory parameters",
+    'invAuditHistory': "Audit history",
+    'invNoAccess': "You do not have access to Inventory.",
+    'invReadOnly': "Read-only access",
+    'invSearchItems': "Search by item name or SKU",
+    'invAllCategories': "All categories",
+    'invAvailable': "Available",
+    'invLimited': "Limited availability",
+    'invUnavailable': "Currently unavailable",
+    'invUnavailableWarning': "This item can still be requested, but delivery may be delayed.",
+    'invQuantity': "Quantity",
+    'invUnit': "Unit",
+    'invAddToRequest': "Add to request",
+    'invRequestCart': "Request cart",
+    'invCartEmpty': "Your request cart is empty.",
+    'invJustification': "Business justification",
+    'invDeliveryDestination': "Delivery destination",
+    'invRequestedFor': "Requested for",
+    'invSelectAgent': "Search and select an agent",
+    'invSubmitRequest': "Submit material request",
+    'invRequestSubmitted': "Material request submitted.",
+    'invRequestDetails': "Material request details",
+    'invRequestNumber': "Request number",
+    'invRequestedQuantity': "Requested",
+    'invApprovedQuantity': "Approved",
+    'invReservedQuantity': "Reserved",
+    'invIssuedQuantity': "Issued",
+    'invOutstandingQuantity': "Outstanding",
+    'invStartReview': "Start review",
+    'invTakeOver': "Take over",
+    'invAdjustLine': "Adjust line",
+    'invReserveStock': "Reserve stock",
+    'invMarkReady': "Mark ready for issue",
+    'invIssueStock': "Issue stock",
+    'invCloseShort': "Close remainder short",
+    'invRejectRequest': "Reject request",
+    'invCancelRequest': "Cancel request",
+    'invConfirmReceipt': "Confirm receipt",
+    'invReason': "Reason",
+    'invSelectReason': "Select a reason",
+    'invRecipient': "Actual recipient",
+    'invNoRequests': "No material requests match the current filters.",
+    'invNoItems': "No inventory items match the current filters.",
+    'invSubmitted': "Submitted",
+    'invUnderReview': "Under review",
+    'invAdjusted': "Adjusted",
+    'invReadyForIssue': "Ready for issue",
+    'invPartiallyFulfilled': "Partially fulfilled",
+    'invAwaitingConfirmation': "Awaiting receipt confirmation",
+    'invFulfilled': "Fulfilled",
+    'invClosedShort': "Closed short",
+    'invCancelled': "Cancelled",
+    'invRejected': "Rejected",
+    'invDashboard': "Inventory operations",
+    'invSubmittedRequests': "Submitted requests",
+    'invUnderReviewRequests': "Under review",
+    'invReadyRequests': "Ready for issue",
+    'invPartialRequests': "Partially fulfilled",
+    'invLowStockItems': "Low-stock balances",
+    'invOutOfStockItems': "Out-of-stock balances",
+    'invFulfilledToday': "Fulfilled today",
+    'invAverageFulfillment': "Average fulfilment",
+    'invRequestsByStatus': "Requests by status",
+    'invLowStockByWarehouse': "Low stock by warehouse",
+    'invOldestPending': "Oldest pending requests",
+    'invRecentMovements': "Recent stock movements",
+    'invNewItem': "New inventory item",
+    'invEditItem': "Edit inventory item",
+    'invSku': "SKU",
+    'invItemName': "Item name",
+    'invCategory': "Category",
+    'invUnitOfMeasure': "Unit of measure",
+    'invItemType': "Item type",
+    'invRequestable': "Visible in the request catalogue",
+    'invOpeningBalances': "Opening balances",
+    'invWarehouse': "Warehouse",
+    'invLocation': "Location",
+    'invThreshold': "Low-stock threshold",
+    'invOnHand': "On hand",
+    'invReserved': "Reserved",
+    'invAvailableStock': "Available stock",
+    'invReceiveStock': "Receive stock",
+    'invReturnStock': "Return to stock",
+    'invTransferStock': "Transfer stock",
+    'invAdjustStock': "Adjust stock",
+    'invReconcileStock': "Physical count reconciliation",
+    'invReference': "Source or reference",
+    'invReferenceRequired': "A source or reference is required for stock receipts.",
+    'invTopRequestedItems': "Top requested items",
+    'invConsumptionByDepartment': "Consumption by department",
+    'invIssuesVsReceipts': "Issues versus receipts",
+    'invMonthlyFulfillmentTrend': "Monthly fulfillment trend",
+    'invSaveItem': "Save item",
+    'invItemSaved': "Inventory item saved.",
+    'invConfigureWarehouses': "Warehouses",
+    'invConfigureLocations': "Locations",
+    'invConfigureCategories': "Categories",
+    'invConfigureUnits': "Units of measure",
+    'invConfigureItemTypes': "Item types",
+    'invConfigureReasons': "Operational reasons",
+    'invCode': "Code",
+    'invMovementReasons': "Movement reasons",
+    'invAdjustmentReasons': "Adjustment reasons",
+    'invRejectionReasons': "Rejection reasons",
+    'invShortfallReasons': "Shortfall reasons",
+    'invParameterSaved': "The inventory parameter was saved.",
+    'invAddParameter': "Add parameter",
+    'invNoParameters': "No parameter has been configured yet.",
+    'invCommandFailed': "The Inventory action could not be completed.",
+    'invServiceUnavailable': "The Inventory service is not available on the server. Deploy the latest Firebase Functions, then try again.",
+    'invRequired': "This field is required.",
+    'invPositiveQuantity': "Enter a quantity greater than zero with at most three decimals.",
+    'invActionCompleted': "Inventory action completed.",
+    'invStatusTimeline': "Request progress",
+    'invManagerAssigned': "Assigned manager",
+    'invNoMovements': "No stock movement has been recorded.",
+    'invNoAuditEvents': "No Inventory audit event has been recorded.",
   },
   'fr': <String, String>{
     'appName': "ARPTC Connect",
@@ -5201,5 +5461,135 @@ const _localizedValues = <String, Map<String, String>>{
     'umSex': "Sexe",
     'umMale': "Masculin",
     'umFemale': "Féminin",
+    'invTitle': "Inventaire",
+    'invUserSubtitle': "Demandez du matériel de travail et suivez chaque livraison.",
+    'invManagerSubtitle': "Gérez le stock, traitez les demandes de matériel et gardez chaque mouvement traçable.",
+    'invAdminSubtitle': "Supervision en lecture seule de l'inventaire, des demandes et de la performance opérationnelle.",
+    'invCatalogue': "Catalogue de matériel",
+    'invCatalogueSubtitle': "Consultez les articles disponibles sans exposer les quantités confidentielles du stock.",
+    'invRequestItems': "Demander des articles",
+    'invMyRequests': "Mes demandes",
+    'invRequestHistory': "Historique des demandes",
+    'invRequestQueue': "File des demandes",
+    'invItemRegister': "Registre des articles",
+    'invWarehouseBalances': "Stocks par entrepôt",
+    'invStockMovements': "Mouvements de stock",
+    'invParameters': "Paramètres de l'inventaire",
+    'invAuditHistory': "Historique d'audit",
+    'invNoAccess': "Vous n'avez pas accès au module Inventaire.",
+    'invReadOnly': "Accès en lecture seule",
+    'invSearchItems': "Rechercher par nom d'article ou SKU",
+    'invAllCategories': "Toutes les catégories",
+    'invAvailable': "Disponible",
+    'invLimited': "Disponibilité limitée",
+    'invUnavailable': "Indisponible actuellement",
+    'invUnavailableWarning': "Cet article peut toujours être demandé, mais la livraison peut être retardée.",
+    'invQuantity': "Quantité",
+    'invUnit': "Unité",
+    'invAddToRequest': "Ajouter à la demande",
+    'invRequestCart': "Panier de demande",
+    'invCartEmpty': "Votre panier de demande est vide.",
+    'invJustification': "Justification professionnelle",
+    'invDeliveryDestination': "Lieu de livraison",
+    'invRequestedFor': "Demandé pour",
+    'invSelectAgent': "Rechercher et sélectionner un agent",
+    'invSubmitRequest': "Soumettre la demande de matériel",
+    'invRequestSubmitted': "Demande de matériel soumise.",
+    'invRequestDetails': "Détails de la demande de matériel",
+    'invRequestNumber': "Numéro de demande",
+    'invRequestedQuantity': "Demandée",
+    'invApprovedQuantity': "Approuvée",
+    'invReservedQuantity': "Réservée",
+    'invIssuedQuantity': "Délivrée",
+    'invOutstandingQuantity': "Restante",
+    'invStartReview': "Commencer l'examen",
+    'invTakeOver': "Prendre en charge",
+    'invAdjustLine': "Ajuster la ligne",
+    'invReserveStock': "Réserver le stock",
+    'invMarkReady': "Marquer prêt à délivrer",
+    'invIssueStock': "Délivrer le stock",
+    'invCloseShort': "Clôturer le reliquat non servi",
+    'invRejectRequest': "Rejeter la demande",
+    'invCancelRequest': "Annuler la demande",
+    'invConfirmReceipt': "Confirmer la réception",
+    'invReason': "Motif",
+    'invSelectReason': "Sélectionner un motif",
+    'invRecipient': "Bénéficiaire réel",
+    'invNoRequests': "Aucune demande de matériel ne correspond aux filtres actuels.",
+    'invNoItems': "Aucun article ne correspond aux filtres actuels.",
+    'invSubmitted': "Soumise",
+    'invUnderReview': "En cours d'examen",
+    'invAdjusted': "Ajustée",
+    'invReadyForIssue': "Prête à délivrer",
+    'invPartiallyFulfilled': "Partiellement servie",
+    'invAwaitingConfirmation': "En attente de confirmation de réception",
+    'invFulfilled': "Servie",
+    'invClosedShort': "Clôturée avec reliquat",
+    'invCancelled': "Annulée",
+    'invRejected': "Rejetée",
+    'invDashboard': "Opérations d'inventaire",
+    'invSubmittedRequests': "Demandes soumises",
+    'invUnderReviewRequests': "En cours d'examen",
+    'invReadyRequests': "Prêtes à délivrer",
+    'invPartialRequests': "Partiellement servies",
+    'invLowStockItems': "Stocks sous le seuil",
+    'invOutOfStockItems': "Stocks épuisés",
+    'invFulfilledToday': "Servies aujourd'hui",
+    'invAverageFulfillment': "Délai moyen de traitement",
+    'invRequestsByStatus': "Demandes par statut",
+    'invLowStockByWarehouse': "Stock faible par entrepôt",
+    'invOldestPending': "Plus anciennes demandes en attente",
+    'invRecentMovements': "Mouvements de stock récents",
+    'invNewItem': "Nouvel article d'inventaire",
+    'invEditItem': "Modifier l'article d'inventaire",
+    'invSku': "SKU",
+    'invItemName': "Nom de l'article",
+    'invCategory': "Catégorie",
+    'invUnitOfMeasure': "Unité de mesure",
+    'invItemType': "Type d'article",
+    'invRequestable': "Visible dans le catalogue de demandes",
+    'invOpeningBalances': "Stocks initiaux",
+    'invWarehouse': "Entrepôt",
+    'invLocation': "Emplacement",
+    'invThreshold': "Seuil de stock faible",
+    'invOnHand': "Stock physique",
+    'invReserved': "Réservé",
+    'invAvailableStock': "Stock disponible",
+    'invReceiveStock': "Réceptionner du stock",
+    'invReturnStock': "Retourner au stock",
+    'invTransferStock': "Transférer le stock",
+    'invAdjustStock': "Ajuster le stock",
+    'invReconcileStock': "Rapprochement d'inventaire physique",
+    'invReference': "Source ou référence",
+    'invReferenceRequired': "Une source ou une référence est obligatoire pour les entrées en stock.",
+    'invTopRequestedItems': "Articles les plus demandés",
+    'invConsumptionByDepartment': "Consommation par département",
+    'invIssuesVsReceipts': "Sorties par rapport aux entrées",
+    'invMonthlyFulfillmentTrend': "Tendance mensuelle des demandes servies",
+    'invSaveItem': "Enregistrer l'article",
+    'invItemSaved': "Article d'inventaire enregistré.",
+    'invConfigureWarehouses': "Entrepôts",
+    'invConfigureLocations': "Emplacements",
+    'invConfigureCategories': "Catégories",
+    'invConfigureUnits': "Unités de mesure",
+    'invConfigureItemTypes': "Types d'article",
+    'invConfigureReasons': "Motifs opérationnels",
+    'invCode': "Code",
+    'invMovementReasons': "Motifs de mouvement",
+    'invAdjustmentReasons': "Motifs d'ajustement",
+    'invRejectionReasons': "Motifs de rejet",
+    'invShortfallReasons': "Motifs de reliquat",
+    'invParameterSaved': "Le paramètre d'inventaire a été enregistré.",
+    'invAddParameter': "Ajouter un paramètre",
+    'invNoParameters': "Aucun paramètre n'a encore été configuré.",
+    'invCommandFailed': "L'action d'inventaire n'a pas pu être exécutée.",
+    'invServiceUnavailable': "Le service Inventaire n'est pas disponible sur le serveur. Déployez les dernières Firebase Functions, puis réessayez.",
+    'invRequired': "Ce champ est obligatoire.",
+    'invPositiveQuantity': "Saisissez une quantité supérieure à zéro avec au plus trois décimales.",
+    'invActionCompleted': "Action d'inventaire terminée.",
+    'invStatusTimeline': "Progression de la demande",
+    'invManagerAssigned': "Gestionnaire affecté",
+    'invNoMovements': "Aucun mouvement de stock n'a été enregistré.",
+    'invNoAuditEvents': "Aucun événement d'audit d'inventaire n'a été enregistré.",
   },
 };

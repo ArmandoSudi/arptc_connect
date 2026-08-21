@@ -19,10 +19,20 @@ import 'package:arptc_connect/modules/incident_management/presentation/screens/m
 import 'package:arptc_connect/modules/incident_management/presentation/screens/manager_incident_parameters_screen.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/screens/manager_incident_queue_screen.dart';
 import 'package:arptc_connect/modules/incident_management/presentation/screens/my_incident_details_screen.dart';
-import 'package:arptc_connect/modules/inventory/presentation/appro_screen.dart';
-import 'package:arptc_connect/modules/inventory/presentation/inventory_main_screen.dart';
-import 'package:arptc_connect/modules/inventory/presentation/livraison_screen.dart';
-import 'package:arptc_connect/modules/inventory/presentation/product/manage_items_screen.dart';
+import 'package:arptc_connect/modules/inventory/application/inventory_providers.dart';
+import 'package:arptc_connect/modules/inventory/domain/inventory_access.dart';
+import 'package:arptc_connect/modules/inventory/domain/material_request.dart';
+import 'package:arptc_connect/modules/inventory/presentation/screens/create_material_request_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/screens/inventory_audit_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/screens/inventory_dashboard_router.dart';
+import 'package:arptc_connect/modules/inventory/presentation/screens/inventory_item_details_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/screens/inventory_item_form_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/screens/inventory_items_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/screens/inventory_movements_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/screens/inventory_parameters_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/screens/material_request_details_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/screens/material_requests_screen.dart';
+import 'package:arptc_connect/modules/inventory/presentation/screens/user_inventory_home_screen.dart';
 import 'package:arptc_connect/modules/itsm/assets_configuration/application/assets_configuration_contracts.dart';
 import 'package:arptc_connect/modules/itsm/assets_configuration/presentation/assets_configuration_presentation.dart';
 import 'package:arptc_connect/modules/itsm/changes/presentation/screens/cab_approvals_screen.dart';
@@ -83,7 +93,6 @@ import 'package:go_router/go_router.dart';
 
 import 'modules/authentication/providers/authentication_provider.dart';
 import 'modules/home/presentation/home_screen.dart';
-import 'modules/inventory/presentation/cart/cart_screen.dart';
 import 'package:arptc_connect/modules/meeting_hall/meeting_hall.dart';
 
 const routerInitialLocation = '/home';
@@ -219,37 +228,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   ],
                 ),
 
-                // Inventory
-                GoRoute(
-                  path: 'inventory',
-                  pageBuilder: (context, state) => NoTransitionPage(
-                    child: InventoryMainScreen(),
-                  ),
-                  routes: [
-                    // Management
-                    GoRoute(
-                      path: 'management',
-                      builder: (context, state) => const ManageItemScreen(),
-                    ),
-
-                    // Approvisionnement
-                    GoRoute(
-                      path: 'appro',
-                      builder: (context, state) => const ApproScreen(),
-                    ),
-
-                    // Livraison
-                    GoRoute(
-                      path: 'livraison',
-                      builder: (context, state) => const LivraisonScreen(),
-                    ),
-
-                    GoRoute(
-                      path: 'cart',
-                      builder: (context, state) => const CartScreen(),
-                    ),
-                  ],
-                ),
+                _buildInventoryRoute(ref),
 
                 // Preserve legacy deep links while moving callers to the
                 // canonical /services/itsm tree.
@@ -653,6 +632,140 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     },
   );
 });
+
+GoRoute _buildInventoryRoute(Ref ref) {
+  String? requireAccess(
+      {bool managerOnly = false, bool operationalRead = false}) {
+    final role = ref.read(currentInventoryRoleProvider);
+    if (role == InventoryRole.none) return '/service';
+    if (managerOnly && role != InventoryRole.manager) {
+      return '/service/inventory';
+    }
+    if (operationalRead &&
+        role != InventoryRole.manager &&
+        role != InventoryRole.admin) {
+      return '/service/inventory';
+    }
+    return null;
+  }
+
+  return GoRoute(
+    path: 'inventory',
+    redirect: (context, state) => requireAccess(),
+    pageBuilder: (context, state) => const NoTransitionPage(
+      child: InventoryDashboardRouter(),
+    ),
+    routes: [
+      GoRoute(
+        path: 'catalog',
+        redirect: (context, state) => requireAccess(),
+        builder: (context, state) => const UserInventoryHomeScreen(),
+      ),
+      GoRoute(
+        path: 'requests/new',
+        redirect: (context, state) {
+          final role = ref.read(currentInventoryRoleProvider);
+          return role == InventoryRole.user || role == InventoryRole.manager
+              ? null
+              : '/service/inventory';
+        },
+        builder: (context, state) => const CreateMaterialRequestScreen(),
+      ),
+      GoRoute(
+        path: 'requests/mine',
+        redirect: (context, state) => requireAccess(),
+        builder: (context, state) => const MaterialRequestsScreen(),
+      ),
+      GoRoute(
+        path: 'requests/queue',
+        redirect: (context, state) => requireAccess(operationalRead: true),
+        builder: (context, state) => MaterialRequestsScreen(
+          initialStatus: _parseInventoryRequestStatus(
+            state.queryParameters['status'],
+          ),
+        ),
+      ),
+      GoRoute(
+        path: 'requests/history',
+        redirect: (context, state) => requireAccess(),
+        builder: (context, state) => const MaterialRequestsScreen(
+          historyOnly: true,
+        ),
+      ),
+      GoRoute(
+        path: 'requests/:requestId',
+        redirect: (context, state) => requireAccess(),
+        builder: (context, state) => MaterialRequestDetailsScreen(
+          requestId: state.pathParameters['requestId'] as String,
+        ),
+      ),
+      GoRoute(
+        path: 'items',
+        redirect: (context, state) => requireAccess(operationalRead: true),
+        builder: (context, state) => const InventoryItemsScreen(),
+      ),
+      GoRoute(
+        path: 'items/new',
+        redirect: (context, state) => requireAccess(managerOnly: true),
+        builder: (context, state) => const InventoryItemFormScreen(),
+      ),
+      GoRoute(
+        path: 'items/:itemId/edit',
+        redirect: (context, state) => requireAccess(managerOnly: true),
+        builder: (context, state) => InventoryItemFormScreen(
+          itemId: state.pathParameters['itemId'] as String,
+        ),
+      ),
+      GoRoute(
+        path: 'items/:itemId',
+        redirect: (context, state) => requireAccess(operationalRead: true),
+        builder: (context, state) => InventoryItemDetailsScreen(
+          itemId: state.pathParameters['itemId'] as String,
+        ),
+      ),
+      GoRoute(
+        path: 'movements',
+        redirect: (context, state) => requireAccess(operationalRead: true),
+        builder: (context, state) => const InventoryMovementsScreen(),
+      ),
+      GoRoute(
+        path: 'parameters',
+        redirect: (context, state) => requireAccess(managerOnly: true),
+        builder: (context, state) => const InventoryParametersScreen(),
+      ),
+      GoRoute(
+        path: 'audit',
+        redirect: (context, state) => requireAccess(operationalRead: true),
+        builder: (context, state) => const InventoryAuditScreen(),
+      ),
+      GoRoute(
+        path: 'management',
+        redirect: (context, state) => '/service/inventory/items',
+      ),
+      GoRoute(
+        path: 'appro',
+        redirect: (context, state) => '/service/inventory/items',
+      ),
+      GoRoute(
+        path: 'livraison',
+        redirect: (context, state) => '/service/inventory/requests/queue',
+      ),
+      GoRoute(
+        path: 'cart',
+        redirect: (context, state) => '/service/inventory/requests/new',
+      ),
+    ],
+  );
+}
+
+MaterialRequestStatus? _parseInventoryRequestStatus(String? value) {
+  final normalized = value?.trim().toLowerCase();
+  if (normalized == null || normalized.isEmpty) return null;
+  for (final status in MaterialRequestStatus.values) {
+    if (status.firestoreValue == normalized) return status;
+  }
+  return null;
+}
 
 GoRoute _buildItsmRoute() {
   return GoRoute(

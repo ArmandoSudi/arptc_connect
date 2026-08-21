@@ -114,6 +114,17 @@ const {
   notificationEventsForNewsChange,
   writeApplicationNotificationEvents,
 } = require('./src/application_notification_triggers');
+const {
+  INVENTORY_COMMANDS,
+  createInventoryCallableHandler,
+} = require('./src/inventory_service');
+const {
+  rebuildInventoryDashboardSnapshots,
+  synchronizeInventoryBalance,
+} = require('./src/inventory_triggers');
+const {
+  registerInventoryAttachment,
+} = require('./src/inventory_attachment_registration');
 
 admin.initializeApp();
 
@@ -373,6 +384,87 @@ exports.itsmCreateCiRelationship = registerItsmAssetsCallable(
 );
 exports.itsmRetireCiRelationship = registerItsmAssetsCallable(
   ITSM_ASSETS_COMMANDS.retireCiRelationship,
+);
+
+function registerInventoryCallable(command) {
+  return onCall(
+    { invoker: 'public' },
+    createInventoryCallableHandler({
+      expectedCommand: command,
+      db,
+      fieldValue: FieldValue,
+      timestamp: Timestamp,
+      HttpsError,
+      logger,
+    }),
+  );
+}
+
+exports.inventorySaveItem = registerInventoryCallable(
+  INVENTORY_COMMANDS.saveItem,
+);
+exports.inventorySetItemActive = registerInventoryCallable(
+  INVENTORY_COMMANDS.setItemActive,
+);
+exports.inventorySaveWarehouse = registerInventoryCallable(
+  INVENTORY_COMMANDS.saveWarehouse,
+);
+exports.inventorySaveLocation = registerInventoryCallable(
+  INVENTORY_COMMANDS.saveLocation,
+);
+exports.inventorySaveParameter = registerInventoryCallable(
+  INVENTORY_COMMANDS.saveParameter,
+);
+exports.inventoryReceiveStock = registerInventoryCallable(
+  INVENTORY_COMMANDS.receiveStock,
+);
+exports.inventoryReturnStock = registerInventoryCallable(
+  INVENTORY_COMMANDS.returnStock,
+);
+exports.inventoryTransferStock = registerInventoryCallable(
+  INVENTORY_COMMANDS.transferStock,
+);
+exports.inventoryAdjustStock = registerInventoryCallable(
+  INVENTORY_COMMANDS.adjustStock,
+);
+exports.inventoryReconcileStock = registerInventoryCallable(
+  INVENTORY_COMMANDS.reconcileStock,
+);
+exports.inventorySetBalanceThreshold = registerInventoryCallable(
+  INVENTORY_COMMANDS.setBalanceThreshold,
+);
+exports.inventorySubmitRequest = registerInventoryCallable(
+  INVENTORY_COMMANDS.submitRequest,
+);
+exports.inventoryStartReview = registerInventoryCallable(
+  INVENTORY_COMMANDS.startReview,
+);
+exports.inventoryTakeOverRequest = registerInventoryCallable(
+  INVENTORY_COMMANDS.takeOverRequest,
+);
+exports.inventoryAdjustRequestLine = registerInventoryCallable(
+  INVENTORY_COMMANDS.adjustRequestLine,
+);
+exports.inventoryReserveRequestLine = registerInventoryCallable(
+  INVENTORY_COMMANDS.reserveRequestLine,
+);
+exports.inventoryMarkRequestReady = registerInventoryCallable(
+  INVENTORY_COMMANDS.markRequestReady,
+);
+exports.inventoryIssueRequest = registerInventoryCallable(
+  INVENTORY_COMMANDS.issueRequest,
+);
+exports.inventoryCloseShortfall = registerInventoryCallable(
+  INVENTORY_COMMANDS.closeShortfall,
+);
+exports.inventoryCancelRequest = registerInventoryCallable(
+  INVENTORY_COMMANDS.cancelRequest,
+);
+exports.inventoryRejectRequest = registerInventoryCallable(
+  INVENTORY_COMMANDS.rejectRequest,
+);
+exports.inventoryConfirmReceipt = registerInventoryCallable(
+  INVENTORY_COMMANDS.confirmReceipt,
 );
 
 function registerItsmChangesCallable(command) {
@@ -718,6 +810,15 @@ exports.itsmRegisterSecurityComplianceAttachment = onObjectFinalized(
   }),
 );
 
+exports.inventoryRegisterRequestAttachment = onObjectFinalized(
+  { bucket: DEFAULT_STORAGE_BUCKET },
+  async (event) => registerInventoryAttachment({
+    db,
+    fieldValue: FieldValue,
+    object: event.data,
+  }),
+);
+
 exports.itsmIndexIncidentWorkItem = onDocumentWritten(
   'incidentTickets/{workItemId}',
   async (event) => maintainSupportWorkItemIndex({
@@ -813,6 +914,22 @@ exports.notifyMeetingHallReservationChanges = onDocumentWritten(
     });
     return writeApplicationNotificationEvents({ db, events });
   },
+);
+
+exports.inventorySynchronizeBalance = onDocumentWritten(
+  'inventoryBalances/{balanceId}',
+  async (event) => {
+    await synchronizeInventoryBalance({ db, fieldValue: FieldValue, event });
+    await rebuildInventoryDashboardSnapshots({ db, fieldValue: FieldValue });
+  },
+);
+
+exports.inventoryRebuildDashboardForRequest = onDocumentWritten(
+  'materialRequests/{requestId}',
+  async () => rebuildInventoryDashboardSnapshots({
+    db,
+    fieldValue: FieldValue,
+  }),
 );
 
 exports.itsmProcessServiceRequestSlaChange = onDocumentWritten(

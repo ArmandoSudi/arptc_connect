@@ -364,7 +364,7 @@ test('invalid initial assignee rolls back asset registration', async () => {
   assert.equal(db.pathsMatching(/^itsmCommandReceipts\//).length, 0);
 });
 
-test('serial and product numbers are unique across asset registration and updates', async () => {
+test('serial numbers are unique while product numbers can be shared', async () => {
   const db = fakeDatabase();
   const registration = (assetId, serialNumber, productNumber) => command(
     ITSM_ASSETS_COMMANDS.registerAsset,
@@ -392,10 +392,7 @@ test('serial and product numbers are unique across asset registration and update
     () => execute(db, registration('asset-c', 'sn-unique-1', 'PN-UNIQUE-3')),
     (error) => error.code === 'already-exists' && /serial number/.test(error.message),
   );
-  await assert.rejects(
-    () => execute(db, registration('asset-d', 'SN-UNIQUE-4', 'pn-unique-1')),
-    (error) => error.code === 'already-exists' && /product number/.test(error.message),
-  );
+  await execute(db, registration('asset-d', 'SN-UNIQUE-4', 'pn-unique-1'));
   await assert.rejects(
     () => execute(db, command(
       ITSM_ASSETS_COMMANDS.updateAsset,
@@ -410,10 +407,11 @@ test('serial and product numbers are unique across asset registration and update
   );
 
   assert.equal(db.document('assets/asset-b').serialNumber, 'SN-UNIQUE-2');
-  assert.equal(db.pathsMatching(/^assetIdentifierLocks\//).length, 4);
+  assert.equal(db.document('assets/asset-d').productNumber, 'pn-unique-1');
+  assert.equal(db.pathsMatching(/^assetIdentifierLocks\//).length, 3);
 });
 
-test('legacy assets without identifier locks still prevent duplicate identifiers', async () => {
+test('legacy assets prevent duplicate serials but allow shared product numbers', async () => {
   const db = fakeDatabase({
     'assets/legacy-asset': {
       assetTag: 'LEGACY-SN-1',
@@ -446,12 +444,10 @@ test('legacy assets without identifier locks still prevent duplicate identifiers
     () => execute(db, registration('duplicate-serial', 'legacy-sn-1', 'NEW-PN')),
     (error) => error.code === 'already-exists' && /serial number/.test(error.message),
   );
-  await assert.rejects(
-    () => execute(db, registration('duplicate-product', 'NEW-SN', 'legacy-pn-1')),
-    (error) => error.code === 'already-exists' && /product number/.test(error.message),
-  );
-  assert.equal(db.pathsMatching(/^assetIdentifierLocks\//).length, 0);
-  assert.equal(db.pathsMatching(/^assets\//).length, 1);
+  await execute(db, registration('duplicate-product', 'NEW-SN', 'legacy-pn-1'));
+  assert.equal(db.document('assets/duplicate-product').productNumber, 'legacy-pn-1');
+  assert.equal(db.pathsMatching(/^assetIdentifierLocks\//).length, 1);
+  assert.equal(db.pathsMatching(/^assets\/[^/]+$/).length, 2);
 });
 
 test('asset state changes require a new state and preserve immutable observations', async () => {

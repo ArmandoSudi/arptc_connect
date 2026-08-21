@@ -783,6 +783,70 @@ service cloud.firestore {
       return request.query.limit != null && request.query.limit <= 100;
     }
 
+    function inventoryRole() {
+      let data = principalData();
+      let permissions = data.keys().hasAny(['modulePermissions'])
+        ? data.modulePermissions
+        : {};
+      return permissions.keys().hasAny(['inventory'])
+        ? permissions.inventory
+        : (
+          permissions.keys().hasAny(['inventaire'])
+            ? permissions.inventaire
+            : 'NONE'
+        );
+    }
+
+    function isInventoryUser() {
+      return inventoryRole() in ['USER', 'user', 'User'];
+    }
+
+    function isInventoryManager() {
+      return inventoryRole() in ['MANAGER', 'manager', 'Manager'];
+    }
+
+    function isInventoryAdmin() {
+      return inventoryRole() in ['ADMIN', 'admin', 'Admin'];
+    }
+
+    function hasInventoryAccess() {
+      return hasActiveAuthAgentDocument() &&
+        (isInventoryUser() || isInventoryManager() || isInventoryAdmin());
+    }
+
+    function isBoundedInventoryQuery() {
+      return request.query.limit != null && request.query.limit <= 100;
+    }
+
+    function isInventoryRequestOwner(data) {
+      return signedIn() &&
+        data.keys().hasAny(['requestedFor']) &&
+        data.requestedFor is map &&
+        data.requestedFor.keys().hasAny(['userId']) &&
+        data.requestedFor.userId == request.auth.uid;
+    }
+
+    function canReadMaterialRequest(data) {
+      return isInventoryManager() ||
+        isInventoryAdmin() ||
+        (isInventoryUser() && isInventoryRequestOwner(data));
+    }
+
+    function canReadMaterialRequestParent(requestId) {
+      return canReadMaterialRequest(
+        get(
+          /databases/$(database)/documents/materialRequests/$(requestId)
+        ).data
+      );
+    }
+
+    function canReadInventoryCatalogueItem(data) {
+      return hasInventoryAccess() &&
+        data.keys().hasAll(['isActive', 'isRequestable']) &&
+        data.isActive == true &&
+        data.isRequestable == true;
+    }
+
     function isSamePrincipalOrganization(data) {
       return hasActiveVerifiedOrganizationPrincipal() &&
         principalOrganizationId() != '' &&
@@ -1255,7 +1319,7 @@ service cloud.firestore {
       }
     }
 
-    // Server-owned uniqueness locks for asset serial and product numbers.
+    // Server-owned uniqueness locks for asset serial numbers.
     match /assetIdentifierLocks/{lockId} {
       allow read, write: if false;
     }
@@ -2050,6 +2114,106 @@ service cloud.firestore {
         canReadAccessCorrectionRequest(resource.data) &&
         isBoundedSecurityComplianceQuery();
       allow create, update, delete: if false;
+    }
+
+    match /inventoryCatalogProjections/{itemId} {
+      allow get: if canReadInventoryCatalogueItem(resource.data);
+      allow list: if canReadInventoryCatalogueItem(resource.data) &&
+        isBoundedInventoryQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /inventoryItems/{itemId} {
+      allow get: if isInventoryManager() || isInventoryAdmin();
+      allow list: if (isInventoryManager() || isInventoryAdmin()) &&
+        isBoundedInventoryQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /inventoryWarehouses/{warehouseId} {
+      allow get: if isInventoryManager() || isInventoryAdmin();
+      allow list: if (isInventoryManager() || isInventoryAdmin()) &&
+        isBoundedInventoryQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /inventoryLocations/{locationId} {
+      allow get: if isInventoryManager() || isInventoryAdmin();
+      allow list: if (isInventoryManager() || isInventoryAdmin()) &&
+        isBoundedInventoryQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /inventoryParameters/{parameterId} {
+      allow get: if isInventoryManager() || isInventoryAdmin();
+      allow list: if (isInventoryManager() || isInventoryAdmin()) &&
+        isBoundedInventoryQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /inventoryBalances/{balanceId} {
+      allow get: if isInventoryManager() || isInventoryAdmin();
+      allow list: if (isInventoryManager() || isInventoryAdmin()) &&
+        isBoundedInventoryQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /inventoryStockMovements/{movementId} {
+      allow get: if isInventoryManager() || isInventoryAdmin();
+      allow list: if (isInventoryManager() || isInventoryAdmin()) &&
+        isBoundedInventoryQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /materialRequests/{requestId} {
+      allow get: if canReadMaterialRequest(resource.data);
+      allow list: if canReadMaterialRequest(resource.data) &&
+        isBoundedInventoryQuery();
+      allow create, update, delete: if false;
+
+      match /{childCollection}/{childId} {
+        allow get: if childCollection in ['lines', 'allocations', 'auditLogs'] &&
+          canReadMaterialRequestParent(requestId);
+        allow list: if childCollection in ['lines', 'allocations', 'auditLogs'] &&
+          canReadMaterialRequestParent(requestId) &&
+          isBoundedInventoryQuery();
+        allow create, update, delete: if false;
+      }
+    }
+
+    match /inventoryAlerts/{alertId} {
+      allow get: if isInventoryManager() || isInventoryAdmin();
+      allow list: if (isInventoryManager() || isInventoryAdmin()) &&
+        isBoundedInventoryQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /inventoryAuditEvents/{eventId} {
+      allow get: if isInventoryManager() || isInventoryAdmin();
+      allow list: if (isInventoryManager() || isInventoryAdmin()) &&
+        isBoundedInventoryQuery();
+      allow create, update, delete: if false;
+    }
+
+    match /inventoryDashboardSnapshots/{snapshotId} {
+      allow get: if isInventoryManager() || isInventoryAdmin();
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+    match /inventorySupportingDocuments/{documentId} {
+      allow get: if resource.data.keys().hasAny(['requestId']) &&
+        canReadMaterialRequestParent(resource.data.requestId);
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+    match /inventoryCommandReceipts/{commandId} {
+      allow read, write: if false;
+    }
+
+    match /inventoryItemSkuLocks/{sku} {
+      allow read, write: if false;
     }
 
     match /meeting_halls/{hallId} {

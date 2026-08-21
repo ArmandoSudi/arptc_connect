@@ -1995,13 +1995,6 @@ function assetIdentifierDefinitions(asset) {
       'serialNumberNormalized',
       asset.serialNumber,
     ],
-    [
-      'product_number',
-      'product number',
-      'productNumber',
-      'productNumberNormalized',
-      asset.productNumber,
-    ],
   ].flatMap(([type, label, rawField, normalizedField, rawValue]) => {
     const value = normalizeString(rawValue);
     const normalizedValue = normalizeAssetIdentifier(value);

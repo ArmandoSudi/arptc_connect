@@ -329,7 +329,7 @@ test('asset registration can assign an active agent in one atomic command', asyn
   );
 });
 
-test('asset identifiers stay unique and location remains optional in Firestore', async () => {
+test('asset serials stay unique while product numbers can be shared', async () => {
   const registration = (assetId, serialNumber, productNumber) => command(
     ITSM_ASSETS_COMMANDS.registerAsset,
     `emulator-register-${assetId}`,
@@ -360,17 +360,16 @@ test('asset identifiers stay unique and location remains optional in Firestore',
     () => execute(registration('asset-duplicate-serial', 'sn-unique-1', 'PN-OTHER')),
     (error) => error.code === 'already-exists',
   );
-  await assert.rejects(
-    () => execute(registration('asset-duplicate-product', 'SN-OTHER', 'pn-unique-1')),
-    (error) => error.code === 'already-exists',
+  await execute(
+    registration('asset-duplicate-product', 'SN-OTHER', 'pn-unique-1'),
   );
 
-  assert.equal((await documents('assets')).length, 1);
+  assert.equal((await documents('assets')).length, 2);
   assert.equal((await documents('assetIdentifierLocks')).length, 2);
-  await assertTrustedArtifacts({ receipts: 1, audits: 1 });
+  await assertTrustedArtifacts({ receipts: 2, audits: 2 });
 });
 
-test('legacy assets without normalized fields or locks still reject duplicates', async () => {
+test('legacy assets reject duplicate serials but allow shared product numbers', async () => {
   await db.doc('assets/legacy-asset').set({
     assetTag: 'LEGACY-SN-1',
     serialNumber: 'LEGACY-SN-1',
@@ -401,13 +400,12 @@ test('legacy assets without normalized fields or locks still reject duplicates',
     () => execute(registration('duplicate-serial', 'legacy-sn-1', 'NEW-PN')),
     (error) => error.code === 'already-exists',
   );
-  await assert.rejects(
-    () => execute(registration('duplicate-product', 'NEW-SN', 'legacy-pn-1')),
-    (error) => error.code === 'already-exists',
+  await execute(
+    registration('duplicate-product', 'NEW-SN', 'legacy-pn-1'),
   );
-  assert.equal((await documents('assets')).length, 1);
-  assert.equal((await documents('assetIdentifierLocks')).length, 0);
-  await assertTrustedArtifacts({ receipts: 0, audits: 0 });
+  assert.equal((await documents('assets')).length, 2);
+  assert.equal((await documents('assetIdentifierLocks')).length, 1);
+  await assertTrustedArtifacts({ receipts: 1, audits: 1 });
 });
 
 test('all stock movement types preserve exact movement history and quantity consistency', async () => {

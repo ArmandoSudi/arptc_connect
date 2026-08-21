@@ -100,6 +100,57 @@ service firebase.storage {
       return itsmRole() in ['ADMIN', 'admin', 'Admin'];
     }
 
+    function inventoryRole() {
+      let data = principalData();
+      let permissions = isActiveAgentProfile(data) &&
+        data.keys().hasAny(['modulePermissions'])
+        ? data.modulePermissions
+        : {};
+      return permissions.keys().hasAny(['inventory'])
+        ? permissions.inventory
+        : (
+          permissions.keys().hasAny(['inventaire'])
+            ? permissions.inventaire
+            : 'NONE'
+        );
+    }
+
+    function isInventoryUser() {
+      return inventoryRole() in ['USER', 'user', 'User'];
+    }
+
+    function isInventoryManager() {
+      return inventoryRole() in ['MANAGER', 'manager', 'Manager'];
+    }
+
+    function isInventoryAdmin() {
+      return inventoryRole() in ['ADMIN', 'admin', 'Admin'];
+    }
+
+    function inventoryRequestPath(requestId) {
+      return /databases/(default)/documents/materialRequests/$(requestId);
+    }
+
+    function isOwnInventoryRequest(requestId) {
+      let path = inventoryRequestPath(requestId);
+      return firestore.exists(path) &&
+        firestore.get(path).data.keys().hasAny(['requestedFor']) &&
+        firestore.get(path).data.requestedFor is map &&
+        firestore.get(path).data.requestedFor.keys().hasAny(['userId']) &&
+        firestore.get(path).data.requestedFor.userId == request.auth.uid;
+    }
+
+    function canReadInventoryRequest(requestId) {
+      return isInventoryManager() ||
+        isInventoryAdmin() ||
+        (isInventoryUser() && isOwnInventoryRequest(requestId));
+    }
+
+    function canUploadInventoryRequestDocument(requestId) {
+      return isInventoryManager() ||
+        (isInventoryUser() && isOwnInventoryRequest(requestId));
+    }
+
     function assetExists(assetId) {
       return firestore.exists(
         /databases/(default)/documents/assets/$(assetId)
@@ -792,6 +843,20 @@ service firebase.storage {
         canManageTasks() &&
         principalDepartmentId() != '' &&
         resource.metadata.departmentId == principalDepartmentId();
+    }
+
+    match /inventory/requests/{requestId}/attachments/{attachmentId}/{fileName} {
+      allow read: if signedIn() && canReadInventoryRequest(requestId);
+      allow create: if signedIn() &&
+        resource == null &&
+        canUploadInventoryRequestDocument(requestId) &&
+        request.resource.size > 0 &&
+        request.resource.size <= 20 * 1024 * 1024 &&
+        hasSupportedContentType(request.resource.contentType) &&
+        request.resource.metadata.requestId == requestId &&
+        request.resource.metadata.attachmentId == attachmentId &&
+        request.resource.metadata.uploadedByUserId == request.auth.uid;
+      allow update, delete: if false;
     }
 
     match /itsm/{workItemCollection}/{workItemId}/attachments/{attachmentId}/{fileName} {
